@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    
+    <!-- Mobile-first viewport for construction sites -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    
+    <!-- Construction-optimized title and meta -->
+    <title>BrAve Forms - Construction Compliance</title>
+    <meta name="description" content="EPA and OSHA compliance management for construction sites. Storm water inspections, safety reporting, and regulatory compliance made simple." />
+    <meta name="keywords" content="construction compliance, EPA storm water, OSHA safety, construction inspections" />
+    
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#0ea5e9" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="BrAve Forms" />
+    
+    <!-- Icons for different platforms -->
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+    
+    <!-- Construction site optimizations -->
+    <meta name="format-detection" content="telephone=yes" />
+    <meta name="format-detection" content="address=yes" />
+    <meta name="application-name" content="BrAve Forms" />
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    
+    <!-- DNS prefetch for external resources -->
+    <link rel="dns-prefetch" href="//api.openweathermap.org" />
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    
+    <!-- Security headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    
+    <!-- Construction site styling optimization -->
+    <style>
+      /* Critical CSS for immediate rendering */
+      html {
+        font-size: 16px;
+        -webkit-text-size-adjust: 100%;
+        -moz-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+        -webkit-tap-highlight-color: rgba(14, 165, 233, 0.2);
+        -webkit-touch-callout: none;
+      }
+      
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #111827;
+        background-color: #f8fafc;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+        overscroll-behavior: none;
+      }
+      
+      #root {
+        min-height: 100vh;
+        position: relative;
+      }
+      
+      /* Loading state for mobile */
+      .app-loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        color: white;
+        z-index: 9999;
+      }
+      
+      .loading-logo {
+        width: 80px;
+        height: 80px;
+        background: white;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        font-weight: 700;
+        color: #0ea5e9;
+        margin-bottom: 24px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      }
+      
+      .loading-text {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      }
+      
+      .loading-subtext {
+        font-size: 16px;
+        opacity: 0.9;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top: 3px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      /* High contrast for bright sunlight */
+      @media (prefers-contrast: high) {
+        body {
+          color: #000000;
+          background-color: #ffffff;
+        }
+      }
+      
+      /* Mobile optimizations */
+      @media (max-width: 768px) {
+        html {
+          font-size: 18px;
+        }
+        
+        body {
+          padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+      }
+    </style>
+  </head>
+  
+  <body>
+    <!-- App container -->
+    <div id="root">
+      <!-- Loading screen for construction site branding -->
+      <div class="app-loading" id="app-loading">
+        <div class="loading-logo">BF</div>
+        <div class="loading-text">BrAve Forms</div>
+        <div class="loading-subtext">
+          Construction Compliance Platform<br>
+          Loading mobile interface...
+        </div>
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+    
+    <!-- App script -->
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Remove loading screen once app loads -->
+    <script>
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          const loading = document.getElementById('app-loading');
+          if (loading) {
+            loading.style.transition = 'opacity 0.5s ease-out';
+            loading.style.opacity = '0';
+            setTimeout(function() {
+              loading.remove();
+            }, 500);
+          }
+        }, 1000);
+      });
+      
+      // Handle iOS viewport units
+      function setViewportHeight() {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', vh + 'px');
+      }
+      
+      setViewportHeight();
+      window.addEventListener('resize', setViewportHeight);
+      window.addEventListener('orientationchange', function() {
+        setTimeout(setViewportHeight, 500);
+      });
+    </script>
+  </body>
+</html>

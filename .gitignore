@@ -1,0 +1,141 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Testing
+coverage
+*.lcov
+.nyc_output
+
+# Next.js
+.next/
+out/
+build
+
+# Production
+dist
+*.production
+
+# Misc
+.DS_Store
+*.pem
+.vscode
+.idea
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Capacitor
+ios/App/build
+ios/App/Pods
+ios/App/App.xcworkspace
+ios/App/App.xcodeproj/xcuserdata
+android/app/build
+android/.gradle
+android/local.properties
+
+# Prisma
+packages/database/migrations
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform
+.terraform.lock.hcl
+terraform.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Docker
+.docker
+
+# OS
+Thumbs.db
+
+# IDE
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Directory for instrumented libs
+lib-cov
+
+# Compiled binary
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Package files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# AWS
+.aws-sam
+
+# Temporary files
+tmp
+temp
+.tmp
+
+# Build artifacts
+build/
+dist/
+out/
+
+# Cache
+.cache
+.parcel-cache
+.turbo
+
+# PWA
+workbox-*.js
+sw.js
+
+# Storybook
+storybook-static

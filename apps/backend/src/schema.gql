@@ -1,0 +1,46 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type PrecipitationCheckResult {
+  exceeded: Boolean!
+  amount: Float!
+  requiresInspection: Boolean!
+}
+
+type WeatherEvent {
+  id: ID!
+  projectId: String!
+  precipitationInches: Float!
+  eventDate: DateTime!
+  inspectionDeadline: DateTime!
+  inspectionCompleted: Boolean!
+  source: WeatherSource!
+  notificationsSent: Boolean!
+  createdAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+enum WeatherSource {
+  NOAA
+  OPENWEATHER
+  MANUAL
+}
+
+type Query {
+  """Check if project location has exceeded EPA 0.25 inch threshold"""
+  checkProjectWeather(projectId: String!, latitude: Float!, longitude: Float!): PrecipitationCheckResult!
+
+  """Get recent weather events for a project"""
+  recentWeatherEvents(projectId: String!, days: Float! = 7): [WeatherEvent!]!
+
+  """Get all pending inspections for the organization"""
+  pendingInspections: [WeatherEvent!]!
+  getStorageStats: String!
+  generatePhotoUrl(photoKey: String!): String!
+  getCompliancePackage(inspectionId: String!): String!
+}

@@ -1,0 +1,599 @@
+/* Construction-specific mobile styles for harsh environments */
+
+:root {
+  /* Construction environment optimizations */
+  --construction-yellow: #fbbf24;
+  --construction-orange: #f97316;
+  --construction-red: #dc2626;
+  --construction-green: #059669;
+  --construction-blue: #0ea5e9;
+  
+  /* High visibility colors for safety compliance */
+  --safety-yellow: #facc15;
+  --safety-orange: #fb923c;
+  --safety-red: #ef4444;
+  --safety-green: #22c55e;
+  
+  /* Weather-based color coding */
+  --weather-clear: #3b82f6;
+  --weather-rain: #6366f1;
+  --weather-storm: #8b5cf6;
+  --weather-alert: #dc2626;
+  
+  /* Compliance status colors */
+  --compliant: #059669;
+  --warning: #d97706;
+  --overdue: #dc2626;
+  --critical: #991b1b;
+  
+  /* Environmental readability enhancements */
+  --text-shadow-light: 0 1px 2px rgba(255, 255, 255, 0.8);
+  --text-shadow-dark: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --border-heavy: 4px;
+  --border-extra-heavy: 6px;
+}
+
+/* Construction site header with high visibility */
+.construction-header {
+  background: linear-gradient(135deg, var(--construction-blue), var(--construction-yellow));
+  color: white;
+  text-shadow: var(--text-shadow-dark);
+  padding: 20px 16px;
+  border-bottom: var(--border-heavy) solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.construction-header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.construction-header .site-info {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 8px;
+  opacity: 0.95;
+}
+
+/* Weather alert banner - maximum visibility */
+.weather-alert-banner {
+  background: linear-gradient(45deg, var(--weather-alert), #fca5a5);
+  color: white;
+  padding: 16px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  text-shadow: var(--text-shadow-dark);
+  border-bottom: var(--border-heavy) solid var(--weather-alert);
+  animation: emergency-pulse 2s ease-in-out infinite;
+  position: sticky;
+  top: 80px;
+  z-index: 90;
+}
+
+@keyframes emergency-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+.weather-alert-banner .alert-icon {
+  font-size: 24px;
+  margin-right: 12px;
+  animation: shake 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(4px); }
+}
+
+/* EPA compliance status indicators */
+.compliance-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 16px 0;
+  border: var(--border-heavy) solid;
+  text-shadow: var(--text-shadow-light);
+}
+
+.compliance-status.compliant {
+  background: linear-gradient(135deg, var(--compliant), #a7f3d0);
+  border-color: var(--compliant);
+  color: #065f46;
+}
+
+.compliance-status.warning {
+  background: linear-gradient(135deg, var(--warning), #fde68a);
+  border-color: var(--warning);
+  color: #92400e;
+}
+
+.compliance-status.overdue {
+  background: linear-gradient(135deg, var(--overdue), #fca5a5);
+  border-color: var(--overdue);
+  color: white;
+  text-shadow: var(--text-shadow-dark);
+}
+
+.compliance-status.critical {
+  background: linear-gradient(135deg, var(--critical), #ef4444);
+  border-color: var(--critical);
+  color: white;
+  text-shadow: var(--text-shadow-dark);
+  animation: emergency-pulse 1.5s ease-in-out infinite;
+}
+
+/* Construction form elements with enhanced durability styling */
+.construction-form-field {
+  margin-bottom: 24px;
+}
+
+.construction-form-field label {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.construction-form-field input,
+.construction-form-field select,
+.construction-form-field textarea {
+  width: 100%;
+  min-height: 60px;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 16px;
+  border: var(--border-heavy) solid #d1d5db;
+  border-radius: 12px;
+  background: white;
+  color: #111827;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.construction-form-field input:focus,
+.construction-form-field select:focus,
+.construction-form-field textarea:focus {
+  outline: none;
+  border-color: var(--construction-blue);
+  border-width: var(--border-extra-heavy);
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.1),
+    0 0 0 4px rgba(14, 165, 233, 0.2);
+}
+
+.construction-form-field input:invalid {
+  border-color: var(--construction-red);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+/* Photo capture interface for construction documentation */
+.photo-capture-container {
+  background: #f8fafc;
+  border: var(--border-heavy) dashed #94a3b8;
+  border-radius: 16px;
+  padding: 32px 16px;
+  text-align: center;
+  margin: 20px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.photo-capture-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(148, 163, 184, 0.1) 10px,
+    rgba(148, 163, 184, 0.1) 20px
+  );
+  pointer-events: none;
+}
+
+.photo-capture-container.active {
+  border-color: var(--construction-blue);
+  background: rgba(14, 165, 233, 0.05);
+}
+
+.photo-capture-button {
+  background: linear-gradient(135deg, var(--construction-blue), var(--construction-yellow));
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 20px 32px;
+  font-size: 20px;
+  font-weight: 700;
+  min-height: 80px;
+  min-width: 200px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  z-index: 1;
+}
+
+.photo-capture-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+
+.photo-capture-button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.photo-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.photo-preview-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.photo-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-preview-item .delete-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--construction-red);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Safety checklist with visual hierarchy */
+.safety-checklist {
+  background: white;
+  border: var(--border-heavy) solid #e5e7eb;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.safety-checklist h3 {
+  color: var(--construction-red);
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 3px solid var(--construction-red);
+  padding-bottom: 8px;
+}
+
+.safety-checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 2px solid #f3f4f6;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.safety-checklist-item:last-child {
+  border-bottom: none;
+}
+
+.safety-checklist-item input[type="checkbox"] {
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--construction-green);
+}
+
+.safety-checklist-item label {
+  flex: 1;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  margin: 0;
+  text-transform: none;
+}
+
+.safety-checklist-item.checked label {
+  color: var(--construction-green);
+  text-decoration: line-through;
+}
+
+/* Weather monitoring display */
+.weather-monitor {
+  background: linear-gradient(135deg, var(--weather-clear), #bfdbfe);
+  color: white;
+  padding: 20px;
+  border-radius: 16px;
+  margin: 20px 0;
+  text-shadow: var(--text-shadow-dark);
+  border: var(--border-heavy) solid rgba(255, 255, 255, 0.3);
+}
+
+.weather-monitor.rain-warning {
+  background: linear-gradient(135deg, var(--weather-rain), #c4b5fd);
+}
+
+.weather-monitor.storm-alert {
+  background: linear-gradient(135deg, var(--weather-storm), #d8b4fe);
+  animation: emergency-pulse 2s ease-in-out infinite;
+}
+
+.weather-monitor.critical-alert {
+  background: linear-gradient(135deg, var(--weather-alert), #fca5a5);
+  animation: emergency-pulse 1s ease-in-out infinite;
+}
+
+.weather-monitor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.weather-monitor-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.weather-monitor-status {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.precipitation-display {
+  font-size: 48px;
+  font-weight: 900;
+  text-align: center;
+  margin: 20px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.precipitation-threshold {
+  font-size: 14px;
+  text-align: center;
+  opacity: 0.9;
+  margin-top: 8px;
+}
+
+/* Inspection deadline countdown */
+.deadline-countdown {
+  background: white;
+  border: var(--border-heavy) solid;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.deadline-countdown.normal {
+  border-color: var(--construction-green);
+  color: var(--construction-green);
+}
+
+.deadline-countdown.warning {
+  border-color: var(--warning);
+  color: var(--warning);
+  background: rgba(217, 119, 6, 0.05);
+}
+
+.deadline-countdown.critical {
+  border-color: var(--critical);
+  color: var(--critical);
+  background: rgba(153, 27, 27, 0.05);
+  animation: emergency-pulse 2s ease-in-out infinite;
+}
+
+.deadline-time {
+  font-size: 36px;
+  font-weight: 900;
+  margin: 16px 0;
+}
+
+.deadline-label {
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Mobile navigation optimized for construction */
+.construction-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: var(--border-heavy) solid #e5e7eb;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
+  display: flex;
+  z-index: 1000;
+}
+
+.construction-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px;
+  text-decoration: none;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 76px;
+  transition: all 0.2s ease;
+  border-bottom: 4px solid transparent;
+}
+
+.construction-nav-item:hover,
+.construction-nav-item.active {
+  color: var(--construction-blue);
+  background: rgba(14, 165, 233, 0.05);
+  border-bottom-color: var(--construction-blue);
+}
+
+.construction-nav-item .nav-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.construction-nav-item .nav-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Offline mode styling */
+.offline-mode {
+  background: var(--construction-orange);
+  color: white;
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  border-bottom: 3px solid rgba(0, 0, 0, 0.2);
+}
+
+.offline-mode .offline-icon {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+/* Emergency action buttons */
+.emergency-action {
+  background: linear-gradient(135deg, var(--construction-red), #fca5a5);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 24px;
+  font-size: 24px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.3);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin: 20px 0;
+  width: 100%;
+  text-shadow: var(--text-shadow-dark);
+}
+
+.emergency-action:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(220, 38, 38, 0.4);
+}
+
+.emergency-action:active {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+}
+
+/* Tablet landscape optimizations */
+@media (orientation: landscape) and (min-width: 768px) {
+  .construction-header {
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .weather-monitor {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding: 24px 32px;
+  }
+  
+  .precipitation-display {
+    font-size: 64px;
+    margin: 0;
+  }
+  
+  .safety-checklist {
+    padding: 32px;
+  }
+  
+  .photo-preview-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+}
+
+/* High contrast mode for bright sunlight */
+@media (prefers-contrast: high) {
+  .construction-header,
+  .weather-alert-banner,
+  .emergency-action {
+    border: var(--border-extra-heavy) solid black;
+  }
+  
+  .compliance-status,
+  .weather-monitor,
+  .safety-checklist {
+    border: var(--border-heavy) solid black;
+  }
+  
+  .construction-form-field input,
+  .construction-form-field select,
+  .construction-form-field textarea {
+    border: var(--border-heavy) solid black;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .weather-alert-banner,
+  .compliance-status.critical,
+  .deadline-countdown.critical,
+  .emergency-pulse {
+    animation: none;
+  }
+}

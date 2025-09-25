@@ -1,0 +1,25 @@
+# Namespace for BrAve Forms local development
+# Isolates all resources for better organization
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: brave-forms
+  labels:
+    app: brave-forms
+    environment: local
+    compliance: epa-cgp
+---
+# Resource quota to prevent runaway resource consumption in local dev
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: brave-forms-quota
+  namespace: brave-forms
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 16Gi
+    persistentvolumeclaims: "10"
+    services: "10"

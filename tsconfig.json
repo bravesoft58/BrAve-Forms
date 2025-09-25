@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "commonjs",
+    "lib": ["ES2021"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@brave-forms/backend/*": ["apps/backend/src/*"],
+      "@brave-forms/web/*": ["apps/web/src/*"],
+      "@brave-forms/mobile/*": ["apps/mobile/src/*"],
+      "@brave-forms/database": ["packages/database/src"],
+      "@brave-forms/database/*": ["packages/database/src/*"],
+      "@brave-forms/types": ["packages/types/src"],
+      "@brave-forms/types/*": ["packages/types/src/*"],
+      "@brave-forms/compliance": ["packages/compliance/src"],
+      "@brave-forms/compliance/*": ["packages/compliance/src/*"]
+    }
+  },
+  "references": [
+    { "path": "./apps/backend" },
+    { "path": "./apps/web" },
+    { "path": "./apps/mobile" },
+    { "path": "./packages/database" },
+    { "path": "./packages/types" },
+    { "path": "./packages/compliance" }
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    "coverage",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
+}

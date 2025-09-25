@@ -1,0 +1,94 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Product Requirements Document (PRD)
+
+## 1. App Overview
+- **Name**: (To be decided)
+- **Description**: A cloud-based app for managing jobsite environmental logs (e.g., Dust Control, SWPPP) and other construction-related forms. The app allows foremen to update logs from mobile devices, inspectors to access logs via QR codes, and administrators to manage access and forms.
+- **Tagline**: "Streamline jobsite logs—anytime, anywhere."
+
+## 2. Target Audience
+- **Foremen**: Construction foremen who need to update logs from multiple job sites.
+- **Inspectors**: Regulatory inspectors who need quick, read-only access to logs.
+- **Administrators**: Company staff who manage user access, create forms, and archive projects.
+
+## 3. Key Features
+1. **Log Management**:
+   - Create, edit, and copy logs (e.g., use the previous day’s log as a template).
+   - Add photos directly from mobile devices.
+2. **Access Control**:
+   - Read-only access for inspectors.
+   - Edit access for foremen.
+   - Admin controls for managing users and permissions.
+3. **Project Organization**:
+   - Favorites or filters for foremen to easily find their projects.
+4. **Customizable Forms**:
+   - Support for agency templates or user-created forms.
+5. **QR Code Access**:
+   - Inspectors can scan a QR code to view logs.
+6. **Archiving**:
+   - Export or archive closed projects for future access.
+7. **Expansion Potential**:
+   - Support for other logs (e.g., safety inspections, daily logs).
+8. **Licensing Model**:
+   - Prevent account sharing and limit licenses per company.
+
+## 4. Success Metrics
+- **User Adoption**: Number of foremen and inspectors using the app.
+- **Log Accuracy**: Reduction in errors or missing logs.
+- **Efficiency**: Time saved for foremen and inspectors.
+- **Customer Retention**: Number of companies renewing licenses.
+
+## 5. Assumptions and Risks
+- **Assumptions**:
+  - Foremen and inspectors have access to mobile devices or the web.
+  - Companies are willing to transition from physical logs to a digital system.
+- **Risks**:
+  - Resistance to change from users accustomed to physical logs.
+  - Connectivity issues on remote job sites.

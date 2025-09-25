@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database with TimescaleDB
+  postgres:
+    image: timescale/timescaledb:latest-pg15
+    container_name: brave-forms-postgres
+    environment:
+      POSTGRES_DB: brave_forms
+      POSTGRES_USER: brave_user
+      POSTGRES_PASSWORD: brave_pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - brave-forms-network
+
+  # Redis for BullMQ and caching
+  redis:
+    image: redis:7-alpine
+    container_name: brave-forms-redis
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - brave-forms-network
+
+  # MinIO Object Storage for photos
+  minio:
+    image: minio/minio:latest
+    container_name: brave-forms-minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - brave-forms-network
+
+  # Backend API (NestJS GraphQL)
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: brave-forms-backend
+    environment:
+      DATABASE_URL: "postgresql://brave_user:brave_pass@postgres:5432/brave_forms"
+      REDIS_URL: "redis://redis:6379"
+      MINIO_ENDPOINT: "minio"
+      MINIO_PORT: "9000"
+      MINIO_ACCESS_KEY: "minioadmin"
+      MINIO_SECRET_KEY: "minioadmin123"
+      NODE_ENV: development
+      PORT: 3002
+    ports:
+      - "3002:3002"
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    volumes:
+      - ./apps/backend:/app
+      - /app/node_modules
+    networks:
+      - brave-forms-network
+
+  # Frontend Web (Next.js)
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: brave-forms-web
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:3002/graphql"
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_development"
+      CLERK_SECRET_KEY: "sk_test_development"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - brave-forms-network
+
+  # Mobile Development Server (Capacitor)
+  mobile:
+    build:
+      context: .
+      dockerfile: apps/mobile/Dockerfile
+    container_name: brave-forms-mobile
+    environment:
+      VITE_API_URL: "http://localhost:3002/graphql"
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./apps/mobile:/app
+      - /app/node_modules
+    networks:
+      - brave-forms-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+
+networks:
+  brave-forms-network:
+    driver: bridge

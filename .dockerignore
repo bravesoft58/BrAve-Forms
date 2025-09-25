@@ -1,0 +1,59 @@
+# Node.js - Complete exclusion
+**/node_modules
+**/**/node_modules
+**/node_modules/**
+node_modules/**
+npm-debug.log*
+pnpm-debug.log*
+.pnpm-store
+.pnpm
+
+# Build outputs
+dist
+.next
+out
+
+# Development
+.env.local
+.env.development
+.env.test
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+.dockerignore
+
+# Logs
+*.log
+
+# Temporary files
+tmp
+temp
+
+# Coverage
+coverage
+
+# Documentation
+docs
+README.md
+
+# Tests
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+__tests__
+
+# Misc
+.husky

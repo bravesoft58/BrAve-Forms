@@ -1,0 +1,71 @@
+# Multi-stage Dockerfile for BrAve Forms Backend
+# Production-optimized NestJS application
+
+# Stage 1: Dependencies
+FROM node:20-alpine AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@8.14.0 --activate
+
+# Copy package files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/backend/package.json ./apps/backend/
+COPY packages/database/package.json ./packages/database/
+COPY packages/types/package.json ./packages/types/
+COPY packages/compliance/package.json ./packages/compliance/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Stage 2: Builder
+FROM node:20-alpine AS builder
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@8.14.0 --activate
+
+# Copy dependencies
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/backend/node_modules ./apps/backend/node_modules
+COPY --from=deps /app/packages ./packages
+
+# Copy source code
+COPY . .
+
+# Generate Prisma client
+RUN pnpm --filter @brave-forms/database generate
+
+# Build backend
+RUN pnpm --filter @brave-forms/backend build
+
+# Stage 3: Runner
+FROM node:20-alpine AS runner
+RUN apk add --no-cache libc6-compat
+
+# Add non-root user
+RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
+
+WORKDIR /app
+
+# Copy necessary files
+COPY --from=builder --chown=nestjs:nodejs /app/apps/backend/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/apps/backend/node_modules ./node_modules
+COPY --from=builder --chown=nestjs:nodejs /app/packages/database/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nestjs:nodejs /app/packages/database/schema.prisma ./prisma/schema.prisma
+
+# Set environment
+ENV NODE_ENV=production
+ENV PORT=4000
+
+USER nestjs
+
+EXPOSE 4000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:4000/health', (r) => {if (r.statusCode !== 200) throw new Error()})"
+
+CMD ["node", "dist/main"]

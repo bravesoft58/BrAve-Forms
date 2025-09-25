@@ -1,0 +1,240 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://brave:brave_secure_pass@localhost:5434/brave_forms?schema=public"
+}
+
+model Organization {
+  id          String             @id @default(uuid())
+  clerkOrgId  String             @unique @map("clerk_org_id")
+  name        String
+  plan        PlanType           @default(STARTER)
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+  inspections     Inspection[]
+  photos          Photo[]
+  projects        Project[]
+  users           UserOrganization[]
+  formTemplates   FormTemplate[]
+  formSubmissions FormSubmission[]
+
+  @@map("organizations")
+}
+
+model UserOrganization {
+  id           String       @id @default(uuid())
+  userId       String       @map("user_id")
+  orgId        String       @map("org_id")
+  role         UserRole     @default(MEMBER)
+  joinedAt     DateTime     @default(now()) @map("joined_at")
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, orgId])
+  @@map("user_organizations")
+}
+
+model Project {
+  id             String         @id @default(uuid())
+  orgId          String         @map("org_id")
+  name           String
+  address        String
+  latitude       Float
+  longitude      Float
+  permitNumber   String?        @map("permit_number")
+  startDate      DateTime       @map("start_date")
+  endDate        DateTime?      @map("end_date")
+  disturbedAcres Float          @map("disturbed_acres")
+  status         ProjectStatus  @default(ACTIVE)
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  swpppConfig    Json?          @map("swppp_config")
+  bmps           Json[]         @map("bmps")
+  inspections     Inspection[]
+  organization    Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  weatherEvents   WeatherEvent[]
+  formSubmissions FormSubmission[]
+
+  @@index([orgId])
+  @@index([latitude, longitude])
+  @@map("projects")
+}
+
+model Inspection {
+  id                  String           @id @default(uuid())
+  orgId               String           @map("org_id")
+  projectId           String           @map("project_id")
+  inspectorId         String           @map("inspector_id")
+  type                InspectionType
+  status              InspectionStatus @default(PENDING)
+  weatherTriggered    Boolean          @default(false) @map("weather_triggered")
+  precipitationInches Float?           @map("precipitation_inches")
+  inspectionDate      DateTime         @map("inspection_date")
+  submittedAt         DateTime?        @map("submitted_at")
+  offlineCreated      Boolean          @default(false) @map("offline_created")
+  formData            Json             @map("form_data")
+  violations          Json[]
+  correctiveActions   Json[]           @map("corrective_actions")
+  organization        Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  project             Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  photos              Photo[]
+  formSubmissions     FormSubmission[]
+
+  @@index([orgId])
+  @@index([projectId])
+  @@index([inspectionDate])
+  @@index([type])
+  @@map("inspections")
+}
+
+model Photo {
+  id           String       @id @default(uuid())
+  orgId        String       @map("org_id")
+  inspectionId String       @map("inspection_id")
+  s3Key        String       @map("s3_key")
+  thumbnailKey String?      @map("thumbnail_key")
+  latitude     Float?
+  longitude    Float?
+  takenAt      DateTime     @map("taken_at")
+  caption      String?
+  fileSize     Int          @map("file_size")
+  mimeType     String       @map("mime_type")
+  uploadedAt   DateTime     @default(now()) @map("uploaded_at")
+  inspection   Inspection   @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([inspectionId])
+  @@map("photos")
+}
+
+model WeatherEvent {
+  id                  String        @id @default(uuid())
+  projectId           String        @map("project_id")
+  eventDate           DateTime      @map("event_date")
+  precipitationInches Float         @map("precipitation_inches")
+  source              WeatherSource
+  inspectionDeadline  DateTime      @map("inspection_deadline")
+  notificationsSent   Boolean       @default(false) @map("notifications_sent")
+  inspectionCompleted Boolean       @default(false) @map("inspection_completed")
+  createdAt           DateTime      @default(now()) @map("created_at")
+  project             Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([eventDate])
+  @@index([inspectionDeadline])
+  @@map("weather_events")
+}
+
+enum PlanType {
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MANAGER
+  MEMBER
+  INSPECTOR
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  SUSPENDED
+  COMPLETED
+  CLOSED
+}
+
+enum InspectionType {
+  ROUTINE
+  RAIN_EVENT
+  QUARTERLY
+  PRE_STORM
+  POST_STORM
+  FINAL
+}
+
+enum InspectionStatus {
+  PENDING
+  IN_PROGRESS
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+model FormTemplate {
+  id          String               @id @default(uuid())
+  orgId       String               @map("org_id")
+  name        String
+  description String?
+  category    FormCategory
+  version     Int                  @default(1)
+  isActive    Boolean              @default(true) @map("is_active")
+  schema      Json                 @map("schema")
+  compliance  Json?                @map("compliance")
+  createdBy   String               @map("created_by")
+  createdAt   DateTime             @default(now()) @map("created_at")
+  updatedAt   DateTime             @updatedAt @map("updated_at")
+  organization Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  submissions  FormSubmission[]
+
+  @@index([orgId])
+  @@index([category])
+  @@index([isActive])
+  @@map("form_templates")
+}
+
+model FormSubmission {
+  id             String       @id @default(uuid())
+  orgId          String       @map("org_id")
+  templateId     String       @map("template_id")
+  inspectionId   String?      @map("inspection_id")
+  projectId      String?      @map("project_id")
+  submittedBy    String       @map("submitted_by")
+  status         FormStatus   @default(DRAFT)
+  data           Json         @map("data")
+  metadata       Json?        @map("metadata")
+  offlineCreated Boolean      @default(false) @map("offline_created")
+  submittedAt    DateTime?    @map("submitted_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  organization   Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  template       FormTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  inspection     Inspection?  @relation(fields: [inspectionId], references: [id], onDelete: SetNull)
+  project        Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([orgId])
+  @@index([templateId])
+  @@index([inspectionId])
+  @@index([projectId])
+  @@index([submittedBy])
+  @@index([status])
+  @@map("form_submissions")
+}
+
+enum FormCategory {
+  EPA_SWPPP
+  EPA_CGP
+  OSHA_SAFETY
+  STATE_PERMIT
+  CUSTOM
+}
+
+enum FormStatus {
+  DRAFT
+  SUBMITTED
+  REVIEWED
+  APPROVED
+  REJECTED
+}
+
+enum WeatherSource {
+  NOAA
+  OPENWEATHER
+  MANUAL
+}

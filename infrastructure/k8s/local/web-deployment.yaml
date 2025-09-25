@@ -1,0 +1,83 @@
+# Next.js Web Frontend - Construction field optimized UI
+# Glove-friendly, offline-first, EPA compliance dashboard
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: brave-forms
+  labels:
+    app: web
+    tier: frontend
+spec:
+  type: NodePort
+  ports:
+    - port: 3000
+      targetPort: 3000
+      nodePort: 30002
+      protocol: TCP
+  selector:
+    app: web
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: brave-forms
+  labels:
+    app: web
+    tier: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+        tier: frontend
+    spec:
+      containers:
+      - name: web
+        image: brave-forms-web:local
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "development"
+        - name: NEXT_PUBLIC_API_URL
+          value: "http://localhost:30001/graphql"
+        - name: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: brave-forms-secrets
+              key: clerk-publishable-key
+        - name: CLERK_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: brave-forms-secrets
+              key: clerk-secret-key
+        - name: NEXT_PUBLIC_EPA_THRESHOLD
+          value: "0.25"  # Display exact EPA threshold
+        - name: NEXT_PUBLIC_OFFLINE_DAYS
+          value: "30"    # 30-day offline capability
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5

@@ -1,0 +1,83 @@
+{
+  "name": "brave-forms",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BrAve Forms - Construction Compliance Platform with EPA/OSHA Integration",
+  "author": "BrAve Forms Team",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0",
+  "scripts": {
+    "dev": "pnpm run --parallel dev",
+    "dev:backend": "pnpm --filter @brave-forms/backend dev",
+    "dev:web": "pnpm --filter @brave-forms/web dev",
+    "dev:mobile": "pnpm --filter @brave-forms/mobile dev",
+    "build": "pnpm run --recursive build",
+    "build:backend": "pnpm --filter @brave-forms/backend build",
+    "build:web": "pnpm --filter @brave-forms/web build",
+    "build:mobile": "pnpm --filter @brave-forms/mobile build",
+    "start": "pnpm run --parallel start",
+    "start:backend": "pnpm --filter @brave-forms/backend start:prod",
+    "start:web": "pnpm --filter @brave-forms/web start",
+    "test": "pnpm run --recursive test",
+    "test:backend": "pnpm --filter @brave-forms/backend test",
+    "test:web": "pnpm --filter @brave-forms/web test",
+    "test:mobile": "pnpm --filter @brave-forms/mobile test",
+    "test:e2e": "pnpm run --recursive test:e2e",
+    "test:coverage": "pnpm run --recursive test:cov",
+    "test:compliance": "pnpm run --recursive test:compliance",
+    "test:offline": "pnpm run --recursive test:offline",
+    "lint": "pnpm run --recursive lint",
+    "lint:backend": "pnpm --filter @brave-forms/backend lint",
+    "lint:web": "pnpm --filter @brave-forms/web lint",
+    "lint:mobile": "pnpm --filter @brave-forms/mobile lint",
+    "type-check": "pnpm run --recursive type-check",
+    "type-check:backend": "pnpm --filter @brave-forms/backend type-check",
+    "type-check:web": "pnpm --filter @brave-forms/web type-check",
+    "type-check:mobile": "pnpm --filter @brave-forms/mobile type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "qa": "pnpm run lint && pnpm run type-check && pnpm run test",
+    "qa:full": "pnpm run lint && pnpm run type-check && pnpm run test && pnpm run test:e2e",
+    "pre-commit": "pnpm run format && pnpm run lint && pnpm run type-check",
+    "db:generate": "pnpm --filter @brave-forms/database generate",
+    "db:migrate": "pnpm --filter @brave-forms/database migrate:dev",
+    "db:migrate:prod": "pnpm --filter @brave-forms/database migrate:deploy",
+    "db:push": "pnpm --filter @brave-forms/database db:push",
+    "db:seed": "pnpm --filter @brave-forms/backend seed",
+    "db:studio": "pnpm --filter @brave-forms/database studio",
+    "mobile:ios": "pnpm --filter @brave-forms/mobile cap:ios",
+    "mobile:android": "pnpm --filter @brave-forms/mobile cap:android",
+    "mobile:sync": "pnpm --filter @brave-forms/mobile cap:sync",
+    "mobile:build:ios": "pnpm --filter @brave-forms/mobile cap:build:ios",
+    "mobile:build:android": "pnpm --filter @brave-forms/mobile cap:build:android",
+    "clean": "pnpm run --recursive clean && rm -rf node_modules",
+    "clean:cache": "pnpm store prune && pnpm cache clean",
+    "install:clean": "pnpm run clean && pnpm install",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "axios": "^1.11.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.2",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  }
+}

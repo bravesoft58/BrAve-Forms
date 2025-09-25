@@ -1,0 +1,61 @@
+# ConfigMap for BrAve Forms non-sensitive configuration
+# EPA compliance settings and application configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: brave-forms-config
+  namespace: brave-forms
+data:
+  # Application Settings
+  NODE_ENV: "development"
+  LOG_LEVEL: "debug"
+  
+  # EPA Compliance - CRITICAL VALUES
+  EPA_RAIN_THRESHOLD_INCHES: "0.25"  # EXACT - not 0.24 or 0.26
+  INSPECTION_DEADLINE_HOURS: "24"     # Within working hours only
+  WORKING_HOURS_START: "7"            # 7 AM
+  WORKING_HOURS_END: "17"             # 5 PM
+  
+  # Service URLs (internal Kubernetes DNS)
+  DATABASE_HOST: "postgres"
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: "brave_forms"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  S3_ENDPOINT: "http://minio:9000"
+  
+  # Frontend Configuration
+  NEXT_PUBLIC_API_URL: "http://localhost:30001/graphql"
+  NEXT_PUBLIC_EPA_THRESHOLD: "0.25"
+  NEXT_PUBLIC_OFFLINE_DAYS: "30"
+  
+  # Performance Settings
+  API_TIMEOUT_MS: "30000"
+  MAX_FILE_SIZE_MB: "50"
+  PHOTO_COMPRESSION_QUALITY: "85"
+---
+# PostgreSQL initialization scripts
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: brave-forms
+data:
+  01-extensions.sql: |
+    -- Enable required extensions
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    CREATE EXTENSION IF NOT EXISTS "timescaledb" CASCADE;
+    
+    -- Create tenant schema
+    CREATE SCHEMA IF NOT EXISTS tenant;
+    
+    -- Enable Row Level Security
+    ALTER DATABASE brave_forms SET row_security = on;
+    
+    -- Set search path
+    ALTER DATABASE brave_forms SET search_path TO public, tenant;
+    
+  02-timescale.sql: |
+    -- Create hypertable for weather events (time-series data)
+    -- This will be created after Prisma migrations
+    -- SELECT create_hypertable('weather_events', 'event_time', if_not_exists => TRUE);
