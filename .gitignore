@@ -139,3 +139,6 @@ sw.js
 
 # Storybook
 storybook-static
+
+# Claude Code AI assistant files
+.claude/
