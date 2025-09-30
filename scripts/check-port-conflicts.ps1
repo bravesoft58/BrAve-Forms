@@ -15,24 +15,22 @@ Write-Host "================================================" -ForegroundColor C
 Write-Host ""
 
 # Check if kubectl is available
-try {
-    kubectl version --client --short 2>$null | Out-Null
-    Write-Host "[OK] kubectl is available" -ForegroundColor Green
-} catch {
+$kubectlCheck = Get-Command kubectl -ErrorAction SilentlyContinue
+if (-not $kubectlCheck) {
     Write-Host "[ERROR] kubectl not found!" -ForegroundColor Red
     Write-Host "Please ensure Rancher Desktop Kubernetes is running" -ForegroundColor Yellow
     exit 1
 }
+Write-Host "[OK] kubectl is available" -ForegroundColor Green
 
 # Check if Kubernetes cluster is accessible
-try {
-    kubectl cluster-info 2>$null | Out-Null
-    Write-Host "[OK] Kubernetes cluster is accessible" -ForegroundColor Green
-} catch {
+$clusterCheck = kubectl cluster-info 2>&1
+if ($LASTEXITCODE -ne 0) {
     Write-Host "[ERROR] Cannot connect to Kubernetes cluster!" -ForegroundColor Red
-    Write-Host "Please start Rancher Desktop and enable Kubernetes" -ForegroundColor Yellow
+    Write-Host "Please ensure Rancher Desktop Kubernetes is running" -ForegroundColor Yellow
     exit 1
 }
+Write-Host "[OK] Kubernetes cluster is accessible" -ForegroundColor Green
 
 Write-Host ""
 Write-Host "Scanning all namespaces for NodePort services..." -ForegroundColor Yellow

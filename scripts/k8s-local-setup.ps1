@@ -65,12 +65,12 @@ function Build-ContainerImages {
 
     # Build backend image
     Write-Host "Building backend image..." -ForegroundColor Yellow
-    nerdctl build -n k8s.io -f infrastructure/docker/Dockerfile.backend -t brave-forms-backend:local .
+    nerdctl --namespace k8s.io build -f infrastructure/docker/Dockerfile.backend -t brave-forms-backend:local .
 
     # Build web image (create Dockerfile.web if not exists)
     if (Test-Path "infrastructure/docker/Dockerfile.web") {
         Write-Host "Building web image..." -ForegroundColor Yellow
-        nerdctl build -n k8s.io -f infrastructure/docker/Dockerfile.web -t brave-forms-web:local .
+        nerdctl --namespace k8s.io build -f infrastructure/docker/Dockerfile.web -t brave-forms-web:local .
     } else {
         Write-Host "Creating simple web Dockerfile..." -ForegroundColor Yellow
         @"
@@ -82,7 +82,7 @@ COPY apps/web .
 EXPOSE 3000
 CMD ["npm", "run", "dev"]
 "@ | Out-File -FilePath "infrastructure/docker/Dockerfile.web" -Encoding UTF8
-        nerdctl build -n k8s.io -f infrastructure/docker/Dockerfile.web -t brave-forms-web:local .
+        nerdctl --namespace k8s.io build -f infrastructure/docker/Dockerfile.web -t brave-forms-web:local .
     }
 
     Write-Host "[OK] Container images built successfully" -ForegroundColor Green
