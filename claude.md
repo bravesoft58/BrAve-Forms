@@ -1,6 +1,6 @@
 # CLAUDE.md - BrAve Forms AI Development Instructions
 
-## 🚨 CRITICAL: Read This First 🚨
+## CRITICAL: Read This First
 
 **YOU MUST review this entire file before ANY code changes.**
 Acknowledge by stating "CLAUDE.md rules understood" before proceeding.
@@ -10,6 +10,7 @@ Acknowledge by stating "CLAUDE.md rules understood" before proceeding.
 ## ABSOLUTE CODE STANDARDS - ZERO TOLERANCE
 
 **NEVER include in ANY code, commits, PRs, or documentation:**
+
 1. Emoji characters of any kind
 2. "Generated with Claude Code" or any AI branding
 3. "Co-Authored-By: Claude" in commits
@@ -23,6 +24,7 @@ All code must be production-ready, professional, and contain ZERO references to 
 ## Tech Stack
 
 ### Backend
+
 - **Framework:** NestJS 10.x with GraphQL (Code-first approach using decorators)
 - **Language:** TypeScript 5.x
 - **Database:** PostgreSQL 15 with TimescaleDB extension (RLS for multi-tenancy)
@@ -31,6 +33,7 @@ All code must be production-ready, professional, and contain ZERO references to 
 - **Authentication:** Clerk (JWT with org context: o.id, o.rol, o.slg)
 
 ### Frontend
+
 - **Framework:** Next.js 14 (App Router)
 - **Mobile:** Capacitor 6 with React (Released April 2024)
 - **State:** Valtio + TanStack Query (with offline persistence)
@@ -39,6 +42,7 @@ All code must be production-ready, professional, and contain ZERO references to 
 - **Offline:** Service Workers + IndexedDB (Custom 30-day sync implementation required)
 
 ### Infrastructure
+
 - **Local Dev:** Rancher Desktop (containerd + k3s + nerdctl)
 - **Production:** Kubernetes (EKS)
 - **Container Runtime:** containerd (production standard)
@@ -49,13 +53,14 @@ All code must be production-ready, professional, and contain ZERO references to 
 - **Namespace:** braveforms (local isolation)
 
 ### Development
+
 - **Package Manager:** pnpm 8.x
 - **Testing:** Jest (backend), Vitest (frontend)
 - **E2E Testing:** Playwright
 - **Linting:** ESLint + Prettier
 - **Git Hooks:** Husky + lint-staged
 
-## 🚨 CRITICAL CODING WORKFLOW 🚨
+## CRITICAL CODING WORKFLOW
 
 **YOU MUST FOLLOW THIS WORKFLOW FOR EVERY SINGLE CODE CHANGE:**
 
@@ -96,16 +101,124 @@ All code must be production-ready, professional, and contain ZERO references to 
    - Test manually in development environment
    - Test with construction site conditions (offline, gloves, sunlight)
 
+## PLAN MODE (SHIFT+TAB TWICE) - MANDATORY FOR COMPLEX FEATURES
+
+**BEFORE implementing ANY complex feature (estimated >30 minutes):**
+
+1. **Press Shift+Tab twice** → Enters read-only planning mode
+2. **Describe feature scope** → Keep under 30 minutes per iteration
+3. **Review generated plan** → Claude creates detailed implementation plan
+4. **Approve before execution** → Human oversight gate
+
+**Benefits (Research-Validated):**
+
+- **21% faster** plan generation vs regular mode
+- **Prevents scope drift** → Forces structured approach
+- **Token efficient** → Planning doesn't consume execution budget
+- **Human oversight** → Review before changes
+
+**When to use Plan Mode:**
+
+- New features with multiple files
+- Complex business logic
+- Refactoring existing code
+- Architecture decisions
+- Multi-step workflows
+
+**Two workflows:**
+
+1. **Simple:** Plan → Approve → Execute immediately
+2. **Complex:** Plan → Write to plan.md → Implement incrementally → Update plan
+
+## CONTEXT MANAGEMENT (CRITICAL FOR LONG SESSIONS)
+
+**Monitor context meter continuously - use these commands strategically:**
+
+**`/clear`** - Wipe conversation history
+
+- Use when: Switching to unrelated task
+- Use when: Current thread went off-track
+- Benefit: Fresh start, no irrelevant context interference
+- **Use as often as possible** when completing tasks
+
+**`/compact`** - Compress conversation to summary
+
+- Use when: Context meter at 70% capacity
+- Use when: Want to preserve decisions but reduce tokens
+- Benefit: Maintains continuity with lower footprint
+- Manual compacting better than auto-compact at 95%
+
+**Context Budget Strategy:**
+
+- **0-50% capacity:** Normal operation
+- **50-70% capacity:** Consider `/compact`
+- **70-80% capacity:** **COMPACT NOW**, prepare to wrap up
+- **80-95% capacity:** Finish current task, **START NEW CHAT**
+- **95%+ capacity:** Auto-compact triggers (too late - lose important context)
+
+## SUB-AGENT MANAGEMENT (PROACTIVE - 2025 BEST PRACTICES)
+
+**Use sub-agents EARLY to preserve main context and enable parallel work:**
+
+**When to use sub-agents (proactive guidance):**
+
+- **Early in conversations** → Delegate research to preserve main context
+- **Specialized tasks** → DB optimization, performance analysis, testing strategy
+- **Parallel processing** → Multiple features simultaneously (5-8 agents optimal, 10 max)
+- **Context preservation** → Move sub-agent history out of main thread
+- **File searches** → Offload to Task tool with specialized agents
+- **Technology research** → Investigation of APIs, libraries, patterns
+
+**Sub-agent strategy:**
+
+1. **Delegate information gathering** → Research, file searches, documentation
+2. **Keep decision-making** in main agent → Architecture choices, approvals
+3. **Use isolated context** → Sub-agents have independent memory
+4. **Return summaries only** → Not full context (token efficient)
+
+**Optimal agent count:**
+
+- **5-8 agents:** Optimal for focused work
+- **10 agents:** Technical maximum (performance degrades beyond)
+
+**Example delegation:**
+
+```
+"Before implementing, spawn a research agent to investigate
+the best approach for database connection pooling in NestJS"
+
+→ Research agent investigates (isolated context)
+→ Returns 3-page summary with recommendations
+→ Main agent receives only summary (preserves context)
+```
+
+**Git Worktrees (Advanced Parallel Development):**
+
+```bash
+# For truly independent feature work
+git worktree add ../braveforms-feature-a feature-a
+git worktree add ../braveforms-feature-b feature-b
+
+# Launch Claude in each worktree
+cd ../braveforms-feature-a && claude  # Agent 1
+cd ../braveforms-feature-b && claude  # Agent 2
+```
+
+Benefits: True parallel development, isolated file states, 5-10x productivity
+
 ## Research Protocol (MANDATORY)
 
 ### Before Any Implementation:
+
 - **MUST** search existing codebase for similar functionality
 - **MUST** check official documentation for current API patterns
 - **MUST** verify library versions and compatibility
 - **MUST** ask clarifying questions if requirements are unclear
 
 ### Current Best Practices Research:
+
 When working with any technology, you MUST:
+
 1. **Capacitor & React:** Check latest Capacitor plugins and React patterns for mobile optimization
 2. **TanStack Query & Valtio:** Look up current offline-first patterns and caching strategies
 3. **Mantine v7:** Verify component API changes and accessibility guidelines
@@ -114,6 +227,7 @@ When working with any technology, you MUST:
 6. **Performance:** Verify current mobile performance benchmarks and optimization techniques
 
 ### Technology-Specific Research Areas:
+
 - **React Hook Form:** Current validation patterns with Zod and complex form logic
 - **Service Workers:** Latest offline-first strategies (30-day sync requires custom implementation)
 - **Capacitor Plugins:** Camera (with GPS EXIF), geolocation, and storage for construction sites
@@ -126,32 +240,82 @@ When working with any technology, you MUST:
 ## Honesty and Reality Protocol
 
 ### Confidence Levels (REQUIRED):
+
 Mark every recommendation with confidence level:
+
 - **High Confidence:** Verified against documentation/existing patterns
 - **Medium Confidence:** Following established patterns but not verified
 - **Low Confidence:** Experimental or unclear approach
 
 ### Uncertainty Handling:
+
 - **MUST** say "I don't know" when uncertain
 - **MUST** mark speculative code with `// TODO: Verify this approach`
 - **NEVER** claim completion without running tests
 - **ALWAYS** acknowledge when you're making assumptions
 
 ### Progress Reporting:
+
 - Be realistic about completion percentages
 - Report actual status: "Tests written but not passing" vs "90% complete"
 - Break down complex tasks into verifiable milestones
 - Don't claim "done" until all quality gates pass
 
+## EVIDENCE-BASED COMPLETION (MANDATORY - ZERO TOLERANCE)
+
+**NO fake validation, NO toy implementations, NO mock data, NO untested claims:**
+
+**PROHIBITED Development Practices:**
+
+- **NEVER** create "Hello World" services and claim they're operational
+- **NEVER** build toy/dummy implementations for validation
+- **NEVER** document fake evidence or fabricated test results
+- **NEVER** claim services work without end-to-end testing
+- **NEVER** use mock data and call it "real validation"
+- **NEVER** mark functionality as complete without actual testing
+- **NEVER** approximate compliance thresholds (0.25" MUST be exact, not 0.24" or 0.26")
+
+**REQUIRED Development Standards:**
+
+- **ALWAYS** build actual working implementations with real functionality
+- **ALWAYS** test against real infrastructure (databases, services, containers)
+- **ALWAYS** document genuine errors and authentic troubleshooting steps
+- **ALWAYS** collect evidence only from actual running systems
+- **ALWAYS** mark things as broken if they don't work - be honest
+- **ALWAYS** validate EPA compliance with actual 0.25" threshold (not approximations)
+
+**Quality Gate:** NO CODE IS "COMPLETE" WITHOUT REAL END-TO-END VALIDATION
+
+**Evidence Archive Structure:**
+
+```
+evidence/{sprint-or-iteration}/{issue-id}/
+├── test-results/          # Screenshots: red → green
+├── performance/           # Actual benchmark results
+├── deployment/            # Verification from running system
+├── coverage/              # Test coverage reports
+└── compliance/            # EPA/OSHA validation proof
+```
+
+**Required evidence for ALL completions:**
+
+- Test results (screenshot of red phase → green phase)
+- Performance benchmarks (actual metrics from real systems)
+- Deployment verification (running system, not localhost mock)
+- Coverage report (>80% for new code)
+- Compliance validation (EPA CGP 0.25" exact threshold proof)
+
 ## Code Standards (NON-NEGOTIABLE)
 
 ### Absolute Prohibitions:
+
 1. **NO EMOJI** - Never use emoji in code, comments, commits, or documentation
 2. **NO AI BRANDING** - Never mention Claude, AI generation, or include links
 3. **NO DECORATIVE CHARACTERS** - Only standard ASCII in code and comments
 4. **NO PLACEHOLDER COMMENTS** - Complete implementation or mark with TODO + ticket reference
 
 ### General Rules:
+
 - **ALWAYS** use existing project patterns and conventions
 - **NEVER** introduce new patterns without discussing first
 - **MUST** handle all error cases explicitly
@@ -161,21 +325,47 @@ Mark every recommendation with confidence level:
 - **MUST** validate multi-tenant data isolation
 
 ### Error Handling:
+
 - Use project's established error handling patterns
 - Include context in all error messages (no generic "Error occurred")
 - Log errors with sufficient debugging information
 - Fail gracefully with user-friendly messages
 - Consider offline error scenarios (queue for sync)
 
-### Testing Requirements (TDD):
-- Write failing tests FIRST, then implement
-- Cover: happy path, edge cases, error scenarios, offline scenarios
-- Use descriptive test names: `should <expected behavior> when <condition>`
-- Include integration tests for complex features
-- Test multi-tenancy isolation explicitly
-- Test EPA/OSHA compliance rules with regulatory citations
+### Testing Requirements (TDD - Anthropic-Recommended Anti-Hallucination Strategy):
+
+**MANDATORY workflow for ALL new features:**
+
+1. **Human defines tests** based on expected input/output pairs
+2. **Claude writes tests FIRST** - Explicitly tell Claude "DO NOT implement yet"
+3. **Run tests, confirm they FAIL** - Verify test validity (red phase)
+4. **Commit tests to git** - Tests exist before implementation
+5. **Claude implements code** to pass tests (NO test modifications allowed)
+6. **Iterate until GREEN** - Human QA gates, Claude fixes
+
+**Why TDD works with AI:**
+
+- Tests define truth, not AI assumptions (counter to hallucination)
+- Prevents scope drift with clear success criteria
+- Human oversight at each gate (pair programming specification)
+
+**Required test coverage:**
+
+- Happy path + edge cases + error scenarios + offline scenarios
+- Multi-tenancy isolation explicit tests
+- EPA/OSHA compliance rules with regulatory citations
+- Descriptive names: `should <expected behavior> when <condition>`
+- Integration tests for complex features
+
+**Required evidence:**
+
+- Test file created BEFORE implementation (commit timestamp proof)
+- Screenshot of failing tests (red phase)
+- Screenshot of passing tests (green phase)
+- Coverage report showing >80% for new code
 
 ### Multi-Tenancy Requirements:
+
 - EVERY query must filter by orgId from Clerk JWT
 - Use Prisma middleware for automatic tenant filtering
 - Verify PostgreSQL RLS policies exist for tenant tables
@@ -183,6 +373,7 @@ Mark every recommendation with confidence level:
 - Include orgId in all audit trail entries
 
 ### Offline-First Requirements:
+
 - ALL features must work offline for 30 days
 - Use Service Workers + IndexedDB for persistence
 - Implement delta sync with conflict resolution
@@ -190,6 +381,7 @@ Mark every recommendation with confidence level:
 - Test storage persistence on iOS (consider SQLite for critical data)
 
 ### Documentation Standards:
+
 - Update documentation IMMEDIATELY when APIs change
 - Use JSDoc format for TypeScript/JavaScript
 - Include: purpose, parameters, return types, examples, edge cases
@@ -201,6 +393,7 @@ Mark every recommendation with confidence level:
 ## Project-Specific Context
 
 ### File Structure:
+
 ```
 brave-forms/
 ├── apps/
@@ -229,6 +422,7 @@ brave-forms/
 ```
 
 ### Key Patterns:
+
 - **API Endpoints:** GraphQL resolvers with @UseGuards(ClerkAuthGuard) and @nestjs/graphql decorators
 - **Component Structure:** Feature-based with barrel exports
 - **State Management:** Valtio stores + TanStack Query for server state (with persistence)
@@ -236,6 +430,7 @@ brave-forms/
 - **Multi-tenancy:** Clerk org_id in JWT claims, custom Prisma middleware for tenant filtering, PostgreSQL RLS policies
 
 ### Important Files:
+
 - **Configuration:** `.env.local`, `capacitor.config.ts`, `nest-cli.json`
 - **Entry Points:** `apps/backend/src/main.ts`, `apps/web/app/layout.tsx`
 - **Shared Utilities:** `packages/compliance/rules.ts`, `packages/types/index.ts`
@@ -244,34 +439,41 @@ brave-forms/
 ## Development Commands
 
 ### Slash Commands (Preferred):
+
 Use these custom slash commands for streamlined workflows:
 
 **Quality Gates:**
+
 - `/qa` - Run complete quality gate (lint + type-check + test + build)
 - `/test-offline` - Test offline functionality and 30-day sync
 - `/test-compliance` - Validate EPA CGP 0.25" rules and compliance
 - `/review` - Launch code-reviewer agent with strict standards
 
 **Workflow:**
+
 - `/feature <name>` - Create feature branch and initialize structure
 - `/fix <issue-number>` - Create fix branch and investigate issue
 - `/commit-clean` - Commit after quality gates (NO branding)
 - `/pr-ready` - Full validation and create PR (NO branding)
 
 **Planning & Architecture:**
+
 - `/plan-feature` - Architecture analysis in Plan Mode
 - `/check-patterns <file>` - Verify code follows project patterns
 - `/compliance-check <feature>` - Deep EPA/OSHA validation
 
 **Database:**
+
 - `/db-check` - Validate multi-tenancy and RLS patterns
 - `/db-migrate-safe` - Create and validate migration
 
 **Documentation:**
+
 - `/doc-sync` - Update all affected documentation
 - `/doc-api <path>` - Generate API documentation
 
 **Specialized Agents:**
+
 - `/agent-offline` - Launch offline-sync-specialist
 - `/agent-compliance` - Launch compliance-engine-developer
 - `/agent-security` - Launch security-compliance-officer
@@ -279,6 +481,7 @@ Use these custom slash commands for streamlined workflows:
 ### Manual Commands (if slash commands unavailable):
 
 **Essential:**
+
 - **Install Dependencies:** `pnpm install`
 - **Development Server:** `pnpm dev` (runs all apps concurrently)
 - **Build:** `pnpm build`
@@ -287,6 +490,7 @@ Use these custom slash commands for streamlined workflows:
 - **Type Check:** `pnpm type-check`
 
 **App-Specific:**
+
 - **Backend Only:** `pnpm --filter backend dev`
 - **Web Only:** `pnpm --filter web dev`
 - **Mobile Build:** `pnpm --filter mobile cap:build`
@@ -294,12 +498,14 @@ Use these custom slash commands for streamlined workflows:
 - **Mobile Android:** `pnpm --filter mobile cap:android`
 
 **Database:**
+
 - **Generate Prisma:** `pnpm db:generate`
 - **Migrate Dev:** `pnpm db:migrate`
 - **Seed Data:** `pnpm --filter backend seed`
 - **Studio:** `pnpm --filter database studio`
 
 **Kubernetes (Local Development):**
+
 - **Deploy:** `.\scripts\k8s-local-setup.ps1 -Action deploy -BuildImages -CreateSecrets`
 - **Status:** `.\scripts\k8s-local-setup.ps1 -Action status`
 - **Build Images:** `.\scripts\k8s-local-setup.ps1 -Action build -BuildImages`
@@ -309,6 +515,7 @@ Use these custom slash commands for streamlined workflows:
 - **Port Forward:** `kubectl port-forward svc/postgres 5432:5432 -n braveforms`
 
 **Quality Assurance:**
+
 - **Full Quality Check:** `pnpm qa` (lint + type-check + test)
 - **Pre-commit Checks:** `pnpm pre-commit`
 - **Compliance Tests:** `pnpm test:compliance`
@@ -318,18 +525,21 @@ Use these custom slash commands for streamlined workflows:
 ## AI Interaction Guidelines
 
 ### Communication Style:
+
 - Be direct and specific in requests
 - Ask for clarification rather than assuming
 - Provide context for why changes are needed
 - Request explanations of complex implementations
 
 ### Code Review Process:
+
 - Explain reasoning behind implementation choices
 - Highlight potential issues or alternatives
 - Reference specific lines when discussing code
 - Suggest improvements to existing code
 
 ### Learning Integration:
+
 - Update this CLAUDE.md when discovering new patterns
 - Document project-specific gotchas and solutions
 - Build a knowledge base of project decisions
@@ -337,6 +547,7 @@ Use these custom slash commands for streamlined workflows:
 ## Quality Gates Checklist
 
 ### Before ANY Code Submission:
+
 - [ ] Follows existing project patterns
 - [ ] Includes comprehensive error handling
 - [ ] Has passing tests for all scenarios
@@ -346,6 +557,7 @@ Use these custom slash commands for streamlined workflows:
 - [ ] Performance considerations addressed
 
 ### For New Features:
+
 - [ ] Architecture aligns with project structure
 - [ ] Security implications considered
 - [ ] Backward compatibility maintained
@@ -354,6 +566,7 @@ Use these custom slash commands for streamlined workflows:
 ## Common Pitfalls to Avoid
 
 ### Critical Violations (Zero Tolerance):
+
 - Including emoji in code, comments, or documentation
 - Adding "Generated with Claude Code" or AI references
 - Adding Co-Authored-By lines for AI
@@ -361,6 +574,7 @@ Use these custom slash commands for streamlined workflows:
 - Leaving TODO comments without implementation or ticket reference
 
 ### Code Quality Issues:
+
 - Don't use placeholder/TODO comments without implementation
 - Don't assume APIs without checking documentation
 - Don't skip error handling for "simple" operations
@@ -370,6 +584,7 @@ Use these custom slash commands for streamlined workflows:
 - Don't assume internet connectivity
 
 ### Pattern Violations:
+
 - Creating new architectural patterns without discussion
 - Ignoring existing error handling patterns
 - Skipping input validation "because it's internal"
@@ -377,6 +592,7 @@ Use these custom slash commands for streamlined workflows:
 - Breaking multi-tenant isolation
 
 ### Testing Violations:
+
 - Claiming code is done without tests
 - Writing tests after implementation (not TDD)
 - Skipping offline scenario tests
@@ -384,6 +600,7 @@ Use these custom slash commands for streamlined workflows:
 - Approximating compliance thresholds (0.24" vs 0.25")
 
 ### Process Issues:
+
 - Don't implement before understanding requirements fully
 - Don't copy patterns from other projects without adaptation
 - Don't skip the research phase for "quick fixes"
@@ -393,12 +610,14 @@ Use these custom slash commands for streamlined workflows:
 - Don't create features that require constant connectivity
 
 ### Documentation Violations:
+
 - Not updating docs when APIs change
 - Including emoji in documentation
 - Adding AI branding to documentation
 - Leaving outdated documentation
 
 ### Git Violations:
+
 - Committing without passing quality gates
 - Using emoji in commit messages
 - Adding AI branding to commits or PRs
@@ -406,6 +625,7 @@ Use these custom slash commands for streamlined workflows:
 - Pushing directly to main/master
 
 ### BrAve Forms Specific:
+
 - **Never compromise on the 0.25" rain threshold accuracy** (EPA CGP requirement - exact, not approximate)
 - Always implement offline-first, sync later (30-day capability via custom implementation)
 - Consider inspector portal access in all compliance features (QR without app install)
@@ -418,7 +638,9 @@ Use these custom slash commands for streamlined workflows:
 ## Enforcement Techniques
 
 ### Session Start Protocol (MANDATORY):
+
 Every session start:
+
 1. Read CLAUDE.md completely
 2. State "CLAUDE.md rules understood" and address Developer
 3. Run `git status` to understand current state
@@ -428,6 +650,7 @@ Every session start:
 7. If violations found, immediately flag for cleanup
 
 ### During Implementation (MANDATORY):
+
 1. Use TodoWrite for ALL tasks requiring >2 steps
 2. Use Plan Mode for features requiring >3 steps
 3. Mark todos in_progress BEFORE starting
@@ -437,6 +660,7 @@ Every session start:
 7. Never claim "done" without passing `/qa`
 
 ### Before Commit (MANDATORY CHECKLIST):
+
 - [ ] Run `/qa` or manual quality gates: pnpm lint && pnpm type-check && pnpm test && pnpm build
 - [ ] Run `/test-offline` if touching sync/mobile
 - [ ] Run `/test-compliance` if touching EPA/OSHA
@@ -446,6 +670,7 @@ Every session start:
 - [ ] Confirm all tests pass
 
 ### Before PR (MANDATORY CHECKLIST):
+
 - [ ] All commits have clean messages (no emoji/branding)
 - [ ] Run `/pr-ready` for full validation
 - [ ] PR description has no emoji or branding
@@ -456,6 +681,7 @@ Every session start:
 ### Git Workflow Standards:
 
 **Branch Naming (REQUIRED):**
+
 - `feature/<descriptive-name>` - New functionality
 - `fix/<issue-number>-<brief>` - Bug fixes
 - `refactor/<area>` - Code improvements
@@ -463,6 +689,7 @@ Every session start:
 - `docs/<what-changed>` - Documentation updates
 
 **Commit Message Format (REQUIRED):**
+
 ```
 <type>: <brief summary under 72 characters>
 
@@ -474,6 +701,7 @@ Every session start:
 **Types:** feat, fix, refactor, docs, test, compliance, perf, chore, security
 
 **Example:**
+
 ```
 compliance: implement EPA CGP 0.25 inch rain inspection trigger
 
@@ -488,21 +716,26 @@ Refs: EPA-CGP-2022-Section-4.4
 ```
 
 **ABSOLUTE RULES:**
+
 - NO emoji anywhere in commit messages
 - NO "Generated with Claude Code" or AI branding
 - NO "Co-Authored-By: Claude" lines
 - NO anthropic.com links
 
 **Pull Request Template (REQUIRED):**
+
 ```markdown
 ## Summary
+
 Brief description of changes
 
 ## Changes
+
 - Specific change 1
 - Specific change 2
 
 ## Testing
+
 - [ ] Unit tests pass
 - [ ] Integration tests pass
 - [ ] Offline scenarios tested (if applicable)
@@ -510,21 +743,26 @@ Brief description of changes
 - [ ] Compliance validated (if applicable)
 
 ## Database Changes
+
 - [ ] No schema changes / Schema changes documented
 
 ## Breaking Changes
+
 - [ ] None / List if applicable
 
 ## Compliance Impact
+
 - [ ] No EPA/OSHA rules affected / Rules updated with citations
 ```
 
 ### Validation Checks:
+
 - Use the "Developer" test - if Claude doesn't address you as "Developer", the file isn't being read
 - Require confidence levels in all recommendations
 - Ask for explicit confirmation of quality gate completion
 
 ### Living Document Approach:
+
 - Update this file immediately when Claude makes mistakes
 - Add new patterns as the project evolves
 - Document decisions and their reasoning
@@ -532,13 +770,16 @@ Brief description of changes
 ## Emergency Overrides
 
 ### When Claude Ignores Instructions:
+
 1. Explicitly reference this file: "Please review @CLAUDE.md"
 2. Quote specific rules that are being violated
 3. Use the session restart command if necessary
 4. Update this file with stronger language for persistent issues
 
 ### Quality Escalation:
+
 If code quality issues persist:
+
 1. Stop development immediately
 2. Review and strengthen relevant sections above
 3. Add specific examples of correct vs incorrect approaches
@@ -547,6 +788,7 @@ If code quality issues persist:
 ## BrAve Forms Critical Requirements
 
 ### Compliance Non-Negotiables:
+
 1. **0.25" Rain Trigger:** EXACT threshold per EPA CGP (not 0.24" or 0.26")
 2. **24-Hour Inspection Window:** Required within 24 hours of storm event producing ≥0.25" rain
    - "During normal working hours" means: If storm occurs Saturday, inspection due Monday (next work day)
@@ -564,6 +806,7 @@ If code quality issues persist:
 All compliance features must cite official EPA CGP documentation.
 
 ### Performance Requirements:
+
 - API response time: <200ms p95
 - Mobile app startup: <3 seconds
 - Photo upload: <15 seconds per batch
@@ -571,6 +814,7 @@ All compliance features must cite official EPA CGP documentation.
 - Inspector portal load: <2 seconds
 
 ### Field Testing Checklist:
+
 - [ ] Works with construction gloves
 - [ ] Visible in direct sunlight
 - [ ] Functions in rain/dust
@@ -579,6 +823,7 @@ All compliance features must cite official EPA CGP documentation.
 - [ ] Syncs when connection restored
 
 ### iOS Storage Persistence (CRITICAL):
+
 - [ ] Critical compliance data stored in SQLite, not IndexedDB
 - [ ] IndexedDB used only for cache/performance data
 - [ ] Tested storage under iOS low-space conditions
@@ -590,6 +835,7 @@ All compliance features must cite official EPA CGP documentation.
 ---
 
 ## Version History
+
 - **v1.0** - Initial BrAve Forms setup
 - **v1.1** - Added construction-specific requirements
 - **v1.2** - Updated with EPA compliance validations
@@ -615,6 +861,19 @@ All compliance features must cite official EPA CGP documentation.
   - Clarified EPA CGP "working hours" interpretation
   - Added session validation protocol
   - Expanded code standards with multi-tenancy and offline requirements
+- **v1.6** - Enhanced with 2025 Best Practices Research (Sep 30, 2025)
+  - **REMOVED ALL EMOJIS** from CLAUDE.md (enforcing professional code-only standard)
+  - Added **PLAN MODE (Shift+Tab twice)** prominence with research-validated benefits
+  - Added **CONTEXT MANAGEMENT** section with `/clear` and `/compact` strategies
+  - Enhanced **TDD WORKFLOW** with Anthropic-recommended anti-hallucination approach
+  - Added **EVIDENCE-BASED COMPLETION** section (zero tolerance for fake validation)
+  - Added **SUB-AGENT MANAGEMENT** with proactive delegation guidance
+  - Added git worktrees section for advanced parallel development
+  - Strengthened testing requirements with explicit red→green workflow
+  - Enhanced evidence archive structure and requirements
+  - Based on 20+ sources: Anthropic official + community best practices
+  - Optimized for token efficiency and instruction adherence
+  - All enhancements tested against claude_setup research template
 
 **Remember:** This platform prevents construction companies from facing $25,000-$50,000 daily EPA fines. Every feature must be field-tested and compliance-validated. Zero tolerance for compliance inaccuracy.
 
