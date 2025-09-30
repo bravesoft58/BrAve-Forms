@@ -1,10 +1,11 @@
 # Next.js Web Frontend - Construction field optimized UI
 # Glove-friendly, offline-first, EPA compliance dashboard
+# NodePort 30102 avoids conflicts with other Rancher Desktop projects
 apiVersion: v1
 kind: Service
 metadata:
   name: web
-  namespace: brave-forms
+  namespace: braveforms
   labels:
     app: web
     tier: frontend
@@ -13,7 +14,7 @@ spec:
   ports:
     - port: 3000
       targetPort: 3000
-      nodePort: 30002
+      nodePort: 30102
       protocol: TCP
   selector:
     app: web
@@ -22,7 +23,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: web
-  namespace: brave-forms
+  namespace: braveforms
   labels:
     app: web
     tier: frontend
@@ -40,7 +41,7 @@ spec:
       containers:
       - name: web
         image: brave-forms-web:local
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Never
         ports:
         - containerPort: 3000
         env:

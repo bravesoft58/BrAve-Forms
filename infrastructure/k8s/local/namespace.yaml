@@ -1,20 +1,22 @@
 # Namespace for BrAve Forms local development
-# Isolates all resources for better organization
+# Isolates all resources for better organization and multi-project support
+# Using single-word 'braveforms' for easier CLI usage with Rancher Desktop
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: brave-forms
+  name: braveforms
   labels:
-    app: brave-forms
+    app: braveforms
     environment: local
     compliance: epa-cgp
+    runtime: rancher-desktop
 ---
 # Resource quota to prevent runaway resource consumption in local dev
 apiVersion: v1
 kind: ResourceQuota
 metadata:
-  name: brave-forms-quota
-  namespace: brave-forms
+  name: braveforms-quota
+  namespace: braveforms
 spec:
   hard:
     requests.cpu: "4"

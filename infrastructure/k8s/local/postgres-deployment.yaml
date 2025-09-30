@@ -4,20 +4,20 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-pvc
-  namespace: brave-forms
+  namespace: braveforms
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi
-  storageClassName: hostpath
+  storageClassName: local-path
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: postgres
-  namespace: brave-forms
+  namespace: braveforms
   labels:
     app: postgres
     tier: database
@@ -34,7 +34,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
-  namespace: brave-forms
+  namespace: braveforms
   labels:
     app: postgres
     tier: database

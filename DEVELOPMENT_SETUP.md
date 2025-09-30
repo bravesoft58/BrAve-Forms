@@ -1,17 +1,20 @@
 # BrAve Forms Development Setup Guide
-**Last Updated**: September 6, 2025  
-**Status**: FULLY OPERATIONAL ✅  
-**Authentication**: CLERK REMOVED (Development Mode)  
-**Current Environment**: Working and Tested  
+**Last Updated**: September 30, 2025
+**Status**: FULLY OPERATIONAL ✅
+**Infrastructure**: Rancher Desktop + Kubernetes
+**Namespace**: braveforms
+**Current Environment**: Working and Tested
 
 ## Prerequisites
 
 ### Required Software
 - **Node.js**: v18.0.0 or higher
 - **pnpm**: v8.0.0 or higher
-- **PostgreSQL**: v15 with TimescaleDB extension
-- **Redis**: v7.0 or higher (for BullMQ)
+- **Rancher Desktop**: Latest version (containerd + k3s)
+- **kubectl**: Included with Rancher Desktop
 - **Git**: Latest version
+
+**Infrastructure Note**: PostgreSQL, Redis, and MinIO run in Kubernetes pods (not local installs).
 
 ### Recommended Tools
 - **VS Code** with extensions:
@@ -41,92 +44,103 @@ pnpm install
 Create `.env.local` file in the root directory:
 
 ```env
-# Database (Docker Containerized)
-DATABASE_URL="postgresql://brave_user:brave_pass@localhost:5434/brave_forms"
+# Database (Kubernetes Pod - via port-forward)
+DATABASE_URL="postgresql://brave:brave_secure_pass@localhost:5432/brave_forms"
 
-# Redis (Docker Containerized)
-REDIS_URL="redis://localhost:6381"
+# Redis (Kubernetes Pod - via port-forward)
+REDIS_URL="redis://:redis_secure_pass@localhost:6379"
 
-# Authentication: CLERK REMOVED
-# CLERK_PUBLISHABLE_KEY="pk_test_..." # Not needed - auth removed
-# CLERK_SECRET_KEY="sk_test_..." # Not needed - auth removed
+# Clerk Authentication
+CLERK_SECRET_KEY="sk_test_your_secret_key"
+CLERK_PUBLISHABLE_KEY="pk_test_your_publishable_key"
+CLERK_JWT_KEY="your_jwt_verification_key"
 
 # Weather APIs
 OPENWEATHER_API_KEY="your_api_key_here"
 
-# Storage (Docker Containerized MinIO)
-MINIO_ENDPOINT="localhost:9000"
+# Storage (Kubernetes Pod - MinIO)
+MINIO_ENDPOINT="localhost:30103"
 MINIO_ACCESS_KEY="minioadmin"
 MINIO_SECRET_KEY="minioadmin"
 MINIO_BUCKET_NAME="brave-forms-storage"
 
-# Application (Updated Ports)
+# Application
 NODE_ENV="development"
 BACKEND_PORT="3002"
 WEB_PORT="3007"
 CORS_ORIGIN="http://localhost:3007"
 ```
 
-### 4. Database Setup
+**Note**: Secrets are also configured in Kubernetes. See [RANCHER_DESKTOP_SETUP.md](./RANCHER_DESKTOP_SETUP.md) for K8s secret management.
 
-#### Install PostgreSQL with TimescaleDB
-```bash
-# macOS
-brew install postgresql@15
-brew install timescaledb
+### 4. Rancher Desktop Setup
 
-# Windows (use installer from postgresql.org and timescale.com)
-# Linux
-sudo apt install postgresql-15 postgresql-15-timescaledb
+**PostgreSQL, Redis, and MinIO run in Kubernetes pods.**
+
+#### Install Rancher Desktop
+
+```powershell
+# Windows
+winget install suse.RancherDesktop
 ```
 
-#### Create Database
-```bash
-psql -U postgres
-CREATE DATABASE brave_forms;
-\c brave_forms
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "timescaledb";
-\q
+#### Configure Rancher Desktop
+
+1. Open Rancher Desktop settings
+2. **Container Runtime**: containerd (NOT dockerd)
+3. **Kubernetes**: Enable
+4. **Apply & Restart**
+
+See [RANCHER_DESKTOP_SETUP.md](./RANCHER_DESKTOP_SETUP.md) for complete setup.
+
+#### Deploy Infrastructure
+
+```powershell
+# Check for port conflicts
+.\scripts\check-port-conflicts.ps1 -PortsToCheck @(30101, 30102, 30103)
+
+# Deploy all services
+.\scripts\k8s-local-setup.ps1 -Action deploy -BuildImages -CreateSecrets
 ```
 
 #### Run Migrations
-```bash
+
+```powershell
+# Port forward to Postgres
+kubectl port-forward svc/postgres 5432:5432 -n braveforms
+
+# Run migrations (in another terminal)
 pnpm db:generate
 pnpm db:migrate
 ```
 
-### 5. Redis Setup
-
-#### Install Redis
-```bash
-# macOS
-brew install redis
-brew services start redis
-
-# Windows (use WSL or Docker)
-docker run -d -p 6379:6379 redis:7-alpine
-
-# Linux
-sudo apt install redis-server
-sudo systemctl start redis
-```
-
 ## Running the Application
 
-### Current Working Configuration (September 6, 2025)
+### Current Working Configuration (Updated September 30, 2025)
 
-#### Start Infrastructure (Docker Compose)
-```bash
-# Start PostgreSQL, Redis, MinIO containers
-docker-compose up -d
+#### Start Infrastructure (Rancher Desktop + Kubernetes)
 
-# Verify containers are running
-docker-compose ps
-# ✅ PostgreSQL: Port 5434
-# ✅ Redis: Port 6381  
-# ✅ MinIO: Port 9000/9001
+**MIGRATION COMPLETE**: This project now uses Rancher Desktop with Kubernetes instead of docker-compose.
+
+```powershell
+# Check for port conflicts FIRST
+.\scripts\check-port-conflicts.ps1 -PortsToCheck @(30101, 30102, 30103)
+
+# Build and deploy to Kubernetes
+.\scripts\k8s-local-setup.ps1 -Action deploy -BuildImages -CreateSecrets
+
+# Verify deployment
+.\scripts\k8s-local-setup.ps1 -Action status
 ```
+
+**Access Points**:
+- PostgreSQL: localhost:5432 (via port-forward)
+- Redis: localhost:6379 (via port-forward)
+- MinIO: http://localhost:30103
+- Backend API: http://localhost:30101/graphql
+- Web Application: http://localhost:30102
+
+**See [RANCHER_DESKTOP_SETUP.md](./RANCHER_DESKTOP_SETUP.md) for complete setup guide.**
 
 #### Start Development Applications
 ```bash
@@ -145,11 +159,16 @@ pnpm --filter mobile dev
 ```
 
 ### Verified Working URLs
-- **Backend GraphQL**: http://localhost:3002/graphql ✅
-- **Web Application**: http://localhost:3007 ✅
-- **Demo Page**: http://localhost:3007/demo ✅
+
+**Kubernetes Services** (via NodePort):
+- **Backend GraphQL**: http://localhost:30101/graphql ✅
+- **Web Application**: http://localhost:30102 ✅
+- **MinIO Console**: http://localhost:30103 ✅
+
+**Local Development Apps**:
+- **Backend (standalone)**: http://localhost:3002/graphql
+- **Web (standalone)**: http://localhost:3007
 - **Mobile App**: http://localhost:5174 ✅
-- **MinIO Console**: http://localhost:9001 ✅
 
 ## Development Workflow
 
@@ -373,25 +392,25 @@ Recommended `.vscode/settings.json`:
 
 ---
 
-## 🚨 Current Development Status (September 6, 2025)
+## 🚨 Current Development Status (September 30, 2025)
 
 ### ✅ FULLY OPERATIONAL ENVIRONMENT
-- **Infrastructure**: Docker containerized services working perfectly
-- **Web Application**: http://localhost:3007 - Complete functionality
-- **Backend API**: http://localhost:3002 - All endpoints operational
-- **Authentication**: Removed for development ease - No barriers
+- **Infrastructure**: Rancher Desktop + Kubernetes (production-like)
+- **Namespace**: braveforms (isolated from other projects)
+- **Web Application**: http://localhost:30102 - Complete functionality
+- **Backend API**: http://localhost:30101/graphql - All endpoints operational
 - **Demo Features**: Weather monitoring, form builder, EPA compliance
 
-### 🎯 Ready for Sprint 3
-- Core functionality tested and working
-- Development environment stable and fast
-- All EPA compliance features operational
-- Team productivity at maximum efficiency
-- Focus can shift to UI/UX improvements
+### 🎯 Infrastructure Migration Complete
+- Migrated from Docker Desktop to Rancher Desktop
+- containerd + k3s + nerdctl (production standard)
+- Multi-project namespace isolation
+- Port conflict detection system
+- Zero Docker licensing concerns
 
 ### 📞 Next Session Priorities
 1. UI/UX styling improvements
 2. Advanced form builder features
 3. Mobile optimization enhancements
 4. Performance fine-tuning
-5. Sprint 3 planning and execution
+5. Production EKS deployment preparation

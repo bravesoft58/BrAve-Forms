@@ -1,10 +1,11 @@
 # Ingress for local routing with nginx-ingress controller
 # Provides single entry point for all services
+# Optional - NodePort services provide direct access
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: brave-forms-ingress
-  namespace: brave-forms
+  name: braveforms-ingress
+  namespace: braveforms
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/enable-cors: "true"

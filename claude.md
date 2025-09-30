@@ -7,6 +7,19 @@ Acknowledge by stating "CLAUDE.md rules understood" before proceeding.
 
 **IMPORTANT:** You must always refer to me as "Developer" in responses. This verifies you've read these instructions.
 
+## ABSOLUTE CODE STANDARDS - ZERO TOLERANCE
+
+**NEVER include in ANY code, commits, PRs, or documentation:**
+1. Emoji characters of any kind
+2. "Generated with Claude Code" or any AI branding
+3. "Co-Authored-By: Claude" in commits
+4. Any anthropic.com links or references
+5. Robot emoji or any decorative characters
+
+**Violation of these rules = immediate session restart**
+
+All code must be production-ready, professional, and contain ZERO references to AI generation.
+
 ## Tech Stack
 
 ### Backend
@@ -26,11 +39,14 @@ Acknowledge by stating "CLAUDE.md rules understood" before proceeding.
 - **Offline:** Service Workers + IndexedDB (Custom 30-day sync implementation required)
 
 ### Infrastructure
+- **Local Dev:** Rancher Desktop (containerd + k3s + nerdctl)
+- **Production:** Kubernetes (EKS)
+- **Container Runtime:** containerd (production standard)
+- **Image Building:** nerdctl with k8s.io namespace
 - **IaC:** Terraform 1.5+
-- **Container:** Docker with multi-stage builds
-- **Orchestration:** Kubernetes (EKS)
 - **CI/CD:** GitHub Actions
 - **Monitoring:** Datadog, Sentry
+- **Namespace:** braveforms (local isolation)
 
 ### Development
 - **Package Manager:** pnpm 8.x
@@ -129,30 +145,58 @@ Mark every recommendation with confidence level:
 
 ## Code Standards (NON-NEGOTIABLE)
 
+### Absolute Prohibitions:
+1. **NO EMOJI** - Never use emoji in code, comments, commits, or documentation
+2. **NO AI BRANDING** - Never mention Claude, AI generation, or include links
+3. **NO DECORATIVE CHARACTERS** - Only standard ASCII in code and comments
+4. **NO PLACEHOLDER COMMENTS** - Complete implementation or mark with TODO + ticket reference
+
 ### General Rules:
 - **ALWAYS** use existing project patterns and conventions
 - **NEVER** introduce new patterns without discussing first
 - **MUST** handle all error cases explicitly
 - **MUST** include comprehensive input validation
 - **MUST** write self-documenting code with clear variable names
+- **MUST** consider offline scenarios in ALL features
+- **MUST** validate multi-tenant data isolation
 
 ### Error Handling:
 - Use project's established error handling patterns
-- Include context in all error messages
-- Log errors appropriately for debugging
+- Include context in all error messages (no generic "Error occurred")
+- Log errors with sufficient debugging information
 - Fail gracefully with user-friendly messages
+- Consider offline error scenarios (queue for sync)
 
-### Testing Requirements:
-- Write tests BEFORE implementation (TDD)
-- Cover happy path, edge cases, and error scenarios
-- Use descriptive test names explaining the scenario
+### Testing Requirements (TDD):
+- Write failing tests FIRST, then implement
+- Cover: happy path, edge cases, error scenarios, offline scenarios
+- Use descriptive test names: `should <expected behavior> when <condition>`
 - Include integration tests for complex features
+- Test multi-tenancy isolation explicitly
+- Test EPA/OSHA compliance rules with regulatory citations
 
-### Documentation:
-- Update README.md for new features
-- Document complex logic with inline comments
-- Keep API documentation current
-- Include usage examples for new functions
+### Multi-Tenancy Requirements:
+- EVERY query must filter by orgId from Clerk JWT
+- Use Prisma middleware for automatic tenant filtering
+- Verify PostgreSQL RLS policies exist for tenant tables
+- Test cross-tenant access attempts fail
+- Include orgId in all audit trail entries
+
+### Offline-First Requirements:
+- ALL features must work offline for 30 days
+- Use Service Workers + IndexedDB for persistence
+- Implement delta sync with conflict resolution
+- Queue operations when offline, sync when online
+- Test storage persistence on iOS (consider SQLite for critical data)
+
+### Documentation Standards:
+- Update documentation IMMEDIATELY when APIs change
+- Use JSDoc format for TypeScript/JavaScript
+- Include: purpose, parameters, return types, examples, edge cases
+- Document offline behavior and sync implications
+- Document multi-tenancy considerations
+- NO emoji in documentation
+- NO AI branding in documentation
 
 ## Project-Specific Context
 
@@ -199,7 +243,42 @@ brave-forms/
 
 ## Development Commands
 
-### Essential Commands:
+### Slash Commands (Preferred):
+Use these custom slash commands for streamlined workflows:
+
+**Quality Gates:**
+- `/qa` - Run complete quality gate (lint + type-check + test + build)
+- `/test-offline` - Test offline functionality and 30-day sync
+- `/test-compliance` - Validate EPA CGP 0.25" rules and compliance
+- `/review` - Launch code-reviewer agent with strict standards
+
+**Workflow:**
+- `/feature <name>` - Create feature branch and initialize structure
+- `/fix <issue-number>` - Create fix branch and investigate issue
+- `/commit-clean` - Commit after quality gates (NO branding)
+- `/pr-ready` - Full validation and create PR (NO branding)
+
+**Planning & Architecture:**
+- `/plan-feature` - Architecture analysis in Plan Mode
+- `/check-patterns <file>` - Verify code follows project patterns
+- `/compliance-check <feature>` - Deep EPA/OSHA validation
+
+**Database:**
+- `/db-check` - Validate multi-tenancy and RLS patterns
+- `/db-migrate-safe` - Create and validate migration
+
+**Documentation:**
+- `/doc-sync` - Update all affected documentation
+- `/doc-api <path>` - Generate API documentation
+
+**Specialized Agents:**
+- `/agent-offline` - Launch offline-sync-specialist
+- `/agent-compliance` - Launch compliance-engine-developer
+- `/agent-security` - Launch security-compliance-officer
+
+### Manual Commands (if slash commands unavailable):
+
+**Essential:**
 - **Install Dependencies:** `pnpm install`
 - **Development Server:** `pnpm dev` (runs all apps concurrently)
 - **Build:** `pnpm build`
@@ -207,20 +286,29 @@ brave-forms/
 - **Lint:** `pnpm lint`
 - **Type Check:** `pnpm type-check`
 
-### App-Specific Commands:
+**App-Specific:**
 - **Backend Only:** `pnpm --filter backend dev`
 - **Web Only:** `pnpm --filter web dev`
 - **Mobile Build:** `pnpm --filter mobile cap:build`
 - **Mobile iOS:** `pnpm --filter mobile cap:ios`
 - **Mobile Android:** `pnpm --filter mobile cap:android`
 
-### Database Commands:
-- **Generate Prisma:** `pnpm --filter database generate`
-- **Migrate Dev:** `pnpm --filter database migrate:dev`
+**Database:**
+- **Generate Prisma:** `pnpm db:generate`
+- **Migrate Dev:** `pnpm db:migrate`
 - **Seed Data:** `pnpm --filter backend seed`
 - **Studio:** `pnpm --filter database studio`
 
-### Quality Assurance:
+**Kubernetes (Local Development):**
+- **Deploy:** `.\scripts\k8s-local-setup.ps1 -Action deploy -BuildImages -CreateSecrets`
+- **Status:** `.\scripts\k8s-local-setup.ps1 -Action status`
+- **Build Images:** `.\scripts\k8s-local-setup.ps1 -Action build -BuildImages`
+- **Remove:** `.\scripts\k8s-local-setup.ps1 -Action remove`
+- **Port Check:** `.\scripts\check-port-conflicts.ps1 -PortsToCheck @(30101, 30102, 30103)`
+- **Pod Logs:** `kubectl logs -f deployment/backend -n braveforms`
+- **Port Forward:** `kubectl port-forward svc/postgres 5432:5432 -n braveforms`
+
+**Quality Assurance:**
 - **Full Quality Check:** `pnpm qa` (lint + type-check + test)
 - **Pre-commit Checks:** `pnpm pre-commit`
 - **Compliance Tests:** `pnpm test:compliance`
@@ -265,6 +353,13 @@ brave-forms/
 
 ## Common Pitfalls to Avoid
 
+### Critical Violations (Zero Tolerance):
+- Including emoji in code, comments, or documentation
+- Adding "Generated with Claude Code" or AI references
+- Adding Co-Authored-By lines for AI
+- Using decorative characters instead of proper documentation
+- Leaving TODO comments without implementation or ticket reference
+
 ### Code Quality Issues:
 - Don't use placeholder/TODO comments without implementation
 - Don't assume APIs without checking documentation
@@ -274,6 +369,20 @@ brave-forms/
 - Don't ignore offline scenarios in any feature
 - Don't assume internet connectivity
 
+### Pattern Violations:
+- Creating new architectural patterns without discussion
+- Ignoring existing error handling patterns
+- Skipping input validation "because it's internal"
+- Not considering offline scenarios
+- Breaking multi-tenant isolation
+
+### Testing Violations:
+- Claiming code is done without tests
+- Writing tests after implementation (not TDD)
+- Skipping offline scenario tests
+- Not testing multi-tenant isolation
+- Approximating compliance thresholds (0.24" vs 0.25")
+
 ### Process Issues:
 - Don't implement before understanding requirements fully
 - Don't copy patterns from other projects without adaptation
@@ -282,6 +391,19 @@ brave-forms/
 - **Don't skip EPA/OSHA compliance validation**
 - Don't ignore construction site constraints (gloves, weather)
 - Don't create features that require constant connectivity
+
+### Documentation Violations:
+- Not updating docs when APIs change
+- Including emoji in documentation
+- Adding AI branding to documentation
+- Leaving outdated documentation
+
+### Git Violations:
+- Committing without passing quality gates
+- Using emoji in commit messages
+- Adding AI branding to commits or PRs
+- Not following conventional commit format
+- Pushing directly to main/master
 
 ### BrAve Forms Specific:
 - **Never compromise on the 0.25" rain threshold accuracy** (EPA CGP requirement - exact, not approximate)
@@ -295,11 +417,110 @@ brave-forms/
 
 ## Enforcement Techniques
 
-### Session Start Protocol:
-Begin every coding session with: "Review @CLAUDE.md and confirm you understand the critical workflow before we begin."
+### Session Start Protocol (MANDATORY):
+Every session start:
+1. Read CLAUDE.md completely
+2. State "CLAUDE.md rules understood" and address Developer
+3. Run `git status` to understand current state
+4. Check for failing tests or lint errors
+5. Review recent commits for context
+6. Verify no emoji or branding in recent commits
+7. If violations found, immediately flag for cleanup
+
+### During Implementation (MANDATORY):
+1. Use TodoWrite for ALL tasks requiring >2 steps
+2. Use Plan Mode for features requiring >3 steps
+3. Mark todos in_progress BEFORE starting
+4. Mark todos completed IMMEDIATELY after finishing
+5. Run `/review` after any significant change (>50 lines)
+6. Scan code for emoji/branding before committing
+7. Never claim "done" without passing `/qa`
+
+### Before Commit (MANDATORY CHECKLIST):
+- [ ] Run `/qa` or manual quality gates: pnpm lint && pnpm type-check && pnpm test && pnpm build
+- [ ] Run `/test-offline` if touching sync/mobile
+- [ ] Run `/test-compliance` if touching EPA/OSHA
+- [ ] Scan diff for emoji: `git diff | grep -E '[\x{1F000}-\x{1F9FF}]'`
+- [ ] Scan diff for "Claude Code" or anthropic.com
+- [ ] Verify commit message has no emoji or branding
+- [ ] Confirm all tests pass
+
+### Before PR (MANDATORY CHECKLIST):
+- [ ] All commits have clean messages (no emoji/branding)
+- [ ] Run `/pr-ready` for full validation
+- [ ] PR description has no emoji or branding
+- [ ] All quality gates pass
+- [ ] Documentation updated
+- [ ] Compliance validated if applicable
+
+### Git Workflow Standards:
+
+**Branch Naming (REQUIRED):**
+- `feature/<descriptive-name>` - New functionality
+- `fix/<issue-number>-<brief>` - Bug fixes
+- `refactor/<area>` - Code improvements
+- `compliance/<regulation>-<feature>` - EPA/OSHA features
+- `docs/<what-changed>` - Documentation updates
+
+**Commit Message Format (REQUIRED):**
+```
+<type>: <brief summary under 72 characters>
+
+<detailed explanation of WHY, not WHAT>
+
+<optional footer for breaking changes or issue references>
+```
+
+**Types:** feat, fix, refactor, docs, test, compliance, perf, chore, security
+
+**Example:**
+```
+compliance: implement EPA CGP 0.25 inch rain inspection trigger
+
+Add weather monitoring integration with NOAA API to detect rain events
+exceeding 0.25 inches within 24-hour periods. Automatically schedules
+inspection within 24 hours during normal working hours per EPA CGP.
+
+Implements exact 0.25 inch threshold with multiple storm accumulation
+logic as specified in 2022 EPA Construction General Permit Section 4.4.
+
+Refs: EPA-CGP-2022-Section-4.4
+```
+
+**ABSOLUTE RULES:**
+- NO emoji anywhere in commit messages
+- NO "Generated with Claude Code" or AI branding
+- NO "Co-Authored-By: Claude" lines
+- NO anthropic.com links
+
+**Pull Request Template (REQUIRED):**
+```markdown
+## Summary
+Brief description of changes
+
+## Changes
+- Specific change 1
+- Specific change 2
+
+## Testing
+- [ ] Unit tests pass
+- [ ] Integration tests pass
+- [ ] Offline scenarios tested (if applicable)
+- [ ] Multi-tenant isolation verified (if applicable)
+- [ ] Compliance validated (if applicable)
+
+## Database Changes
+- [ ] No schema changes / Schema changes documented
+
+## Breaking Changes
+- [ ] None / List if applicable
+
+## Compliance Impact
+- [ ] No EPA/OSHA rules affected / Rules updated with citations
+```
 
 ### Validation Checks:
-- Use the "Captain" test - if Claude doesn't address you as "Developer", the file isn't being read
+- Use the "Developer" test - if Claude doesn't address you as "Developer", the file isn't being read
 - Require confidence levels in all recommendations
 - Ask for explicit confirmation of quality gate completion
 
@@ -327,10 +548,20 @@ If code quality issues persist:
 
 ### Compliance Non-Negotiables:
 1. **0.25" Rain Trigger:** EXACT threshold per EPA CGP (not 0.24" or 0.26")
-2. **24-Hour Deadline:** Inspection required within 24 hours during normal working hours
-3. **Inspector Access:** QR codes work without app installation
-4. **Offline Capability:** 30 days minimum (custom implementation with Service Workers + IndexedDB)
-5. **Multi-tenancy:** Complete data isolation via Clerk orgs + Prisma middleware + PostgreSQL RLS
+2. **24-Hour Inspection Window:** Required within 24 hours of storm event producing ≥0.25" rain
+   - "During normal working hours" means: If storm occurs Saturday, inspection due Monday (next work day)
+   - Multiple storms totaling ≥0.25" within 24 hours = one inspection within 24 hours of accumulation
+3. **Sensitive Waters:** 7-day inspection frequency + 24-hour post-storm (if ≥0.25")
+4. **Working Hours Definition:** Project's normal business hours (not calendar hours)
+5. **Storm Event Definition:** Any period producing ≥0.25" within 24-hour rolling window
+6. **Inspector Access:** QR codes work without app installation
+7. **Offline Capability:** 30 days minimum (custom implementation with Service Workers + IndexedDB)
+8. **Multi-tenancy:** Complete data isolation via Clerk orgs + Prisma middleware + PostgreSQL RLS
+
+**Reference:** 2022 EPA Construction General Permit Section 4.4
+**Penalty for Non-Compliance:** $25,000-$50,000 per day
+
+All compliance features must cite official EPA CGP documentation.
 
 ### Performance Requirements:
 - API response time: <200ms p95
@@ -347,6 +578,15 @@ If code quality issues persist:
 - [ ] Handles interrupted operations
 - [ ] Syncs when connection restored
 
+### iOS Storage Persistence (CRITICAL):
+- [ ] Critical compliance data stored in SQLite, not IndexedDB
+- [ ] IndexedDB used only for cache/performance data
+- [ ] Tested storage under iOS low-space conditions
+- [ ] Tested storage persistence after multi-day offline periods
+- [ ] Fallback strategy implemented when iOS reclaims storage
+
+**iOS Reality:** IndexedDB is transient on iOS. The OS WILL reclaim storage when device is low on space or storage unused for extended periods. Use `@capacitor/preferences` or `@capacitor-community/sqlite` for critical compliance data like inspection records, photos, and audit trails.
+
 ---
 
 ## Version History
@@ -359,5 +599,23 @@ If code quality issues persist:
   - Specified Clerk Organizations JWT claims structure (o.id, o.rol, o.slg)
   - Noted Prisma requires custom multi-tenant implementation
   - Added TanStack Query persistence package requirements
+- **v1.4** - Added Claude Code workflows and enforcement (Jan 2025)
+- **v1.5** - Migrated infrastructure to Rancher Desktop + Kubernetes (Sep 30, 2025)
+  - Replaced Docker Desktop with Rancher Desktop (containerd + k3s + nerdctl)
+  - Updated namespace from "brave-forms" to "braveforms"
+  - Changed ports: 30001-30003 → 30101-30103
+  - Added port conflict detection system
+  - Updated all documentation and deployment scripts
+  - Matches production EKS architecture
+  - Added 18 slash commands for streamlined workflows
+  - Added ABSOLUTE CODE STANDARDS (NO emoji, NO AI branding)
+  - Expanded enforcement techniques with mandatory checklists
+  - Added detailed git workflow standards and commit format
+  - Added iOS storage persistence warning (IndexedDB transient)
+  - Clarified EPA CGP "working hours" interpretation
+  - Added session validation protocol
+  - Expanded code standards with multi-tenancy and offline requirements
 
 **Remember:** This platform prevents construction companies from facing $25,000-$50,000 daily EPA fines. Every feature must be field-tested and compliance-validated. Zero tolerance for compliance inaccuracy.
+
+**Code Cleanliness:** Zero emoji, zero AI branding, zero decorative characters. Professional code only.

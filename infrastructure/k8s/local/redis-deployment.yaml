@@ -4,20 +4,20 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: redis-pvc
-  namespace: brave-forms
+  namespace: braveforms
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 2Gi
-  storageClassName: hostpath
+  storageClassName: local-path
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: redis
-  namespace: brave-forms
+  namespace: braveforms
   labels:
     app: redis
     tier: cache
@@ -34,7 +34,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
-  namespace: brave-forms
+  namespace: braveforms
   labels:
     app: redis
     tier: cache

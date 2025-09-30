@@ -1,10 +1,11 @@
 # NestJS Backend API - EPA Compliance Engine
 # Monitors 0.25" rain threshold and multi-tenant isolation
+# NodePort 30101 avoids conflicts with other Rancher Desktop projects
 apiVersion: v1
 kind: Service
 metadata:
   name: backend
-  namespace: brave-forms
+  namespace: braveforms
   labels:
     app: backend
     tier: api
@@ -13,7 +14,7 @@ spec:
   ports:
     - port: 4000
       targetPort: 4000
-      nodePort: 30001
+      nodePort: 30101
       protocol: TCP
   selector:
     app: backend
@@ -22,7 +23,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
-  namespace: brave-forms
+  namespace: braveforms
   labels:
     app: backend
     tier: api
@@ -40,7 +41,7 @@ spec:
       containers:
       - name: backend
         image: brave-forms-backend:local
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Never
         ports:
         - containerPort: 4000
         env:

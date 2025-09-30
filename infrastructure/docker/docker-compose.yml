@@ -1,3 +1,27 @@
+# ============================================================================
+# DEPRECATED: This docker-compose configuration is no longer actively used
+# ============================================================================
+#
+# BrAve Forms has migrated to Rancher Desktop with Kubernetes for local development.
+#
+# Why the migration?
+# - Production-like environment using containerd (de facto Kubernetes standard)
+# - Better multi-project isolation via namespaces
+# - Matches production EKS deployment architecture
+# - No Docker Desktop licensing concerns
+# - Faster, lighter weight with k3s
+#
+# New Setup:
+# 1. Install Rancher Desktop: https://rancherdesktop.io
+# 2. Configure: containerd runtime + Kubernetes enabled
+# 3. Deploy: .\scripts\k8s-local-setup.ps1 -Action deploy -BuildImages -CreateSecrets
+#
+# Complete Guide: See RANCHER_DESKTOP_SETUP.md
+#
+# This file is kept for reference only.
+# Migration Date: September 30, 2025
+# ============================================================================
+
 version: '3.8'
 
 services:

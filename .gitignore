@@ -142,3 +142,8 @@ storybook-static
 
 # Claude Code AI assistant files (keep commands and agents, exclude local settings)
 .claude/settings.local.json
+
+# Rancher Desktop / Kubernetes local files
+RANCHER_PORT_SCAN_RESULTS.md
+*.local.yaml
+secrets-local.yaml
