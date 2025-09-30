@@ -21,6 +21,36 @@ Acknowledge by stating "CLAUDE.md rules understood" before proceeding.
 
 All code must be production-ready, professional, and contain ZERO references to AI generation.
 
+## Documentation Library (Required Reading)
+
+**Primary Documentation Index:**
+
+- **[@docs/DOCUMENT_LIBRARY.md](docs/DOCUMENT_LIBRARY.md)** - Master documentation index
+  - Complete inventory of all project documentation
+  - Status tracking for all documents
+  - Last updated: September 30, 2025
+
+**Essential Supporting Documentation:**
+
+- **[@docs/TECH_STACK_DETAILS.md](docs/TECH_STACK_DETAILS.md)** - Comprehensive technical stack
+  - Backend (NestJS, GraphQL, Prisma, PostgreSQL)
+  - Frontend (Next.js 14, Capacitor 6, Mantine v7)
+  - Infrastructure (Kubernetes, Rancher Desktop, nerdctl)
+  - Performance targets, security patterns, version compatibility
+
+- **[@docs/COMMON_PITFALLS.md](docs/COMMON_PITFALLS.md)** - Development anti-patterns guide
+  - Critical violations (zero tolerance)
+  - Code quality issues
+  - Testing violations
+  - Multi-tenancy pitfalls
+  - BrAve Forms specific (EPA compliance, offline requirements)
+
+**When to Reference These Docs:**
+
+- **DOCUMENT_LIBRARY.md:** Finding specific documentation, understanding doc structure
+- **TECH_STACK_DETAILS.md:** Implementation details, version-specific patterns, performance targets
+- **COMMON_PITFALLS.md:** Avoiding mistakes, understanding prohibitions, learning from violations
+
 ## Tech Stack
 
 ### Backend
