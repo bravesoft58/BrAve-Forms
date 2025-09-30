@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import DataLoader from 'dataloader';
-import { PrismaService } from '../database/prisma.service';
+import { PrismaService } from '../../modules/database/prisma.service';
 import { RedisService } from '../cache/redis.service';
 
 /**
@@ -10,28 +10,28 @@ import { RedisService } from '../cache/redis.service';
 @Injectable()
 export class DataLoaderService {
   private readonly logger = new Logger(DataLoaderService.name);
-  
+
   // User loaders
   public readonly userLoader: DataLoader<string, any>;
   public readonly usersByOrgLoader: DataLoader<string, any[]>;
-  
+
   // Project loaders
   public readonly projectLoader: DataLoader<string, any>;
   public readonly projectsByUserLoader: DataLoader<string, any[]>;
   public readonly projectsByOrgLoader: DataLoader<string, any[]>;
-  
+
   // Form loaders
   public readonly formTemplateLoader: DataLoader<string, any>;
   public readonly formSubmissionLoader: DataLoader<string, any>;
   public readonly formSubmissionsByProjectLoader: DataLoader<string, any[]>;
-  
+
   // Weather data loaders
   public readonly weatherDataLoader: DataLoader<string, any>;
   public readonly currentWeatherLoader: DataLoader<string, any>;
-  
+
   constructor(
     private readonly prisma: PrismaService,
-    private readonly redis: RedisService,
+    private readonly redis: RedisService
   ) {
     // Initialize all DataLoaders with optimized batch loading
     this.userLoader = this.createUserLoader();
@@ -53,16 +53,14 @@ export class DataLoaderService {
     return new DataLoader(
       async (userIds: readonly string[]) => {
         const startTime = performance.now();
-        
+
         try {
           // Check Redis cache first
-          const cachedUsers = await this.redis.mget(
-            userIds.map(id => `user:${id}`)
-          );
-          
+          const cachedUsers = await this.redis.mget(userIds.map((id) => `user:${id}`));
+
           const uncachedIds: string[] = [];
           const userMap = new Map();
-          
+
           // Separate cached and uncached users
           userIds.forEach((id, index) => {
             const cached = cachedUsers[index];
@@ -72,12 +70,12 @@ export class DataLoaderService {
               uncachedIds.push(id);
             }
           });
-          
+
           // Fetch uncached users from database
           if (uncachedIds.length > 0) {
             const uncachedUsers = await this.prisma.user.findMany({
-              where: { 
-                clerkId: { in: uncachedIds }
+              where: {
+                clerkId: { in: uncachedIds },
               },
               select: {
                 id: true,
@@ -89,12 +87,12 @@ export class DataLoaderService {
                 organizationId: true,
                 createdAt: true,
                 updatedAt: true,
-              }
+              },
             });
-            
+
             // Cache newly fetched users
             const pipeline = this.redis.pipeline();
-            uncachedUsers.forEach(user => {
+            uncachedUsers.forEach((user) => {
               userMap.set(user.clerkId, user);
               pipeline.setex(
                 `user:${user.clerkId}`,
@@ -104,13 +102,14 @@ export class DataLoaderService {
             });
             await pipeline.exec();
           }
-          
+
           const duration = performance.now() - startTime;
-          this.logger.debug(`User batch load: ${userIds.length} users in ${Math.round(duration)}ms`);
-          
+          this.logger.debug(
+            `User batch load: ${userIds.length} users in ${Math.round(duration)}ms`
+          );
+
           // Return users in requested order
-          return userIds.map(id => userMap.get(id) || null);
-          
+          return userIds.map((id) => userMap.get(id) || null);
         } catch (error) {
           this.logger.error('Error in user batch loading:', error);
           return userIds.map(() => null);
@@ -119,7 +118,7 @@ export class DataLoaderService {
       {
         cache: true,
         maxBatchSize: 100,
-        batchScheduleFn: callback => setTimeout(callback, 10), // 10ms batch window
+        batchScheduleFn: (callback) => setTimeout(callback, 10), // 10ms batch window
       }
     );
   }
@@ -131,11 +130,11 @@ export class DataLoaderService {
     return new DataLoader(
       async (orgIds: readonly string[]) => {
         const startTime = performance.now();
-        
+
         try {
           const users = await this.prisma.user.findMany({
             where: {
-              organizationId: { in: [...orgIds] }
+              organizationId: { in: [...orgIds] },
             },
             select: {
               id: true,
@@ -145,24 +144,25 @@ export class DataLoaderService {
               lastName: true,
               role: true,
               organizationId: true,
-            }
+            },
           });
-          
+
           // Group users by organization
           const usersByOrg = new Map<string, any[]>();
-          orgIds.forEach(orgId => usersByOrg.set(orgId, []));
-          
-          users.forEach(user => {
+          orgIds.forEach((orgId) => usersByOrg.set(orgId, []));
+
+          users.forEach((user) => {
             const orgUsers = usersByOrg.get(user.organizationId) || [];
             orgUsers.push(user);
             usersByOrg.set(user.organizationId, orgUsers);
           });
-          
+
           const duration = performance.now() - startTime;
-          this.logger.debug(`Users by org batch load: ${orgIds.length} orgs in ${Math.round(duration)}ms`);
-          
-          return orgIds.map(orgId => usersByOrg.get(orgId) || []);
-          
+          this.logger.debug(
+            `Users by org batch load: ${orgIds.length} orgs in ${Math.round(duration)}ms`
+          );
+
+          return orgIds.map((orgId) => usersByOrg.get(orgId) || []);
         } catch (error) {
           this.logger.error('Error in users by org batch loading:', error);
           return orgIds.map(() => []);
@@ -171,7 +171,7 @@ export class DataLoaderService {
       {
         cache: true,
         maxBatchSize: 50,
-        batchScheduleFn: callback => setTimeout(callback, 10),
+        batchScheduleFn: (callback) => setTimeout(callback, 10),
       }
     );
   }
@@ -183,32 +183,33 @@ export class DataLoaderService {
     return new DataLoader(
       async (projectIds: readonly string[]) => {
         const startTime = performance.now();
-        
+
         try {
           const projects = await this.prisma.project.findMany({
             where: {
-              id: { in: [...projectIds] }
+              id: { in: [...projectIds] },
             },
             include: {
               organization: {
-                select: { id: true, name: true }
+                select: { id: true, name: true },
               },
               _count: {
                 select: {
                   forms: true,
-                  submissions: true
-                }
-              }
-            }
+                  submissions: true,
+                },
+              },
+            },
           });
-          
-          const projectMap = new Map(projects.map(p => [p.id, p]));
-          
+
+          const projectMap = new Map(projects.map((p) => [p.id, p]));
+
           const duration = performance.now() - startTime;
-          this.logger.debug(`Project batch load: ${projectIds.length} projects in ${Math.round(duration)}ms`);
-          
-          return projectIds.map(id => projectMap.get(id) || null);
-          
+          this.logger.debug(
+            `Project batch load: ${projectIds.length} projects in ${Math.round(duration)}ms`
+          );
+
+          return projectIds.map((id) => projectMap.get(id) || null);
         } catch (error) {
           this.logger.error('Error in project batch loading:', error);
           return projectIds.map(() => null);
@@ -217,7 +218,7 @@ export class DataLoaderService {
       {
         cache: true,
         maxBatchSize: 100,
-        batchScheduleFn: callback => setTimeout(callback, 10),
+        batchScheduleFn: (callback) => setTimeout(callback, 10),
       }
     );
   }
@@ -230,15 +231,15 @@ export class DataLoaderService {
       async (keys: readonly string[]) => {
         // Keys are in format: "userId:orgId:role"
         const startTime = performance.now();
-        
+
         try {
           const results = await Promise.all(
             keys.map(async (key) => {
               const [userId, orgId, role] = key.split(':');
-              
+
               // Build where clause based on user role
-              let whereClause: any = { organizationId: orgId };
-              
+              const whereClause: any = { organizationId: orgId };
+
               switch (role) {
                 case 'OWNER':
                 case 'ADMIN':
@@ -246,10 +247,7 @@ export class DataLoaderService {
                   break;
                 case 'MANAGER':
                   // Access to projects they manage
-                  whereClause.OR = [
-                    { managerId: userId },
-                    { members: { some: { userId } } }
-                  ];
+                  whereClause.OR = [{ managerId: userId }, { members: { some: { userId } } }];
                   break;
                 case 'MEMBER':
                   // Only assigned projects
@@ -258,24 +256,25 @@ export class DataLoaderService {
                 default:
                   return [];
               }
-              
+
               return await this.prisma.project.findMany({
                 where: whereClause,
                 include: {
                   _count: {
-                    select: { forms: true, submissions: true }
-                  }
+                    select: { forms: true, submissions: true },
+                  },
                 },
-                orderBy: { updatedAt: 'desc' }
+                orderBy: { updatedAt: 'desc' },
               });
             })
           );
-          
+
           const duration = performance.now() - startTime;
-          this.logger.debug(`Projects by user batch load: ${keys.length} queries in ${Math.round(duration)}ms`);
-          
+          this.logger.debug(
+            `Projects by user batch load: ${keys.length} queries in ${Math.round(duration)}ms`
+          );
+
           return results;
-          
         } catch (error) {
           this.logger.error('Error in projects by user batch loading:', error);
           return keys.map(() => []);
@@ -284,7 +283,7 @@ export class DataLoaderService {
       {
         cache: true,
         maxBatchSize: 20,
-        batchScheduleFn: callback => setTimeout(callback, 15),
+        batchScheduleFn: (callback) => setTimeout(callback, 15),
       }
     );
   }
@@ -296,35 +295,36 @@ export class DataLoaderService {
     return new DataLoader(
       async (orgIds: readonly string[]) => {
         const startTime = performance.now();
-        
+
         try {
           const projects = await this.prisma.project.findMany({
             where: {
-              organizationId: { in: [...orgIds] }
+              organizationId: { in: [...orgIds] },
             },
             include: {
               _count: {
-                select: { forms: true, submissions: true }
-              }
+                select: { forms: true, submissions: true },
+              },
             },
-            orderBy: { updatedAt: 'desc' }
+            orderBy: { updatedAt: 'desc' },
           });
-          
+
           // Group projects by organization
           const projectsByOrg = new Map<string, any[]>();
-          orgIds.forEach(orgId => projectsByOrg.set(orgId, []));
-          
-          projects.forEach(project => {
+          orgIds.forEach((orgId) => projectsByOrg.set(orgId, []));
+
+          projects.forEach((project) => {
             const orgProjects = projectsByOrg.get(project.organizationId) || [];
             orgProjects.push(project);
             projectsByOrg.set(project.organizationId, orgProjects);
           });
-          
+
           const duration = performance.now() - startTime;
-          this.logger.debug(`Projects by org batch load: ${orgIds.length} orgs in ${Math.round(duration)}ms`);
-          
-          return orgIds.map(orgId => projectsByOrg.get(orgId) || []);
-          
+          this.logger.debug(
+            `Projects by org batch load: ${orgIds.length} orgs in ${Math.round(duration)}ms`
+          );
+
+          return orgIds.map((orgId) => projectsByOrg.get(orgId) || []);
         } catch (error) {
           this.logger.error('Error in projects by org batch loading:', error);
           return orgIds.map(() => []);
@@ -333,7 +333,7 @@ export class DataLoaderService {
       {
         cache: true,
         maxBatchSize: 50,
-        batchScheduleFn: callback => setTimeout(callback, 10),
+        batchScheduleFn: (callback) => setTimeout(callback, 10),
       }
     );
   }
@@ -345,16 +345,16 @@ export class DataLoaderService {
     return new DataLoader(
       async (templateIds: readonly string[]) => {
         const startTime = performance.now();
-        
+
         try {
           // Check Redis cache first (form templates change infrequently)
           const cachedTemplates = await this.redis.mget(
-            templateIds.map(id => `form_template:${id}`)
+            templateIds.map((id) => `form_template:${id}`)
           );
-          
+
           const uncachedIds: string[] = [];
           const templateMap = new Map();
-          
+
           templateIds.forEach((id, index) => {
             const cached = cachedTemplates[index];
             if (cached) {
@@ -363,24 +363,24 @@ export class DataLoaderService {
               uncachedIds.push(id);
             }
           });
-          
+
           // Fetch uncached templates
           if (uncachedIds.length > 0) {
             const templates = await this.prisma.formTemplate.findMany({
               where: { id: { in: uncachedIds } },
               include: {
                 fields: {
-                  orderBy: { order: 'asc' }
+                  orderBy: { order: 'asc' },
                 },
                 _count: {
-                  select: { submissions: true }
-                }
-              }
+                  select: { submissions: true },
+                },
+              },
             });
-            
+
             // Cache templates for 24 hours (they change infrequently)
             const pipeline = this.redis.pipeline();
-            templates.forEach(template => {
+            templates.forEach((template) => {
               templateMap.set(template.id, template);
               pipeline.setex(
                 `form_template:${template.id}`,
@@ -390,12 +390,13 @@ export class DataLoaderService {
             });
             await pipeline.exec();
           }
-          
+
           const duration = performance.now() - startTime;
-          this.logger.debug(`Form template batch load: ${templateIds.length} templates in ${Math.round(duration)}ms`);
-          
-          return templateIds.map(id => templateMap.get(id) || null);
-          
+          this.logger.debug(
+            `Form template batch load: ${templateIds.length} templates in ${Math.round(duration)}ms`
+          );
+
+          return templateIds.map((id) => templateMap.get(id) || null);
         } catch (error) {
           this.logger.error('Error in form template batch loading:', error);
           return templateIds.map(() => null);
@@ -404,7 +405,7 @@ export class DataLoaderService {
       {
         cache: true,
         maxBatchSize: 50,
-        batchScheduleFn: callback => setTimeout(callback, 5),
+        batchScheduleFn: (callback) => setTimeout(callback, 5),
       }
     );
   }
@@ -416,37 +417,38 @@ export class DataLoaderService {
     return new DataLoader(
       async (submissionIds: readonly string[]) => {
         const startTime = performance.now();
-        
+
         try {
           const submissions = await this.prisma.formSubmission.findMany({
             where: {
-              id: { in: [...submissionIds] }
+              id: { in: [...submissionIds] },
             },
             include: {
               form: {
-                select: { id: true, title: true, type: true }
+                select: { id: true, title: true, type: true },
               },
               project: {
-                select: { id: true, name: true }
+                select: { id: true, name: true },
               },
               photos: {
-                select: { 
-                  id: true, 
-                  filename: true, 
-                  url: true, 
-                  metadata: true 
-                }
-              }
-            }
+                select: {
+                  id: true,
+                  filename: true,
+                  url: true,
+                  metadata: true,
+                },
+              },
+            },
           });
-          
-          const submissionMap = new Map(submissions.map(s => [s.id, s]));
-          
+
+          const submissionMap = new Map(submissions.map((s) => [s.id, s]));
+
           const duration = performance.now() - startTime;
-          this.logger.debug(`Form submission batch load: ${submissionIds.length} submissions in ${Math.round(duration)}ms`);
-          
-          return submissionIds.map(id => submissionMap.get(id) || null);
-          
+          this.logger.debug(
+            `Form submission batch load: ${submissionIds.length} submissions in ${Math.round(duration)}ms`
+          );
+
+          return submissionIds.map((id) => submissionMap.get(id) || null);
         } catch (error) {
           this.logger.error('Error in form submission batch loading:', error);
           return submissionIds.map(() => null);
@@ -455,7 +457,7 @@ export class DataLoaderService {
       {
         cache: true,
         maxBatchSize: 100,
-        batchScheduleFn: callback => setTimeout(callback, 10),
+        batchScheduleFn: (callback) => setTimeout(callback, 10),
       }
     );
   }
@@ -467,43 +469,44 @@ export class DataLoaderService {
     return new DataLoader(
       async (projectIds: readonly string[]) => {
         const startTime = performance.now();
-        
+
         try {
           const submissions = await this.prisma.formSubmission.findMany({
             where: {
-              projectId: { in: [...projectIds] }
+              projectId: { in: [...projectIds] },
             },
             include: {
               form: {
-                select: { id: true, title: true, type: true }
+                select: { id: true, title: true, type: true },
               },
               photos: {
-                select: { 
-                  id: true, 
-                  filename: true, 
-                  url: true 
-                }
-              }
+                select: {
+                  id: true,
+                  filename: true,
+                  url: true,
+                },
+              },
             },
             orderBy: { createdAt: 'desc' },
-            take: 100 // Limit to recent submissions for performance
+            take: 100, // Limit to recent submissions for performance
           });
-          
+
           // Group submissions by project
           const submissionsByProject = new Map<string, any[]>();
-          projectIds.forEach(projectId => submissionsByProject.set(projectId, []));
-          
-          submissions.forEach(submission => {
+          projectIds.forEach((projectId) => submissionsByProject.set(projectId, []));
+
+          submissions.forEach((submission) => {
             const projectSubmissions = submissionsByProject.get(submission.projectId) || [];
             projectSubmissions.push(submission);
             submissionsByProject.set(submission.projectId, projectSubmissions);
           });
-          
+
           const duration = performance.now() - startTime;
-          this.logger.debug(`Submissions by project batch load: ${projectIds.length} projects in ${Math.round(duration)}ms`);
-          
-          return projectIds.map(projectId => submissionsByProject.get(projectId) || []);
-          
+          this.logger.debug(
+            `Submissions by project batch load: ${projectIds.length} projects in ${Math.round(duration)}ms`
+          );
+
+          return projectIds.map((projectId) => submissionsByProject.get(projectId) || []);
         } catch (error) {
           this.logger.error('Error in submissions by project batch loading:', error);
           return projectIds.map(() => []);
@@ -512,7 +515,7 @@ export class DataLoaderService {
       {
         cache: true,
         maxBatchSize: 25,
-        batchScheduleFn: callback => setTimeout(callback, 10),
+        batchScheduleFn: (callback) => setTimeout(callback, 10),
       }
     );
   }
@@ -524,16 +527,14 @@ export class DataLoaderService {
     return new DataLoader(
       async (locationKeys: readonly string[]) => {
         const startTime = performance.now();
-        
+
         try {
           // Check Redis cache for weather data (5 minute TTL)
-          const cachedWeather = await this.redis.mget(
-            locationKeys.map(key => `weather:${key}`)
-          );
-          
+          const cachedWeather = await this.redis.mget(locationKeys.map((key) => `weather:${key}`));
+
           const uncachedKeys: string[] = [];
           const weatherMap = new Map();
-          
+
           locationKeys.forEach((key, index) => {
             const cached = cachedWeather[index];
             if (cached) {
@@ -542,31 +543,31 @@ export class DataLoaderService {
               uncachedKeys.push(key);
             }
           });
-          
+
           // Fetch uncached weather data
           if (uncachedKeys.length > 0) {
             const weatherRecords = await this.prisma.weatherData.findMany({
               where: {
                 locationKey: { in: uncachedKeys },
                 timestamp: {
-                  gte: new Date(Date.now() - 24 * 60 * 60 * 1000) // Last 24 hours
-                }
+                  gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
+                },
               },
               orderBy: { timestamp: 'desc' },
-              take: 1000 // Reasonable limit
+              take: 1000, // Reasonable limit
             });
-            
+
             // Group by location key
             const weatherByLocation = new Map<string, any[]>();
-            weatherRecords.forEach(record => {
+            weatherRecords.forEach((record) => {
               const existing = weatherByLocation.get(record.locationKey) || [];
               existing.push(record);
               weatherByLocation.set(record.locationKey, existing);
             });
-            
+
             // Cache weather data for 5 minutes
             const pipeline = this.redis.pipeline();
-            uncachedKeys.forEach(key => {
+            uncachedKeys.forEach((key) => {
               const weather = weatherByLocation.get(key) || [];
               weatherMap.set(key, weather);
               pipeline.setex(
@@ -577,12 +578,13 @@ export class DataLoaderService {
             });
             await pipeline.exec();
           }
-          
+
           const duration = performance.now() - startTime;
-          this.logger.debug(`Weather data batch load: ${locationKeys.length} locations in ${Math.round(duration)}ms`);
-          
-          return locationKeys.map(key => weatherMap.get(key) || []);
-          
+          this.logger.debug(
+            `Weather data batch load: ${locationKeys.length} locations in ${Math.round(duration)}ms`
+          );
+
+          return locationKeys.map((key) => weatherMap.get(key) || []);
         } catch (error) {
           this.logger.error('Error in weather data batch loading:', error);
           return locationKeys.map(() => []);
@@ -591,7 +593,7 @@ export class DataLoaderService {
       {
         cache: true,
         maxBatchSize: 20,
-        batchScheduleFn: callback => setTimeout(callback, 5),
+        batchScheduleFn: (callback) => setTimeout(callback, 5),
       }
     );
   }
@@ -603,26 +605,27 @@ export class DataLoaderService {
     return new DataLoader(
       async (locationKeys: readonly string[]) => {
         const startTime = performance.now();
-        
+
         try {
           const currentWeather = await this.prisma.weatherData.findMany({
             where: {
               locationKey: { in: [...locationKeys] },
               timestamp: {
-                gte: new Date(Date.now() - 60 * 60 * 1000) // Last hour
-              }
+                gte: new Date(Date.now() - 60 * 60 * 1000), // Last hour
+              },
             },
             orderBy: { timestamp: 'desc' },
-            distinct: ['locationKey']
+            distinct: ['locationKey'],
           });
-          
-          const weatherMap = new Map(currentWeather.map(w => [w.locationKey, w]));
-          
+
+          const weatherMap = new Map(currentWeather.map((w) => [w.locationKey, w]));
+
           const duration = performance.now() - startTime;
-          this.logger.debug(`Current weather batch load: ${locationKeys.length} locations in ${Math.round(duration)}ms`);
-          
-          return locationKeys.map(key => weatherMap.get(key) || null);
-          
+          this.logger.debug(
+            `Current weather batch load: ${locationKeys.length} locations in ${Math.round(duration)}ms`
+          );
+
+          return locationKeys.map((key) => weatherMap.get(key) || null);
         } catch (error) {
           this.logger.error('Error in current weather batch loading:', error);
           return locationKeys.map(() => null);
@@ -631,7 +634,7 @@ export class DataLoaderService {
       {
         cache: true,
         maxBatchSize: 10,
-        batchScheduleFn: callback => setTimeout(callback, 5),
+        batchScheduleFn: (callback) => setTimeout(callback, 5),
       }
     );
   }
@@ -650,7 +653,7 @@ export class DataLoaderService {
     this.formSubmissionsByProjectLoader.clearAll();
     this.weatherDataLoader.clearAll();
     this.currentWeatherLoader.clearAll();
-    
+
     this.logger.debug('All DataLoader caches cleared');
   }
 
@@ -660,17 +663,17 @@ export class DataLoaderService {
   getCacheStats(): Record<string, any> {
     return {
       userLoader: {
-        cacheSize: this.userLoader.cache?.size || 0
+        cacheSize: this.userLoader.cache?.size || 0,
       },
       projectLoader: {
-        cacheSize: this.projectLoader.cache?.size || 0
+        cacheSize: this.projectLoader.cache?.size || 0,
       },
       formTemplateLoader: {
-        cacheSize: this.formTemplateLoader.cache?.size || 0
+        cacheSize: this.formTemplateLoader.cache?.size || 0,
       },
       weatherDataLoader: {
-        cacheSize: this.weatherDataLoader.cache?.size || 0
-      }
+        cacheSize: this.weatherDataLoader.cache?.size || 0,
+      },
     };
   }
 }

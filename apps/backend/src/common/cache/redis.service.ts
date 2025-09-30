@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Redis, { RedisOptions } from 'ioredis';
+import Redis, { RedisOptions, ChainableCommander } from 'ioredis';
 
 /**
  * Redis Service for High-Performance Caching
@@ -11,7 +11,7 @@ export class RedisService implements OnModuleDestroy {
   private readonly logger = new Logger(RedisService.name);
   private redis: Redis;
   private clusterMode = false;
-  
+
   // Performance metrics
   private stats = {
     hits: 0,
@@ -19,7 +19,7 @@ export class RedisService implements OnModuleDestroy {
     sets: 0,
     deletes: 0,
     errors: 0,
-    totalRequests: 0
+    totalRequests: 0,
   };
 
   constructor(private readonly configService: ConfigService) {
@@ -29,39 +29,39 @@ export class RedisService implements OnModuleDestroy {
   private initializeRedis(): void {
     const redisUrl = this.configService.get<string>('REDIS_URL', 'redis://localhost:6381');
     const clusterNodes = this.configService.get<string>('REDIS_CLUSTER_NODES');
-    
+
     const baseOptions: RedisOptions = {
       // Connection settings optimized for construction site performance
       connectTimeout: 10000,
       commandTimeout: 5000,
-      retryDelayOnFailover: 1000,
       maxRetriesPerRequest: 3,
-      
+
       // Connection pool settings for concurrent construction workers
       lazyConnect: true,
       keepAlive: 30000,
-      
-      // Compression for limited bandwidth scenarios
-      compression: 'gzip',
-      
+
       // Error handling
-      retryDelayOnClusterDown: 2000,
-      maxRetriesPerRequest: 2,
+      retryStrategy: (times: number) => {
+        if (times > 10) {
+          return null; // Stop retrying
+        }
+        return Math.min(times * 100, 2000); // Exponential backoff
+      },
     };
 
     try {
       if (clusterNodes) {
         // Cluster mode for production
-        const nodes = clusterNodes.split(',').map(node => {
+        const nodes = clusterNodes.split(',').map((node) => {
           const [host, port] = node.trim().split(':');
           return { host, port: parseInt(port) || 6379 };
         });
-        
+
         this.redis = new Redis.Cluster(nodes, {
           redisOptions: baseOptions,
           enableOfflineQueue: false,
         });
-        
+
         this.clusterMode = true;
         this.logger.log(`Redis cluster initialized with ${nodes.length} nodes`);
       } else {
@@ -72,7 +72,6 @@ export class RedisService implements OnModuleDestroy {
 
       // Event listeners for monitoring
       this.setupEventListeners();
-      
     } catch (error) {
       this.logger.error('Failed to initialize Redis:', error);
       throw error;
@@ -103,17 +102,17 @@ export class RedisService implements OnModuleDestroy {
    */
   async get<T = any>(key: string): Promise<T | null> {
     this.stats.totalRequests++;
-    
+
     try {
       const value = await this.redis.get(key);
-      
+
       if (value === null) {
         this.stats.misses++;
         return null;
       }
-      
+
       this.stats.hits++;
-      
+
       try {
         return JSON.parse(value) as T;
       } catch {
@@ -132,21 +131,21 @@ export class RedisService implements OnModuleDestroy {
    */
   async mget(keys: string[]): Promise<(string | null)[]> {
     if (keys.length === 0) return [];
-    
+
     this.stats.totalRequests += keys.length;
-    
+
     try {
       const values = await this.redis.mget(...keys);
-      
+
       // Count hits and misses
-      values.forEach(value => {
+      values.forEach((value) => {
         if (value === null) {
           this.stats.misses++;
         } else {
           this.stats.hits++;
         }
       });
-      
+
       return values;
     } catch (error) {
       this.logger.error(`Error getting keys ${keys.join(', ')}:`, error);
@@ -160,16 +159,16 @@ export class RedisService implements OnModuleDestroy {
    */
   async set(key: string, value: any, ttlSeconds?: number): Promise<boolean> {
     this.stats.sets++;
-    
+
     try {
       const serializedValue = typeof value === 'string' ? value : JSON.stringify(value);
-      
+
       if (ttlSeconds) {
         await this.redis.setex(key, ttlSeconds, serializedValue);
       } else {
         await this.redis.set(key, serializedValue);
       }
-      
+
       return true;
     } catch (error) {
       this.logger.error(`Error setting key ${key}:`, error);
@@ -190,23 +189,23 @@ export class RedisService implements OnModuleDestroy {
    */
   async mset(keyValuePairs: { key: string; value: any; ttl?: number }[]): Promise<boolean> {
     if (keyValuePairs.length === 0) return true;
-    
+
     try {
       const pipeline = this.redis.pipeline();
-      
+
       keyValuePairs.forEach(({ key, value, ttl }) => {
         const serializedValue = typeof value === 'string' ? value : JSON.stringify(value);
-        
+
         if (ttl) {
           pipeline.setex(key, ttl, serializedValue);
         } else {
           pipeline.set(key, serializedValue);
         }
       });
-      
+
       await pipeline.exec();
       this.stats.sets += keyValuePairs.length;
-      
+
       return true;
     } catch (error) {
       this.logger.error('Error in batch set operation:', error);
@@ -220,7 +219,7 @@ export class RedisService implements OnModuleDestroy {
    */
   async del(key: string): Promise<boolean> {
     this.stats.deletes++;
-    
+
     try {
       const result = await this.redis.del(key);
       return result > 0;
@@ -236,7 +235,7 @@ export class RedisService implements OnModuleDestroy {
    */
   async mdel(keys: string[]): Promise<number> {
     if (keys.length === 0) return 0;
-    
+
     try {
       const result = await this.redis.del(...keys);
       this.stats.deletes += keys.length;
@@ -399,7 +398,7 @@ export class RedisService implements OnModuleDestroy {
   /**
    * Get Redis pipeline for batch operations
    */
-  pipeline(): Redis.Pipeline {
+  pipeline(): ChainableCommander {
     return this.redis.pipeline();
   }
 
@@ -445,14 +444,16 @@ export class RedisService implements OnModuleDestroy {
    * Get cache statistics
    */
   getStats() {
-    const hitRate = this.stats.totalRequests > 0 ? 
-      (this.stats.hits / this.stats.totalRequests * 100).toFixed(2) : '0.00';
-    
+    const hitRate =
+      this.stats.totalRequests > 0
+        ? ((this.stats.hits / this.stats.totalRequests) * 100).toFixed(2)
+        : '0.00';
+
     return {
       ...this.stats,
       hitRate: `${hitRate}%`,
       clusterMode: this.clusterMode,
-      isConnected: this.redis.status === 'ready'
+      isConnected: this.redis.status === 'ready',
     };
   }
 
@@ -466,7 +467,7 @@ export class RedisService implements OnModuleDestroy {
       sets: 0,
       deletes: 0,
       errors: 0,
-      totalRequests: 0
+      totalRequests: 0,
     };
   }
 
@@ -475,19 +476,19 @@ export class RedisService implements OnModuleDestroy {
    */
   async healthCheck(): Promise<{ status: string; latency: number }> {
     const start = performance.now();
-    
+
     try {
       await this.redis.ping();
       const latency = Math.round(performance.now() - start);
-      
+
       return {
         status: 'healthy',
-        latency
+        latency,
       };
     } catch (error) {
       return {
         status: 'unhealthy',
-        latency: -1
+        latency: -1,
       };
     }
   }
@@ -509,7 +510,7 @@ export class RedisService implements OnModuleDestroy {
    */
   async memoryUsage(key: string): Promise<number | null> {
     try {
-      return await this.redis.memory('usage', key);
+      return await this.redis.memory('USAGE', key);
     } catch (error) {
       this.logger.error(`Error getting memory usage for key ${key}:`, error);
       return null;
@@ -519,27 +520,32 @@ export class RedisService implements OnModuleDestroy {
   /**
    * Construction site specific: Cache form data for offline access
    */
-  async cacheFormDataForOffline(projectId: string, formData: any[], ttlDays = 30): Promise<boolean> {
+  async cacheFormDataForOffline(
+    projectId: string,
+    formData: any[],
+    ttlDays = 30
+  ): Promise<boolean> {
     const ttlSeconds = ttlDays * 24 * 60 * 60;
-    
+
     try {
       const pipeline = this.pipeline();
-      
+
       // Cache individual forms
       formData.forEach((form, index) => {
         const key = `offline:form:${projectId}:${form.id || index}`;
         pipeline.setex(key, ttlSeconds, JSON.stringify(form));
       });
-      
+
       // Cache form list
       const listKey = `offline:forms:${projectId}`;
-      pipeline.setex(listKey, ttlSeconds, JSON.stringify(formData.map(f => f.id)));
-      
+      pipeline.setex(listKey, ttlSeconds, JSON.stringify(formData.map((f) => f.id)));
+
       await pipeline.exec();
-      
-      this.logger.debug(`Cached ${formData.length} forms for offline access (project: ${projectId})`);
+
+      this.logger.debug(
+        `Cached ${formData.length} forms for offline access (project: ${projectId})`
+      );
       return true;
-      
     } catch (error) {
       this.logger.error(`Error caching offline form data for project ${projectId}:`, error);
       return false;
