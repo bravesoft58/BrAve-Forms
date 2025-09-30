@@ -162,7 +162,7 @@ export class ProjectsResolver {
 
   constructor(
     private readonly projectsService: ProjectsService,
-    private readonly prisma: PrismaService,
+    private readonly prisma: PrismaService
   ) {}
 
   @Query(() => [ProjectGQL])
@@ -172,13 +172,9 @@ export class ProjectsResolver {
     const org = await this.getOrganizationByClerkId(user.orgId);
 
     // Get projects with role-based filtering
-    const projects = await this.projectsService.getUserProjects(
-      user.userId,
-      org.id,
-      user.orgRole,
-    );
+    const projects = await this.projectsService.getUserProjects(user.userId, org.id, user.orgRole);
 
-    return projects.map(project => ({
+    return projects.map((project) => ({
       ...project,
       recentInspections: project.inspections.slice(0, 5).map(this.mapInspection),
       compliance: this.calculateProjectCompliance(project),
@@ -188,10 +184,7 @@ export class ProjectsResolver {
   @Query(() => ProjectGQL)
   @UseGuards(ClerkAuthGuard, RolesGuard)
   @TeamAccess()
-  async project(
-    @CurrentUser() user: any,
-    @Args('id') id: string,
-  ): Promise<ProjectGQL> {
+  async project(@CurrentUser() user: any, @Args('id') id: string): Promise<ProjectGQL> {
     // Verify project access through organization
     const project = await this.prisma.project.findFirst({
       where: {
@@ -224,7 +217,7 @@ export class ProjectsResolver {
   @ManagementAccess() // Managers and above can create projects
   async createProject(
     @CurrentUser() user: any,
-    @Args('input') input: CreateProjectInput,
+    @Args('input') input: CreateProjectInput
   ): Promise<ProjectGQL> {
     const org = await this.getOrganizationByClerkId(user.orgId);
 
@@ -258,7 +251,7 @@ export class ProjectsResolver {
   async updateProject(
     @CurrentUser() user: any,
     @Args('id') id: string,
-    @Args('input') input: UpdateProjectInput,
+    @Args('input') input: UpdateProjectInput
   ): Promise<ProjectGQL> {
     // Verify project belongs to user's organization
     const existingProject = await this.prisma.project.findFirst({
@@ -276,7 +269,7 @@ export class ProjectsResolver {
 
     const project = await this.prisma.project.update({
       where: { id },
-      data: input,
+      data: input as any,
       include: {
         inspections: {
           orderBy: { inspectionDate: 'desc' },
@@ -293,7 +286,7 @@ export class ProjectsResolver {
 
     return {
       ...project,
-      recentInspections: project.inspections.map(this.mapInspection),
+      recentInspections: (project.inspections || []).map(this.mapInspection),
       compliance: this.calculateProjectCompliance(project),
     };
   }
@@ -301,10 +294,7 @@ export class ProjectsResolver {
   @Mutation(() => Boolean)
   @UseGuards(ClerkAuthGuard, RolesGuard)
   @AdminAccess() // Only Admins and Owners can delete projects
-  async deleteProject(
-    @CurrentUser() user: any,
-    @Args('id') id: string,
-  ): Promise<boolean> {
+  async deleteProject(@CurrentUser() user: any, @Args('id') id: string): Promise<boolean> {
     // Verify project belongs to user's organization
     const project = await this.prisma.project.findFirst({
       where: {
@@ -365,10 +355,8 @@ export class ProjectsResolver {
 
   private calculateProjectCompliance(project: any): ProjectComplianceGQL {
     const inspections = project.inspections || [];
-    
-    const pendingInspections = inspections.filter(
-      (i: any) => i.status === 'PENDING'
-    ).length;
+
+    const pendingInspections = inspections.filter((i: any) => i.status === 'PENDING').length;
 
     const overdueInspections = inspections.filter((i: any) => {
       const deadline = new Date(i.inspectionDate);
@@ -376,18 +364,13 @@ export class ProjectsResolver {
       return deadline < new Date() && i.status === 'PENDING';
     }).length;
 
-    const approvedInspections = inspections.filter(
-      (i: any) => i.status === 'APPROVED'
-    ).length;
+    const approvedInspections = inspections.filter((i: any) => i.status === 'APPROVED').length;
 
     const totalInspections = inspections.length;
-    const overallScore = totalInspections > 0 
-      ? (approvedInspections / totalInspections) * 100 
-      : 100;
+    const overallScore =
+      totalInspections > 0 ? (approvedInspections / totalInspections) * 100 : 100;
 
-    const lastInspection = inspections.length > 0 
-      ? inspections[0]?.inspectionDate 
-      : null;
+    const lastInspection = inspections.length > 0 ? inspections[0]?.inspectionDate : null;
 
     // TODO: Calculate next deadline based on weather events and routine schedule
     const nextDeadline = null;

@@ -6,7 +6,7 @@ import { OrganizationsResolver } from './organizations.resolver';
 
 /**
  * Multi-Tenant Data Isolation Test Suite
- * 
+ *
  * Critical tests to ensure complete tenant separation for construction companies
  * Tests cover the EPA compliance requirement for data segregation
  */
@@ -15,16 +15,16 @@ describe('Multi-Tenant Data Isolation', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let orgService: OrganizationsService;
-  
+
   // Test tenant data
   const tenantA = {
     id: 'org-a-uuid',
     clerkOrgId: 'clerk-org-a',
     name: 'ABC Construction',
   };
-  
+
   const tenantB = {
-    id: 'org-b-uuid', 
+    id: 'org-b-uuid',
     clerkOrgId: 'clerk-org-b',
     name: 'XYZ Builders',
   };
@@ -32,28 +32,24 @@ describe('Multi-Tenant Data Isolation', () => {
   const userA = {
     userId: 'user-a-uuid',
     orgId: tenantA.id,
-    role: 'ADMIN',
+    role: 'ADMIN' as const,
   };
 
   const userB = {
     userId: 'user-b-uuid',
     orgId: tenantB.id,
-    role: 'ADMIN',
+    role: 'ADMIN' as const,
   };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      providers: [
-        PrismaService,
-        OrganizationsService,
-        OrganizationsResolver,
-      ],
+      providers: [PrismaService, OrganizationsService, OrganizationsResolver],
     }).compile();
 
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);
     orgService = moduleFixture.get<OrganizationsService>(OrganizationsService);
-    
+
     await app.init();
 
     // Setup test data
@@ -83,9 +79,9 @@ describe('Multi-Tenant Data Isolation', () => {
       expect(orgB.name).toBe(tenantB.name);
 
       // Attempting to access wrong org should fail
-      await expect(
-        orgService.getOrganizationByClerkId('non-existent-org')
-      ).rejects.toThrow('Organization not found');
+      await expect(orgService.getOrganizationByClerkId('non-existent-org')).rejects.toThrow(
+        'Organization not found'
+      );
     });
   });
 
@@ -98,7 +94,7 @@ describe('Multi-Tenant Data Isolation', () => {
           name: 'Highway Construction Project',
           address: '123 Main St, City A',
           latitude: 40.7128,
-          longitude: -74.0060,
+          longitude: -74.006,
           startDate: new Date(),
           disturbedAcres: 5.2,
           bmps: [],
@@ -119,23 +115,15 @@ describe('Multi-Tenant Data Isolation', () => {
       });
 
       // User A should only see projects from Tenant A
-      const projectsA = await orgService.getUserProjects(
-        userA.userId,
-        tenantA.id,
-        'ADMIN'
-      );
-      
+      const projectsA = await orgService.getUserProjects(userA.userId, tenantA.id, 'ADMIN');
+
       expect(projectsA).toHaveLength(1);
       expect(projectsA[0].id).toBe(projectA.id);
       expect(projectsA[0].name).toBe('Highway Construction Project');
 
       // User B should only see projects from Tenant B
-      const projectsB = await orgService.getUserProjects(
-        userB.userId,
-        tenantB.id,
-        'ADMIN'
-      );
-      
+      const projectsB = await orgService.getUserProjects(userB.userId, tenantB.id, 'ADMIN');
+
       expect(projectsB).toHaveLength(1);
       expect(projectsB[0].id).toBe(projectB.id);
       expect(projectsB[0].name).toBe('Bridge Renovation Project');
@@ -146,7 +134,7 @@ describe('Multi-Tenant Data Isolation', () => {
         projectB.id,
         'READ'
       );
-      
+
       expect(canUserAAccessProjectB).toBe(false);
     });
   });
@@ -213,7 +201,7 @@ describe('Multi-Tenant Data Isolation', () => {
       const inspectionsA = await prisma.inspection.findMany({
         where: { orgId: tenantA.id },
       });
-      
+
       const inspectionsB = await prisma.inspection.findMany({
         where: { orgId: tenantB.id },
       });
@@ -234,7 +222,7 @@ describe('Multi-Tenant Data Isolation', () => {
           id: inspectionB.id, // Inspection from different tenant
         },
       });
-      
+
       expect(crossTenantQuery).toHaveLength(0);
     });
   });
@@ -262,31 +250,19 @@ describe('Multi-Tenant Data Isolation', () => {
         },
       });
 
-      for (const testCase of testCases) {
+      for (const _testCase of testCases) {
         // Test project access permissions
-        const canRead = await orgService.canAccessProject(
-          userA.userId,
-          project.id,
-          'READ'
-        );
+        const canRead = await orgService.canAccessProject(userA.userId, project.id, 'READ');
 
-        const canWrite = await orgService.canAccessProject(
-          userA.userId,
-          project.id,
-          'WRITE'
-        );
+        const canWrite = await orgService.canAccessProject(userA.userId, project.id, 'WRITE');
 
-        const canDelete = await orgService.canAccessProject(
-          userA.userId,
-          project.id,
-          'DELETE'
-        );
+        const canAdmin = await orgService.canAccessProject(userA.userId, project.id, 'ADMIN');
 
         // Note: This test would need actual user role setup in the database
         // For now, we're testing the permission logic structure
         expect(typeof canRead).toBe('boolean');
         expect(typeof canWrite).toBe('boolean');
-        expect(typeof canDelete).toBe('boolean');
+        expect(typeof canAdmin).toBe('boolean');
       }
     });
   });
@@ -308,7 +284,7 @@ describe('Multi-Tenant Data Isolation', () => {
 
       // Attempt SQL injection to access other tenant's data
       const maliciousQuery = `${projectA.id}' OR org_id = '${tenantB.id}`;
-      
+
       // This should NOT return projectB data
       const result = await prisma.project.findMany({
         where: {
@@ -326,7 +302,7 @@ describe('Multi-Tenant Data Isolation', () => {
     it('should maintain regulatory compliance for data isolation', async () => {
       // Test that weather events and inspections are properly isolated
       // This is critical for EPA audit compliance
-      
+
       const projectA = await prisma.project.create({
         data: {
           orgId: tenantA.id,
@@ -414,7 +390,7 @@ describe('Multi-Tenant Data Isolation', () => {
  */
 describe('Multi-Tenant Query Performance', () => {
   let prisma: PrismaService;
-  
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       providers: [PrismaService],
@@ -425,7 +401,7 @@ describe('Multi-Tenant Query Performance', () => {
 
   it('should maintain query performance with tenant filtering', async () => {
     const startTime = Date.now();
-    
+
     // Simulate large dataset query with tenant filtering
     const projects = await prisma.project.findMany({
       where: {
@@ -440,9 +416,9 @@ describe('Multi-Tenant Query Performance', () => {
       },
       take: 50,
     });
-    
+
     const queryTime = Date.now() - startTime;
-    
+
     // Query should complete within reasonable time (< 100ms for small dataset)
     expect(queryTime).toBeLessThan(1000);
     expect(Array.isArray(projects)).toBe(true);
@@ -451,7 +427,7 @@ describe('Multi-Tenant Query Performance', () => {
   it('should efficiently use database indexes for tenant queries', async () => {
     // Test that org_id indexes are being used effectively
     // In a real test, we'd analyze query execution plans
-    
+
     const result = await prisma.project.findMany({
       where: {
         orgId: 'test-org-id',

@@ -1,13 +1,12 @@
-import { 
-  Resolver, 
-  Query, 
-  Args, 
-  ObjectType, 
-  Field, 
-  Float, 
-  ID, 
+import {
+  Resolver,
+  Query,
+  Args,
+  ObjectType,
+  Field,
+  Float,
+  ID,
   registerEnumType,
-  Subscription
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
@@ -104,17 +103,17 @@ export class WeatherResolver {
 
   @Query(() => PrecipitationCheckResult, {
     name: 'checkProjectWeather',
-    description: 'Check if project location has exceeded EPA 0.25 inch threshold'
+    description: 'Check if project location has exceeded EPA 0.25 inch threshold',
   })
   async checkProjectWeather(
     @Args('projectId') projectId: string,
     @Args('latitude', { type: () => Float }) latitude: number,
     @Args('longitude', { type: () => Float }) longitude: number,
-    @CurrentUser() user: CurrentUser,
+    @CurrentUser() _user: CurrentUser
   ): Promise<PrecipitationCheckResult> {
     // Multi-tenant validation handled by service
     const result = await this.weatherService.checkPrecipitation(latitude, longitude, projectId);
-    
+
     return {
       ...result,
       timestamp: new Date().toISOString(),
@@ -123,46 +122,54 @@ export class WeatherResolver {
 
   @Query(() => [WeatherEvent], {
     name: 'recentWeatherEvents',
-    description: 'Get recent weather events for a project'
+    description: 'Get recent weather events for a project',
   })
   async recentWeatherEvents(
     @Args('projectId') projectId: string,
     @Args('days', { type: () => Float, defaultValue: 7 }) days: number,
-    @CurrentUser() user: CurrentUser,
+    @CurrentUser() _user: CurrentUser
   ): Promise<WeatherEvent[]> {
     return this.weatherService.getRecentWeatherEvents(projectId, days);
   }
 
   @Query(() => [WeatherEvent], {
     name: 'pendingInspections',
-    description: 'Get all pending inspections for the organization'
+    description: 'Get all pending inspections for the organization',
   })
-  async pendingInspections(
-    @CurrentUser() user: CurrentUser,
-  ): Promise<WeatherEvent[]> {
+  async pendingInspections(@CurrentUser() user: CurrentUser): Promise<WeatherEvent[]> {
     return this.weatherService.getPendingInspections(user.orgId);
   }
 
-  @Subscription(() => WeatherAlert, {
-    name: 'weatherAlerts',
-    description: 'Subscribe to real-time weather alerts for organization projects'
-  })
-  weatherAlerts(
-    @Args('orgId') orgId: string,
-    @CurrentUser() user: CurrentUser,
-  ) {
-    // Multi-tenant security: only subscribe to user's organization
-    if (user.orgId !== orgId) {
-      throw new Error('Unauthorized: Cannot subscribe to alerts for other organizations');
-    }
-
-    return this.pubSub.asyncIterator(`WEATHER_ALERTS_${orgId}`);
-  }
+  // TODO: Re-enable subscriptions after configuring proper PubSub implementation
+  // GraphQL subscriptions require Redis or another pub/sub mechanism for production
+  // For now, clients can poll pendingInspections query
+  //
+  // @Subscription(() => WeatherAlert, {
+  //   name: 'weatherAlerts',
+  //   description: 'Subscribe to real-time weather alerts for organization projects'
+  // })
+  // weatherAlerts(
+  //   @Args('orgId') orgId: string,
+  //   @CurrentUser() user: CurrentUser,
+  // ) {
+  //   // Multi-tenant security: only subscribe to user's organization
+  //   if (user.orgId !== orgId) {
+  //     throw new Error('Unauthorized: Cannot subscribe to alerts for other organizations');
+  //   }
+  //
+  //   return this.pubSub.asyncIterator(`WEATHER_ALERTS_${orgId}`);
+  // }
 
   // Method to publish alerts - called by WeatherMonitoringService
   async publishWeatherAlert(orgId: string, alert: WeatherAlert): Promise<void> {
-    await this.pubSub.publish(`WEATHER_ALERTS_${orgId}`, {
-      weatherAlerts: alert,
-    });
+    // TODO: Re-enable when subscriptions are configured
+    // await this.pubSub.publish(`WEATHER_ALERTS_${orgId}`, {
+    //   weatherAlerts: alert,
+    // });
+
+    // For now, log the alert for debugging
+    // TODO: Implement proper logging service
+    // eslint-disable-next-line no-console
+    console.log('Weather alert (subscriptions disabled):', { orgId, alert });
   }
 }

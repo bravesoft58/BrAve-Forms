@@ -3,7 +3,12 @@ import { UseGuards, Logger } from '@nestjs/common';
 import { ClerkAuthGuard } from '../auth/guards/clerk-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { AdminAccess, ManagementAccess, TeamAccess, AllRoles } from '../../common/decorators/roles.decorator';
+import {
+  AdminAccess,
+  ManagementAccess,
+  TeamAccess,
+  AllRoles,
+} from '../../common/decorators/roles.decorator';
 import { OrganizationsService } from './organizations.service';
 import { PrismaService } from '../database/prisma.service';
 
@@ -277,7 +282,7 @@ export class OrganizationsResolver {
 
   constructor(
     private readonly organizationsService: OrganizationsService,
-    private readonly prisma: PrismaService,
+    private readonly prisma: PrismaService
   ) {}
 
   @Query(() => OrganizationGQL)
@@ -310,8 +315,16 @@ export class OrganizationsResolver {
     // Calculate real-time stats
     const stats = await this.calculateOrganizationStats(org.id);
 
+    // Add stats to projects
+    const projectsWithStats = org.projects.map((project: any) => ({
+      ...project,
+      inspections: project.inspections,
+      stats: this.calculateProjectStats(project),
+    }));
+
     return {
       ...org,
+      projects: projectsWithStats,
       stats,
     };
   }
@@ -321,14 +334,14 @@ export class OrganizationsResolver {
   @TeamAccess() // All team members can see projects (filtered by role in service)
   async projects(
     @CurrentUser() user: any,
-    @Args('filter', { nullable: true }) filter?: ProjectFilterInput,
+    @Args('filter', { nullable: true }) filter?: ProjectFilterInput
   ): Promise<ProjectGQL[]> {
     const org = await this.getOrganizationByClerkId(user.orgId);
 
     const projects = await this.prisma.project.findMany({
       where: {
         orgId: org.id,
-        ...(filter?.status && { status: filter.status }),
+        ...(filter?.status && { status: filter.status as any }),
         ...(filter?.search && {
           OR: [
             { name: { contains: filter.search, mode: 'insensitive' } },
@@ -352,13 +365,14 @@ export class OrganizationsResolver {
 
     // TODO: Apply role-based project filtering
     // INSPECTORS: Only assigned projects
-    // MEMBERS: Only projects they're part of  
+    // MEMBERS: Only projects they're part of
     // MANAGERS+: All org projects
 
-    return projects.map(project => ({
+    return projects.map((project) => ({
       ...project,
+      inspections: project.inspections,
       stats: this.calculateProjectStats(project),
-    }));
+    })) as ProjectGQL[];
   }
 
   @Query(() => OrganizationStatsGQL)
@@ -374,7 +388,7 @@ export class OrganizationsResolver {
   @AdminAccess() // Admin and Owner can update org settings
   async updateOrganization(
     @CurrentUser() user: any,
-    @Args('input') input: UpdateOrganizationInput,
+    @Args('input') input: UpdateOrganizationInput
   ): Promise<OrganizationGQL> {
     const org = await this.getOrganizationByClerkId(user.orgId);
 
@@ -396,6 +410,13 @@ export class OrganizationsResolver {
 
     const stats = await this.calculateOrganizationStats(updatedOrg.id);
 
+    // Add stats to projects
+    const projectsWithStats = updatedOrg.projects.map((project: any) => ({
+      ...project,
+      inspections: project.inspections,
+      stats: this.calculateProjectStats(project),
+    }));
+
     this.logger.log(`Organization ${org.name} updated by user ${user.userId}`, {
       orgId: org.id,
       changes: input,
@@ -403,6 +424,7 @@ export class OrganizationsResolver {
 
     return {
       ...updatedOrg,
+      projects: projectsWithStats,
       stats,
     };
   }
@@ -422,11 +444,7 @@ export class OrganizationsResolver {
 
   private async calculateOrganizationStats(orgId: string): Promise<OrganizationStatsGQL> {
     // Use raw queries for performance on large datasets
-    const [
-      projectStats,
-      inspectionStats,
-      userStats,
-    ] = await Promise.all([
+    const [projectStats, inspectionStats, userStats] = await Promise.all([
       this.prisma.project.groupBy({
         by: ['status'],
         where: { orgId },
@@ -447,21 +465,20 @@ export class OrganizationsResolver {
     // Calculate totals
     const totalProjects = projectStats.reduce((sum, stat) => sum + stat._count, 0);
     const activeProjects = projectStats
-      .filter(stat => ['ACTIVE', 'PLANNING'].includes(stat.status))
+      .filter((stat) => ['ACTIVE', 'PLANNING'].includes(stat.status))
       .reduce((sum, stat) => sum + stat._count, 0);
 
     const totalInspections = inspectionStats.reduce((sum, stat) => sum + stat._count, 0);
     const pendingInspections = inspectionStats
-      .filter(stat => stat.status === 'PENDING')
+      .filter((stat) => stat.status === 'PENDING')
       .reduce((sum, stat) => sum + stat._count, 0);
 
     const compliantInspections = inspectionStats
-      .filter(stat => stat.status === 'APPROVED')
+      .filter((stat) => stat.status === 'APPROVED')
       .reduce((sum, stat) => sum + stat._count, 0);
 
-    const complianceRate = totalInspections > 0 
-      ? (compliantInspections / totalInspections) * 100 
-      : 0;
+    const complianceRate =
+      totalInspections > 0 ? (compliantInspections / totalInspections) * 100 : 0;
 
     const totalUsers = userStats.reduce((sum, stat) => sum + stat._count, 0);
 
@@ -472,11 +489,11 @@ export class OrganizationsResolver {
       pendingInspections,
       complianceRate,
       totalUsers,
-      usersByRole: userStats.map(stat => ({
+      usersByRole: userStats.map((stat) => ({
         role: stat.role,
         count: stat._count,
       })),
-      projectsByStatus: projectStats.map(stat => ({
+      projectsByStatus: projectStats.map((stat) => ({
         status: stat.status,
         count: stat._count,
       })),
@@ -497,7 +514,7 @@ export class OrganizationsResolver {
     }).length;
 
     const lastInspection = project.inspections[0]?.inspectionDate;
-    
+
     // Calculate next deadline based on weather events or routine schedule
     // TODO: Implement weather-based deadline calculation
     const nextDeadline = null;
@@ -512,22 +529,25 @@ export class OrganizationsResolver {
   }
 
   private aggregateInspectionStats(inspectionStats: any[]): InspectionStatsGQL[] {
-    const typeGroups = inspectionStats.reduce((acc, stat) => {
-      if (!acc[stat.type]) {
-        acc[stat.type] = { type: stat.type, total: 0, compliant: 0, overdue: 0 };
-      }
-      
-      acc[stat.type].total += stat._count;
-      
-      if (stat.status === 'APPROVED') {
-        acc[stat.type].compliant += stat._count;
-      } else if (stat.status === 'PENDING') {
-        // TODO: Calculate actual overdue based on inspection dates
-        acc[stat.type].overdue += stat._count;
-      }
-      
-      return acc;
-    }, {} as Record<string, any>);
+    const typeGroups = inspectionStats.reduce(
+      (acc, stat) => {
+        if (!acc[stat.type]) {
+          acc[stat.type] = { type: stat.type, total: 0, compliant: 0, overdue: 0 };
+        }
+
+        acc[stat.type].total += stat._count;
+
+        if (stat.status === 'APPROVED') {
+          acc[stat.type].compliant += stat._count;
+        } else if (stat.status === 'PENDING') {
+          // TODO: Calculate actual overdue based on inspection dates
+          acc[stat.type].overdue += stat._count;
+        }
+
+        return acc;
+      },
+      {} as Record<string, any>
+    );
 
     return Object.values(typeGroups);
   }
