@@ -7,6 +7,7 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 ## Current Tech Stack (Per CLAUDE.md)
 
 ### Backend
+
 - **Framework:** NestJS 10.x with GraphQL (Code-first approach using decorators)
 - **Database:** PostgreSQL 15 with TimescaleDB extension (RLS for multi-tenancy)
 - **ORM:** Prisma 5.x with JSONB support (Custom multi-tenant middleware)
@@ -14,6 +15,7 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - **Auth:** Clerk (JWT with org context: o.id, o.rol, o.slg)
 
 ### Frontend
+
 - **Framework:** Next.js 14 (App Router)
 - **Mobile:** Capacitor 6 with React (Released April 2024)
 - **State:** Valtio + TanStack Query (with @tanstack/query-async-storage-persister)
@@ -22,6 +24,7 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - **Offline:** Service Workers + IndexedDB (Custom 30-day sync)
 
 ### Infrastructure
+
 - **IaC:** Terraform 1.5+
 - **Container:** Docker with multi-stage builds
 - **Orchestration:** Kubernetes (EKS)
@@ -32,39 +35,41 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 
 ```
 .claude/agents/
-├── api-integration-architect.md              # ✅ NestJS/GraphQL API design
-├── chaos-engineer.md                         # ✅ System resilience testing
-├── compliance-engine-developer.md            # ✅ EPA/OSHA compliance rules
-├── database-schema-architect.md              # ✅ PostgreSQL/Prisma design
-├── devops-pipeline-engineer.md               # ✅ CI/CD and deployment
-├── doc-library-manager.md                    # ✅ Documentation management
-├── doc-sync-guardian.md                      # ✅ Documentation consistency
-├── infrastructure-designer.md                # ✅ AWS/Terraform infrastructure
-├── mobile-app-builder.md                     # ✅ Capacitor mobile development
-├── offline-sync-specialist.md                # ✅ 30-day offline capability
-├── performance-optimizer.md                  # ✅ System performance tuning
-├── photo-storage-optimizer.md                # ✅ Image processing/storage
-├── product-owner.md                          # ✅ Product strategy/roadmap
-├── project-manager.md                        # ✅ Project coordination
-├── qr-inspector-portal-developer.md          # ✅ Inspector QR portal
-├── scrum-master.md                           # ✅ Agile process management
-├── security-compliance-officer.md            # ✅ Security/compliance audit
-├── technical-writer.md                       # ✅ User documentation
-├── test-automation-engineer.md               # ✅ Testing strategies
-├── weather-integration-specialist.md         # ✅ Weather API integration
-├── frontend-ux-developer.md                  # ❌ MISSING - Needs creation
-├── forms-engine-developer.md                 # ❌ MISSING - Needs creation
-├── graphql-api-specialist.md                 # ❌ MISSING - Needs creation
-├── multi-tenant-architect.md                 # ❌ MISSING - Needs creation
-└── queue-processing-engineer.md              # ❌ MISSING - Needs creation
+├── api-integration-architect.md              # YES NestJS/GraphQL API design
+├── chaos-engineer.md                         # YES System resilience testing
+├── compliance-engine-developer.md            # YES EPA/OSHA compliance rules
+├── database-schema-architect.md              # YES PostgreSQL/Prisma design
+├── devops-pipeline-engineer.md               # YES CI/CD and deployment
+├── doc-library-manager.md                    # YES Documentation management
+├── doc-sync-guardian.md                      # YES Documentation consistency
+├── infrastructure-designer.md                # YES AWS/Terraform infrastructure
+├── mobile-app-builder.md                     # YES Capacitor mobile development
+├── offline-sync-specialist.md                # YES 30-day offline capability
+├── performance-optimizer.md                  # YES System performance tuning
+├── photo-storage-optimizer.md                # YES Image processing/storage
+├── product-owner.md                          # YES Product strategy/roadmap
+├── project-manager.md                        # YES Project coordination
+├── qr-inspector-portal-developer.md          # YES Inspector QR portal
+├── scrum-master.md                           # YES Agile process management
+├── security-compliance-officer.md            # YES Security/compliance audit
+├── technical-writer.md                       # YES User documentation
+├── test-automation-engineer.md               # YES Testing strategies
+├── weather-integration-specialist.md         # YES Weather API integration
+├── frontend-ux-developer.md                  # NO MISSING - Needs creation
+├── forms-engine-developer.md                 # NO MISSING - Needs creation
+├── graphql-api-specialist.md                 # NO MISSING - Needs creation
+├── multi-tenant-architect.md                 # NO MISSING - Needs creation
+└── queue-processing-engineer.md              # NO MISSING - Needs creation
 ```
 
 ## Existing Agents (Currently in .claude/agents/)
 
 ### 1. API Integration Architect
+
 **File:** `api-integration-architect.md`
 **Description:** NestJS and GraphQL expert designing high-performance APIs with Apollo Server 4, REST fallbacks, and efficient DataLoader patterns for construction compliance.
 **Key Responsibilities:**
+
 - NestJS v10+ modular architecture with dependency injection
 - GraphQL with Apollo Server 4 and federation support
 - REST API fallbacks for third-party integrations
@@ -72,9 +77,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - Sub-200ms response times for 10,000+ concurrent users
 
 ### 2. Chaos Engineer
+
 **File:** `chaos-engineer.md`
 **Description:** System resilience and failure testing specialist ensuring 99.99% uptime.
 **Key Responsibilities:**
+
 - Failure injection testing
 - Load and stress testing
 - Disaster recovery scenarios
@@ -82,9 +89,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - Data corruption recovery
 
 ### 3. Compliance Engine Developer
+
 **File:** `compliance-engine-developer.md`
 **Description:** Construction regulatory compliance expert building EPA/OSHA rules engines with 0.25" rain triggers and multi-jurisdiction regulatory intelligence.
 **Key Responsibilities:**
+
 - EPA 2022 CGP requirements (EXACT 0.25" threshold)
 - OSHA 29 CFR 1926 standards
 - SWPPP inspection workflows (24-hour deadline during working hours)
@@ -92,9 +101,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - Violation prevention alerts ($25,000-$161,323 fines)
 
 ### 4. Database Schema Architect
+
 **File:** `database-schema-architect.md`
 **Description:** PostgreSQL 15 with TimescaleDB expert designing multi-tenant schemas with RLS.
 **Key Responsibilities:**
+
 - Prisma 5.x with custom multi-tenant middleware
 - PostgreSQL Row Level Security policies
 - TimescaleDB for weather time-series data
@@ -102,9 +113,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - 7-year data retention compliance
 
 ### 5. DevOps Pipeline Engineer
+
 **File:** `devops-pipeline-engineer.md`
 **Description:** CI/CD and infrastructure automation specialist for AWS/Kubernetes deployments.
 **Key Responsibilities:**
+
 - GitHub Actions workflows
 - Docker multi-stage builds
 - Kubernetes (EKS) orchestration
@@ -112,9 +125,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - Datadog monitoring and Sentry error tracking
 
 ### 6. Doc Library Manager
+
 **File:** `doc-library-manager.md`
 **Description:** Documentation organization and maintenance specialist.
 **Key Responsibilities:**
+
 - API documentation with OpenAPI/Swagger
 - Architecture decision records (ADRs)
 - Compliance documentation
@@ -122,9 +137,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - Developer onboarding materials
 
 ### 7. Doc Sync Guardian
+
 **File:** `doc-sync-guardian.md`
 **Description:** Documentation consistency and accuracy enforcement.
 **Key Responsibilities:**
+
 - Cross-documentation consistency
 - Version control for docs
 - Automated documentation updates
@@ -132,9 +149,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - Compliance documentation audits
 
 ### 8. Infrastructure Designer
+
 **File:** `infrastructure-designer.md`
 **Description:** AWS cloud architecture specialist designing scalable, cost-effective infrastructure.
 **Key Responsibilities:**
+
 - AWS services (EKS, RDS Aurora PostgreSQL, S3, CloudFront)
 - Multi-region deployment strategies
 - Auto-scaling for 10x traffic spikes
@@ -142,9 +161,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - 99.9% uptime SLA implementation
 
 ### 9. Mobile App Builder
+
 **File:** `mobile-app-builder.md`
 **Description:** Capacitor 6 with React specialist building offline-capable mobile applications.
 **Key Responsibilities:**
+
 - Capacitor 6 (April 2024 release) configuration
 - React with TypeScript for mobile UI
 - Custom 30-day offline implementation
@@ -152,9 +173,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - iOS and Android platform optimization
 
 ### 10. Offline Sync Specialist
+
 **File:** `offline-sync-specialist.md`
 **Description:** 30-day offline operation architect with Service Workers and IndexedDB.
 **Key Responsibilities:**
+
 - Service Workers + IndexedDB implementation (custom required)
 - TanStack Query with @tanstack/query-async-storage-persister
 - Conflict resolution strategies
@@ -162,9 +185,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - Background sync with retry logic
 
 ### 11. Performance Optimizer
+
 **File:** `performance-optimizer.md`
 **Description:** System performance tuning expert achieving sub-second response times.
 **Key Responsibilities:**
+
 - API response optimization (<200ms p95)
 - Mobile app startup (<2 seconds)
 - Database query optimization
@@ -172,9 +197,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - Memory and battery optimization
 
 ### 12. Photo Storage Optimizer
+
 **File:** `photo-storage-optimizer.md`
 **Description:** Image processing and storage specialist for construction photos.
 **Key Responsibilities:**
+
 - S3 storage with CloudFront CDN
 - Image compression and optimization
 - GPS EXIF data preservation
@@ -182,9 +209,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - 7-year retention compliance
 
 ### 13. Product Owner
+
 **File:** `product-owner.md`
 **Description:** Product strategy and roadmap specialist for construction compliance.
 **Key Responsibilities:**
+
 - User story development
 - Feature prioritization
 - Compliance requirement analysis
@@ -192,9 +221,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - ROI and success metrics
 
 ### 14. Project Manager
+
 **File:** `project-manager.md`
 **Description:** Project coordination and delivery management specialist.
 **Key Responsibilities:**
+
 - Sprint planning and execution
 - Resource allocation
 - Risk management
@@ -202,9 +233,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - Timeline and budget tracking
 
 ### 15. QR Inspector Portal Developer
+
 **File:** `qr-inspector-portal-developer.md`
 **Description:** QR code-based inspector portal specialist enabling app-free access.
 **Key Responsibilities:**
+
 - QR code generation with project context
 - Progressive web app for inspectors
 - Instant access without authentication
@@ -212,9 +245,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - Mobile-optimized interface
 
 ### 16. Scrum Master
+
 **File:** `scrum-master.md`
 **Description:** Agile process facilitator and team efficiency optimizer.
 **Key Responsibilities:**
+
 - Sprint ceremony facilitation
 - Impediment removal
 - Team velocity tracking
@@ -222,9 +257,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - Cross-team coordination
 
 ### 17. Security Compliance Officer
+
 **File:** `security-compliance-officer.md`
 **Description:** Security audit and compliance verification specialist.
 **Key Responsibilities:**
+
 - OWASP Top 10 prevention
 - SOC 2 Type II compliance
 - Clerk authentication security (org claims validation)
@@ -232,9 +269,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - Penetration testing coordination
 
 ### 18. Technical Writer
+
 **File:** `technical-writer.md`
 **Description:** User-facing documentation specialist for construction workers.
 **Key Responsibilities:**
+
 - Field worker user guides
 - Video tutorials for gloved hands operation
 - Quick reference cards
@@ -242,9 +281,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - Compliance procedure documentation
 
 ### 19. Test Automation Engineer
+
 **File:** `test-automation-engineer.md`
 **Description:** Comprehensive testing strategy implementation specialist.
 **Key Responsibilities:**
+
 - Jest (backend) and Vitest (frontend) unit tests
 - Playwright E2E testing
 - 80% minimum code coverage
@@ -252,9 +293,11 @@ BrAve Forms (note the capital A) is a mobile-first construction compliance and f
 - Compliance validation testing
 
 ### 20. Weather Integration Specialist
+
 **File:** `weather-integration-specialist.md`
 **Description:** Weather API integration expert for compliance triggers and monitoring.
 **Key Responsibilities:**
+
 - NOAA Weather API (primary source)
 - OpenWeatherMap (fallback source)
 - EXACT 0.25" precipitation tracking (not 0.24" or 0.26")
@@ -474,6 +517,7 @@ You are a queue processing engineer specializing in BullMQ with Redis.
 ### Setting Up Missing Agents
 
 1. **Create the missing agent files:**
+
 ```bash
 # Create Frontend UX Developer
 cat > .claude/agents/frontend-ux-developer.md << 'EOF'
@@ -502,6 +546,7 @@ EOF
 ```
 
 2. **Verify all agents are loaded:**
+
 ```bash
 # In Claude Code, run:
 /agents
@@ -510,6 +555,7 @@ EOF
 ### Usage Patterns
 
 #### Development Flow with Complete Agent Set
+
 ```bash
 # 1. Multi-tenant setup
 # Use multi-tenant-architect for Clerk + Prisma + RLS setup
@@ -539,24 +585,26 @@ EOF
 
 ### Agent Collaboration Matrix
 
-| Primary Agent | Collaborates With | For Tasks |
-|--------------|-------------------|-----------|
-| api-integration-architect | graphql-api-specialist, multi-tenant-architect | API design and multi-tenancy |
-| frontend-ux-developer | forms-engine-developer, offline-sync-specialist | UI and offline forms |
-| mobile-app-builder | offline-sync-specialist, photo-storage-optimizer | Mobile offline and photos |
-| compliance-engine-developer | weather-integration-specialist, forms-engine-developer | Compliance triggers and forms |
-| queue-processing-engineer | weather-integration-specialist, photo-storage-optimizer | Background jobs |
-| database-schema-architect | multi-tenant-architect, offline-sync-specialist | Schema and isolation |
+| Primary Agent               | Collaborates With                                       | For Tasks                     |
+| --------------------------- | ------------------------------------------------------- | ----------------------------- |
+| api-integration-architect   | graphql-api-specialist, multi-tenant-architect          | API design and multi-tenancy  |
+| frontend-ux-developer       | forms-engine-developer, offline-sync-specialist         | UI and offline forms          |
+| mobile-app-builder          | offline-sync-specialist, photo-storage-optimizer        | Mobile offline and photos     |
+| compliance-engine-developer | weather-integration-specialist, forms-engine-developer  | Compliance triggers and forms |
+| queue-processing-engineer   | weather-integration-specialist, photo-storage-optimizer | Background jobs               |
+| database-schema-architect   | multi-tenant-architect, offline-sync-specialist         | Schema and isolation          |
 
 ## Critical Compliance Requirements
 
 ### EPA CGP Non-Negotiables
+
 1. **0.25" Rain Trigger:** EXACT threshold (not 0.24" or 0.26")
 2. **24-Hour Inspection:** Required within working hours only
 3. **7-Year Retention:** All compliance documentation
 4. **Inspector Access:** QR codes without app installation
 
 ### Technical Non-Negotiables
+
 1. **30-Day Offline:** Custom Service Workers + IndexedDB implementation
 2. **Multi-Tenancy:** Clerk orgs + Prisma middleware + PostgreSQL RLS
 3. **Performance:** <200ms API, <2s app startup
@@ -565,16 +613,19 @@ EOF
 ## Maintenance Schedule
 
 ### Weekly Updates
+
 - Weather API monitoring (weather-integration-specialist)
 - Performance metrics review (performance-optimizer)
 - Security scan results (security-compliance-officer)
 
 ### Monthly Updates
+
 - Compliance rule updates (compliance-engine-developer)
 - Infrastructure costs (infrastructure-designer)
 - Test coverage reports (test-automation-engineer)
 
 ### Quarterly Updates
+
 - Architecture review (api-integration-architect, database-schema-architect)
 - Documentation audit (doc-library-manager, technical-writer)
 - Process improvements (scrum-master, project-manager)
@@ -582,16 +633,19 @@ EOF
 ## Success Metrics
 
 ### Development Velocity
+
 - 50% reduction in feature development time
 - Consistent code patterns across teams
 - Automated compliance validation
 
 ### Quality Metrics
+
 - 80% minimum test coverage
 - Zero critical security vulnerabilities
 - 99.9% uptime achievement
 
 ### Compliance Accuracy
+
 - 100% EPA/OSHA requirement coverage
 - Zero compliance violations
 - Automated weather trigger accuracy

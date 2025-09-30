@@ -1,6 +1,7 @@
 # BrAve Forms Development Setup Guide
+
 **Last Updated**: September 30, 2025
-**Status**: FULLY OPERATIONAL ✅
+**Status**: FULLY OPERATIONAL
 **Infrastructure**: Rancher Desktop + Kubernetes
 **Namespace**: braveforms
 **Current Environment**: Working and Tested
@@ -8,6 +9,7 @@
 ## Prerequisites
 
 ### Required Software
+
 - **Node.js**: v18.0.0 or higher
 - **pnpm**: v8.0.0 or higher
 - **Rancher Desktop**: Latest version (containerd + k3s)
@@ -17,6 +19,7 @@
 **Infrastructure Note**: PostgreSQL, Redis, and MinIO run in Kubernetes pods (not local installs).
 
 ### Recommended Tools
+
 - **VS Code** with extensions:
   - ESLint
   - Prettier
@@ -29,12 +32,14 @@
 ## Initial Setup
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/brave-forms/brave-forms.git
 cd brave-forms
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 pnpm install
 ```
@@ -134,6 +139,7 @@ pnpm db:migrate
 ```
 
 **Access Points**:
+
 - PostgreSQL: localhost:5432 (via port-forward)
 - Redis: localhost:6379 (via port-forward)
 - MinIO: http://localhost:30103
@@ -143,6 +149,7 @@ pnpm db:migrate
 **See [RANCHER_DESKTOP_SETUP.md](./RANCHER_DESKTOP_SETUP.md) for complete setup guide.**
 
 #### Start Development Applications
+
 ```bash
 # Start all applications (recommended)
 pnpm dev
@@ -151,7 +158,7 @@ pnpm dev
 # Backend API (GraphQL on http://localhost:3002/graphql)
 pnpm --filter backend dev
 
-# Web Application (http://localhost:3007) ✅ WORKING
+# Web Application (http://localhost:3007) WORKING
 pnpm --filter web dev
 
 # Mobile Development (http://localhost:5174)
@@ -161,25 +168,29 @@ pnpm --filter mobile dev
 ### Verified Working URLs
 
 **Kubernetes Services** (via NodePort):
-- **Backend GraphQL**: http://localhost:30101/graphql ✅
-- **Web Application**: http://localhost:30102 ✅
-- **MinIO Console**: http://localhost:30103 ✅
+
+- **Backend GraphQL**: http://localhost:30101/graphql
+- **Web Application**: http://localhost:30102
+- **MinIO Console**: http://localhost:30103
 
 **Local Development Apps**:
+
 - **Backend (standalone)**: http://localhost:3002/graphql
 - **Web (standalone)**: http://localhost:3007
-- **Mobile App**: http://localhost:5174 ✅
+- **Mobile App**: http://localhost:5174
 
 ## Development Workflow
 
 ### 1. Creating a New Feature
 
 1. Create feature branch:
+
 ```bash
 git checkout -b feature/your-feature-name
 ```
 
 2. Update database schema if needed:
+
 ```bash
 # Edit packages/database/schema.prisma
 pnpm db:generate
@@ -187,16 +198,19 @@ pnpm db:migrate
 ```
 
 3. Implement backend changes:
+
 - Create/update modules in `apps/backend/src/modules/`
 - Follow NestJS modular architecture
 - Add GraphQL resolvers with proper decorators
 
 4. Implement frontend changes:
+
 - Update components in `apps/web/` or `apps/mobile/`
 - Use Mantine v7 components
 - Implement offline-first with TanStack Query
 
 5. Write tests:
+
 ```bash
 # Backend tests
 pnpm test:backend
@@ -211,6 +225,7 @@ pnpm test:mobile
 ### 2. Code Quality Checks
 
 Before committing:
+
 ```bash
 # Run all quality checks
 pnpm qa
@@ -224,6 +239,7 @@ pnpm test
 ### 3. EPA Compliance Testing
 
 Test 0.25" rain threshold:
+
 ```bash
 pnpm test:compliance
 ```
@@ -231,6 +247,7 @@ pnpm test:compliance
 ### 4. Offline Testing
 
 Test 30-day offline capability:
+
 ```bash
 pnpm test:offline
 ```
@@ -238,26 +255,32 @@ pnpm test:offline
 ## Mobile Development
 
 ### iOS Setup (macOS only)
+
 1. Install Xcode from App Store
 2. Install CocoaPods:
+
 ```bash
 sudo gem install cocoapods
 ```
 
 3. Open iOS project:
+
 ```bash
 pnpm mobile:ios
 ```
 
 ### Android Setup
+
 1. Install Android Studio
 2. Configure Android SDK (API 33+)
 3. Open Android project:
+
 ```bash
 pnpm mobile:android
 ```
 
 ### Building Mobile Apps
+
 ```bash
 # Build for iOS
 pnpm mobile:build:ios
@@ -269,17 +292,21 @@ pnpm mobile:build:android
 ## Database Management
 
 ### Prisma Studio (GUI)
+
 ```bash
 pnpm db:studio
 ```
+
 Opens at http://localhost:5555
 
 ### Seeding Data
+
 ```bash
 pnpm db:seed
 ```
 
 ### Reset Database
+
 ```bash
 pnpm db:migrate:reset
 ```
@@ -287,9 +314,11 @@ pnpm db:migrate:reset
 ## API Development
 
 ### GraphQL Playground
+
 1. Start backend: `pnpm dev:backend`
 2. Open http://localhost:3001/graphql
 3. Use Clerk JWT token in headers:
+
 ```json
 {
   "Authorization": "Bearer YOUR_CLERK_TOKEN"
@@ -326,6 +355,7 @@ query CheckWeather($projectId: String!) {
 ### Common Issues
 
 1. **Port already in use**
+
 ```bash
 # Find process using port
 lsof -i :3001
@@ -334,15 +364,18 @@ kill -9 <PID>
 ```
 
 2. **Database connection failed**
+
 - Check PostgreSQL is running
 - Verify DATABASE_URL in .env.local
 - Ensure database exists
 
 3. **Redis connection failed**
+
 - Check Redis is running
 - Verify REDIS_URL in .env.local
 
 4. **Authentication removed (September 6, 2025)**
+
 - Clerk authentication has been completely removed
 - No authentication setup required for development
 - All features accessible without login barriers
@@ -392,23 +425,26 @@ Recommended `.vscode/settings.json`:
 
 ---
 
-## 🚨 Current Development Status (September 30, 2025)
+## Current Development Status (September 30, 2025)
 
-### ✅ FULLY OPERATIONAL ENVIRONMENT
+### FULLY OPERATIONAL ENVIRONMENT
+
 - **Infrastructure**: Rancher Desktop + Kubernetes (production-like)
 - **Namespace**: braveforms (isolated from other projects)
 - **Web Application**: http://localhost:30102 - Complete functionality
 - **Backend API**: http://localhost:30101/graphql - All endpoints operational
 - **Demo Features**: Weather monitoring, form builder, EPA compliance
 
-### 🎯 Infrastructure Migration Complete
+### Infrastructure Migration Complete
+
 - Migrated from Docker Desktop to Rancher Desktop
 - containerd + k3s + nerdctl (production standard)
 - Multi-project namespace isolation
 - Port conflict detection system
 - Zero Docker licensing concerns
 
-### 📞 Next Session Priorities
+### Next Session Priorities
+
 1. UI/UX styling improvements
 2. Advanced form builder features
 3. Mobile optimization enhancements
