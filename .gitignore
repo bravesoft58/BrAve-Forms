@@ -140,5 +140,5 @@ sw.js
 # Storybook
 storybook-static
 
-# Claude Code AI assistant files
-.claude/
+# Claude Code AI assistant files (keep commands and agents, exclude local settings)
+.claude/settings.local.json

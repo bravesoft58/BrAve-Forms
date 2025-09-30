@@ -1,0 +1,751 @@
+# .claude/clerk-implementation.md
+# Clerk Authentication Implementation Patterns
+
+## Hybrid Offline Authentication Architecture
+
+### Extended Token Generation
+```javascript
+class HybridOfflineAuth {
+  async initializeOfflineAuth(clerkSession) {
+    // Generate extended offline token from Clerk session
+    const offlineToken = await this.generateExtendedToken({
+      clerkSessionId: clerkSession.id,
+      clerkUserId: clerkSession.userId,
+      organizationId: clerkSession.organizationId,
+      permissions: await this.extractPermissions(clerkSession),
+      issuedAt: Date.now(),
+      expiresAt: Date.now() + (30 * 24 * 60 * 60 * 1000), // 30 days
+      offlineCapable: true
+    });
+    
+    // Store securely in device keychain/keystore
+    await SecureStore.setItemAsync('offline_auth_token', offlineToken);
+    return offlineToken;
+  }
+  
+  async validateOfflineSession() {
+    const storedToken = await SecureStore.getItemAsync('offline_auth_token');
+    
+    if (this.isOnline()) {
+      // Online: Verify with Clerk if possible, fallback to local validation
+      try {
+        const clerkSession = await clerkClient.sessions.getSession(
+          this.extractClerkSessionId(storedToken)
+        );
+        return this.createAuthContext(clerkSession);
+      } catch (error) {
+        return this.validateLocalToken(storedToken);
+      }
+    } else {
+      // Offline: Use local validation with cryptographic verification
+      return this.validateLocalToken(storedToken);
+    }
+  }
+}
+```
+
+## Multi-Tenant Organization Management
+
+### Clerk Organizations Integration
+```javascript
+class ClerkTenantManager {
+  async createOrganization(adminUserId, orgData) {
+    // Create organization in Clerk
+    const clerkOrg = await clerkClient.organizations.createOrganization({
+      name: orgData.companyName,
+      slug: orgData.slug,
+      createdBy: adminUserId,
+      privateMetadata: {
+        tenantId: crypto.randomUUID(),
+        complianceLevel: orgData.complianceLevel,
+        industryType: 'construction',
+        tier: orgData.tier // 'standard' or 'enterprise'
+      },
+      publicMetadata: {
+        website: orgData.website,
+        industry: 'construction',
+        size: orgData.employeeCount
+      }
+    });
+    
+    // Create corresponding database tenant
+    await this.createDatabaseTenant({
+      tenantId: clerkOrg.privateMetadata.tenantId,
+      organizationId: clerkOrg.id,
+      tier: orgData.tier
+    });
+    
+    return clerkOrg;
+  }
+  
+  async getUserTenantContext(userId) {
+    const memberships = await clerkClient.users.getOrganizationMembershipList({
+      userId: userId
+    });
+    
+    return memberships.map(membership => ({
+      tenantId: membership.organization.privateMetadata.tenantId,
+      organizationId: membership.organization.id,
+      role: membership.role,
+      permissions: this.mapClerkRoleToPermissions(membership.role),
+      complianceLevel: membership.organization.privateMetadata.complianceLevel
+    }));
+  }
+}
+```
+
+## Database Integration Patterns
+
+### Clerk-Enhanced Audit Logging
+```sql
+-- Enhanced audit table with Clerk context
+CREATE TABLE clerk_audit_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL,
+  clerk_user_id VARCHAR(255) NOT NULL,
+  clerk_session_id VARCHAR(255),
+  clerk_organization_id VARCHAR(255) NOT NULL,
+  
+  -- Action details
+  action VARCHAR(50) NOT NULL,
+  resource_type VARCHAR(50) NOT NULL,
+  resource_id UUID,
+  timestamp TIMESTAMPTZ DEFAULT NOW(),
+  
+  -- Clerk metadata
+  user_role VARCHAR(50),
+  organization_role VARCHAR(50),
+  session_device_id VARCHAR(255),
+  ip_address INET,
+  user_agent TEXT,
+  
+  -- Change tracking
+  old_values JSONB,
+  new_values JSONB,
+  
+  -- Compliance flags
+  compliance_relevant BOOLEAN DEFAULT FALSE,
+  retention_years INTEGER DEFAULT 7
+) PARTITION BY RANGE (timestamp);
+```
+
+### Organization Mapping
+```sql
+-- Clerk organization synchronization
+CREATE TABLE clerk_organization_mapping (
+  clerk_org_id VARCHAR(255) PRIMARY KEY,
+  tenant_id UUID NOT NULL UNIQUE,
+  organization_name VARCHAR(255),
+  organization_tier VARCHAR(20) DEFAULT 'standard',
+  compliance_level VARCHAR(20) DEFAULT 'basic',
+  sync_status VARCHAR(20) DEFAULT 'active',
+  last_synced_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- User role mapping with Clerk
+CREATE TABLE clerk_user_roles (
+  clerk_user_id VARCHAR(255) NOT NULL,
+  clerk_org_id VARCHAR(255) NOT NULL,
+  app_role VARCHAR(50) NOT NULL, -- 'admin', 'foreman', 'inspector'
+  permissions JSONB DEFAULT '[]',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  
+  PRIMARY KEY (clerk_user_id, clerk_org_id)
+);
+```
+
+## React Native Integration
+
+### Clerk Provider Setup
+```javascript
+import { ClerkProvider } from '@clerk/clerk-react-native';
+import { tokenCache } from './utils/cache';
+
+export default function App() {
+  return (
+    <ClerkProvider 
+      publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      tokenCache={tokenCache}
+    >
+      <AppNavigator />
+    </ClerkProvider>
+  );
+}
+
+// Secure token caching for offline
+import * as SecureStore from 'expo-secure-store';
+
+const tokenCache = {
+  async getToken(key) {
+    try {
+      return SecureStore.getItemAsync(key);
+    } catch (err) {
+      return null;
+    }
+  },
+  async saveToken(key, value) {
+    try {
+      return SecureStore.setItemAsync(key, value);
+    } catch (err) {
+      return;
+    }
+  },
+};
+```
+
+### Protected Routes
+```javascript
+import { useAuth, useOrganization } from '@clerk/clerk-react-native';
+
+const ProtectedScreen = ({ children, requiredRole }) => {
+  const { isLoaded, userId } = useAuth();
+  const { organization, membership } = useOrganization();
+  
+  if (!isLoaded) return <LoadingScreen />;
+  if (!userId) return <LoginScreen />;
+  if (!organization) return <OrganizationSelector />;
+  
+  const hasPermission = checkPermission(membership.role, requiredRole);
+  if (!hasPermission) return <UnauthorizedScreen />;
+  
+  return children;
+};
+
+// Usage in navigation
+const ProjectStack = () => (
+  <Stack.Navigator>
+    <Stack.Screen 
+      name="Projects" 
+      component={ProjectsScreen}
+      options={{
+        wrapper: ({ children }) => (
+          <ProtectedScreen requiredRole="foreman">
+            {children}
+          </ProtectedScreen>
+        )
+      }}
+    />
+  </Stack.Navigator>
+);
+```
+
+## API Integration Patterns
+
+### Clerk Session Context
+```javascript
+// API calls with Clerk context
+class ApiClient {
+  constructor() {
+    this.clerkClient = clerkClient;
+  }
+  
+  async makeAuthenticatedRequest(endpoint, options = {}) {
+    const session = await this.clerkClient.session.getSession();
+    const organizationId = session?.organizationId;
+    
+    const headers = {
+      'Authorization': `Bearer ${session.getToken()}`,
+      'X-Organization-ID': organizationId,
+      'Content-Type': 'application/json',
+      ...options.headers
+    };
+    
+    return fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers
+    });
+  }
+  
+  async createFormSubmission(formData, projectId) {
+    const session = await this.clerkClient.session.getSession();
+    
+    return this.makeAuthenticatedRequest('/api/forms/submit', {
+      method: 'POST',
+      body: JSON.stringify({
+        ...formData,
+        projectId,
+        submittedBy: session.userId,
+        organizationId: session.organizationId,
+        timestamp: new Date().toISOString()
+      })
+    });
+  }
+}
+```
+
+### Webhook Handling
+```javascript
+// Backend webhook processing
+import { Webhook } from 'svix';
+
+export async function handleClerkWebhook(request) {
+  const payload = await request.text();
+  const headers = request.headers;
+  
+  const wh = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
+  const evt = wh.verify(payload, headers);
+  
+  switch (evt.type) {
+    case 'organization.created':
+      await createTenantDatabase(evt.data);
+      break;
+      
+    case 'organizationMembership.created':
+      await assignUserToTenant(evt.data);
+      break;
+      
+    case 'user.updated':
+      await syncUserMetadata(evt.data);
+      break;
+      
+    case 'session.ended':
+      await revokeOfflineTokens(evt.data.user_id);
+      break;
+  }
+  
+  return new Response('OK', { status: 200 });
+}
+```
+
+## QR Code Implementation
+
+### Dynamic QR Generation with Clerk
+```javascript
+class ClerkQRAccessSystem {
+  async generateInspectorAccess(inspectorClerkUserId, siteId, duration) {
+    // Verify inspector permissions
+    const inspector = await clerkClient.users.getUser(inspectorClerkUserId);
+    const inspectorRole = inspector.publicMetadata.role;
+    
+    if (!['inspector', 'compliance_officer'].includes(inspectorRole)) {
+      throw new Error('Insufficient permissions for inspector access');
+    }
+    
+    // Create temporary access token
+    const accessToken = jwt.sign({
+      sub: inspectorClerkUserId,
+      site: siteId,
+      role: inspectorRole,
+      permissions: this.getInspectorPermissions(inspectorRole),
+      exp: Math.floor(Date.now() / 1000) + duration,
+      iss: 'braveforms-qr',
+      clerk_user_id: inspectorClerkUserId,
+      organization_context: inspector.organizationMemberships[0]?.organization.id
+    }, process.env.JWT_SECRET);
+    
+    const qrData = {
+      url: `https://api.braveforms.com/inspector/${accessToken}`,
+      version: 1,
+      errorCorrection: 'H'
+    };
+    
+    return QRCode.toDataURL(JSON.stringify(qrData));
+  }
+}
+```
+
+## Permission Management
+
+### Role-Based Access Control
+```javascript
+const ROLE_PERMISSIONS = {
+  'super_admin': [
+    'manage_system',
+    'manage_organizations',
+    'view_all_data',
+    'manage_users',
+    'access_audit_logs'
+  ],
+  'org_admin': [
+    'manage_organization',
+    'manage_users',
+    'view_org_data',
+    'manage_projects',
+    'generate_reports'
+  ],
+  'project_manager': [
+    'manage_projects',
+    'view_project_data',
+    'manage_forms',
+    'generate_qr_codes',
+    'view_reports'
+  ],
+  'foreman': [
+    'create_forms',
+    'upload_photos',
+    'view_project_data',
+    'manage_inspections'
+  ],
+  'inspector': [
+    'view_compliance_data',
+    'create_violations',
+    'generate_reports',
+    'access_qr_portal'
+  ],
+  'subcontractor': [
+    'view_assigned_projects',
+    'create_forms',
+    'upload_photos'
+  ],
+  'viewer': [
+    'view_reports',
+    'view_public_data'
+  ]
+};
+
+const hasPermission = (userRole, requiredPermission) => {
+  return ROLE_PERMISSIONS[userRole]?.includes(requiredPermission) || false;
+};
+
+// Clerk role mapping
+const mapClerkRoleToAppRole = (clerkRole) => {
+  const mapping = {
+    'admin': 'org_admin',
+    'manager': 'project_manager',
+    'member': 'foreman'
+  };
+  return mapping[clerkRole] || 'viewer';
+};
+```
+
+## Middleware and Context
+
+### Authentication Middleware
+```javascript
+// Express.js middleware
+export const clerkAuthMiddleware = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) throw new Error('No token provided');
+    
+    const session = await clerkClient.sessions.verifySession(token);
+    const user = await clerkClient.users.getUser(session.userId);
+    const organization = await clerkClient.organizations.getOrganization(
+      session.organizationId
+    );
+    
+    // Add Clerk context to request
+    req.auth = {
+      userId: session.userId,
+      clerkUserId: session.userId,
+      organizationId: session.organizationId,
+      clerkOrgId: session.organizationId,
+      tenantId: organization.privateMetadata.tenantId,
+      role: user.publicMetadata.role,
+      permissions: ROLE_PERMISSIONS[user.publicMetadata.role] || []
+    };
+    
+    // Set database context for RLS
+    await req.db.query('SELECT set_config($1, $2, true)', [
+      'app.current_tenant_id',
+      req.auth.tenantId
+    ]);
+    await req.db.query('SELECT set_config($1, $2, true)', [
+      'app.current_user_role',
+      req.auth.role
+    ]);
+    await req.db.query('SELECT set_config($1, $2, true)', [
+      'app.current_user_clerk_id',
+      req.auth.clerkUserId
+    ]);
+    
+    next();
+  } catch (error) {
+    res.status(401).json({ error: 'Authentication failed' });
+  }
+};
+```
+
+### React Context Provider
+```javascript
+import { createContext, useContext } from 'react';
+import { useAuth, useOrganization, useUser } from '@clerk/clerk-react-native';
+
+const AppAuthContext = createContext();
+
+export const AppAuthProvider = ({ children }) => {
+  const { userId, sessionId, isSignedIn } = useAuth();
+  const { organization, membership } = useOrganization();
+  const { user } = useUser();
+  
+  const authContext = {
+    isAuthenticated: isSignedIn,
+    userId,
+    clerkUserId: userId,
+    organizationId: organization?.id,
+    tenantId: organization?.privateMetadata?.tenantId,
+    role: user?.publicMetadata?.role || 'viewer',
+    permissions: ROLE_PERMISSIONS[user?.publicMetadata?.role] || [],
+    complianceLevel: organization?.privateMetadata?.complianceLevel || 'basic'
+  };
+  
+  return (
+    <AppAuthContext.Provider value={authContext}>
+      {children}
+    </AppAuthContext.Provider>
+  );
+};
+
+export const useAppAuth = () => {
+  const context = useContext(AppAuthContext);
+  if (!context) {
+    throw new Error('useAppAuth must be used within AppAuthProvider');
+  }
+  return context;
+};
+```
+
+## Clerk Webhook Integration
+
+### User and Organization Sync
+```javascript
+export const clerkWebhookHandlers = {
+  'organization.created': async (data) => {
+    await db.query(`
+      INSERT INTO organizations (clerk_org_id, name, tier, created_at)
+      VALUES ($1, $2, $3, NOW())
+    `, [data.id, data.name, data.private_metadata?.tier || 'standard']);
+  },
+  
+  'organizationMembership.created': async (data) => {
+    await db.query(`
+      INSERT INTO clerk_user_roles (clerk_user_id, clerk_org_id, app_role)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (clerk_user_id, clerk_org_id) 
+      DO UPDATE SET app_role = EXCLUDED.app_role
+    `, [
+      data.user.id,
+      data.organization.id,
+      mapClerkRoleToAppRole(data.role)
+    ]);
+  },
+  
+  'user.updated': async (data) => {
+    // Sync user metadata changes
+    await db.query(`
+      UPDATE clerk_user_roles 
+      SET permissions = $1
+      WHERE clerk_user_id = $2
+    `, [
+      JSON.stringify(ROLE_PERMISSIONS[data.public_metadata?.role] || []),
+      data.id
+    ]);
+  },
+  
+  'session.ended': async (data) => {
+    // Revoke offline tokens when session ends
+    await revokeOfflineTokens(data.user_id);
+  }
+};
+```
+
+## Authentication Flow Patterns
+
+### Login Flow with Organization Selection
+```javascript
+const AuthFlow = () => {
+  const { signIn, isLoaded } = useSignIn();
+  const { setActive } = useAuth();
+  
+  const handleSignIn = async (credentials) => {
+    const result = await signIn.create({
+      identifier: credentials.email,
+      password: credentials.password
+    });
+    
+    if (result.status === 'complete') {
+      await setActive({ session: result.createdSessionId });
+      
+      // Initialize offline capabilities
+      await initializeOfflineAuth(result.createdSession);
+      
+      // Navigate based on organization membership
+      const orgs = await getUserOrganizations(result.userId);
+      if (orgs.length === 1) {
+        navigateToDashboard(orgs[0]);
+      } else {
+        navigateToOrganizationSelector(orgs);
+      }
+    }
+  };
+  
+  if (!isLoaded) return <LoadingScreen />;
+  
+  return <SignInForm onSubmit={handleSignIn} />;
+};
+```
+
+### Organization Switching
+```javascript
+const OrganizationSwitcher = () => {
+  const { organization, setActive } = useOrganization();
+  const { user } = useUser();
+  
+  const handleSwitchOrganization = async (orgId) => {
+    await setActive({ organization: orgId });
+    
+    // Clear local data for previous organization
+    await clearLocalData();
+    
+    // Initialize new organization context
+    await initializeOrganizationData(orgId);
+    
+    // Navigate to dashboard
+    navigateToDashboard();
+  };
+  
+  return (
+    <Select
+      value={organization?.id}
+      onChange={handleSwitchOrganization}
+      data={user?.organizationMemberships?.map(membership => ({
+        value: membership.organization.id,
+        label: membership.organization.name,
+        role: membership.role
+      }))}
+    />
+  );
+};
+```
+
+## Security Implementation
+
+### Zero-Trust Verification
+```javascript
+class ClerkZeroTrustGateway {
+  async verifyRequestContext(request) {
+    const session = await this.verifyClerkSession(request.token);
+    const user = await clerkClient.users.getUser(session.userId);
+    const organization = await clerkClient.organizations.getOrganization(
+      session.organizationId
+    );
+    
+    // Calculate trust score
+    let trustScore = 0.0;
+    
+    // Clerk user verification (40% weight)
+    if (session.status === 'active') trustScore += 0.2;
+    if (user.twoFactorEnabled) trustScore += 0.2;
+    
+    // Organization context (25% weight)
+    const membership = organization.memberships.find(
+      m => m.userId === session.userId
+    );
+    if (membership && membership.role !== 'guest') trustScore += 0.25;
+    
+    // Device verification (20% weight)
+    if (this.isKnownDevice(session.deviceId, user.id)) trustScore += 0.2;
+    
+    // Behavioral analysis (15% weight)
+    if (this.isNormalBehavior(user.id, request.action)) trustScore += 0.15;
+    
+    // Dynamic threshold based on action sensitivity
+    const threshold = this.getActionThreshold(request.action, organization.privateMetadata.tier);
+    
+    return {
+      allowed: trustScore >= threshold,
+      trustScore,
+      threshold,
+      context: {
+        userId: session.userId,
+        organizationId: session.organizationId,
+        role: user.publicMetadata.role,
+        tenantId: organization.privateMetadata.tenantId
+      }
+    };
+  }
+}
+```
+
+## Error Handling Patterns
+
+### Clerk Error Recovery
+```javascript
+const useClerkErrorHandler = () => {
+  const { signOut } = useAuth();
+  
+  const handleClerkError = async (error) => {
+    switch (error.code) {
+      case 'session_expired':
+        // Attempt silent refresh
+        try {
+          await clerkClient.session.touch();
+        } catch (refreshError) {
+          await signOut();
+          navigateToLogin();
+        }
+        break;
+        
+      case 'organization_not_found':
+        navigateToOrganizationSelector();
+        break;
+        
+      case 'insufficient_permissions':
+        showToast('You do not have permission for this action');
+        break;
+        
+      case 'network_error':
+        // Switch to offline mode
+        enableOfflineMode();
+        break;
+        
+      default:
+        console.error('Unhandled Clerk error:', error);
+        showToast('Authentication error occurred');
+    }
+  };
+  
+  return { handleClerkError };
+};
+```
+
+## Testing Patterns
+
+### Clerk Testing Setup
+```javascript
+// Mock Clerk for tests
+const mockClerkProvider = ({ children, mockUser, mockOrg }) => {
+  const mockAuth = {
+    userId: mockUser?.id || 'user_123',
+    isSignedIn: !!mockUser,
+    sessionId: 'sess_123'
+  };
+  
+  const mockOrgContext = {
+    organization: mockOrg,
+    membership: mockOrg ? {
+      role: 'admin',
+      organization: mockOrg
+    } : null
+  };
+  
+  return (
+    <ClerkProvider>
+      <AuthContext.Provider value={mockAuth}>
+        <OrganizationContext.Provider value={mockOrgContext}>
+          {children}
+        </OrganizationContext.Provider>
+      </AuthContext.Provider>
+    </ClerkProvider>
+  );
+};
+
+// Integration tests
+describe('Clerk Integration', () => {
+  it('should handle organization switching', async () => {
+    const mockUser = { id: 'user_123', publicMetadata: { role: 'foreman' } };
+    const mockOrg = { id: 'org_123', name: 'Test Construction' };
+    
+    render(
+      <MockClerkProvider mockUser={mockUser} mockOrg={mockOrg}>
+        <OrganizationSwitcher />
+      </MockClerkProvider>
+    );
+    
+    // Test organization switching logic
+  });
+});
+```
+
+Remember: Always verify Clerk session state before making API calls, and implement graceful fallback to offline mode when Clerk services are unavailable. The hybrid auth system ensures 30-day offline capability while maintaining security standards.
