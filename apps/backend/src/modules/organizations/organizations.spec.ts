@@ -141,7 +141,7 @@ describe('Multi-Tenant Data Isolation', () => {
       expect(projectsB[0].name).toBe('Bridge Renovation Project');
 
       // Cross-tenant access should be blocked
-      const canUserAAccessProjectB = await orgService.canUserAccessProject(
+      const canUserAAccessProjectB = await orgService.canAccessProject(
         userA.userId,
         projectB.id,
         'READ'
@@ -264,19 +264,19 @@ describe('Multi-Tenant Data Isolation', () => {
 
       for (const testCase of testCases) {
         // Test project access permissions
-        const canRead = await orgService.canUserAccessProject(
+        const canRead = await orgService.canAccessProject(
           userA.userId,
           project.id,
           'READ'
         );
 
-        const canWrite = await orgService.canUserAccessProject(
+        const canWrite = await orgService.canAccessProject(
           userA.userId,
           project.id,
           'WRITE'
         );
 
-        const canDelete = await orgService.canUserAccessProject(
+        const canDelete = await orgService.canAccessProject(
           userA.userId,
           project.id,
           'DELETE'

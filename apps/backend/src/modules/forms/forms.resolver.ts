@@ -5,25 +5,17 @@ import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { FormsService } from './forms.service';
 import { GraphQLJSON } from 'graphql-type-json';
 
-// Enums
-export enum FormTemplateCategory {
-  EPA_SWPPP = 'EPA_SWPPP',
-  EPA_CGP = 'EPA_CGP',
-  OSHA_SAFETY = 'OSHA_SAFETY',
-  STATE_PERMIT = 'STATE_PERMIT',
-  CUSTOM = 'CUSTOM',
-}
+import { FormCategory as PrismaFormCategory, FormStatus as PrismaFormStatus } from '@prisma/client';
 
-export enum FormStatus {
-  DRAFT = 'DRAFT',
-  SUBMITTED = 'SUBMITTED',
-  REVIEWED = 'REVIEWED',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
-}
+// Re-export Prisma enums for GraphQL
+export const FormCategory = PrismaFormCategory;
+export type FormCategory = PrismaFormCategory;
 
-registerEnumType(FormTemplateCategory, {
-  name: 'FormTemplateCategory',
+export const FormStatus = PrismaFormStatus;
+export type FormStatus = PrismaFormStatus;
+
+registerEnumType(FormCategory, {
+  name: 'FormCategory',
 });
 
 registerEnumType(FormStatus, {
@@ -184,8 +176,8 @@ export class FormTemplate {
   @Field({ nullable: true })
   description?: string;
 
-  @Field(() => FormTemplateCategory)
-  category: FormTemplateCategory;
+  @Field(() => FormCategory)
+  category: FormCategory;
 
   @Field()
   version: number;
@@ -286,8 +278,8 @@ export class CreateFormTemplateInput {
   @Field({ nullable: true })
   description?: string;
 
-  @Field(() => FormTemplateCategory)
-  category: FormTemplateCategory;
+  @Field(() => FormCategory)
+  category: FormCategory;
 
   @Field(() => GraphQLJSON)
   schema: any;

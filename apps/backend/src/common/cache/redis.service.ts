@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Redis, { RedisOptions, ChainableCommander } from 'ioredis';
+import Redis, { RedisOptions, ChainableCommander, Cluster } from 'ioredis';
 
 /**
  * Redis Service for High-Performance Caching
@@ -9,7 +9,7 @@ import Redis, { RedisOptions, ChainableCommander } from 'ioredis';
 @Injectable()
 export class RedisService implements OnModuleDestroy {
   private readonly logger = new Logger(RedisService.name);
-  private redis: Redis;
+  private redis: Redis | Cluster;
   private clusterMode = false;
 
   // Performance metrics

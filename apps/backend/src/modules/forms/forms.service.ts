@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '@/modules/database/prisma.service';
-import type { FormTemplate, FormSubmission } from '@brave-forms/types';
 
 @Injectable()
 export class FormsService {
@@ -129,6 +128,9 @@ export class FormsService {
         offlineCreated: data.offlineCreated || false,
         status: 'DRAFT',
       },
+      include: {
+        template: true,
+      },
     });
   }
 
@@ -191,12 +193,15 @@ export class FormsService {
       where: { id },
       data: {
         ...data,
-        submittedAt: data.status === 'SUBMITTED' && !submission.submittedAt 
-          ? new Date() 
+        submittedAt: data.status === 'SUBMITTED' && !submission.submittedAt
+          ? new Date()
           : submission.submittedAt,
         reviewedAt: data.status && ['REVIEWED', 'APPROVED', 'REJECTED'].includes(data.status)
           ? new Date()
           : submission.reviewedAt,
+      },
+      include: {
+        template: true,
       },
     });
   }
@@ -214,9 +219,11 @@ export class FormsService {
     };
 
     // Check critical EPA thresholds
-    if (template.compliance?.criticalThresholds) {
-      for (const threshold of template.compliance.criticalThresholds) {
-        const fieldValue = submission.data[threshold.field];
+    const compliance = template.compliance as any;
+    if (compliance?.criticalThresholds) {
+      for (const threshold of compliance.criticalThresholds) {
+        const submissionData = submission.data as any;
+        const fieldValue = submissionData[threshold.field];
         
         if (threshold.field === 'rainfallAmount' && fieldValue !== undefined) {
           // EPA CGP requires exactly 0.25" threshold - no rounding
@@ -231,9 +238,11 @@ export class FormsService {
     }
 
     // Check required fields
-    if (template.schema?.fields) {
-      for (const field of template.schema.fields) {
-        if (field.validation?.required && !submission.data[field.name]) {
+    const schema = template.schema as any;
+    if (schema?.fields) {
+      for (const field of schema.fields) {
+        const submissionData = submission.data as any;
+        if (field.validation?.required && !submissionData[field.name]) {
           validationResults.violations.push(
             `Required field "${field.label}" is missing`
           );
@@ -243,10 +252,11 @@ export class FormsService {
     }
 
     // Check GPS requirement for photos (EPA compliance)
-    if (template.schema?.fields) {
-      for (const field of template.schema.fields) {
+    if (schema?.fields) {
+      for (const field of schema.fields) {
         if (field.type === 'photo' && field.metadata?.gpsRequired) {
-          const photoData = submission.data[field.name];
+          const submissionData = submission.data as any;
+          const photoData = submissionData[field.name];
           if (photoData && !photoData.gpsLocation) {
             validationResults.violations.push(
               'Photo must include GPS location for EPA compliance'

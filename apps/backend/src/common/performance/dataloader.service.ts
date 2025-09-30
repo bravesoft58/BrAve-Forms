@@ -659,20 +659,21 @@ export class DataLoaderService {
 
   /**
    * Get cache statistics for monitoring
+   * Note: DataLoader 2.x+ doesn't expose cache property publicly
    */
   getCacheStats(): Record<string, any> {
     return {
       userLoader: {
-        cacheSize: this.userLoader.cache?.size || 0,
+        cacheEnabled: true,
       },
       projectLoader: {
-        cacheSize: this.projectLoader.cache?.size || 0,
+        cacheEnabled: true,
       },
       formTemplateLoader: {
-        cacheSize: this.formTemplateLoader.cache?.size || 0,
+        cacheEnabled: true,
       },
       weatherDataLoader: {
-        cacheSize: this.weatherDataLoader.cache?.size || 0,
+        cacheEnabled: true,
       },
     };
   }

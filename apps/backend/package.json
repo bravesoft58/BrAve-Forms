@@ -48,6 +48,7 @@
     "dataloader": "^2.2.3",
     "exif-reader": "^2.0.2",
     "graphql": "^16.8.1",
+    "graphql-subscriptions": "^3.0.0",
     "graphql-type-json": "^0.3.2",
     "has-flag": "^5.0.1",
     "ioredis": "^5.3.2",

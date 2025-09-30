@@ -62,7 +62,7 @@ export class OrganizationResolver {
    */
   @Query('organizationProjects')
   @UseGuards(RolesGuard)
-  @Roles('owner', 'admin', 'manager')
+  @Roles('OWNER', 'ADMIN', 'MANAGER')
   async getOrganizationProjects(@CurrentUser() user: any) {
     const organization = await this.organizationService.getOrganizationByClerkId(user.orgId);
     if (!organization) {
@@ -77,7 +77,7 @@ export class OrganizationResolver {
    */
   @Query('organizationUsers')
   @UseGuards(RolesGuard)
-  @Roles('owner', 'admin')
+  @Roles('OWNER', 'ADMIN')
   async getOrganizationUsers(@CurrentUser() user: any) {
     const organization = await this.organizationService.getOrganizationByClerkId(user.orgId);
     if (!organization) {
