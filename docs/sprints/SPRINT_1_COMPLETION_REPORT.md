@@ -110,7 +110,7 @@ pnpm test:compliance
 
 ### What Went Well
 
-- Kubernetes deployment smooth with Docker Desktop
+- Kubernetes deployment smooth with Rancher Desktop
 - Port conflict resolution handled proactively
 - Database migrations successful on first try
 - EPA threshold implementation correct
@@ -186,10 +186,10 @@ NEXT_PUBLIC_API_URL="http://localhost:3002/graphql"
 # All services operational with Docker Compose:
 
 # Start all services (single command)
-docker-compose up -d
+Kubernetes (k3s) up -d
 
 # Verify services
-docker-compose ps
+Kubernetes (k3s) ps
 # COMPLETED PostgreSQL, Redis, MinIO all healthy
 
 # Start development servers

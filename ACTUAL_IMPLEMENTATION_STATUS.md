@@ -23,10 +23,11 @@
 
 - NestJS 10.x GraphQL API with Code-first approach
 - PostgreSQL 15 database with Prisma 5.x ORM
-- Kubernetes local development (Rancher Desktop + k3s)
+- Kubernetes local development (Rancher Desktop + k3s + nerdctl)
+- containerd container runtime (production standard, NO Docker Desktop)
 - Redis for caching and session management
 - MinIO for object storage (S3-compatible)
-- Docker containerization with multi-stage builds
+- Multi-stage Dockerfiles (built with nerdctl, not docker command)
 
 **Modules (17 total):**
 
@@ -176,11 +177,13 @@
 - Port mappings: 30101 (backend), 30102 (web), 30103 (minio)
 - PowerShell deployment scripts (k8s-local-setup.ps1)
 
-**Docker:**
+**Container Images:**
 
-- Multi-stage Dockerfile for backend
-- Image builds working with nerdctl
-- Images in k8s.io namespace
+- Multi-stage Dockerfiles for backend and web
+- Image builds working with nerdctl (Rancher Desktop)
+- Images stored in k8s.io namespace (Kubernetes-native)
+- NO Docker Desktop required or used
+- containerd runtime (production standard)
 
 ### NOT IMPLEMENTED (Missing)
 

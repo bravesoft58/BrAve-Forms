@@ -209,7 +209,7 @@ As a developer, I need a consistent development environment so that the team can
 
 **Technical Tasks:**
 
-- Create docker-compose.yml
+- Create Kubernetes (k3s).yml
 - Set up .env.example files
 - Configure nodemon/tsx watch
 - Add pgAdmin container

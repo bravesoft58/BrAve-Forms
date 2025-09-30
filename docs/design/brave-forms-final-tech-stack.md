@@ -653,7 +653,7 @@ cp .env.example .env
 # Add Clerk keys, database URL, etc.
 
 # 4. Start development
-docker-compose up -d
+Kubernetes (k3s) up -d
 npm run dev
 
 # 5. Access application
@@ -718,7 +718,7 @@ NODE_ENV=development
 - [ ] Clerk account created with organization setup
 - [ ] PostgreSQL 16 installed with JSONB support
 - [ ] Node.js 20 LTS environment ready
-- [ ] Docker Desktop for local development
+- [ ] Rancher Desktop for local development
 - [ ] Git repository initialized
 
 ### MVP Must-Haves

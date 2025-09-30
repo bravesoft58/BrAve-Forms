@@ -115,8 +115,10 @@ Real-world construction compliance forms that BrAve Forms digitizes:
 
 ### Infrastructure
 
-- **Container**: Docker with multi-stage builds
-- **Orchestration**: Kubernetes (EKS)
+- **Local Dev**: Rancher Desktop (containerd + k3s + nerdctl)
+- **Container Runtime**: containerd (production standard)
+- **Image Building**: nerdctl with k8s.io namespace
+- **Orchestration**: Kubernetes (k3s local, EKS production)
 - **IaC**: Terraform 1.5+
 - **CI/CD**: GitHub Actions
 - **Monitoring**: Datadog, Sentry
@@ -129,9 +131,8 @@ Real-world construction compliance forms that BrAve Forms digitizes:
 
 - Node.js 20+
 - pnpm 8+
-- PostgreSQL 15 with TimescaleDB
-- Redis 7+
-- Docker & Docker Compose (optional)
+- Rancher Desktop (latest version with containerd + k3s)
+- kubectl (included with Rancher Desktop)
 
 ### Installation
 
@@ -175,18 +176,27 @@ pnpm --filter @brave-forms/mobile cap:ios
 pnpm --filter @brave-forms/mobile cap:android
 ```
 
-### Docker Development
+### Kubernetes Development (Rancher Desktop)
 
 ```bash
-# Start all services
-docker-compose up -d
+# Deploy all services to Kubernetes
+.\scripts\k8s-local-setup.ps1 -Action deploy -BuildImages -CreateSecrets
 
-# View logs
-docker-compose logs -f backend
+# Check deployment status
+.\scripts\k8s-local-setup.ps1 -Action status
 
-# Stop services
-docker-compose down
+# View pod logs
+kubectl logs -f deployment/backend -n braveforms
+
+# Remove deployment
+.\scripts\k8s-local-setup.ps1 -Action remove
 ```
+
+**Services Available:**
+
+- Backend GraphQL: http://localhost:30101/graphql
+- Web Application: http://localhost:30102
+- MinIO Console: http://localhost:30103
 
 ## Testing
 
@@ -261,9 +271,9 @@ pnpm build
 # Deploy database migrations
 pnpm --filter @brave-forms/database migrate:deploy
 
-# Build Docker images
-docker build -f infrastructure/docker/Dockerfile.backend -t brave-forms-backend .
-docker build -f infrastructure/docker/Dockerfile.web -t brave-forms-web .
+# Build container images (Rancher Desktop + nerdctl)
+nerdctl -n k8s.io build -f infrastructure/docker/Dockerfile.backend -t brave-forms-backend .
+nerdctl -n k8s.io build -f infrastructure/docker/Dockerfile.web -t brave-forms-web .
 ```
 
 ### Infrastructure
