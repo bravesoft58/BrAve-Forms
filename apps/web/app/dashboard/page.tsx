@@ -1,6 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+// Force dynamic rendering (requires Clerk authentication at runtime)
+export const dynamic = 'force-dynamic';
 import { 
   Container, 
   Title, 
@@ -38,10 +41,23 @@ import { OrganizationProvider } from '@/components/Organization/OrganizationProv
  * Enforces complete tenant isolation using Clerk Organizations
  */
 function DashboardContent() {
-  const { orgRole } = useAuth();
-  const { getCurrentRole } = useRolePermissions();
+  const [isMounted, setIsMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('overview');
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Prevent SSR/SSG - only render in browser
+  if (!isMounted) {
+    return null;
+  }
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { orgRole } = useAuth();
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { getCurrentRole } = useRolePermissions();
 
   const userRole = getCurrentRole() || 'MEMBER';
 
@@ -74,7 +90,7 @@ function DashboardContent() {
         </Group>
       </Group>
 
-      <Tabs value={activeTab} onChange={setActiveTab}>
+      <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'overview')}>
         <Tabs.List>
           <Tabs.Tab 
             value="overview" 

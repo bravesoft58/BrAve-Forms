@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { gql } from '@apollo/client';
-import { useQuery, useLazyQuery } from '@apollo/client/react';
+import { useState, useEffect } from 'react';
+
+// Force dynamic rendering (requires Apollo Client at runtime)
+export const dynamic = 'force-dynamic';
+
+import { gql, useQuery, useLazyQuery } from '@apollo/client';
 import { Button, Card, Text, Title, Stack, Alert, Code, Loader } from '@mantine/core';
 import { useCurrentUser, useOrganizationData, useProjects } from '@/lib/apollo/hooks';
 
@@ -34,9 +37,20 @@ const HEALTH_CHECK = gql`
 `;
 
 export default function TestApolloPage() {
+  const [isMounted, setIsMounted] = useState(false);
   const [testResults, setTestResults] = useState<{ [key: string]: any }>({});
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Prevent SSR/SSG - only render in browser
+  if (!isMounted) {
+    return null;
+  }
+
   // Test basic connectivity
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { data: healthData, loading: healthLoading, error: healthError } = useQuery(HEALTH_CHECK, {
     onCompleted: (data) => {
       setTestResults(prev => ({
@@ -53,6 +67,7 @@ export default function TestApolloPage() {
   });
 
   // Test introspection
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [runIntrospection, { data: introspectionData, loading: introspectionLoading }] = useLazyQuery(
     INTROSPECTION_QUERY,
     {

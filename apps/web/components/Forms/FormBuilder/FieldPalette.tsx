@@ -36,7 +36,7 @@ import {
   IconCalculator,
   IconFileUpload,
   IconAlertTriangle,
-  IconRepeater,
+  IconRefresh,
 } from '@tabler/icons-react';
 
 interface FieldPaletteProps {
@@ -199,7 +199,7 @@ const fieldCategories = [
       {
         type: 'correctiveAction',
         label: 'Corrective Action',
-        icon: IconRepeater,
+        icon: IconRefresh,
         description: 'Track remediation steps and deadlines',
         color: 'orange',
         badge: 'Action',

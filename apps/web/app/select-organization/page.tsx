@@ -2,6 +2,9 @@ import { OrganizationList } from '@clerk/nextjs';
 import { Container, Title, Text, Stack, Card } from '@mantine/core';
 import { IconBuilding, IconHelmet } from '@tabler/icons-react';
 
+// Force dynamic rendering (requires Clerk authentication at runtime)
+export const dynamic = 'force-dynamic';
+
 /**
  * Organization Selection Page
  * 

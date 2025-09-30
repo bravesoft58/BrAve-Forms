@@ -1,6 +1,10 @@
 'use client';
 
 import React from 'react';
+
+// Force dynamic rendering (form builder is interactive)
+export const dynamic = 'force-dynamic';
+
 import { Container, Title, Text, Stack } from '@mantine/core';
 import { FormBuilder } from '@/components/Forms/FormBuilder';
 import type { FormTemplate } from '@brave-forms/types';
