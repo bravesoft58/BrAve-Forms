@@ -7,6 +7,7 @@ This project has migrated from Docker Desktop to **Rancher Desktop** for local K
 ## Migration Complete
 
 All Docker Desktop references have been removed in favor of:
+
 - **Rancher Desktop** - Open-source Docker Desktop alternative
 - **containerd** - Production Kubernetes container runtime
 - **nerdctl** - Docker-compatible CLI for containerd
@@ -19,6 +20,7 @@ Please refer to the comprehensive setup guide:
 ### [RANCHER_DESKTOP_SETUP.md](./RANCHER_DESKTOP_SETUP.md)
 
 This guide covers:
+
 - Rancher Desktop installation and configuration
 - Multi-project namespace isolation (braveforms)
 - Port conflict detection and management
@@ -32,12 +34,14 @@ This guide covers:
 If you previously used Docker Desktop:
 
 1. **Uninstall Docker Desktop** (optional)
+
    ```powershell
    # Windows
    winget uninstall Docker.DockerDesktop
    ```
 
 2. **Install Rancher Desktop**
+
    ```powershell
    # Windows
    winget install suse.RancherDesktop
@@ -48,6 +52,7 @@ If you previously used Docker Desktop:
    - Kubernetes: **Enabled**
 
 4. **Update Project**
+
    ```powershell
    # Check for port conflicts FIRST
    .\scripts\check-port-conflicts.ps1 -PortsToCheck @(30101, 30102, 30103)
@@ -59,29 +64,35 @@ If you previously used Docker Desktop:
 ## Key Changes
 
 ### Namespace
+
 - Old: `brave-forms`
 - New: `braveforms` (single word for easier CLI usage)
 
 ### Ports
+
 - Backend API: `30001` → `30101`
 - Web Frontend: `30002` → `30102`
 - MinIO Console: `30003` → `30103`
 
 ### Storage Class
+
 - Old: `hostpath` (Docker Desktop)
 - New: `local-path` (k3s default)
 
 ### Image Building
+
 - Old: `docker build`
 - New: `nerdctl build -n k8s.io`
 
 ### Image Pull Policy
+
 - Old: `IfNotPresent`
 - New: `Never` (forces local image usage)
 
 ## Why Rancher Desktop?
 
 ### Benefits:
+
 - **Open Source:** No licensing restrictions
 - **Production-Like:** Uses containerd (de facto Kubernetes standard)
 - **Fast:** k3s is lightweight and optimized
@@ -89,6 +100,7 @@ If you previously used Docker Desktop:
 - **Active Development:** Regular updates and community support
 
 ### Docker Desktop Limitations:
+
 - Licensing requirements for commercial use
 - Heavier resource usage
 - dockerd not used in production Kubernetes
@@ -98,11 +110,11 @@ If you previously used Docker Desktop:
 
 New service URLs:
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| Web App | http://localhost:30102 | Main application UI |
-| GraphQL API | http://localhost:30101/graphql | API playground |
-| MinIO Console | http://localhost:30103 | S3-compatible storage |
+| Service       | URL                            | Description           |
+| ------------- | ------------------------------ | --------------------- |
+| Web App       | http://localhost:30102         | Main application UI   |
+| GraphQL API   | http://localhost:30101/graphql | API playground        |
+| MinIO Console | http://localhost:30103         | S3-compatible storage |
 
 ## Common Commands
 
@@ -127,22 +139,26 @@ kubectl get pods -n braveforms
 If you encounter issues:
 
 1. **Verify Rancher Desktop is running**
+
    ```powershell
    nerdctl version
    kubectl cluster-info
    ```
 
 2. **Check port conflicts**
+
    ```powershell
    .\scripts\check-port-conflicts.ps1 -PortsToCheck @(30101, 30102, 30103)
    ```
 
 3. **Rebuild images**
+
    ```powershell
    .\scripts\k8s-local-setup.ps1 -Action build -BuildImages
    ```
 
 4. **Clean reinstall**
+
    ```powershell
    # Remove old deployment
    kubectl delete namespace braveforms

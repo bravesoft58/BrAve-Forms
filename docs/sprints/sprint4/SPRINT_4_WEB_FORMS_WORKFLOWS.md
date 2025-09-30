@@ -18,6 +18,7 @@
 ## 📋 User Stories
 
 ### Story 4.1: Visual Form Builder
+
 **Points:** 13  
 **Priority:** P0 (Critical)  
 **Assignee:** Frontend Dev 1 + Frontend Dev 2
@@ -26,6 +27,7 @@
 As a compliance administrator, I need a visual form builder so that I can create custom inspection forms without coding.
 
 **Acceptance Criteria:**
+
 - [ ] Drag-and-drop form designer
 - [ ] 10+ field types available
 - [ ] Field validation rules configuration
@@ -34,6 +36,7 @@ As a compliance administrator, I need a visual form builder so that I can create
 - [ ] Template library
 
 **Technical Tasks:**
+
 - Integrate react-beautiful-dnd for drag-drop
 - Create field type components
 - Build properties panel for field config
@@ -42,6 +45,7 @@ As a compliance administrator, I need a visual form builder so that I can create
 - Create template management system
 
 **Field Types:**
+
 ```typescript
 enum FieldType {
   TEXT = 'text',
@@ -58,11 +62,12 @@ enum FieldType {
   GPS_LOCATION = 'gps_location',
   WEATHER_AUTO = 'weather_auto', // Auto-populated
   CALCULATION = 'calculation',
-  SECTION_BREAK = 'section_break'
+  SECTION_BREAK = 'section_break',
 }
 ```
 
 **Form Builder Layout:**
+
 ```
 +------------------+------------------+------------------+
 |  Field Palette   |   Form Canvas    | Properties Panel |
@@ -78,6 +83,7 @@ enum FieldType {
 ---
 
 ### Story 4.2: Inspection Management System
+
 **Points:** 8  
 **Priority:** P0 (Critical)  
 **Assignee:** Frontend Dev 1
@@ -86,6 +92,7 @@ enum FieldType {
 As a project manager, I need to manage inspections so that I can track compliance status across all sites.
 
 **Acceptance Criteria:**
+
 - [ ] Inspection calendar view
 - [ ] List view with filters
 - [ ] Inspection detail page
@@ -94,6 +101,7 @@ As a project manager, I need to manage inspections so that I can track complianc
 - [ ] Export functionality
 
 **Technical Tasks:**
+
 - Create inspection calendar component
 - Build DataTable with advanced filters
 - Implement inspection detail layout
@@ -102,21 +110,23 @@ As a project manager, I need to manage inspections so that I can track complianc
 - Add CSV/PDF export
 
 **Inspection Statuses:**
+
 ```typescript
 enum InspectionStatus {
   SCHEDULED = 'scheduled',
-  PENDING = 'pending',      // 0.25" rain triggered
+  PENDING = 'pending', // 0.25" rain triggered
   IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   APPROVED = 'approved',
   REJECTED = 'rejected',
-  OVERDUE = 'overdue'      // Past 24-hour deadline
+  OVERDUE = 'overdue', // Past 24-hour deadline
 }
 ```
 
 ---
 
 ### Story 4.3: Workflow Automation Builder
+
 **Points:** 8  
 **Priority:** P1 (High)  
 **Assignee:** Frontend Dev 2
@@ -125,6 +135,7 @@ enum InspectionStatus {
 As a compliance manager, I need workflow automation so that inspections follow proper procedures automatically.
 
 **Acceptance Criteria:**
+
 - [ ] Visual workflow designer
 - [ ] Trigger configuration
 - [ ] Action builder
@@ -133,6 +144,7 @@ As a compliance manager, I need workflow automation so that inspections follow p
 - [ ] Testing mode
 
 **Technical Tasks:**
+
 - Integrate React Flow for workflow visualization
 - Create trigger selection UI
 - Build action configuration panels
@@ -141,6 +153,7 @@ As a compliance manager, I need workflow automation so that inspections follow p
 - Create workflow test runner
 
 **Workflow Components:**
+
 ```typescript
 interface WorkflowTriggers {
   weatherEvent: '0.25" precipitation';
@@ -163,6 +176,7 @@ interface WorkflowActions {
 ---
 
 ### Story 4.4: Compliance Tracking Dashboard
+
 **Points:** 5  
 **Priority:** P0 (Critical)  
 **Assignee:** Frontend Dev 1
@@ -171,6 +185,7 @@ interface WorkflowActions {
 As a compliance officer, I need a real-time dashboard so that I can monitor EPA/OSHA compliance across all projects.
 
 **Acceptance Criteria:**
+
 - [ ] Compliance score visualization
 - [ ] Violation alerts panel
 - [ ] Upcoming deadlines widget
@@ -179,6 +194,7 @@ As a compliance officer, I need a real-time dashboard so that I can monitor EPA/
 - [ ] Drill-down capability
 
 **Technical Tasks:**
+
 - Create compliance score cards
 - Build violation alert list
 - Implement deadline timeline
@@ -187,6 +203,7 @@ As a compliance officer, I need a real-time dashboard so that I can monitor EPA/
 - Add interactive drill-down
 
 **Dashboard Widgets:**
+
 ```
 +------------------+------------------+
 | Compliance Score | Active Violations|
@@ -204,6 +221,7 @@ As a compliance officer, I need a real-time dashboard so that I can monitor EPA/
 ---
 
 ### Story 4.5: Document Management System
+
 **Points:** 5  
 **Priority:** P1 (High)  
 **Assignee:** Frontend Dev 2
@@ -212,6 +230,7 @@ As a compliance officer, I need a real-time dashboard so that I can monitor EPA/
 As a document controller, I need to manage compliance documents so that all required paperwork is organized.
 
 **Acceptance Criteria:**
+
 - [ ] Document upload interface
 - [ ] Folder structure management
 - [ ] Version control
@@ -220,6 +239,7 @@ As a document controller, I need to manage compliance documents so that all requ
 - [ ] Sharing controls
 
 **Technical Tasks:**
+
 - Create file upload component with react-dropzone
 - Build folder tree navigation
 - Implement version history UI
@@ -228,6 +248,7 @@ As a document controller, I need to manage compliance documents so that all requ
 - Create sharing permissions UI
 
 **Document Types:**
+
 ```typescript
 interface DocumentTypes {
   SWPPP: 'Stormwater Prevention Plan';
@@ -242,6 +263,7 @@ interface DocumentTypes {
 ---
 
 ### Story 4.6: Notification Center
+
 **Points:** 3  
 **Priority:** P1 (High)  
 **Assignee:** Frontend Dev 1
@@ -250,6 +272,7 @@ interface DocumentTypes {
 As a user, I need a notification center so that I stay informed about important compliance events.
 
 **Acceptance Criteria:**
+
 - [ ] Real-time notification bell
 - [ ] Notification dropdown panel
 - [ ] Notification preferences
@@ -258,6 +281,7 @@ As a user, I need a notification center so that I stay informed about important 
 - [ ] Action buttons in notifications
 
 **Technical Tasks:**
+
 - Create notification bell with badge
 - Build notification dropdown
 - Implement WebSocket for real-time
@@ -266,6 +290,7 @@ As a user, I need a notification center so that I stay informed about important 
 - Add actionable notification cards
 
 **Notification Types:**
+
 ```typescript
 interface NotificationTypes {
   WEATHER_ALERT: {
@@ -289,6 +314,7 @@ interface NotificationTypes {
 ---
 
 ### Story 4.7: Form Response Viewer
+
 **Points:** 3  
 **Priority:** P2 (Medium)  
 **Assignee:** Frontend Dev 2
@@ -297,6 +323,7 @@ interface NotificationTypes {
 As an inspector, I need to view submitted form responses so that I can review inspection data.
 
 **Acceptance Criteria:**
+
 - [ ] Response detail view
 - [ ] Photo gallery viewer
 - [ ] Signature verification
@@ -305,6 +332,7 @@ As an inspector, I need to view submitted form responses so that I can review in
 - [ ] Comments system
 
 **Technical Tasks:**
+
 - Create response detail layout
 - Build photo lightbox gallery
 - Add signature display component
@@ -315,6 +343,7 @@ As an inspector, I need to view submitted form responses so that I can review in
 ## 🎨 UI/UX Specifications
 
 ### Form Builder UX
+
 - Intuitive drag-and-drop with visual feedback
 - Real-time preview updates
 - Undo/redo functionality
@@ -322,6 +351,7 @@ As an inspector, I need to view submitted form responses so that I can review in
 - Auto-save every 30 seconds
 
 ### Workflow Visualization
+
 - Node-based flow diagram
 - Color-coded status indicators
 - Zoom and pan controls
@@ -329,6 +359,7 @@ As an inspector, I need to view submitted form responses so that I can review in
 - Connection validation
 
 ### Performance Requirements
+
 - Form builder loads in <2 seconds
 - Drag operations <16ms response
 - Auto-save completes in <500ms
@@ -337,11 +368,13 @@ As an inspector, I need to view submitted form responses so that I can review in
 ## 🧪 Testing Focus Areas
 
 ### Critical Paths
+
 1. Form creation → Save → Use in inspection
 2. Weather trigger → Workflow execution → Notification
 3. Inspection submission → Approval → Compliance update
 
 ### Browser Compatibility
+
 - Chrome 90+ (primary)
 - Firefox 88+
 - Safari 14+
@@ -349,23 +382,23 @@ As an inspector, I need to view submitted form responses so that I can review in
 
 ## 🚨 Risks & Mitigation
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Form builder complexity | High | Start with basic fields, add advanced later |
-| Workflow engine performance | Medium | Implement queuing for complex workflows |
-| Real-time sync issues | Medium | Fallback to polling if WebSocket fails |
+| Risk                        | Impact | Mitigation                                  |
+| --------------------------- | ------ | ------------------------------------------- |
+| Form builder complexity     | High   | Start with basic fields, add advanced later |
+| Workflow engine performance | Medium | Implement queuing for complex workflows     |
+| Real-time sync issues       | Medium | Fallback to polling if WebSocket fails      |
 
 ## 👥 Team Allocation
 
-| Team Member | Focus Area | Capacity |
-|-------------|------------|----------|
-| Frontend Dev 1 | Form Builder (lead), Inspections | 100% |
-| Frontend Dev 2 | Workflows, Documents, Notifications | 100% |
-| Backend Dev | API support for forms/workflows | 75% |
-| QA Engineer | Form builder testing | 100% |
-| UX Designer | Form builder UX | 50% |
+| Team Member    | Focus Area                          | Capacity |
+| -------------- | ----------------------------------- | -------- |
+| Frontend Dev 1 | Form Builder (lead), Inspections    | 100%     |
+| Frontend Dev 2 | Workflows, Documents, Notifications | 100%     |
+| Backend Dev    | API support for forms/workflows     | 75%      |
+| QA Engineer    | Form builder testing                | 100%     |
+| UX Designer    | Form builder UX                     | 50%      |
 
-## ✅ Definition of Done
+## COMPLETED Definition of Done
 
 - [ ] Features work in Chrome, Firefox, Safari
 - [ ] Responsive down to tablet (768px)
@@ -378,16 +411,17 @@ As an inspector, I need to view submitted form responses so that I can review in
 
 ## 📊 Sprint Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Form Builder Load | <2s | Lighthouse |
-| Workflow Save | <1s | API timing |
+| Metric                | Target | Measurement       |
+| --------------------- | ------ | ----------------- |
+| Form Builder Load     | <2s    | Lighthouse        |
+| Workflow Save         | <1s    | API timing        |
 | Notification Delivery | <500ms | WebSocket latency |
-| Page Bundle Size | <750KB | Webpack analyzer |
+| Page Bundle Size      | <750KB | Webpack analyzer  |
 
 ## 🚀 Next Sprint Preview
 
 **Sprint 5: Web Features & Portal**
+
 - QR code generation system
 - Public inspector portal
 - Advanced reporting
@@ -399,6 +433,6 @@ As an inspector, I need to view submitted form responses so that I can review in
 
 **Sprint 4 Commitment:** 40 story points  
 **Confidence Level:** 80%  
-**Dependencies:** Sprint 3 UI foundation complete  
+**Dependencies:** Sprint 3 UI foundation complete
 
-*This sprint delivers the core form and workflow capabilities that differentiate BrAve Forms from competitors.*
+_This sprint delivers the core form and workflow capabilities that differentiate BrAve Forms from competitors._

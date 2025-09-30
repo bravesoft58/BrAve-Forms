@@ -5,6 +5,7 @@
 BrAve Forms uses **Rancher Desktop** for local Kubernetes development with complete container orchestration. This replaces Docker Desktop and provides a production-like environment using containerd + nerdctl + k3s.
 
 **Why Rancher Desktop?**
+
 - Open-source Docker Desktop alternative
 - Uses containerd (production Kubernetes standard)
 - Includes k3s (lightweight, fast Kubernetes)
@@ -50,16 +51,19 @@ winget install suse.RancherDesktop
 Open Rancher Desktop settings and configure:
 
 **Container Runtime:**
+
 - Engine: **containerd** (NOT dockerd)
 - Namespace: k8s.io
 
 **Kubernetes:**
+
 - Enable: **YES**
 - Version: Latest stable (1.28+)
 - Port: 6443
 - Container Runtime: containerd
 
 **WSL (Windows only):**
+
 - Integration: Enabled for default WSL distribution
 
 ### 3. Verify Installation
@@ -79,6 +83,7 @@ kubectl get namespaces
 ```
 
 Expected output:
+
 ```
 [OK] Rancher Desktop (nerdctl) is available
 [OK] Kubernetes cluster is accessible
@@ -90,6 +95,7 @@ Expected output:
 BrAve Forms uses a dedicated namespace: **braveforms**
 
 ### Namespace Isolation Benefits:
+
 - Complete separation from other projects
 - Independent resource quotas
 - No port conflicts
@@ -97,6 +103,7 @@ BrAve Forms uses a dedicated namespace: **braveforms**
 - Clear kubectl targeting
 
 ### Port Assignments:
+
 - **30101** - Backend GraphQL API
 - **30102** - Web Frontend
 - **30103** - MinIO S3 Console
@@ -239,6 +246,7 @@ kubectl get svc --all-namespaces -o json | jq '.items[] | select(.spec.type=="No
 ```
 
 If conflicts exist:
+
 1. Check which project is using the ports
 2. Choose different ports for BrAve Forms
 3. Update all manifests and configmaps
@@ -278,11 +286,13 @@ nerdctl -n k8s.io rmi brave-forms-backend:local
 ### Image Pull Policy
 
 All deployments use `imagePullPolicy: Never` to force local image usage. This prevents:
+
 - Accidental pulls from Docker Hub
 - Network delays
 - Version mismatches
 
 If you see `ImagePullBackOff` errors:
+
 1. Verify image exists: `nerdctl -n k8s.io images`
 2. Rebuild image with correct tag
 3. Ensure image name matches deployment spec exactly
@@ -305,6 +315,7 @@ Error: NodePort 30101 is already allocated
 ```
 
 **Solution:**
+
 ```powershell
 # Check what's using the port
 .\scripts\check-port-conflicts.ps1 -PortsToCheck @(30101)
@@ -321,6 +332,7 @@ Pod Status: ImagePullBackOff
 ```
 
 **Solution:**
+
 ```powershell
 # Verify image exists
 nerdctl -n k8s.io images | grep brave-forms
@@ -339,6 +351,7 @@ Pod Status: Pending
 ```
 
 **Solution:**
+
 ```powershell
 # Check events
 kubectl get events -n braveforms --sort-by='.lastTimestamp'
@@ -357,6 +370,7 @@ Error: connect ECONNREFUSED postgres:5432
 ```
 
 **Solution:**
+
 ```powershell
 # Check Postgres pod is running
 kubectl get pods -n braveforms -l app=postgres
@@ -378,6 +392,7 @@ Error: secret "braveforms-secrets" not found
 ```
 
 **Solution:**
+
 ```powershell
 # Create secrets
 .\scripts\k8s-local-setup.ps1 -Action secrets -CreateSecrets
@@ -433,10 +448,12 @@ Adjust in deployment manifests if needed for your system.
 ### Storage Performance
 
 k3s uses `local-path` storage class which stores data in:
+
 - Windows: `\\wsl$\rancher-desktop-data\data\local-path-provisioner\`
 - macOS/Linux: `/var/lib/rancher/k3s/storage/`
 
 For better performance:
+
 - Use SSD for Rancher Desktop data
 - Allocate sufficient WSL memory (Windows)
 - Monitor disk I/O with `kubectl top nodes`
@@ -458,6 +475,7 @@ For better performance:
 ### 2. Use Namespace Isolation
 
 All commands should target the `braveforms` namespace:
+
 ```powershell
 kubectl get pods -n braveforms
 kubectl logs deployment/backend -n braveforms
@@ -466,6 +484,7 @@ kubectl logs deployment/backend -n braveforms
 ### 3. Clean Rebuilds
 
 When in doubt, clean rebuild:
+
 ```powershell
 # Remove deployment
 .\scripts\k8s-local-setup.ps1 -Action remove
@@ -494,6 +513,7 @@ watch kubectl top pods -n braveforms
 ### 5. Backup Data
 
 Before major changes:
+
 ```powershell
 # Backup Postgres
 kubectl exec deployment/postgres -n braveforms -- pg_dump -U brave brave_forms > backup.sql
@@ -536,6 +556,7 @@ kubectl logs deployment/backend -n braveforms | grep "rain-threshold"
 ## Support
 
 For issues specific to:
+
 - **BrAve Forms:** Check `CLAUDE.md` and project documentation
 - **Rancher Desktop:** https://github.com/rancher-sandbox/rancher-desktop/issues
 - **Kubernetes:** https://kubernetes.io/docs/tasks/debug/

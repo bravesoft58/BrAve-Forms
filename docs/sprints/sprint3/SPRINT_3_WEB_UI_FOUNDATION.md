@@ -18,6 +18,7 @@
 ## 📋 User Stories
 
 ### Story 3.1: Next.js Application Setup
+
 **Points:** 5  
 **Priority:** P0 (Critical)  
 **Assignee:** Frontend Dev 1
@@ -26,6 +27,7 @@
 As a developer, I need a properly configured Next.js 14 application so that we can build a performant web interface.
 
 **Acceptance Criteria:**
+
 - [ ] Next.js 14 with App Router configured
 - [ ] TypeScript strict mode enabled
 - [ ] ESLint and Prettier configured
@@ -34,6 +36,7 @@ As a developer, I need a properly configured Next.js 14 application so that we c
 - [ ] Error boundary implementation
 
 **Technical Tasks:**
+
 ```typescript
 // app/layout.tsx structure
 - Root layout with providers
@@ -46,6 +49,7 @@ As a developer, I need a properly configured Next.js 14 application so that we c
 ---
 
 ### Story 3.2: Mantine UI Framework Integration
+
 **Points:** 5  
 **Priority:** P0 (Critical)  
 **Assignee:** Frontend Dev 2
@@ -54,6 +58,7 @@ As a developer, I need a properly configured Next.js 14 application so that we c
 As a UI developer, I need Mantine v7 configured so that we have consistent, accessible components.
 
 **Acceptance Criteria:**
+
 - [ ] Mantine v7 installed and configured
 - [ ] Custom theme matching brand guidelines
 - [ ] Dark mode support
@@ -62,6 +67,7 @@ As a UI developer, I need Mantine v7 configured so that we have consistent, acce
 - [ ] Accessibility testing setup
 
 **Technical Tasks:**
+
 - Install @mantine/core, @mantine/hooks, @mantine/dates
 - Configure MantineProvider with theme
 - Create custom color palette
@@ -70,6 +76,7 @@ As a UI developer, I need Mantine v7 configured so that we have consistent, acce
 - Configure form components
 
 **Theme Configuration:**
+
 ```typescript
 const theme = {
   primaryColor: 'blue',
@@ -86,6 +93,7 @@ const theme = {
 ---
 
 ### Story 3.3: Admin Dashboard Layout
+
 **Points:** 8  
 **Priority:** P0 (Critical)  
 **Assignee:** Frontend Dev 1
@@ -94,6 +102,7 @@ const theme = {
 As an admin user, I need a dashboard interface so that I can navigate and manage the platform efficiently.
 
 **Acceptance Criteria:**
+
 - [ ] Responsive sidebar navigation
 - [ ] Header with user menu and notifications
 - [ ] Breadcrumb navigation
@@ -102,6 +111,7 @@ As an admin user, I need a dashboard interface so that I can navigate and manage
 - [ ] Loading states and skeletons
 
 **Technical Tasks:**
+
 - Create AppShell layout component
 - Build collapsible sidebar with navigation
 - Implement breadcrumb system
@@ -110,10 +120,11 @@ As an admin user, I need a dashboard interface so that I can navigate and manage
 - Build responsive mobile menu
 
 **Dashboard Sections:**
+
 ```
 - Overview (Stats & Alerts)
 - Projects
-- Sites  
+- Sites
 - Teams
 - Inspections
 - Weather
@@ -125,6 +136,7 @@ As an admin user, I need a dashboard interface so that I can navigate and manage
 ---
 
 ### Story 3.4: Project Management Interface
+
 **Points:** 8  
 **Priority:** P0 (Critical)  
 **Assignee:** Frontend Dev 2
@@ -133,6 +145,7 @@ As an admin user, I need a dashboard interface so that I can navigate and manage
 As a project manager, I need to create and manage construction projects so that inspections can be organized.
 
 **Acceptance Criteria:**
+
 - [ ] Project list view with filters
 - [ ] Project creation wizard
 - [ ] Project detail view
@@ -141,6 +154,7 @@ As a project manager, I need to create and manage construction projects so that 
 - [ ] Status indicators and badges
 
 **Technical Tasks:**
+
 - Create projects list page with DataTable
 - Build multi-step project creation form
 - Implement project detail layout
@@ -149,6 +163,7 @@ As a project manager, I need to create and manage construction projects so that 
 - Build status visualization
 
 **Data Table Features:**
+
 ```typescript
 interface ProjectTableFeatures {
   sorting: true;
@@ -163,6 +178,7 @@ interface ProjectTableFeatures {
 ---
 
 ### Story 3.5: User & Organization Management
+
 **Points:** 5  
 **Priority:** P1 (High)  
 **Assignee:** Frontend Dev 1
@@ -171,6 +187,7 @@ interface ProjectTableFeatures {
 As an organization admin, I need to manage users and permissions so that access is properly controlled.
 
 **Acceptance Criteria:**
+
 - [ ] User list with role badges
 - [ ] User invitation flow
 - [ ] Role management interface
@@ -179,6 +196,7 @@ As an organization admin, I need to manage users and permissions so that access 
 - [ ] Audit log viewer
 
 **Technical Tasks:**
+
 - Create users DataTable component
 - Build invitation modal with email
 - Implement role selector component
@@ -189,6 +207,7 @@ As an organization admin, I need to manage users and permissions so that access 
 ---
 
 ### Story 3.6: Weather Monitoring Dashboard
+
 **Points:** 8  
 **Priority:** P0 (Critical)  
 **Assignee:** Frontend Dev 2
@@ -197,6 +216,7 @@ As an organization admin, I need to manage users and permissions so that access 
 As a compliance manager, I need to monitor weather conditions so that I know when inspections are required.
 
 **Acceptance Criteria:**
+
 - [ ] Real-time weather display for all sites
 - [ ] 0.25" precipitation alerts (EXACT)
 - [ ] 7-day forecast view
@@ -205,6 +225,7 @@ As a compliance manager, I need to monitor weather conditions so that I know whe
 - [ ] Site-specific weather cards
 
 **Technical Tasks:**
+
 - Create weather dashboard layout
 - Build precipitation alert component
 - Implement forecast visualization
@@ -213,6 +234,7 @@ As a compliance manager, I need to monitor weather conditions so that I know whe
 - Build site weather cards
 
 **Weather Alert Component:**
+
 ```typescript
 interface WeatherAlert {
   siteId: string;
@@ -226,6 +248,7 @@ interface WeatherAlert {
 ---
 
 ### Story 3.7: Authentication Flow Integration
+
 **Points:** 3  
 **Priority:** P0 (Critical)  
 **Assignee:** Tech Lead
@@ -234,6 +257,7 @@ interface WeatherAlert {
 As a user, I need secure authentication so that I can access my organization's data.
 
 **Acceptance Criteria:**
+
 - [ ] Clerk authentication integrated
 - [ ] Protected routes configured
 - [ ] Organization context in all pages
@@ -242,6 +266,7 @@ As a user, I need secure authentication so that I can access my organization's d
 - [ ] Session management
 
 **Technical Tasks:**
+
 - Install @clerk/nextjs
 - Configure middleware for auth
 - Create auth layout wrapper
@@ -252,6 +277,7 @@ As a user, I need secure authentication so that I can access my organization's d
 ---
 
 ### Story 3.8: GraphQL Client Setup
+
 **Points:** 3  
 **Priority:** P1 (High)  
 **Assignee:** Tech Lead
@@ -260,6 +286,7 @@ As a user, I need secure authentication so that I can access my organization's d
 As a frontend developer, I need GraphQL client configured so that I can fetch data efficiently.
 
 **Acceptance Criteria:**
+
 - [ ] Apollo Client configured
 - [ ] Code generation for types
 - [ ] Optimistic UI updates
@@ -268,6 +295,7 @@ As a frontend developer, I need GraphQL client configured so that I can fetch da
 - [ ] Loading states
 
 **Technical Tasks:**
+
 - Install @apollo/client
 - Configure Apollo Provider
 - Set up graphql-codegen
@@ -278,24 +306,28 @@ As a frontend developer, I need GraphQL client configured so that I can fetch da
 ## 🎨 Design Specifications
 
 ### Desktop Layout (1920px)
+
 - Sidebar: 260px fixed width
 - Content area: Fluid with 1400px max
 - Header: 64px height
 - Spacing: 24px gutters
 
 ### Tablet Layout (768px - 1024px)
+
 - Collapsible sidebar
 - Responsive data tables
 - Stacked forms
 - Touch-optimized controls
 
 ### Typography
+
 - Headers: Inter font family
 - Body: System font stack
 - Base size: 16px
 - Line height: 1.5
 
 ### Color Palette
+
 - Primary: #2196F3 (EPA Blue)
 - Success: #4CAF50 (Compliance Green)
 - Warning: #FF9800 (Alert Orange)
@@ -305,18 +337,21 @@ As a frontend developer, I need GraphQL client configured so that I can fetch da
 ## 🧪 Testing Requirements
 
 ### Unit Tests
+
 - [ ] Component tests with React Testing Library
 - [ ] Hook tests for custom logic
 - [ ] Utility function tests
 - [ ] 80% coverage minimum
 
 ### Integration Tests
+
 - [ ] Authentication flow
 - [ ] Data fetching
 - [ ] Form submissions
 - [ ] Navigation
 
 ### E2E Tests (Playwright)
+
 - [ ] User login journey
 - [ ] Project creation flow
 - [ ] Weather alert workflow
@@ -324,11 +359,13 @@ As a frontend developer, I need GraphQL client configured so that I can fetch da
 ## 🚨 Risks & Dependencies
 
 ### Risks
+
 1. **Clerk integration complexity** - Mitigation: Early spike
 2. **Real-time weather updates** - Mitigation: WebSocket fallback
 3. **Performance with large datasets** - Mitigation: Virtual scrolling
 
 ### Dependencies
+
 - Sprint 1-2 backend APIs ready
 - Clerk organization features configured
 - GraphQL schema finalized
@@ -336,16 +373,16 @@ As a frontend developer, I need GraphQL client configured so that I can fetch da
 
 ## 👥 Team Capacity
 
-| Team Member | Capacity | Primary Focus |
-|-------------|----------|---------------|
-| Frontend Dev 1 | 100% | Dashboard, Projects |
-| Frontend Dev 2 | 100% | Weather, UI Framework |
-| Tech Lead | 50% | Architecture, Auth |
-| Backend Dev | 50% | API Support |
-| QA Engineer | 100% | Test Setup |
-| UX Designer | 50% | Design System |
+| Team Member    | Capacity | Primary Focus         |
+| -------------- | -------- | --------------------- |
+| Frontend Dev 1 | 100%     | Dashboard, Projects   |
+| Frontend Dev 2 | 100%     | Weather, UI Framework |
+| Tech Lead      | 50%      | Architecture, Auth    |
+| Backend Dev    | 50%      | API Support           |
+| QA Engineer    | 100%     | Test Setup            |
+| UX Designer    | 50%      | Design System         |
 
-## ✅ Definition of Done
+## COMPLETED Definition of Done
 
 - [ ] All acceptance criteria met
 - [ ] Code reviewed by 2 developers
@@ -367,6 +404,7 @@ As a frontend developer, I need GraphQL client configured so that I can fetch da
 ## 🚀 Next Sprint Preview
 
 **Sprint 4: Web Forms & Workflows**
+
 - Visual form builder interface
 - Inspection management system
 - Workflow automation
@@ -377,6 +415,6 @@ As a frontend developer, I need GraphQL client configured so that I can fetch da
 
 **Sprint 3 Commitment:** 40 story points  
 **Confidence Level:** 85%  
-**Platform:** Web (Next.js 14)  
+**Platform:** Web (Next.js 14)
 
-*This sprint establishes the web UI foundation for office users to manage EPA compliance efficiently.*
+_This sprint establishes the web UI foundation for office users to manage EPA compliance efficiently._

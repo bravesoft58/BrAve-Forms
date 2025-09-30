@@ -52,8 +52,7 @@ WORKDIR /app
 
 # Copy necessary files
 COPY --from=builder --chown=nestjs:nodejs /app/apps/backend/dist ./dist
-COPY --from=builder --chown=nestjs:nodejs /app/apps/backend/node_modules ./node_modules
-COPY --from=builder --chown=nestjs:nodejs /app/packages/database/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nodejs /app/packages/database/schema.prisma ./prisma/schema.prisma
 
 # Set environment

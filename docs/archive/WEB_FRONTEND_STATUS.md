@@ -10,12 +10,14 @@
 Next.js 14 App Router with `output: 'standalone'` is attempting to statically pre-render pages during build, causing failures for pages that require runtime dependencies (Clerk authentication, Apollo Client).
 
 ### Error Details:
+
 ```
 Error occurred prerendering page "/dashboard". Read more: https://nextjs.org/docs/messages/prerender-error
 Error: @clerk/clerk-react: useAuth can only be used within the <ClerkProvider /> component
 ```
 
 ### Pages Affected:
+
 - `/dashboard` - Uses Clerk useAuth hook
 - `/test-apollo` - Uses Apollo Client hooks
 - `/select-organization` - Uses Clerk OrganizationList
@@ -25,14 +27,16 @@ Error: @clerk/clerk-react: useAuth can only be used within the <ClerkProvider />
 
 ## Changes Made (Partial Fix)
 
-### ✅ Completed:
+### COMPLETED Completed:
+
 1. **Fixed IconRepeater import** - Replaced with IconRefresh from @tabler/icons-react
 2. **Added Apollo/GraphQL to transpilePackages** - Ensures proper bundling
 3. **Added `export const dynamic = 'force-dynamic'`** to all affected pages
 4. **Configured TypeScript and ESLint to ignore build errors** (temporary)
 5. **Attempted client-only rendering** with useEffect mount checks
 
-### ❌ Still Failing:
+### NOT_IMPLEMENTED Still Failing:
+
 - Next.js 14 App Router ignores `dynamic = 'force-dynamic'` for static export phase
 - Pages execute hooks during build time before mount checks can prevent it
 - Build fails with "Export encountered errors" despite standalone output mode
@@ -42,11 +46,13 @@ Error: @clerk/clerk-react: useAuth can only be used within the <ClerkProvider />
 ## Root Cause Analysis
 
 Next.js 14 with App Router and `output: 'standalone'` performs these build steps:
-1. **Compile** - Transpiles TypeScript/JSX ✅ (working with ignoreBuildErrors)
-2. **Generate Static** - Attempts to pre-render all pages ❌ (failing here)
-3. **Export** - Creates standalone server bundle ❌ (never reaches this step)
+
+1. **Compile** - Transpiles TypeScript/JSX COMPLETED (working with ignoreBuildErrors)
+2. **Generate Static** - Attempts to pre-render all pages NOT_IMPLEMENTED (failing here)
+3. **Export** - Creates standalone server bundle NOT_IMPLEMENTED (never reaches this step)
 
 The problem is that Step 2 tries to execute page components server-side during build, which:
+
 - Calls Clerk hooks without ClerkProvider context
 - Calls Apollo hooks without ApolloProvider context
 - Fails even with `'use client'` and `dynamic = 'force-dynamic'`
@@ -56,48 +62,57 @@ The problem is that Step 2 tries to execute page components server-side during b
 ## Solutions to Try (Next Session)
 
 ### Option 1: Route Segment Config (Recommended)
+
 Create `page.tsx` files with proper runtime configuration:
+
 ```typescript
 // apps/web/app/dashboard/page.tsx
-export const dynamic = 'force-dynamic'
-export const dynamicParams = true
-export const revalidate = 0
-export const fetchCache = 'force-no-store'
-export const runtime = 'nodejs' // or 'edge'
-export const preferredRegion = 'auto'
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+export const runtime = 'nodejs'; // or 'edge'
+export const preferredRegion = 'auto';
 ```
 
 ### Option 2: generateStaticParams
+
 Create empty `generateStaticParams` to signal dynamic routing:
+
 ```typescript
 export async function generateStaticParams() {
-  return []
+  return [];
 }
 ```
 
 ### Option 3: Dynamic Import Wrapper
-Wrap problematic components with dynamic imports:
-```typescript
-import dynamic from 'next/dynamic'
 
-const DashboardContent = dynamic(
-  () => import('@/components/Dashboard/DashboardContent'),
-  { ssr: false }
-)
+Wrap problematic components with dynamic imports:
+
+```typescript
+import dynamic from 'next/dynamic';
+
+const DashboardContent = dynamic(() => import('@/components/Dashboard/DashboardContent'), {
+  ssr: false,
+});
 ```
 
-###  Option 4: Middleware + Redirects
+### Option 4: Middleware + Redirects
+
 Use Next.js middleware to handle authentication before pages load:
+
 ```typescript
 // middleware.ts
-import { authMiddleware } from "@clerk/nextjs";
+import { authMiddleware } from '@clerk/nextjs';
 export default authMiddleware({});
 ```
 
 ### Option 5: Switch to Pages Router
+
 Consider migrating affected routes back to Pages Router where SSR behavior is more predictable.
 
 ### Option 6: Upgrade Next.js
+
 Test with Next.js 14.1+ or 15.x which may handle `dynamic = 'force-dynamic'` better.
 
 ---
@@ -105,6 +120,7 @@ Test with Next.js 14.1+ or 15.x which may handle `dynamic = 'force-dynamic'` bet
 ## Testing Required
 
 After implementing fixes:
+
 ```bash
 # Local build test
 cd apps/web
@@ -122,6 +138,7 @@ kubectl logs -f deployment/web -n braveforms
 ```
 
 Access http://localhost:30102 and verify:
+
 - Dashboard loads and shows Clerk authentication
 - Apollo Client connects to GraphQL API
 - No console errors in browser
@@ -132,17 +149,20 @@ Access http://localhost:30102 and verify:
 ## Related Files
 
 ### Configuration:
+
 - [apps/web/next.config.js](apps/web/next.config.js) - Currently has `ignoreBuildErrors: true` (temporary)
 - [apps/web/app/layout.tsx](apps/web/app/layout.tsx) - Root layout with ClerkProvider
 - [apps/web/app/providers.tsx](apps/web/app/providers.tsx) - Apollo/TanStack providers
 
 ### Affected Pages:
+
 - [apps/web/app/dashboard/page.tsx](apps/web/app/dashboard/page.tsx) - Main dashboard (Clerk useAuth)
 - [apps/web/app/test-apollo/page.tsx](apps/web/app/test-apollo/page.tsx) - Apollo testing page
 - [apps/web/app/select-organization/page.tsx](apps/web/app/select-organization/page.tsx) - Org selection
 - [apps/web/app/forms/builder/page.tsx](apps/web/app/forms/builder/page.tsx) - Form builder
 
 ### Components with Apollo Hooks:
+
 - [apps/web/components/Organization/OrganizationDashboard.tsx](apps/web/components/Organization/OrganizationDashboard.tsx)
 - [apps/web/components/Organization/OrganizationProvider.tsx](apps/web/components/Organization/OrganizationProvider.tsx)
 - [apps/web/components/Projects/ProjectSelector.tsx](apps/web/components/Projects/ProjectSelector.tsx)
@@ -151,13 +171,14 @@ Access http://localhost:30102 and verify:
 
 ---
 
-## Backend Status: ✅ WORKING
+## Backend Status: COMPLETED WORKING
 
 The backend builds successfully with zero TypeScript errors:
+
 ```bash
 cd apps/backend
-pnpm type-check  # ✅ No errors
-pnpm build       # ✅ Successful
+pnpm type-check  # COMPLETED No errors
+pnpm build       # COMPLETED Successful
 ```
 
 Backend container can be deployed independently while web frontend is being fixed.
