@@ -60,7 +60,7 @@ export class OrganizationResolver {
   /**
    * Get organization projects (manager+ only)
    */
-  @Query('organizationProjects')
+  @Query(() => [String], { name: 'organizationProjects' })
   @UseGuards(RolesGuard)
   @Roles('OWNER', 'ADMIN', 'MANAGER')
   async getOrganizationProjects(@CurrentUser() user: any) {
@@ -75,7 +75,7 @@ export class OrganizationResolver {
   /**
    * Get organization users (admin+ only)
    */
-  @Query('organizationUsers')
+  @Query(() => [String], { name: 'organizationUsers' })
   @UseGuards(RolesGuard)
   @Roles('OWNER', 'ADMIN')
   async getOrganizationUsers(@CurrentUser() user: any) {
@@ -90,22 +90,22 @@ export class OrganizationResolver {
   /**
    * Sync organization from Clerk (internal use - webhook)
    */
-  @Mutation('syncOrganization')
+  @Mutation(() => String, { name: 'syncOrganization' })
   async syncOrganization(
-    @Args('clerkOrgId') clerkOrgId: string,
-    @Args('orgData') orgData: any,
+    @Args('clerkOrgId', { type: () => String }) clerkOrgId: string,
+    @Args('orgData', { type: () => String }) orgData: string,
   ) {
-    return await this.organizationService.syncOrganization(clerkOrgId, orgData);
+    return await this.organizationService.syncOrganization(clerkOrgId, JSON.parse(orgData));
   }
 
   /**
    * Sync user organization membership (internal use - webhook)
    */
-  @Mutation('syncUserOrganization')
+  @Mutation(() => String, { name: 'syncUserOrganization' })
   async syncUserOrganization(
-    @Args('userId') userId: string,
-    @Args('orgId') orgId: string,
-    @Args('role') role: string,
+    @Args('userId', { type: () => String }) userId: string,
+    @Args('orgId', { type: () => String }) orgId: string,
+    @Args('role', { type: () => String }) role: string,
   ) {
     await this.organizationService.syncUserOrganization(userId, orgId, role);
     return { success: true };
@@ -114,10 +114,10 @@ export class OrganizationResolver {
   /**
    * Remove user from organization (internal use - webhook)
    */
-  @Mutation('removeUserFromOrganization')
+  @Mutation(() => String, { name: 'removeUserFromOrganization' })
   async removeUserFromOrganization(
-    @Args('userId') userId: string,
-    @Args('orgId') orgId: string,
+    @Args('userId', { type: () => String }) userId: string,
+    @Args('orgId', { type: () => String }) orgId: string,
   ) {
     await this.organizationService.removeUserFromOrganization(userId, orgId);
     return { success: true };

@@ -1,3 +1,5 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Enable experimental features for better performance
@@ -140,7 +142,5 @@ const nextConfig = {
     'graphql',
   ],
 };
-
-const path = require('path');
 
 module.exports = nextConfig;

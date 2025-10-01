@@ -129,10 +129,12 @@ export const createQueryClient = (): QueryClient => {
         // Enable background refetch for fresh data when possible
         refetchOnWindowFocus: true,
         refetchOnReconnect: true,
-        // Use network-first strategy when online, cache-first when offline
-        networkMode: 'online' as const,
+        // Offline-first: queries work with cached data even without network
+        networkMode: 'offlineFirst' as const,
       },
       mutations: {
+        // Offline-first: mutations queue when offline and sync when online
+        networkMode: 'offlineFirst' as const,
         // Retry mutations on network errors
         retry: (failureCount, error: any) => {
           if (error?.response?.status >= 400 && error?.response?.status < 500) {
@@ -195,21 +197,25 @@ export const queryKeys = {
   // User and authentication
   user: ['user'] as const,
   profile: (userId: string) => ['user', 'profile', userId] as const,
-  
+
+  // Organizations
+  organizations: ['organizations'] as const,
+  organizationDashboard: ['organizations', 'dashboard'] as const,
+
   // Projects
   projects: ['projects'] as const,
   project: (id: string) => ['projects', id] as const,
   projectInspections: (id: string) => ['projects', id, 'inspections'] as const,
-  
+
   // Inspections
   inspections: ['inspections'] as const,
   inspection: (id: string) => ['inspections', id] as const,
-  
+
   // Weather data (critical for EPA compliance)
   weather: ['weather'] as const,
   currentWeather: (location: string) => ['weather', 'current', location] as const,
   weatherHistory: (location: string, days: number) => ['weather', 'history', location, days] as const,
-  
+
   // Compliance
   compliance: ['compliance'] as const,
   complianceStatus: (projectId: string) => ['compliance', 'status', projectId] as const,

@@ -1,7 +1,10 @@
 # System Architecture Document for BrAve Forms
 ## Executive summary: Web-first compliance platform for construction with progressive mobile capabilities
 
-BrAve Forms is a comprehensive construction compliance and forms management platform following a web-first strategy for rapid market entry, with progressive mobile capabilities added for field operations. The platform features **30-day offline capability (mobile phase)**, multi-tenant regulatory compliance, and enterprise-scale photo management. The architecture leverages **Clerk for authentication services**, PostgreSQL with JSONB storage, Next.js 14 for web applications, React Native for mobile (Sprints 7-10), and implements zero-trust security with SOC 2 compliance standards.
+BrAve Forms is a comprehensive construction **forms management platform with compliance automation** following a web-first strategy for rapid market entry, with progressive mobile capabilities added for field operations. The platform features **30-day offline capability (mobile phase)**, multi-tenant data isolation, and enterprise-scale photo management. The architecture leverages **Clerk for authentication services**, PostgreSQL 15 with JSONB storage and TimescaleDB, Next.js 14 for web applications, **Capacitor 6 with React** for mobile (Sprints 7-10), and implements zero-trust security with SOC 2 compliance standards.
+
+**Last Updated:** October 1, 2025
+**Status:** Technical corrections applied (PostgreSQL 15, Capacitor 6, forms-first positioning)
 
 The platform uniquely addresses construction industry requirements through weather-triggered compliance alerts, QR-based inspector portals, and automatic regulatory updates across federal, state, and local jurisdictions. With support for 10,000+ concurrent users, processing 1 million form submissions monthly, and managing 50TB+ of construction documentation, BrAve Forms provides the technical foundation for modern construction compliance management.
 
@@ -24,7 +27,7 @@ The system employs a **hybrid microservices architecture** combining domain-driv
 - **Multi-tenancy**: Clerk Organizations for tenant management with PostgreSQL row-level security
 - **Storage architecture**: AWS S3 with intelligent tiering, achieving 40-70% cost optimization through automated lifecycle policies
 - **Web framework**: Next.js 14 with App Router for web MVP (Sprints 3-6)
-- **Mobile framework**: React Native with Realm for offline storage (Sprints 7-10), supporting both iOS 12+ and Android SDK 26+
+- **Mobile framework**: Capacitor 6 with React for mobile (web technologies wrapped in native shell), supporting iOS 13+ and Android 10+ (Sprints 7-10)
 - **Security model**: Zero-trust architecture with Clerk JWT tokens, field-level encryption, and comprehensive audit logging
 
 ### System component architecture
@@ -32,7 +35,7 @@ The system employs a **hybrid microservices architecture** combining domain-driv
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                        Mobile Applications                       │
-│    React Native 0.72.x | SQLite/Realm | Background Sync         │
+│    Capacitor 6 + React | SQLite | IndexedDB | Background Sync   │
 └──────────────────────────────────────────────────────────────────┘
                                 │
                     ┌───────────▼───────────┐
@@ -54,7 +57,7 @@ The system employs a **hybrid microservices architecture** combining domain-driv
                                 │
                     ┌───────────▼───────────┐
                     │   Data Layer          │
-                    │ PostgreSQL 16+ JSONB  │
+                    │ PostgreSQL 15 + TimescaleDB JSONB │
                     │ Redis/KeyDB Cache     │
                     └───────────┬───────────┘
                                 │
@@ -998,18 +1001,18 @@ pipeline:
 - **Event Streaming**: Apache Kafka for real-time updates
 
 **Data layer:**
-- **Primary Database**: PostgreSQL 16+ with JSONB support
+- **Primary Database**: PostgreSQL 15 with TimescaleDB extension and JSONB support
 - **Cache Layer**: Redis 7+ or KeyDB with cluster mode
 - **Search Engine**: Elasticsearch 8+ or OpenSearch for document search
 - **Object Storage**: MinIO or SeaweedFS (S3-compatible)
 
 **Mobile application:**
-- **Framework**: React Native 0.72+ with TypeScript
-- **Authentication**: Clerk React Native SDK
+- **Framework**: Capacitor 6 with React and TypeScript (web technologies in native shell)
+- **Authentication**: Clerk via standard web SDK (Capacitor uses web technologies)
 - **State Management**: Redux Toolkit with RTK Query
 - **Offline Database**: SQLite with Realm for object persistence
 - **Navigation**: React Navigation 6+
-- **UI Components**: React Native Elements + custom design system
+- **UI Components**: Mantine v7 + custom construction-specific components (same as web)
 
 **Infrastructure:**
 - **Container Orchestration**: Kubernetes 1.28+ (any provider)
@@ -1068,7 +1071,7 @@ const integrations = {
 
 ### Phase 2: Mobile Development (Sprints 7-10, Apr-May)
 **Mobile platform development:**
-- **Sprint 7**: React Native setup with Clerk SDK, offline-first architecture, Service Workers
+- **Sprint 7**: Capacitor 6 setup with React, Clerk SDK integration, offline-first architecture with SQLite + IndexedDB
 - **Sprint 8**: Camera integration with GPS, photo management, form completion
 - **Sprint 9**: 30-day offline sync capability, conflict resolution, performance optimization
 - **Sprint 10**: Polish, app store submission, full platform integration
@@ -1200,7 +1203,7 @@ The platform's innovative features—including 30-day offline capability with hy
 - **Enterprise readiness**: Professional SSO, MFA, and compliance features out of the box
 - **Scalable pricing**: Growth-friendly pricing model from free tier to enterprise
 - **Regulatory compliance**: Inherit Clerk's SOC 2 Type II compliance for authentication components
-- **Mobile-first support**: Native React Native SDK with offline-capable token management
+- **Mobile-first support**: Web SDK works with Capacitor 6 (web technologies), offline-capable token management via IndexedDB
 
 Implementation following the phased roadmap ensures systematic risk mitigation while delivering incremental value. The architecture's emphasis on performance optimization, Clerk-enhanced security design, and comprehensive monitoring creates a platform capable of evolving with changing regulatory requirements and industry needs, establishing BrAve Forms as the definitive construction compliance platform for the next decade.
 

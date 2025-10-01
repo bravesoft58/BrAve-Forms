@@ -33,7 +33,7 @@
 
 ### 1.1 Purpose
 
-This UI/UX Design Document defines the comprehensive design system and user experience architecture for the BrAve Forms Platform v1.0, a web-first construction compliance application designed to reduce daily documentation time from 2-3 hours to under 30 minutes while maintaining regulatory compliance.
+This UI/UX Design Document defines the comprehensive design system and user experience architecture for the BrAve Forms Platform v1.0, a web-first construction forms management platform with compliance automation capabilities designed to reduce daily documentation time from 2-3 hours to under 30 minutes through intelligent forms workflows while maintaining regulatory compliance.
 
 ### 1.2 Design Philosophy
 
@@ -112,73 +112,81 @@ The design system prioritizes field usability over aesthetic complexity, focusin
 
 ## 3. User Personas and Journey Maps
 
-### 3.1 Primary Persona: Construction Foreman
+### 3.1 Primary Persona: Construction Foreman (Field User - $39/month)
 
-**Journey Map: Daily SWPPP Inspection**
+**Journey Map: Daily SWPPP Inspection via Forms Platform**
 
 ```
 Morning Preparation (6:00 AM)
 ├── Open app on phone
-├── Review weather alerts (automatic)
+├── Review forms dashboard
+├── Check weather alerts (compliance automation feature)
 ├── Check required inspections
-└── Download updates if on WiFi
+└── Download forms/templates if on WiFi
 
-Field Inspection (7:00 AM - 9:00 AM)
+Field Inspection - Forms Workflow (7:00 AM - 9:00 AM)
 ├── Select project from favorites
-├── Start SWPPP inspection
+├── Open SWPPP inspection form template
 ├── Walk site following GPS markers
-├── Document each BMP:
-│   ├── Take photo
-│   ├── Mark condition
-│   └── Note issues
-├── Complete weather section
+├── Complete form fields for each BMP:
+│   ├── Take photo (auto-attached to form)
+│   ├── Select condition from dropdown
+│   ├── Add notes via voice-to-text
+│   └── Mark GPS location
+├── Complete weather section (pre-populated from automation)
+├── Review form completeness indicator
 └── Add digital signature
 
 Sync & Submit (9:00 AM)
 ├── Return to trailer/office
-├── Auto-sync when WiFi detected
+├── Auto-sync forms when WiFi detected
 ├── Review submission confirmation
-└── Check next tasks
+└── Check next forms/tasks
+
+**Time Saved:** 2-3 hours reduced to 30 minutes via smart forms
 ```
 
 **Key UI Requirements**:
-- Large, glove-friendly buttons
-- Minimal text entry (voice-to-text preferred)
-- Visual progress indicators
-- Offline capability for entire workflow
+- Large, glove-friendly form buttons
+- Minimal text entry (voice-to-text, dropdowns, checkboxes)
+- Form progress indicators
+- Offline form capability for entire workflow
+- Auto-save every 30 seconds
 
-### 3.2 Secondary Persona: Environmental Inspector
+### 3.2 Secondary Persona: Environmental Inspector (Inspector Portal - FREE)
 
-**Journey Map: Site Inspection Visit**
+**Journey Map: Site Inspection Visit via QR Portal**
 
 ```
 Arrival at Site (2:00 PM)
 ├── Scan QR code at entrance
-├── Access inspector portal (no app needed)
-└── View compliance dashboard
+├── Access inspector portal (no app install, FREE access)
+└── View forms compliance dashboard
 
-Inspection Process (2:15 PM - 3:30 PM)
-├── Review recent submissions
-├── Check weather history
+Inspection Process - Forms Review (2:15 PM - 3:30 PM)
+├── Review recent form submissions
+├── Check submitted inspection forms
+├── Check weather history (compliance automation)
 ├── Verify BMP locations on map
-├── Document violations:
+├── Document violations via inspection form:
 │   ├── Take photos
 │   ├── Mark GPS location
+│   ├── Complete violation form fields
 │   └── Set correction deadline
-└── Generate report
+└── Generate report from forms data
 
 Report Distribution (3:30 PM)
-├── Add digital signature
-├── Email to contractor
-├── Submit to agency system
-└── Schedule follow-up
+├── Add digital signature to form
+├── Email form/report to contractor
+├── Submit to agency system (auto-formatted)
+└── Schedule follow-up inspection
 ```
 
 **Key UI Requirements**:
-- Read-only access with clear permissions
-- Professional report formatting
-- Photo annotation tools
-- Quick navigation between documents
+- Read-only form access with clear permissions
+- Professional form/report formatting
+- Photo annotation tools within forms
+- Quick navigation between submitted forms
 
 ---
 

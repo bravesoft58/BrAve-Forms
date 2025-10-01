@@ -3,17 +3,50 @@
 import { Alert, Group, Text, Badge, Button, Skeleton, Loader } from '@mantine/core';
 import { IconDroplet, IconAlertTriangle, IconClock, IconWifi, IconWifiOff } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useQuery, useSubscription } from '@apollo/client';
+import { useQuery } from '@tanstack/react-query';
+// TODO: Re-implement real-time weather alerts with WebSockets or polling
+// Temporarily disabled during Apollo removal (ISSUE-017)
 import { useAuth } from '@clerk/nextjs';
 import { useAppStore } from '@/lib/store/app.store';
-import { 
-  GET_PENDING_INSPECTIONS, 
-  WEATHER_ALERTS_SUBSCRIPTION,
+import { queryKeys } from '@/lib/query/client';
+import {
   useWeatherMonitoring,
   type WeatherEvent,
   type WeatherAlert as WeatherAlertType
 } from '@/lib/graphql/weather.queries';
 import { useState, useEffect } from 'react';
+
+// GraphQL fetcher for pending inspections
+async function fetchPendingInspections(token: string | null) {
+  const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:30101/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+    body: JSON.stringify({
+      query: `
+        query GetPendingInspections {
+          pendingInspections {
+            id
+            projectId
+            precipitationInches
+            eventDate
+            inspectionDeadline
+            inspectionCompleted
+            source
+            notificationsSent
+            createdAt
+          }
+        }
+      `,
+    }),
+  });
+
+  const json = await response.json();
+  if (json.errors) throw new Error(json.errors[0].message);
+  return json.data;
+}
 
 interface WeatherAlertProps {
   projectId?: string;
@@ -22,37 +55,43 @@ interface WeatherAlertProps {
 
 export function WeatherAlert({ projectId, compact = false }: WeatherAlertProps) {
   const appState = useAppStore();
-  const { orgId } = useAuth();
+  const { orgId, getToken } = useAuth();
   const weatherUtils = useWeatherMonitoring();
   const [latestAlert, setLatestAlert] = useState<WeatherAlertType | null>(null);
-  
+
   // Get pending inspections for the organization
-  const { data, loading, error, refetch } = useQuery(GET_PENDING_INSPECTIONS, {
-    pollInterval: 60000, // Refresh every minute for compliance monitoring
-    errorPolicy: 'all',
-    notifyOnNetworkStatusChange: true,
+  const { data, isPending, error, refetch } = useQuery({
+    queryKey: queryKeys.complianceDeadlines,
+    queryFn: async () => {
+      const token = await getToken();
+      return fetchPendingInspections(token);
+    },
+    refetchInterval: 60000, // Refresh every minute for compliance monitoring
+    retry: 2,
   });
-  
-  // Subscribe to real-time weather alerts
-  const { data: alertData } = useSubscription(WEATHER_ALERTS_SUBSCRIPTION, {
+
+  // Alias for compatibility
+  const loading = isPending;
+
+  // TODO: Re-implement real-time weather alerts subscription
+  // Temporarily disabled during Apollo removal (ISSUE-017)
+  // Will be restored with WebSocket or polling in future issue
+  /* const { data: alertData } = useSubscription(WEATHER_ALERTS_SUBSCRIPTION, {
     variables: { orgId },
     skip: !orgId,
     onData: ({ data: subscriptionData }) => {
       if (subscriptionData.data?.weatherAlerts) {
         setLatestAlert(subscriptionData.data.weatherAlerts);
-        
-        // Refetch pending inspections when we get a new alert
         refetch();
       }
     },
   });
-  
-  // Show latest real-time alert if available
+
   useEffect(() => {
     if (alertData?.weatherAlerts) {
       setLatestAlert(alertData.weatherAlerts);
     }
-  }, [alertData]);
+  }, [alertData]); */
   
   if (loading && !data) {
     return (

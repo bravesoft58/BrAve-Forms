@@ -1,9 +1,9 @@
 # Software Development Plan (SDP)
 ## BrAve Forms Platform v1.0
 
-**Document Version:** 1.0  
-**Date:** August 30, 2025  
-**Status:** Final - Approved for Development  
+**Document Version:** 2.0
+**Date:** October 1, 2025
+**Status:** Active - Forms-First Repositioning Complete
 **Classification:** Project Management - Primary Reference
 
 ---
@@ -31,7 +31,7 @@
 
 ### 1.1 Purpose
 
-This Software Development Plan defines the comprehensive methodology, processes, tools, and practices for developing the BrAve Forms Platform v1.0 - a web-first construction compliance and forms management system designed to reduce daily documentation time from 2-3 hours to under 30 minutes while ensuring regulatory compliance across federal, state, and local jurisdictions.
+This Software Development Plan defines the comprehensive methodology, processes, tools, and practices for developing the BrAve Forms Platform v1.0 - a web-first construction forms management system designed to reduce daily documentation time from 2-3 hours to under 30 minutes. The platform's 80/20 focus is: **80% forms management and digitization** (primary value driver) + **20% automated compliance workflows** (competitive differentiation through weather-triggered SWPPP automation).
 
 ### 1.2 Key Objectives
 
@@ -44,7 +44,11 @@ This Software Development Plan defines the comprehensive methodology, processes,
 
 ### 1.3 Development Approach
 
-The project employs an **AI-augmented Agile-Scrum methodology** with 2-week sprints, leveraging Claude Code for agentic coding assistance and Archon for intelligent project management. The approach combines traditional Agile practices with AI acceleration, enabling rapid development while maintaining code quality through continuous integration/deployment (CI/CD) and test-driven development (TDD) practices. Web-first development for rapid market entry, with mobile offline capabilities added progressively, is the core architectural principle.
+The project employs an **AI-augmented Agile-Scrum methodology** with 2-week sprints, leveraging Claude Code for agentic coding assistance. The approach combines traditional Agile practices with AI acceleration, enabling rapid development while maintaining code quality through continuous integration/deployment (CI/CD) and **evidence-based test-driven development (TDD)** practices per CLAUDE.md v1.6 standards. Web-first development for rapid market entry, with mobile offline capabilities added progressively, is the core architectural principle.
+
+**Development Prioritization:**
+- **P0 (Sprints 1-6):** Forms engine, dynamic form builder, photo capture, offline storage - 80% of development effort
+- **P1 (Sprints 6+):** Weather-triggered SWPPP automation, compliance workflows - 20% of development effort
 
 ---
 
@@ -52,27 +56,36 @@ The project employs an **AI-augmented Agile-Scrum methodology** with 2-week spri
 
 ### 2.1 Project Description
 
-BrAve Forms is a comprehensive construction compliance platform addressing critical industry pain points:
-- Environmental compliance management (SWPPP, dust control)
-- Weather-triggered compliance automation (0.25" rain threshold)
+BrAve Forms is a construction forms management platform with automated compliance workflows, addressing critical industry pain points:
+
+**Primary Value Proposition (80% - Forms Management):**
+- Digital forms replace paper checklists (daily logs, safety inspections, equipment tracking)
+- Photo capture with GPS tagging and timestamp metadata
+- 30-day offline operation for disconnected job sites
+- Multi-project organization with team collaboration
+- Export to PDF/Excel for client deliverables
+
+**Competitive Differentiation (20% - Compliance Automation):**
+- Weather-triggered SWPPP automation (0.25" rain threshold via NOAA API)
 - QR-based inspector access without app installation
-- Enterprise-scale photo documentation
-- Multi-tenant architecture with Clerk authentication
+- Multi-tenant architecture with Clerk Organizations
+- Issues and actions tracking for continuous improvement
 
 ### 2.2 Business Drivers
 
 | Driver | Current State | Target State | Impact |
 |--------|--------------|--------------|--------|
-| **Documentation Time** | 2-3 hours daily | <30 minutes | 90% reduction |
-| **Compliance Violations** | 40% projects fined | <5% violations | $50K+ savings/project |
-| **Inspector Access** | Manual process | QR instant access | <2 minute setup |
-| **Data Entry Errors** | 30% error rate | <5% error rate | Improved accuracy |
+| **Documentation Time** | 2-3 hours daily | <30 minutes | 90% time savings (PRIMARY ROI) |
+| **Data Entry Errors** | 30% paper error rate | <5% digital errors | Improved accuracy |
+| **Photo Organization** | Disorganized files | GPS-tagged, searchable | Professional deliverables |
+| **Offline Access** | Paper dependency | 30-day digital offline | Job site flexibility |
+| **Compliance Violations** | 40% projects fined | <5% violations | $50K+ savings (SECONDARY) |
 
 ### 2.3 Stakeholders
 
-- **Primary**: Construction foremen, project managers, compliance officers
-- **Secondary**: Regulatory inspectors, subcontractors, executives
-- **External**: EPA, OSHA, state environmental agencies
+- **Primary**: Construction foremen, project managers, field superintendents (FORMS USERS)
+- **Secondary**: Office staff, safety managers, compliance officers (COMPLIANCE USERS)
+- **External**: Third-party inspectors (QR portal access), clients (report recipients)
 
 ---
 
@@ -115,26 +128,49 @@ Backlog -> Sprint Planning -> Development -> Testing -> Review -> Deploy
 6. **Review**: AI pre-review followed by peer review
 7. **Deployment**: Automated with agent monitoring
 
-### 3.3 Definition of Done
+### 3.3 Definition of Done (Evidence-Based - CLAUDE.md v1.6)
 
-A user story is considered complete when:
-- Code is written and peer-reviewed
-- Unit tests achieve 80% coverage
-- Integration tests pass
-- Documentation is updated
-- Mobile and web versions tested
-- Offline functionality verified
-- Security scan completed
-- Product Owner approval received
+A user story is considered complete when **REAL EVIDENCE** is documented:
+
+**Code Quality Gates (MANDATORY):**
+- [ ] Code written and peer-reviewed (GitHub PR with approvals)
+- [ ] Unit tests achieve 80% coverage (screenshot of coverage report)
+- [ ] Integration tests pass (CI/CD pipeline green)
+- [ ] Linting and type-check pass (`pnpm lint && pnpm type-check`)
+- [ ] Build succeeds (`pnpm build`)
+
+**Functional Verification (MANDATORY):**
+- [ ] Mobile and web versions tested (screenshots of working features)
+- [ ] Offline functionality verified (30-day requirement tested)
+- [ ] Security scan completed (Snyk/OWASP ZAP report)
+- [ ] Documentation updated (accurate and reflects implementation)
+- [ ] Product Owner approval received (signed acceptance)
+
+**Evidence Archive (MANDATORY - NO FAKE VALIDATION):**
+```
+docs/sprints/{sprint-id}/evidence/{issue-id}/
+├── test-results/          # Red → Green test progression
+├── deployment/            # Running system verification
+├── performance/           # Actual benchmark results
+└── compliance/            # EPA/OSHA validation (if applicable)
+```
+
+**PROHIBITED Development Practices:**
+- ❌ NO toy/dummy implementations presented as complete
+- ❌ NO mock data claimed as real validation
+- ❌ NO "Hello World" services marked as operational
+- ❌ NO fake evidence or fabricated test results
+- ✅ ONLY real end-to-end validation with actual systems
 
 ### 3.4 Sprint Velocity Targets
 
-| Sprint | Story Points | Focus Area |
-|--------|--------------|------------|
-| 1-2 | 40-50 | Authentication, project setup |
-| 3-4 | 50-60 | Core forms, SWPPP module |
-| 5-6 | 60-70 | Weather integration, photos |
-| 7-8 | 70-80 | QR system, reporting |
+| Sprint | Story Points | Focus Area (Forms-First Priority) |
+|--------|--------------|----------------------------------|
+| 1-2 | 40-50 | Authentication, project setup, database foundation |
+| 3-4 | 50-60 | **Forms engine** (P0), dynamic form builder, validation |
+| 5-6 | 60-70 | **Photo capture** (P0), offline storage, basic reporting |
+| 7-8 | 70-80 | Weather integration (P1), QR system, SWPPP automation |
+| 9-10 | 70-80 | Issues/Actions tracking, advanced reporting, mobile optimization |
 
 ---
 
@@ -148,7 +184,7 @@ A user story is considered complete when:
 | **Scrum Master** | 1 | Process facilitation, impediment removal | 50% |
 | **Tech Lead** | 1 | Architecture decisions, code reviews | 100% |
 | **Full-Stack Developers** | 3 | Feature development, testing | 100% |
-| **Mobile Developer** | 1 | Capacitor/React Native specialist | 100% |
+| **Mobile Developer** | 1 | Capacitor 6 + React specialist | 100% |
 | **QA Engineer** | 1 | Test automation, quality assurance | 100% |
 | **DevOps Engineer** | 1 | CI/CD, infrastructure | 50% |
 | **UX Designer** | 1 | UI/UX design, prototypes | 75% |
@@ -205,56 +241,57 @@ Each developer is equipped with Claude Code for:
 
 ## 5. Development Phases and Timeline
 
-### 5.1 Phase 1: Foundation (Months 1-2)
+### 5.1 Phase 1: Foundation & Forms Engine (Months 1-2) - 80% FOCUS
 
 #### Sprint 1-2: Core Infrastructure
-- Clerk authentication integration
-- PostgreSQL multi-tenant setup
+- Clerk authentication integration (Organizations with JWT claims)
+- PostgreSQL 15 + TimescaleDB multi-tenant setup
 - Basic project management
-- Offline architecture foundation
-- CI/CD pipeline setup
+- Offline architecture foundation (Service Workers + IndexedDB)
+- CI/CD pipeline setup (GitHub Actions)
 
-#### Sprint 3-4: Web UI Foundation
-- Web-first interface development
-- Dynamic form builder
-- Validation framework
-- Core user interface components
-- Initial form creation workflows
+#### Sprint 3-4: Forms Engine (P0 - PRIMARY VALUE DRIVER)
+- **Dynamic form builder** - Create custom forms without coding
+- **Form validation framework** - React Hook Form + Zod
+- **Form template library** - Daily logs, safety inspections, equipment tracking
+- **Core UI components** - Mantine v7 with construction-optimized touch targets
+- **Offline form persistence** - IndexedDB for 30-day capability
 
-### 5.2 Phase 2: Compliance Features (Months 3-4)
+### 5.2 Phase 2: Photos & Offline (Months 3-4) - 80% FOCUS
 
-#### Sprint 5-6: Web MVP Completion
-- SWPPP inspection workflows
-- Weather API integration (NOAA primary)
-- 0.25" rain trigger automation
-- Daily inspection logs
-- Web MVP launch (March 28, 2025) for early revenue validation
+#### Sprint 5-6: Photo Capture & Basic Reporting (P0)
+- **Photo capture with GPS tagging** - Capacitor Camera plugin with EXIF metadata
+- **Photo organization** - Link photos to forms, projects, and locations
+- **Offline photo storage** - SQLite for critical data (iOS persistence requirement)
+- **Basic PDF export** - Generate reports from forms and photos
+- **Web MVP launch** for early revenue validation
 
 #### Sprint 7-8: Mobile Platform Development
-- Capacitor mobile integration
-- Local SQLite storage
-- Sync queue management
-- Photo compression pipeline
-- Mobile-specific optimizations
+- Capacitor 6 mobile integration (NOT React Native)
+- Local SQLite storage for critical data
+- Sync queue management with conflict resolution
+- Photo compression pipeline (progressive JPEG)
+- Mobile-specific optimizations (glove-friendly UI)
 
-### 5.3 Phase 3: Launch Preparation (Month 5)
+### 5.3 Phase 3: Compliance Automation (Month 5) - 20% FOCUS
 
-#### Sprint 9-10: Mobile MVP and Portal Features
-- QR code generation system
-- Read-only inspector portal
-- Violation tracking interface
-- PDF report generation
-- Digital signature capture
+#### Sprint 9-10: SWPPP & Inspector Portal (P1 - DIFFERENTIATION)
+- **Weather API integration** - NOAA (primary) + OpenWeatherMap (fallback)
+- **0.25" rain trigger automation** - EPA CGP exact threshold compliance
+- **QR code generation system** - Time-limited tokens for inspector access
+- **Read-only inspector portal** - No app install required
+- **Issues/Actions tracking** - Competitive parity with SafetyCulture
 
 ### 5.4 Milestone Schedule
 
-| Milestone | Date | Deliverables | Success Criteria |
-|-----------|------|--------------|------------------|
-| **M1: Foundation** | Month 2 | Auth, forms, offline | Working prototype |
-| **M2: Compliance** | Month 3 | SWPPP, weather | EPA compliance met |
-| **M3: Inspector** | Month 4 | QR, portal | <2 min access time |
-| **M4: Beta Launch** | Month 5 | Full platform | 50 beta users |
-| **M5: Production** | Month 6 | V1.0 release | 250 paying customers |
+| Milestone | Date | Deliverables (Forms-First) | Success Criteria |
+|-----------|------|---------------------------|------------------|
+| **M1: Foundation** | Month 2 | Auth, projects, infrastructure | Working prototype with real database |
+| **M2: Forms Engine** | Month 3 | Dynamic forms, templates, validation | 5 form templates working offline |
+| **M3: Photos & Reports** | Month 4 | Photo capture, GPS tagging, PDF export | End-to-end form → photo → PDF flow |
+| **M4: Beta Launch** | Month 5 | Web + Mobile MVP (forms-focused) | 50 beta users, 80% forms satisfaction |
+| **M5: Compliance** | Month 6 | Weather triggers, QR portal, SWPPP | EPA CGP exact 0.25" threshold validated |
+| **M6: Production** | Month 7 | V1.0 release (80/20 split verified) | 250 paying customers, 92%+ ROI from time savings |
 
 ---
 
@@ -287,9 +324,9 @@ API:
   Queue: BullMQ + Redis 7
   
 Database:
-  Primary: PostgreSQL 16 with JSONB
+  Primary: PostgreSQL 15 + TimescaleDB with JSONB
   Cache: Redis 7
-  File Storage: Hybrid (PostgreSQL + S3)
+  File Storage: Hybrid (PostgreSQL metadata + S3 photos)
   Search: PostgreSQL Full Text Search
 ```
 
@@ -298,50 +335,49 @@ Database:
 | Category | Tool | Purpose |
 |----------|------|---------|
 | **IDE** | VS Code with Claude Code | Primary development with AI assistance |
-| **Agentic Coding** | Claude Code | Terminal-based AI coding assistant |
+| **Agentic Coding** | Claude Code | Terminal-based AI coding assistant per CLAUDE.md v1.6 |
 | **Version Control** | GitHub | Code repository, PR reviews |
-| **Project Management** | Archon | Agent-based project and task management |
-| **Agent Management** | Archon | AI agent creation and orchestration |
+| **Project Management** | GitHub Projects | Kanban boards, issue tracking |
 | **Communication** | Slack | Team collaboration |
 | **Design** | Figma | UI/UX design, prototypes |
 | **API Testing** | Postman | API development and testing |
-| **Documentation** | Archon + Markdown | Technical documentation management |
-| **Monitoring** | Sentry | Error tracking |
+| **Documentation** | Markdown + GitHub | Technical documentation in repository |
+| **Monitoring** | Sentry + Datadog | Error tracking, APM |
 
 ### 6.3 CI/CD Pipeline
 
 ```yaml
 Pipeline Stages:
-  1. Code Commit:
+  1. Code Commit (Pre-commit Hooks):
      - ESLint + Prettier checks
      - TypeScript compilation
-     - Commit message validation
-     - Claude Code review suggestions
-  
-  2. Build & Test:
-     - Unit tests (Jest, 80% coverage)
+     - Commit message validation (Conventional Commits)
+     - NO emoji, NO AI branding (CLAUDE.md enforcement)
+
+  2. Build & Test (MANDATORY Quality Gates):
+     - Unit tests (Jest/Vitest, 80% coverage REQUIRED)
      - Integration tests (Supertest)
      - Security scan (Snyk)
-     - Archon agent validation
-  
-  3. Staging Deploy:
-     - Docker image build
-     - Deploy to staging
-     - E2E tests (Playwright)
-     - Agent-monitored smoke tests
-  
-  4. Production Deploy:
-     - Manual approval gate
-     - Blue-green deployment
-     - Health checks
-     - Rollback capability
-     - Archon deployment agent tracking
+     - Build verification (`pnpm build`)
+     - TDD evidence: Red → Green test progression screenshots
 
-AI Integration Points:
-  - Pre-commit: Claude Code suggestions for improvements
-  - Post-test: Archon agents analyze failures and suggest fixes
-  - Deployment: AI monitoring for anomaly detection
-  - Post-deploy: Automated performance analysis
+  3. Staging Deploy:
+     - Docker image build (nerdctl for Kubernetes compatibility)
+     - Deploy to staging environment
+     - E2E tests (Playwright)
+     - Smoke tests (critical user flows)
+
+  4. Production Deploy:
+     - Manual approval gate (Product Owner sign-off)
+     - Blue-green deployment (zero-downtime)
+     - Health checks (API response time, database connectivity)
+     - Rollback capability (automated if health checks fail)
+
+AI Integration Points (CLAUDE.md v1.6):
+  - Pre-commit: Claude Code review for patterns compliance
+  - Post-test: Analysis of test failures and suggestions
+  - Documentation: Automated updates when APIs change
+  - Evidence: Real test results archived (NO fake validation)
 ```
 
 ---
@@ -405,7 +441,7 @@ test: add unit tests for forms module
 - **User Guides**: Step-by-step with screenshots
 - **Deployment Guides**: Runbooks for all environments
 
-### 7.5 AI-Assisted Development Practices
+### 7.5 AI-Assisted Development Practices (CLAUDE.md v1.6)
 
 #### Claude Code Integration
 ```bash
@@ -413,48 +449,49 @@ test: add unit tests for forms module
 cd project-directory
 claude  # Start Claude Code session
 
-# Example commands
-"Implement the weather API integration with 0.25 inch rain threshold"
-"Write comprehensive tests for the offline sync module"
-"Debug the photo compression pipeline and optimize for mobile"
+# Example commands (forms-first focus)
+"Implement the dynamic form builder with React Hook Form and Zod validation"
+"Write TDD tests FIRST for offline photo storage with SQLite persistence"
+"Debug the form submission queue and optimize for 30-day offline capability"
+"Review the EPA CGP 0.25 inch rain threshold implementation for exact compliance"
 ```
 
-#### Best Practices with Claude Code
-- **Planning First**: Ask Claude to research and plan before coding
-- **Test-Driven Development**: Have Claude write tests before implementation
-- **Code Reviews**: Use Claude for initial code review before peer review
-- **Documentation**: Generate comprehensive documentation alongside code
-- **Debugging**: Describe bugs in plain language for rapid resolution
+#### MANDATORY Best Practices (CLAUDE.md v1.6)
 
-#### Archon Agent Management
-```yaml
-Agent Workflow:
-  1. Define Requirements:
-     - Describe agent purpose in Archon
-     - Specify integration points
-     
-  2. Agent Creation:
-     - Use Archon to generate specialized agents
-     - Review and refine agent configuration
-     
-  3. Task Management:
-     - Create tasks and milestones in Archon
-     - Link documentation to agents
-     - Track progress through agent reports
-     
-  4. Integration:
-     - Deploy agents via MCP servers
-     - Connect to development workflow
-```
+**Plan Mode (Shift+Tab Twice) for Complex Features:**
+- Use for ANY feature estimated >30 minutes
+- 21% faster plan generation vs regular mode
+- Forces structured approach, prevents scope drift
+- Human oversight gate before execution
 
-#### Development Acceleration Metrics
-| Activity | Traditional Time | With AI Tools | Efficiency Gain |
-|----------|-----------------|---------------|-----------------|
-| **Boilerplate Code** | 2-3 hours | 15 minutes | 90% reduction |
-| **Unit Test Writing** | 1-2 hours | 20 minutes | 75% reduction |
-| **Bug Investigation** | 30-60 minutes | 5-10 minutes | 80% reduction |
-| **Documentation** | 1 hour | 15 minutes | 75% reduction |
-| **Code Refactoring** | 2-3 hours | 30 minutes | 80% reduction |
+**Evidence-Based TDD Workflow (Anti-Hallucination):**
+1. **Human defines tests** based on expected input/output
+2. **Claude writes tests FIRST** - Do NOT implement yet
+3. **Run tests, confirm they FAIL** - Verify test validity (red phase)
+4. **Commit tests to git** - Tests exist BEFORE implementation
+5. **Claude implements code** to pass tests (NO test modifications)
+6. **Iterate until GREEN** - Human QA gates, Claude fixes
+
+**Context Management:**
+- **0-50% capacity:** Normal operation
+- **50-70% capacity:** Consider `/compact`
+- **70%+ capacity:** COMPACT NOW, prepare to wrap up
+- **After task completion:** `/clear` for fresh context
+
+**Sub-Agent Management:**
+- Delegate research early to preserve main context
+- Use 5-8 agents optimal, 10 max
+- Keep decision-making in main agent
+- Return summaries only, not full context
+
+#### Development Acceleration Metrics (REAL, NOT FAKE)
+| Activity | Traditional Time | With Claude Code | Evidence Required |
+|----------|-----------------|------------------|-------------------|
+| **Boilerplate Code** | 2-3 hours | 15 minutes | Working code committed |
+| **Unit Test Writing** | 1-2 hours | 20 minutes | Coverage report screenshot |
+| **Bug Investigation** | 30-60 minutes | 5-10 minutes | Fixed code + test |
+| **Documentation** | 1 hour | 15 minutes | Accurate docs (not hallucinated) |
+| **Code Refactoring** | 2-3 hours | 30 minutes | Passing tests prove equivalence |
 
 ---
 
@@ -508,25 +545,27 @@ Agent Workflow:
 
 | Risk | Probability | Impact | Mitigation | Contingency |
 |------|------------|--------|------------|-------------|
-| **Offline sync conflicts** | High | High | CRDT implementation | Manual resolution UI |
-| **Weather API failure** | Medium | High | Multiple API providers | Cache last known data |
-| **Scale beyond 10K users** | Low | High | Load testing, auto-scaling | Infrastructure upgrade |
-| **Clerk service outage** | Low | High | Offline token extension | Fallback auth system |
-| **Data migration issues** | Medium | Medium | Staged rollout | Rollback procedures |
+| **Offline sync conflicts** | High | High | Delta sync + conflict resolution | Manual resolution UI |
+| **iOS IndexedDB data loss** | High | High | SQLite for critical data | iOS-specific persistence testing |
+| **30-day offline capability broken** | High | Critical | Comprehensive offline testing | Service Workers + IndexedDB fallback |
+| **Weather API failure** | Medium | Medium | NOAA + OpenWeatherMap fallback | Cache last known data |
+| **Clerk service outage** | Low | High | Offline token extension (JWT) | Graceful degradation |
+| **EPA compliance inaccuracy** | Low | Critical | Exact 0.25" threshold validation | Regulatory review + legal sign-off |
 
 ### 9.2 Project Risks
 
 | Risk | Mitigation Strategy |
 |------|-------------------|
-| **Scope creep** | Strict change control, MVP focus |
-| **Resource availability** | Cross-training, documentation |
-| **Regulatory changes** | Monthly compliance reviews |
-| **User adoption** | Beta program, training materials |
+| **Scope creep** | Strict 80/20 forms/compliance split, MVP focus |
+| **Forms-first misalignment** | Product Owner enforces 80% forms development effort |
+| **Resource availability** | Cross-training, comprehensive documentation |
+| **Regulatory changes** | Quarterly EPA CGP compliance reviews |
+| **User adoption** | Beta program with construction industry users |
 | **Technical debt** | 20% sprint capacity for refactoring |
 | **AI tool dependency** | Maintain manual development capability |
-| **Claude Code outage** | Local development fallback procedures |
-| **Agent hallucination** | Human review of all AI-generated code |
-| **Documentation drift** | Weekly validation of auto-generated docs |
+| **Claude Code outage** | Local development fallback, no critical blockers |
+| **AI hallucination** | Evidence-based TDD, human review of ALL AI code |
+| **Fake validation** | MANDATORY evidence archive, NO toy implementations |
 
 ### 9.3 Risk Response Plan
 
@@ -561,66 +600,71 @@ Response Strategies:
 
 | Meeting | Day/Time | Duration | Participants | AI Support |
 |---------|----------|----------|--------------|------------|
-| **Daily Standup** | Mon-Fri 9:00 AM | 15 min | Dev team | Archon prepares overnight reports |
+| **Daily Standup** | Mon-Fri 9:00 AM | 15 min | Dev team | Claude Code available for questions |
 | **Sprint Planning** | Monday (Sprint start) | 4 hours | Full team | Claude Code estimates complexity |
-| **Backlog Grooming** | Thursday | 2 hours | PO, Tech Lead, QA | Archon analyzes story dependencies |
-| **Sprint Review** | Friday (Sprint end) | 2 hours | All stakeholders | Auto-generated demo scripts |
-| **Retrospective** | Friday (Sprint end) | 1.5 hours | Dev team | AI-compiled metrics and insights |
+| **Backlog Grooming** | Thursday | 2 hours | PO, Tech Lead, QA | AI-assisted story decomposition |
+| **Sprint Review** | Friday (Sprint end) | 2 hours | All stakeholders | Evidence archive review (real results) |
+| **Retrospective** | Friday (Sprint end) | 1.5 hours | Dev team | Metrics analysis and insights |
 
 #### AI-Enhanced Meeting Efficiency
-- **Pre-meeting**: Archon agents compile relevant data and prepare agendas
+- **Pre-meeting**: Developers prepare with Claude Code research
 - **During meeting**: Claude Code available for live technical clarifications
-- **Post-meeting**: Automated action item tracking and documentation updates
-- **Follow-up**: Archon agents monitor completion of assigned tasks
+- **Post-meeting**: Action item tracking in GitHub Projects
+- **Follow-up**: Evidence-based completion verification (NO fake validation)
 
 ### 10.3 Documentation Repository
 
 ```
-/archon-workspace
-  /agents          - AI agents for specific tasks
-  /tasks           - Sprint tasks and user stories
-  /scope           - Project scope documents
-  /architecture    - System design, ADRs
-  
 /docs
-  /api             - OpenAPI specs, examples
+  /design          - Product vision, architecture, PRDs
+  /sprints         - Sprint plans and evidence archives
+  /api             - OpenAPI specs, GraphQL documentation
   /guides          - User and admin guides
-  /processes       - Development workflows
-  /meeting-notes   - Sprint ceremonies
-  /decisions       - Technical decisions
+  /processes       - Development workflows (CLAUDE.md)
+
+/.claude
+  /agents          - Specialized AI agents (25 agents)
+
+/evidence (per sprint)
+  /{sprint-id}/evidence/{issue-id}/
+    /test-results      - Red → Green test progression
+    /deployment        - Running system verification
+    /performance       - Actual benchmark results
+    /compliance        - EPA/OSHA validation proof
 ```
 
-### 10.4 Archon-Based Project Coordination
+### 10.4 Claude Code-Based Development Coordination (CLAUDE.md v1.6)
 
-#### Task Management with Archon
-- **Sprint Planning**: Create agent-managed sprint backlogs
-- **Task Assignment**: AI-assisted task distribution based on expertise
-- **Progress Tracking**: Automated status updates from development agents
-- **Impediment Resolution**: AI agents identify and suggest solutions
+#### Task Management with GitHub Projects
+- **Sprint Planning**: Kanban boards with story point estimates
+- **Task Assignment**: Manual assignment based on expertise
+- **Progress Tracking**: GitHub issue updates with evidence links
+- **Impediment Resolution**: Scrum Master facilitates removal
 
 #### Document Management
-- **Automated Documentation**: Agents generate and update docs
-- **Version Control**: Integrated with Git for documentation tracking
-- **Knowledge Base**: RAG-powered search across all project documents
-- **Context Preservation**: Agents maintain project context across sprints
+- **CLAUDE.md v1.6**: Master development guidance (MUST read before ANY code)
+- **Version Control**: Git for all documentation (markdown in /docs)
+- **Knowledge Base**: Searchable documentation in repository
+- **Context Preservation**: `/compact` and `/clear` for Claude Code context management
 
-#### Agent-Driven Workflows
+#### Claude Code Development Workflows
 ```yaml
 Daily Workflow:
   Morning:
-    - Agent reviews overnight CI/CD results
-    - Generates priority task list
-    - Updates team dashboard
-    
+    - Review Sprint 1 Master Plan for current tasks
+    - Start Claude Code session: `claude`
+    - Use Plan Mode (Shift+Tab twice) for complex features
+
   Development:
-    - Claude Code assists with implementation
-    - Archon agents track progress
-    - Automated documentation updates
-    
+    - TDD: Write tests FIRST (red phase)
+    - Claude Code implements (green phase)
+    - Evidence archive: Screenshots, test results
+    - MANDATORY: pnpm lint && pnpm type-check && pnpm test && pnpm build
+
   End of Day:
-    - Agent compiles daily report
-    - Updates burndown charts
-    - Prepares next day priorities
+    - Commit with conventional format (NO emoji, NO AI branding)
+    - Update issue with evidence links
+    - `/clear` for fresh context next session
 ```
 
 ---
@@ -690,15 +734,17 @@ Rollback Criteria:
 - System uptime: >99.9%
 - API response time: <200ms (P95)
 - Error rate: <0.1%
-- Test coverage: >80%
-- Deploy frequency: Weekly
+- Test coverage: >80% (MANDATORY)
+- Deploy frequency: Weekly (after evidence validation)
+- Offline capability: 30 days (CRITICAL)
 
-#### Business KPIs
+#### Business KPIs (Forms-First Focus)
 - Daily active users: Track growth
-- Form completion time: <30 minutes
+- **Form completion time: <30 minutes** (PRIMARY metric - 90% time savings)
 - Sync success rate: >99%
-- Customer satisfaction: >4.5/5
+- Customer satisfaction: >4.5/5 (forms ease-of-use)
 - Support ticket volume: <5% of users
+- **ROI from time savings: 92-95%** of total ROI (not compliance fine avoidance)
 
 ### 12.3 Maintenance Windows
 
@@ -712,22 +758,24 @@ Rollback Criteria:
 
 ### 13.1 MVP Success Criteria (Month 6)
 
-| Metric | Target | Measurement Method |
-|--------|--------|-------------------|
-| **Users** | 250 active customers | Analytics dashboard |
+| Metric | Target | Measurement Method (Forms-First) |
+|--------|--------|----------------------------------|
+| **Users** | 250 active customers | Analytics dashboard (5-25 employees/company) |
 | **Projects** | 500+ active projects | Database metrics |
 | **Uptime** | 99.9% availability | Monitoring tools |
-| **Performance** | <30 min documentation | User surveys |
-| **Revenue** | $50K MRR | Financial reports |
-| **Rating** | 4.0+ app store | Store reviews |
+| **Performance** | <30 min documentation | User surveys (PRIMARY success metric) |
+| **Revenue** | $50K MRR | Financial reports ($39/field, $19/office user pricing) |
+| **Rating** | 4.0+ app store | Store reviews (forms ease-of-use focus) |
+| **Forms Usage** | 80% of user time | Feature analytics (validate forms-first positioning) |
 
 ### 13.2 Long-term Goals (Year 1)
 
-- 1,000+ customers across 2,000+ projects
-- $500K+ MRR with 90% retention
-- Expansion to 3 additional compliance modules
-- Integration with 2 major construction platforms
+- 1,000+ customers across 2,000+ projects (5-25 employee PRIMARY market)
+- $500K+ MRR with 90% retention (forms ease-of-use drives retention)
+- Expansion to 3 additional form types (estimating, time tracking, client deliverables)
+- Integration with 2 major construction platforms (Procore, Autodesk)
 - SOC 2 Type II certification achieved
+- **80/20 split validated:** 80% forms usage, 20% compliance automation usage
 
 ### 13.3 Quality Metrics
 
@@ -739,16 +787,17 @@ Rollback Criteria:
 | **Sprint Velocity** | 60-80 points | Track per sprint | Increasing |
 | **Customer Satisfaction** | >85% CSAT | Monthly survey | Baseline TBD |
 
-### 13.4 AI-Assistance Metrics
+### 13.4 AI-Assistance Metrics (Evidence-Based - CLAUDE.md v1.6)
 
-| Metric | Target | Measurement Method |
-|--------|--------|-------------------|
-| **Claude Code Utilization** | >70% of dev time | IDE analytics |
-| **Agent Task Completion** | >90% success rate | Archon dashboard |
-| **AI-Generated Code Acceptance** | >80% acceptance | Git commit analysis |
-| **Documentation Automation** | 100% coverage | Document tracking |
-| **Development Velocity Gain** | 2x baseline | Sprint metrics |
-| **Time to First Commit** | <2 hours | Git analytics |
+| Metric | Target | Measurement Method (REAL, NOT FAKE) |
+|--------|--------|-------------------------------------|
+| **Claude Code Utilization** | >70% of dev time | IDE analytics + time tracking |
+| **TDD Workflow Compliance** | 100% of features | Tests committed BEFORE implementation |
+| **Evidence Archive Coverage** | 100% of issues | docs/sprints/evidence/{issue-id}/ folders exist |
+| **AI-Generated Code Acceptance** | >80% acceptance | Git commit analysis (human-reviewed) |
+| **Development Velocity Gain** | 2x baseline | Sprint metrics (validated with real deployments) |
+| **Context Management** | `/clear` after tasks | Session logs analysis |
+| **Fake Validation Incidents** | 0 (ZERO TOLERANCE) | Quality gate enforcement |
 
 ---
 
@@ -767,19 +816,22 @@ Rollback Criteria:
 - **Trade-offs**: Vendor lock-in, customization limits
 
 #### ADR-003: Database Choice
-- **Decision**: PostgreSQL 16 with JSONB
-- **Rationale**: Flexible schemas, proven scale, ACID compliance
+- **Decision**: PostgreSQL 15 + TimescaleDB with JSONB
+- **Rationale**: Flexible schemas, proven scale, ACID compliance, time-series weather data support
 - **Trade-offs**: NoSQL features limited, requires optimization
+- **Correction**: NOT PostgreSQL 16 (TimescaleDB compatibility requirement)
 
 #### ADR-004: AI Development Tools
-- **Decision**: Claude Code + Archon
-- **Rationale**: 2-3x development velocity, automated documentation, intelligent project management
-- **Trade-offs**: Learning curve, dependency on AI services, requires human oversight
+- **Decision**: Claude Code with evidence-based TDD workflow (CLAUDE.md v1.6)
+- **Rationale**: 2-3x development velocity, Plan Mode for complex features, anti-hallucination TDD
+- **Trade-offs**: Learning curve, dependency on AI services, requires human oversight and evidence validation
+- **Critical**: NO fake validation, NO toy implementations, MANDATORY evidence archive
 
 #### ADR-005: Project Management Approach
-- **Decision**: Archon agent-based management
-- **Rationale**: Automated task tracking, intelligent resource allocation, real-time documentation
-- **Trade-offs**: Non-traditional workflow, requires agent training and configuration
+- **Decision**: GitHub Projects with Kanban boards
+- **Rationale**: Simple, integrated with GitHub, no additional tools required
+- **Trade-offs**: Less sophisticated than specialized tools, manual tracking
+- **Correction**: NOT Archon (project uses GitHub for project management)
 
 ### Appendix B: Compliance Requirements
 
@@ -793,62 +845,62 @@ Rollback Criteria:
 
 | Role | Training Required | Duration | Method |
 |------|------------------|----------|--------|
-| **Developers** | Capacitor, NestJS, Clerk, Claude Code | 2 weeks | Online + hands-on |
-| **QA** | Playwright, mobile testing, AI test generation | 1 week | Workshops |
-| **DevOps** | Docker, CI/CD, monitoring, Archon agents | 1 week | Documentation |
-| **Product Team** | Agile, Archon project management | 3 days | Workshops |
-| **All Team** | AI tool best practices | 2 days | Interactive sessions |
+| **Developers** | Capacitor 6, NestJS, Clerk, Claude Code, CLAUDE.md v1.6 | 2 weeks | Online + hands-on |
+| **QA** | Playwright, mobile testing, evidence-based validation | 1 week | Workshops |
+| **DevOps** | nerdctl, Kubernetes, CI/CD, monitoring | 1 week | Documentation |
+| **Product Team** | Agile, GitHub Projects, forms-first positioning | 3 days | Workshops |
+| **All Team** | CLAUDE.md v1.6 best practices | 2 days | Interactive sessions |
 
-#### AI Tool Training Curriculum
+#### AI Tool Training Curriculum (CLAUDE.md v1.6)
 
 **Week 1: Claude Code Fundamentals**
-- Installation and setup
-- Basic commands and workflows
-- Test-driven development with AI
-- Code review practices
-- Documentation generation
+- Installation and setup (terminal-based AI assistant)
+- CLAUDE.md v1.6 comprehensive review (MANDATORY before ANY code)
+- Plan Mode (Shift+Tab twice) for complex features
+- Evidence-based TDD workflow (anti-hallucination)
+- Context management (`/compact`, `/clear`)
 
-**Week 2: Archon Agent Management**
-- Agent creation and configuration
-- Task management workflows
-- Documentation strategies
-- Integration with development pipeline
-- Performance monitoring
+**Week 2: Forms-First Development**
+- Forms engine priorities (80% development effort)
+- Compliance automation as differentiation (20% effort)
+- Offline-first architecture (30-day capability)
+- iOS persistence requirements (SQLite vs IndexedDB)
+- EPA CGP exact 0.25" threshold validation
 
-**Ongoing: AI Best Practices**
-- Weekly AI tips and tricks sessions
-- Monthly retrospectives on AI tool usage
-- Quarterly training on new AI features
-- Continuous improvement workshops
+**Ongoing: Quality Standards**
+- NO emoji, NO AI branding (zero tolerance)
+- Evidence archive for ALL completions (NO fake validation)
+- TDD: Tests BEFORE implementation (red → green workflow)
+- Quality gates: lint + type-check + test + build (MANDATORY)
+- Continuous improvement with real metrics
 
 ### Appendix D: Budget Allocation
 
 ```yaml
-Development Costs (9 months):
-  Personnel: $600,000
-  Infrastructure: $25,000
-  Tools & Licenses: $15,000
-  Training: $10,000
+Development Costs (7 months - Forms-First MVP):
+  Personnel: $400,000 (4 developers + PM + QA)
+  Infrastructure: $20,000 (Rancher Desktop local, AWS staging/prod)
+  Tools & Licenses: $12,000 (GitHub, Figma, monitoring)
+  Training: $8,000 (CLAUDE.md v1.6 onboarding, forms-first focus)
   AI Tools:
-    Claude Code (Team): $2,000/month x 9 = $18,000
-    Archon Setup: $5,000
-  Total: $673,000
+    Claude Code (Team): $2,000/month x 7 = $14,000
+  Total: $454,000
 
 Monthly Operating (Post-Launch):
-  Infrastructure: $2,000
-  Services: $500
-  Tools: $300
+  Infrastructure: $2,500 (AWS EKS, RDS, S3, Redis)
+  Services: $500 (Clerk authentication, monitoring)
+  Tools: $300 (GitHub, Datadog, Sentry)
   AI Services:
-    Claude API: $200/month
-    Archon Hosting: $100/month
-  Total: $3,100/month
+    Claude Code: $2,000/month (ongoing development)
+  Total: $5,300/month
 
-ROI from AI Acceleration:
-  Traditional Development: $900,000 (6 developers, 9 months)
-  AI-Augmented Development: $600,000 (4 developers, 9 months)
-  Savings: $300,000 (33% reduction)
-  Time to Market: 2 months faster
-  Opportunity Value: $150,000 (2 months earlier revenue)
+ROI from AI Acceleration (Evidence-Based):
+  Traditional Development: $600,000 (6 developers, 9 months)
+  AI-Augmented Development: $454,000 (4 developers, 7 months)
+  Savings: $146,000 (24% reduction)
+  Time to Market: 2 months faster (forms-first prioritization)
+  Opportunity Value: $100,000 (2 months earlier revenue)
+  Total Benefit: $246,000
 ```
 
 ### Appendix E: Glossary
@@ -864,72 +916,82 @@ ROI from AI Acceleration:
 | **WIP** | Work In Progress |
 | **DoD** | Definition of Done |
 
-### Appendix F: AI Tools Setup Guide
+### Appendix F: Claude Code Setup Guide (CLAUDE.md v1.6)
 
-#### Claude Code Configuration
+#### Claude Code Installation
 ```bash
-# Installation
-npm install -g @anthropic-ai/claude-code
+# Installation (terminal-based AI assistant)
+# Follow official installation: https://docs.claude.com/claude-code
 
 # Project Setup
-cd brave-forms-platform
-claude  # Initialize Claude Code in project
+cd e:\BrAve\ Forms
+claude  # Start Claude Code session
 
-# Team Configuration
-export CLAUDE_API_KEY="team-api-key"
-export CLAUDE_MODEL="claude-opus-4-1-20250805"
+# First Command in EVERY Session
+"Read @CLAUDE.md and confirm you understand by addressing me as Developer"
 
-# Best Practices Configuration
-echo '{
-  "workflow": "test-driven",
-  "codeReview": "enabled",
-  "documentation": "auto-generate",
-  "debugMode": "verbose"
-}' > .claude-config.json
+# Verify NO emoji, NO AI branding enforcement
+git config --global core.editor "code --wait"
 ```
 
-#### Archon Setup for BrAve Forms
+#### MANDATORY Workflow (CLAUDE.md v1.6)
+
+**Session Start Protocol:**
+1. Start Claude Code: `claude`
+2. Read CLAUDE.md: "Read @CLAUDE.md completely"
+3. Confirm understanding: Verify Claude addresses you as "Developer"
+4. Check current state: `git status`
+5. Review recent commits for context
+
+**Development Workflow:**
 ```yaml
-# Docker Installation
-git clone https://github.com/coleam00/archon.git
-cd archon
-python run_docker.py
+Complex Feature (>30 min):
+  1. Plan Mode: Shift+Tab twice
+  2. Review plan with human
+  3. Approve before execution
 
-# Agent Configuration
-agents:
-  - name: "SWPPP Compliance Agent"
-    purpose: "Monitor and validate environmental compliance"
-    integration: "weather-api, regulatory-db"
-    
-  - name: "Sprint Manager Agent"
-    purpose: "Manage sprint tasks and burndown"
-    integration: "github, slack"
-    
-  - name: "Documentation Agent"
-    purpose: "Maintain technical and user documentation"
-    integration: "markdown, openapi"
-    
-  - name: "QA Automation Agent"
-    purpose: "Generate and maintain test suites"
-    integration: "jest, playwright"
+TDD Workflow (MANDATORY):
+  1. Human defines tests
+  2. Claude writes tests FIRST
+  3. Confirm tests FAIL (red phase)
+  4. Commit tests to git
+  5. Claude implements code
+  6. Iterate until GREEN
 
-# Supabase Vector Database Setup
-database:
-  provider: "supabase"
-  collections:
-    - "project-documentation"
-    - "compliance-requirements"
-    - "test-scenarios"
-    - "user-stories"
+Quality Gates (BEFORE COMMIT):
+  - pnpm lint
+  - pnpm type-check
+  - pnpm test
+  - pnpm build
+  - Evidence archive: Screenshots, test results
+
+Commit:
+  - Conventional Commits format
+  - NO emoji
+  - NO "Generated with Claude Code"
+  - NO "Co-Authored-By: Claude"
 ```
 
-#### Integration Workflow
-1. **Morning Standup**: Archon agents prepare overnight reports
-2. **Development**: Claude Code assists with implementation
-3. **Testing**: Automated test generation and execution
-4. **Documentation**: Real-time updates by Archon agents
-5. **Review**: AI-assisted code review before peer review
-6. **Deployment**: Agent-monitored release process
+#### Context Management
+- **0-50% capacity:** Normal operation
+- **50-70% capacity:** `/compact` to reduce context
+- **70%+ capacity:** COMPACT NOW, prepare to wrap up
+- **After task:** `/clear` for fresh context next session
+
+#### Evidence Archive Structure
+```
+docs/sprints/sprint1/evidence/ISSUE-XXX/
+├── test-results/
+│   ├── red-phase.png          (failing tests)
+│   └── green-phase.png        (passing tests)
+├── deployment/
+│   ├── pods-status.txt        (kubectl get pods)
+│   └── api-response.json      (real API call)
+├── performance/
+│   └── benchmark.txt          (actual metrics)
+└── compliance/
+    └── epa-validation.md      (regulatory proof)
+```
 
 ---
 
@@ -940,12 +1002,13 @@ database:
 |---------|------|--------|---------|
 | 0.1 | July 2025 | Tech Lead | Initial draft |
 | 0.5 | August 2025 | Dev Team | Incorporated team feedback |
-| 1.0 | August 2025 | All Stakeholders | Final approved version |
+| 1.0 | August 30, 2025 | All Stakeholders | Final approved version (compliance-first) |
+| 2.0 | October 1, 2025 | Product Owner + Dev Team | **Forms-first repositioning (80/20 split)**, CLAUDE.md v1.6 alignment, PostgreSQL 15 correction, Capacitor 6 clarification, Evidence-based TDD, GitHub Projects (not Archon) |
 
 **Review Schedule:** Quarterly or as major changes occur
 
 **Distribution:**
-- Development Team: Full access
+- Development Team: Full access (MUST read CLAUDE.md v1.6 before ANY code)
 - Stakeholders: Read access
 - External Partners: Sections 1-3 only
 
@@ -957,4 +1020,36 @@ database:
 
 ---
 
-*This Software Development Plan serves as the authoritative guide for the BrAve Forms Platform development. It leverages AI-augmented development practices through Claude Code for agentic coding assistance and Archon for intelligent project management, enabling accelerated delivery while maintaining high quality standards. The plan should be reviewed and updated regularly to reflect project evolution and lessons learned from AI tool usage.*
+## Summary of Version 2.0 Changes (October 1, 2025)
+
+**Strategic Repositioning:**
+- Changed from compliance-first (60/40) to **forms-first (80/20)** positioning
+- Forms management is PRIMARY value driver (90% time savings ROI)
+- Compliance automation is DIFFERENTIATION (weather-triggered SWPPP)
+
+**Technical Corrections:**
+- PostgreSQL 15 + TimescaleDB (NOT PostgreSQL 16)
+- Capacitor 6 with React (NOT React Native)
+- GitHub Projects for project management (NOT Archon)
+
+**CLAUDE.md v1.6 Alignment:**
+- Evidence-based TDD workflow (anti-hallucination)
+- Plan Mode (Shift+Tab twice) for complex features
+- Context management (`/compact`, `/clear`)
+- MANDATORY evidence archive (NO fake validation)
+- Quality gates: lint + type-check + test + build
+- NO emoji, NO AI branding (zero tolerance)
+
+**Development Prioritization:**
+- P0 (Sprints 1-6): Forms engine, photo capture, offline storage - **80% effort**
+- P1 (Sprints 6+): Weather triggers, SWPPP automation, QR portal - **20% effort**
+
+**Success Metrics:**
+- Form completion time <30 minutes (PRIMARY metric)
+- 92-95% ROI from time savings (not compliance fine avoidance)
+- 80% of user time in forms features (validate positioning)
+- Zero fake validation incidents (evidence-based quality)
+
+---
+
+*This Software Development Plan serves as the authoritative guide for the BrAve Forms Platform development. Version 2.0 reflects the strategic repositioning to forms-first (80%) with compliance automation as competitive differentiation (20%). It leverages AI-augmented development practices through Claude Code with CLAUDE.md v1.6 evidence-based standards, enabling accelerated delivery while maintaining high quality through mandatory TDD workflow and real evidence validation. The plan should be reviewed and updated regularly to reflect project evolution and lessons learned from AI tool usage.*

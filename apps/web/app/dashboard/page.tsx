@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-// Force dynamic rendering (requires Clerk authentication at runtime)
-export const dynamic = 'force-dynamic';
 import { 
   Container, 
   Title, 

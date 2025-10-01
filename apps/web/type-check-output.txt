@@ -1,0 +1,99 @@
+
+> @brave-forms/web@1.0.0 type-check E:\BrAve Forms\apps\web
+> tsc --noEmit
+
+.next/types/app/test-apollo/page.ts(2,24): error TS2307: Cannot find module '../../../../app/test-apollo/page.js' or its corresponding type declarations.
+.next/types/app/test-apollo/page.ts(5,29): error TS2307: Cannot find module '../../../../app/test-apollo/page.js' or its corresponding type declarations.
+components/Apollo/ApolloProvider.tsx(4,53): error TS2307: Cannot find module '@apollo/client' or its corresponding type declarations.
+components/Apollo/ApolloProvider.tsx(5,54): error TS2307: Cannot find module '@apollo/client/react' or its corresponding type declarations.
+components/Apollo/ConnectionStatus.tsx(4,21): error TS2307: Cannot find module '@apollo/client' or its corresponding type declarations.
+components/Apollo/ConnectionStatus.tsx(5,26): error TS2307: Cannot find module '@apollo/client/react' or its corresponding type declarations.
+components/Apollo/ConnectionStatus.tsx(33,15): error TS7006: Parameter 'err' implicitly has an 'any' type.
+components/Forms/FormBuilder/FieldProperties.tsx(230,43): error TS2345: Argument of type 'string | null' is not assignable to parameter of type '"full" | "half" | "third" | "quarter" | ((prevValue: "full" | "half" | "third" | "quarter") => "full" | "half" | "third" | "quarter")'.
+  Type 'null' is not assignable to type '"full" | "half" | "third" | "quarter" | ((prevValue: "full" | "half" | "third" | "quarter") => "full" | "half" | "third" | "quarter")'.
+components/Forms/FormBuilder/FieldProperties.tsx(261,55): error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'number | ((prevValue: number | undefined) => number | undefined) | undefined'.
+  Type 'string' is not assignable to type 'number | ((prevValue: number | undefined) => number | undefined) | undefined'.
+components/Forms/FormBuilder/FieldProperties.tsx(271,55): error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'number | ((prevValue: number | undefined) => number | undefined) | undefined'.
+  Type 'string' is not assignable to type 'number | ((prevValue: number | undefined) => number | undefined) | undefined'.
+components/Forms/FormBuilder/FieldProperties.tsx(285,49): error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'number | ((prevValue: number | undefined) => number | undefined) | undefined'.
+  Type 'string' is not assignable to type 'number | ((prevValue: number | undefined) => number | undefined) | undefined'.
+components/Forms/FormBuilder/FieldProperties.tsx(294,49): error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'number | ((prevValue: number | undefined) => number | undefined) | undefined'.
+  Type 'string' is not assignable to type 'number | ((prevValue: number | undefined) => number | undefined) | undefined'.
+components/Forms/FormBuilder/FieldProperties.tsx(305,50): error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'number | ((prevValue: number | undefined) => number | undefined) | undefined'.
+  Type 'string' is not assignable to type 'number | ((prevValue: number | undefined) => number | undefined) | undefined'.
+components/Forms/FormBuilder/FieldProperties.tsx(311,82): error TS2322: Type '{ children: string; icon: Element; color: "yellow"; size: string; }' is not assignable to type 'IntrinsicAttributes & AlertProps & RefAttributes<HTMLDivElement> & { component?: any; renderRoot?: ((props: Record<string, any>) => ReactNode) | undefined; }'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & AlertProps & RefAttributes<HTMLDivElement> & { component?: any; renderRoot?: ((props: Record<string, any>) => ReactNode) | undefined; }'.
+components/Forms/FormBuilder/FieldProperties.tsx(373,21): error TS2322: Type '{ onChange: (event: ChangeEvent<HTMLInputElement>) => void; value?: any; defaultValue?: any; checked?: any; defaultChecked?: any; error?: any; onFocus?: any; onBlur?: any; label: string; description: string; icon: Element; }' is not assignable to type 'IntrinsicAttributes & SwitchProps & RefAttributes<HTMLInputElement> & { component?: any; renderRoot?: ((props: Record<...>) => ReactNode) | undefined; }'.
+  Property 'icon' does not exist on type 'IntrinsicAttributes & SwitchProps & RefAttributes<HTMLInputElement> & { component?: any; renderRoot?: ((props: Record<...>) => ReactNode) | undefined; }'.
+components/Forms/FormBuilder/FieldProperties.tsx(389,58): error TS2345: Argument of type 'string | null' is not assignable to parameter of type '"medium" | "high" | "low" | ((prevValue: "medium" | "high" | "low") => "medium" | "high" | "low")'.
+  Type 'null' is not assignable to type '"medium" | "high" | "low" | ((prevValue: "medium" | "high" | "low") => "medium" | "high" | "low")'.
+components/Forms/FormBuilder/FieldProperties.tsx(461,47): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string | ((prevValue: string) => string)'.
+  Type 'null' is not assignable to type 'string | ((prevValue: string) => string)'.
+components/Forms/FormBuilder/FormCanvas.tsx(224,11): error TS2322: Type '{ children: Element; icon: Element; color: "yellow"; size: string; mt: "xs"; }' is not assignable to type 'IntrinsicAttributes & AlertProps & RefAttributes<HTMLDivElement> & { component?: any; renderRoot?: ((props: Record<string, any>) => ReactNode) | undefined; }'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & AlertProps & RefAttributes<HTMLDivElement> & { component?: any; renderRoot?: ((props: Record<string, any>) => ReactNode) | undefined; }'.
+components/Organization/OrganizationDashboard.tsx(35,31): error TS2307: Cannot find module '@apollo/client' or its corresponding type declarations.
+components/Organization/OrganizationDashboard.tsx(193,51): error TS2345: Argument of type '"OWNER" | "ADMIN" | "MANAGER" | "MEMBER" | "INSPECTOR"' is not assignable to parameter of type '"OWNER" | "ADMIN"'.
+  Type '"MANAGER"' is not assignable to type '"OWNER" | "ADMIN"'.
+components/Organization/OrganizationDashboard.tsx(384,64): error TS2345: Argument of type '"OWNER" | "ADMIN" | "MANAGER" | "MEMBER" | "INSPECTOR"' is not assignable to parameter of type '"OWNER" | "ADMIN" | "MANAGER"'.
+  Type '"MEMBER"' is not assignable to type '"OWNER" | "ADMIN" | "MANAGER"'.
+components/Organization/OrganizationProvider.tsx(5,31): error TS2307: Cannot find module '@apollo/client' or its corresponding type declarations.
+components/Organization/OrganizationProvider.tsx(68,15): error TS7006: Parameter 'error' implicitly has an 'any' type.
+components/Organization/OrganizationProvider.tsx(177,12): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ STARTER: string[]; PROFESSIONAL: string[]; ENTERPRISE: string[]; }'.
+components/Projects/ProjectSelector.tsx(38,44): error TS2307: Cannot find module '@apollo/client' or its corresponding type declarations.
+components/Projects/ProjectSelector.tsx(133,15): error TS7006: Parameter 'error' implicitly has an 'any' type.
+components/Projects/ProjectSelector.tsx(152,15): error TS7006: Parameter 'error' implicitly has an 'any' type.
+components/Projects/ProjectSelector.tsx(170,15): error TS7006: Parameter 'error' implicitly has an 'any' type.
+components/Projects/ProjectSelector.tsx(231,7): error TS2322: Type 'Date | null' is not assignable to type 'null | undefined'.
+  Type 'Date' is not assignable to type 'null | undefined'.
+components/Projects/ProjectSelector.tsx(521,17): error TS2322: Type '{ onChange: any; value?: any; defaultValue?: any; checked?: any; defaultChecked?: any; error?: any; onFocus?: any; onBlur?: any; label: string; placeholder: string; required: true; precision: number; }' is not assignable to type 'IntrinsicAttributes & NumberInputProps & RefAttributes<HTMLInputElement> & { component?: any; renderRoot?: ((props: Record<...>) => ReactNode) | undefined; }'.
+  Property 'precision' does not exist on type 'IntrinsicAttributes & NumberInputProps & RefAttributes<HTMLInputElement> & { component?: any; renderRoot?: ((props: Record<...>) => ReactNode) | undefined; }'.
+components/Projects/ProjectSelector.tsx(528,17): error TS2322: Type '{ onChange: any; value?: any; defaultValue?: any; checked?: any; defaultChecked?: any; error?: any; onFocus?: any; onBlur?: any; label: string; placeholder: string; required: true; precision: number; }' is not assignable to type 'IntrinsicAttributes & NumberInputProps & RefAttributes<HTMLInputElement> & { component?: any; renderRoot?: ((props: Record<...>) => ReactNode) | undefined; }'.
+  Property 'precision' does not exist on type 'IntrinsicAttributes & NumberInputProps & RefAttributes<HTMLInputElement> & { component?: any; renderRoot?: ((props: Record<...>) => ReactNode) | undefined; }'.
+components/Projects/ProjectSelector.tsx(557,15): error TS2322: Type '{ onChange: any; value?: any; defaultValue?: any; checked?: any; defaultChecked?: any; error?: any; onFocus?: any; onBlur?: any; label: string; placeholder: string; required: true; min: number; step: number; precision: number; }' is not assignable to type 'IntrinsicAttributes & NumberInputProps & RefAttributes<HTMLInputElement> & { component?: any; renderRoot?: ((props: Record<...>) => ReactNode) | undefined; }'.
+  Property 'precision' does not exist on type 'IntrinsicAttributes & NumberInputProps & RefAttributes<HTMLInputElement> & { component?: any; renderRoot?: ((props: Record<...>) => ReactNode) | undefined; }'.
+components/Weather/WeatherAlert.tsx(6,43): error TS2307: Cannot find module '@apollo/client' or its corresponding type declarations.
+components/Weather/WeatherAlert.tsx(40,22): error TS7031: Binding element 'subscriptionData' implicitly has an 'any' type.
+components/Weather/WeatherDashboard.tsx(36,26): error TS2307: Cannot find module '@apollo/client' or its corresponding type declarations.
+lib/apollo/client.ts(11,8): error TS2307: Cannot find module '@apollo/client' or its corresponding type declarations.
+lib/apollo/client.ts(12,28): error TS2307: Cannot find module '@apollo/client/link/context' or its corresponding type declarations.
+lib/apollo/client.ts(13,25): error TS2307: Cannot find module '@apollo/client/link/error' or its corresponding type declarations.
+lib/apollo/client.ts(14,27): error TS2307: Cannot find module '@apollo/client/link/retry' or its corresponding type declarations.
+lib/apollo/client.ts(27,17): error TS7006: Parameter 'existing' implicitly has an 'any' type.
+lib/apollo/client.ts(27,27): error TS7006: Parameter 'incoming' implicitly has an 'any' type.
+lib/apollo/client.ts(27,39): error TS7031: Binding element 'args' implicitly has an 'any' type.
+lib/apollo/client.ts(59,17): error TS7006: Parameter 'existing' implicitly has an 'any' type.
+lib/apollo/client.ts(59,27): error TS7006: Parameter 'incoming' implicitly has an 'any' type.
+lib/apollo/client.ts(73,17): error TS7006: Parameter 'existing' implicitly has an 'any' type.
+lib/apollo/client.ts(73,27): error TS7006: Parameter 'incoming' implicitly has an 'any' type.
+lib/apollo/client.ts(131,11): error TS7006: Parameter 'uri' implicitly has an 'any' type.
+lib/apollo/client.ts(131,16): error TS7006: Parameter 'options' implicitly has an 'any' type.
+lib/apollo/client.ts(145,36): error TS7006: Parameter '_' implicitly has an 'any' type.
+lib/apollo/client.ts(145,41): error TS7031: Binding element 'headers' implicitly has an 'any' type.
+lib/apollo/client.ts(178,15): error TS7006: Parameter 'error' implicitly has an 'any' type.
+lib/apollo/client.ts(178,22): error TS7006: Parameter '_operation' implicitly has an 'any' type.
+lib/apollo/client.ts(205,30): error TS7031: Binding element 'graphQLErrors' implicitly has an 'any' type.
+lib/apollo/client.ts(205,45): error TS7031: Binding element 'networkError' implicitly has an 'any' type.
+lib/apollo/client.ts(205,59): error TS7031: Binding element 'operation' implicitly has an 'any' type.
+lib/apollo/client.ts(205,70): error TS7031: Binding element 'forward' implicitly has an 'any' type.
+lib/apollo/client.ts(208,28): error TS7006: Parameter 'err' implicitly has an 'any' type.
+lib/apollo/client.ts(276,42): error TS7006: Parameter 'operation' implicitly has an 'any' type.
+lib/apollo/client.ts(276,53): error TS7006: Parameter 'forward' implicitly has an 'any' type.
+lib/apollo/client.ts(277,26): error TS7006: Parameter 'observer' implicitly has an 'any' type.
+lib/apollo/client.ts(403,18): error TS7006: Parameter 'cache' implicitly has an 'any' type.
+lib/apollo/client.ts(403,27): error TS7031: Binding element 'data' implicitly has an 'any' type.
+lib/apollo/client.ts(403,33): error TS7031: Binding element 'errors' implicitly has an 'any' type.
+lib/apollo/hooks.ts(1,21): error TS2307: Cannot find module '@apollo/client' or its corresponding type declarations.
+lib/apollo/hooks.ts(2,56): error TS2307: Cannot find module '@apollo/client/react' or its corresponding type declarations.
+lib/apollo/hooks.ts(3,60): error TS2307: Cannot find module '@apollo/client/react/types' or its corresponding type declarations.
+lib/apollo/hooks.ts(543,19): error TS7006: Parameter 'data' implicitly has an 'any' type.
+lib/apollo/hooks.ts(556,19): error TS7006: Parameter 'data' implicitly has an 'any' type.
+lib/apollo/hooks.ts(560,15): error TS7006: Parameter 'error' implicitly has an 'any' type.
+lib/apollo/hooks.ts(570,19): error TS7006: Parameter 'data' implicitly has an 'any' type.
+lib/apollo/hooks.ts(574,15): error TS7006: Parameter 'error' implicitly has an 'any' type.
+lib/apollo/hooks.ts(584,19): error TS7006: Parameter 'data' implicitly has an 'any' type.
+lib/apollo/hooks.ts(588,15): error TS7006: Parameter 'error' implicitly has an 'any' type.
+lib/apollo/hooks.ts(598,19): error TS7006: Parameter 'data' implicitly has an 'any' type.
+lib/apollo/hooks.ts(610,16): error TS7031: Binding element 'data' implicitly has an 'any' type.
+lib/apollo/hooks.ts(628,16): error TS7031: Binding element 'data' implicitly has an 'any' type.
+lib/graphql/weather.queries.ts(1,21): error TS2307: Cannot find module '@apollo/client' or its corresponding type declarations.
+ ELIFECYCLE  Command failed with exit code 2.

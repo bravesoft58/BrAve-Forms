@@ -35,68 +35,15 @@ import {
   IconUsers,
 } from '@tabler/icons-react';
 import { useAuth } from '@clerk/nextjs';
-import { gql, useQuery, useMutation } from '@apollo/client';
+import { useQuery } from '@tanstack/react-query';
+import { fetchProjects } from '@/lib/api/projects';
 import { notifications } from '@mantine/notifications';
 import { DateInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 
-// GraphQL Operations
-const GET_USER_PROJECTS = gql`
-  query GetUserProjects {
-    projects {
-      id
-      name
-      address
-      permitNumber
-      startDate
-      endDate
-      disturbedAcres
-      status
-      compliance {
-        overallScore
-        pendingInspections
-        overdueInspections
-        requiresAttention
-        lastInspection
-        nextDeadline
-      }
-      recentInspections {
-        id
-        type
-        status
-        overdue
-        inspectionDate
-      }
-    }
-  }
-`;
-
-const CREATE_PROJECT = gql`
-  mutation CreateProject($input: CreateProjectInput!) {
-    createProject(input: $input) {
-      id
-      name
-      address
-      status
-    }
-  }
-`;
-
-const UPDATE_PROJECT = gql`
-  mutation UpdateProject($id: ID!, $input: UpdateProjectInput!) {
-    updateProject(id: $id, input: $input) {
-      id
-      name
-      status
-    }
-  }
-`;
-
-const DELETE_PROJECT = gql`
-  mutation DeleteProject($id: ID!) {
-    deleteProject(id: $id)
-  }
-`;
+// TODO: Mutations to be reimplemented with fetch-based API helpers
+// See ISSUE-047 BLOCKER tracking - ProjectSelector mutations commented out
+// Will be restored in future issue when mutation helpers are created
 
 interface ProjectSelectorProps {
   userRole: 'OWNER' | 'ADMIN' | 'MANAGER' | 'MEMBER' | 'INSPECTOR';
@@ -105,76 +52,36 @@ interface ProjectSelectorProps {
   showCreateButton?: boolean;
 }
 
-export function ProjectSelector({ 
-  userRole, 
-  onProjectSelect, 
+export function ProjectSelector({
+  userRole,
+  onProjectSelect,
   selectedProjectId,
-  showCreateButton = true 
+  showCreateButton = true
 }: ProjectSelectorProps) {
+  const { orgId } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>('');
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
 
-  const { data, loading, error, refetch } = useQuery(GET_USER_PROJECTS, {
-    errorPolicy: 'all',
+  // Fetch projects using TanStack Query
+  const { data: projectsData, isPending, error, refetch } = useQuery({
+    queryKey: ['projects', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      return fetchProjects(orgId);
+    },
+    enabled: !!orgId,
   });
 
-  const [createProject, { loading: creating }] = useMutation(CREATE_PROJECT, {
-    onCompleted: () => {
-      notifications.show({
-        title: 'Project Created',
-        message: 'New project has been added successfully',
-        color: 'green',
-      });
-      setCreateModalOpen(false);
-      refetch();
-    },
-    onError: (error) => {
-      notifications.show({
-        title: 'Creation Failed',
-        message: error.message,
-        color: 'red',
-      });
-    },
-  });
+  // Alias for compatibility with existing code
+  const loading = isPending;
+  const data = { projects: projectsData || [] };
 
-  const [updateProject, { loading: updating }] = useMutation(UPDATE_PROJECT, {
-    onCompleted: () => {
-      notifications.show({
-        title: 'Project Updated',
-        message: 'Project has been updated successfully',
-        color: 'green',
-      });
-      setEditingProject(null);
-      refetch();
-    },
-    onError: (error) => {
-      notifications.show({
-        title: 'Update Failed',
-        message: error.message,
-        color: 'red',
-      });
-    },
-  });
-
-  const [deleteProject] = useMutation(DELETE_PROJECT, {
-    onCompleted: () => {
-      notifications.show({
-        title: 'Project Deleted',
-        message: 'Project has been removed successfully',
-        color: 'green',
-      });
-      refetch();
-    },
-    onError: (error) => {
-      notifications.show({
-        title: 'Deletion Failed',
-        message: error.message,
-        color: 'red',
-      });
-    },
-  });
+  // TODO: Mutations temporarily disabled - will be reimplemented with fetch-based API
+  // Track in ISSUE-047 discovery tracker
+  const creating = false;
+  const updating = false;
 
   const projectForm = useForm({
     initialValues: {
@@ -190,33 +97,27 @@ export function ProjectSelector({
   });
 
   const handleCreateProject = async (values: any) => {
-    await createProject({
-      variables: {
-        input: {
-          ...values,
-          endDate: values.endDate || undefined,
-        },
-      },
+    notifications.show({
+      title: 'Feature Temporarily Unavailable',
+      message: 'Project creation will be restored in next issue',
+      color: 'blue',
     });
   };
 
   const handleUpdateProject = async (values: any) => {
-    if (!editingProject) return;
-
-    await updateProject({
-      variables: {
-        id: editingProject.id,
-        input: values,
-      },
+    notifications.show({
+      title: 'Feature Temporarily Unavailable',
+      message: 'Project updates will be restored in next issue',
+      color: 'blue',
     });
   };
 
   const handleDeleteProject = async (projectId: string, projectName: string) => {
-    if (confirm(`Are you sure you want to delete "${projectName}"?`)) {
-      await deleteProject({
-        variables: { id: projectId },
-      });
-    }
+    notifications.show({
+      title: 'Feature Temporarily Unavailable',
+      message: 'Project deletion will be restored in next issue',
+      color: 'blue',
+    });
   };
 
   const openEditModal = (project: any) => {

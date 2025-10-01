@@ -1,50 +1,254 @@
 # BrAve Forms Platform - Use Cases and User Stories
-**Version 1.0 | August 2025**
+**Version 2.0 | October 1, 2025**
+**Status:** Updated with forms-first positioning
 
 ---
 
 ## Table of Contents
 1. [Executive Summary](#executive-summary)
 2. [User Personas Overview](#user-personas-overview)
-3. [Core Use Cases](#core-use-cases)
-4. [User Stories by Feature](#user-stories-by-feature)
-5. [Scenario-Based Use Cases](#scenario-based-use-cases)
-6. [Edge Cases and Exception Handling](#edge-cases-and-exception-handling)
-7. [Success Metrics](#success-metrics)
+3. [Core Use Cases - Forms Management (80%)](#core-use-cases---forms-management)
+4. [Secondary Use Cases - Compliance Automation (20%)](#secondary-use-cases---compliance-automation)
+5. [User Stories by Feature](#user-stories-by-feature)
+6. [Scenario-Based Use Cases](#scenario-based-use-cases)
+7. [Edge Cases and Exception Handling](#edge-cases-and-exception-handling)
+8. [Success Metrics](#success-metrics)
 
 ---
 
 ## Executive Summary
 
-This document provides comprehensive use cases and user stories for the BrAve Forms Platform, a web-first construction compliance and forms management system. These scenarios are based on extensive research of construction industry workflows, validated pain points, and regulatory requirements including:
+This document provides comprehensive use cases and user stories for the BrAve Forms Platform, a **mobile-first construction forms management system** with bonus compliance automation features. These scenarios are based on extensive research of construction industry workflows, validated pain points, and field requirements including:
 
-- **2-3 hours daily** currently spent on documentation (target: <30 minutes)
-- **0.25" rain threshold** triggering 24-hour inspection deadlines per EPA 2022 CGP
+**PRIMARY FOCUS - Forms Management (80% of use cases):**
+- **2-3 hours daily** currently spent on forms/paperwork (target: <30 minutes)
 - **30-day offline operation** requirement for remote construction sites
-- **$161,323 maximum penalties** for OSHA willful violations
+- **Photo documentation** with GPS tagging for all inspections
 - **92% smartphone adoption** among construction professionals
+- **Digital forms** replacing paper/Excel for daily logs, inspections, safety checklists
 
-Each use case addresses real-world construction scenarios, from daily SWPPP inspections to weather-triggered compliance events, ensuring the platform meets practical field requirements while maintaining regulatory compliance.
+**SECONDARY FOCUS - Compliance Automation (20% of use cases):**
+- **0.25" rain threshold** triggering 24-hour inspection deadlines per EPA 2022 CGP
+- **Automated reminders** for regulatory compliance deadlines
+- **$165,514 maximum penalties** for OSHA willful violations (rare but serious)
+
+Each use case addresses real-world construction scenarios, with **primary emphasis on daily forms workflows** and secondary coverage of compliance automation, ensuring the platform meets practical field requirements while providing bonus compliance features.
 
 ---
 
 ## User Personas Overview
 
-### Primary Personas
+### Primary Personas (Reordered - Forms-First)
 
-| Persona | Role | Key Needs | Primary Device |
-|---------|------|-----------|---------------|
-| **"Compliance Carlos"** | Construction Foreman | Quick documentation, weather alerts, offline access | Android smartphone (71%) |
-| **"Inspector Rita"** | Environmental Inspector | QR code access, violation tracking, report generation | Tablet/smartphone |
-| **"Admin Amy"** | Compliance Administrator | Portfolio oversight, regulatory reporting, audit trails | Desktop + mobile |
-| **"Manager Mike"** | Project Manager | Multi-project visibility, team coordination, cost tracking | Tablet + desktop |
-| **"Subcontractor Sam"** | External Contractor | Limited access, task documentation, photo upload | Smartphone |
+| Persona | Role | Key Needs | Primary Device | Use Case Priority |
+|---------|------|-----------|---------------|------------------|
+| **"Forms Manager Frank"** | Construction Foreman | Quick form filling, photo docs, offline access | Android smartphone (71%) | PRIMARY (80%) |
+| **"Manager Mike"** | Project Manager | Multi-project visibility, reports, team coordination | Tablet + desktop | PRIMARY (80%) |
+| **"Safety Sam"** | Safety Coordinator | Safety inspections, incident reports, photo evidence | Smartphone + tablet | PRIMARY (80%) |
+| **"Admin Amy"** | Office Administrator | View-only access, export reports, compliance tracking | Desktop | PRIMARY (80%) |
+| **"Inspector Rita"** | Environmental Inspector | QR code access, inspection reports, violation tracking | Tablet/smartphone | SECONDARY (20%) |
+| **"Compliance Carlos"** | Environmental Officer | SWPPP compliance, weather alerts, regulatory reporting | Desktop + mobile | SECONDARY (20%) |
+
+**Note:** Persona priority reflects actual usage patterns - daily forms (80%) vs occasional compliance events (20%)
 
 ---
 
-## Core Use Cases
+## Core Use Cases - Forms Management (80%)
 
-### UC-001: Daily SWPPP Inspection Workflow
+### UC-001: Daily Log Form Completion
+
+**Actor**: Construction Foreman
+**Frequency**: Daily (100% of field days)
+**Precondition**: Active construction project
+**Trigger**: Start of work day or end of work day
+
+**Main Flow**:
+1. Foreman opens mobile app (works offline)
+2. Selects project from favorites
+3. Opens "Daily Log" form template
+4. Option: Copy yesterday's log as starting point
+5. Updates form fields:
+   - Weather conditions
+   - Crew roster and hours
+   - Equipment used
+   - Work performed
+   - Materials delivered
+   - Safety observations
+6. Takes photos of work progress
+7. Photos auto-attach with GPS tags
+8. Adds digital signature
+9. Submits form (queued if offline)
+10. Receives confirmation when synced
+
+**Time Comparison**:
+- Paper/Excel: 45 minutes
+- BrAve Forms: 10 minutes
+- **Savings: 35 minutes daily**
+
+**Postcondition**: Daily log complete, available for PM review, stored for audit trail
+
+---
+
+### UC-002: Safety Inspection Form with Photos
+
+**Actor**: Safety Coordinator
+**Frequency**: Weekly or after incidents (80% of inspections)
+**Precondition**: Safety inspection required
+**Trigger**: Scheduled inspection or incident report
+
+**Main Flow**:
+1. Safety coordinator selects "Safety Inspection" template
+2. Walks site with mobile device
+3. For each checklist item:
+   - Marks compliant/non-compliant
+   - Takes photo if issue found
+   - Photos auto-attach to specific field
+   - Adds corrective action notes
+4. Creates issues for violations:
+   - Assigns to responsible person
+   - Sets due date
+   - Attaches photo evidence
+5. Generates PDF report on-device
+6. Emails to project team
+7. Tracks issue resolution
+
+**Time Comparison**:
+- Paper + Email Photos: 60 minutes
+- BrAve Forms: 15 minutes
+- **Savings: 45 minutes**
+
+**Postcondition**: Safety issues documented, corrective actions assigned, audit trail created
+
+---
+
+### UC-003: Equipment Log Form
+
+**Actor**: Construction Foreman
+**Frequency**: Daily per equipment (multiple times daily)
+**Precondition**: Equipment on site
+**Trigger**: Equipment use or maintenance
+
+**Main Flow**:
+1. Foreman scans equipment QR code (optional)
+2. Opens equipment log form (pre-filled from QR code)
+3. Records:
+   - Operating hours
+   - Fuel consumed
+   - Maintenance performed
+   - Issues observed
+4. Takes photo of hour meter
+5. Photo auto-attaches with GPS
+6. Submits form offline
+7. Syncs when back to office
+
+**Time Comparison**:
+- Paper logbook: 15 minutes per equipment
+- BrAve Forms: 3 minutes per equipment
+- **Savings: 12 minutes per equipment**
+
+**Postcondition**: Equipment usage tracked, maintenance scheduled, compliance maintained
+
+---
+
+### UC-004: Quality Control Inspection Form
+
+**Actor**: Quality Control Inspector
+**Frequency**: Per work phase (multiple weekly)
+**Precondition**: Work phase complete
+**Trigger**: QC inspection required
+
+**Main Flow**:
+1. QC inspector selects work phase template (concrete, framing, MEP, etc.)
+2. Walks completed work area
+3. For each inspection point:
+   - Checks against specifications
+   - Takes before/after photos
+   - Records measurements
+   - Notes deficiencies
+4. Creates punch list items:
+   - Assigns to trade contractor
+   - Sets severity (critical/major/minor)
+   - Attaches photos
+5. Digital signature from foreman
+6. Generates inspection report
+7. Distributes to stakeholders
+
+**Time Comparison**:
+- Paper + Manual Photo Organization: 90 minutes
+- BrAve Forms: 20 minutes
+- **Savings: 70 minutes**
+
+**Postcondition**: Quality inspection complete, punch list created, deficiencies tracked
+
+---
+
+### UC-005: Material Delivery Form
+
+**Actor**: Construction Foreman
+**Frequency**: Per delivery (3-10 times weekly)
+**Precondition**: Materials arriving on site
+**Trigger**: Delivery truck arrives
+
+**Main Flow**:
+1. Foreman opens "Material Delivery" form
+2. Scans delivery ticket barcode (optional)
+3. Records:
+   - Supplier name
+   - Material type and quantity
+   - Delivery time
+   - Condition on arrival
+4. Takes photos:
+   - Delivery ticket
+   - Material condition
+   - Storage location
+5. Gets driver signature (digital)
+6. Submits form
+7. Accounting receives notification
+
+**Time Comparison**:
+- Paper + Phone Call to Office: 20 minutes
+- BrAve Forms: 5 minutes
+- **Savings: 15 minutes per delivery**
+
+**Postcondition**: Material receipt documented, inventory updated, invoice verified
+
+---
+
+## Secondary Use Cases - Compliance Automation (20%)
+
+### UC-101: Weather-Triggered SWPPP Inspection
+
+**Actor**: Environmental Officer / Foreman
+**Frequency**: After 0.25" rain events (~10-50 times/year depending on location)
+**Precondition**: SWPPP plan active, weather monitoring enabled
+**Trigger**: Automatic detection of 0.25" precipitation
+
+**Main Flow**:
+1. System detects 0.25" rain via NOAA API
+2. Automatic notification sent to responsible foreman
+3. Countdown timer shows 24-hour deadline
+4. Foreman receives push notification
+5. Opens SWPPP inspection form (pre-filled with storm data)
+6. Conducts site inspection:
+   - BMPs (Best Management Practices)
+   - Discharge points
+   - Erosion control measures
+7. Takes geotagged photos
+8. Records corrective actions if needed
+9. Submits inspection
+10. Compliance deadline met automatically
+
+**Time Comparison**:
+- Manual tracking + Paper form: Need to remember (often missed)
+- BrAve Forms: Automatic reminder + digital form = zero missed deadlines
+
+**Postcondition**: EPA CGP compliance maintained, inspection within 24-hour window, audit trail created
+
+**Compliance Impact**: Prevents $25,000-$50,000 daily EPA fines
+
+---
+
+### UC-102: OSHA Incident Report Form
 
 **Actor**: Construction Foreman  
 **Precondition**: Active construction project with SWPPP requirements  

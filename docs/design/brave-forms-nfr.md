@@ -455,11 +455,13 @@ control_categories:
 
 ### 6.2 Environmental Compliance
 
-#### EPA Requirements
-- **Data Retention**: 3 years post-permit termination
+#### EPA Requirements (Automated Compliance Features)
+- **Data Retention**: 3 years post-permit termination (automated archival)
 - **Inspection Records**: Weekly + 24hr post-rain (EXACTLY 0.25" - EPA CGP requirement, non-configurable)
-- **Report Formats**: EPA-specified XML schemas
-- **Audit Trail**: Complete, immutable records
+  - **Primary Workflow**: Digital forms with photo documentation (reduces 2-3 hours to 30 minutes)
+  - **Compliance Automation**: Weather-triggered inspection scheduling
+- **Report Formats**: EPA-specified XML schemas (auto-generated from form data)
+- **Audit Trail**: Complete, immutable records (forms + compliance actions)
 
 #### OSHA Requirements
 - **Safety Records**: 5-year retention

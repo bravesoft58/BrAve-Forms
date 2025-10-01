@@ -6,6 +6,8 @@ This comprehensive research report provides production-ready database design pat
 
 ## PostgreSQL 15 with TimescaleDB for weather monitoring and JSONB for dynamic forms
 
+**Note:** This architecture uses PostgreSQL 15 (not PostgreSQL 16) with TimescaleDB extension for optimal time-series weather data performance while maintaining JSONB flexibility for dynamic form schemas.
+
 ### Hybrid architecture combining structured and JSONB columns
 
 The optimal approach leverages PostgreSQL's strengths by using structured columns for fixed data and JSONB for dynamic form content. This pattern, proven at companies like Heap and Notion, provides flexibility while maintaining query performance.
@@ -74,6 +76,19 @@ RETURNS UUID AS $$
     SELECT current_setting('app.current_tenant_id', TRUE)::UUID;
 $$ LANGUAGE sql SECURITY DEFINER;
 
+-- User roles with pricing tiers
+CREATE TYPE user_role_type AS ENUM ('FIELD', 'OFFICE', 'INSPECTOR');
+
+CREATE TABLE users (
+    id UUID PRIMARY KEY,
+    clerk_user_id VARCHAR(255) UNIQUE NOT NULL,
+    organization_id UUID REFERENCES organizations(id),
+    role user_role_type NOT NULL DEFAULT 'FIELD',
+    pricing_tier VARCHAR(20) CHECK (pricing_tier IN ('field_39', 'office_19', 'inspector_free')),
+    features_enabled JSONB DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- RLS policies with role-based access
 CREATE POLICY tenant_forms_policy ON compliance_forms
     USING (tenant_id = current_tenant_id());
@@ -81,10 +96,10 @@ CREATE POLICY tenant_forms_policy ON compliance_forms
 CREATE POLICY form_access_policy ON compliance_forms
 FOR ALL TO app_user
 USING (
-    tenant_id = current_tenant_id() 
+    tenant_id = current_tenant_id()
     AND (
         current_setting('app.current_user_role') = 'admin'
-        OR (current_setting('app.current_user_role') = 'inspector' 
+        OR (current_setting('app.current_user_role') = 'inspector'
             AND status = 'published')
     )
 );

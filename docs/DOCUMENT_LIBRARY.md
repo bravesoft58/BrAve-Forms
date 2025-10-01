@@ -1,8 +1,8 @@
 # BrAve Forms - Master Documentation Library
 
-**Last Updated:** 2025-09-30
+**Last Updated:** 2025-10-01
 **Maintained By:** Documentation Library Manager Agent
-**Status:** UPDATED - Phase 2 Documentation Complete, CLAUDE.md v1.6
+**Status:** UPDATED - Forms-First Repositioning Complete, Design Docs Archived
 
 ## Documentation Overview
 
@@ -65,72 +65,118 @@ This master index provides a complete inventory of all documentation in the BrAv
 
 ---
 
-## 📋 Design & Architecture Documentation
+## Design & Architecture Documentation
+
+### NEW MASTER DOCUMENTS (October 1, 2025 - Forms-First Repositioning)
+
+- ACTIVE **[Comprehensive PRD](../design/comprehensive_prd.md)** - MASTER PRODUCT REQUIREMENTS
+  - **Purpose:** Complete product requirements with forms-first positioning (80% forms, 20% compliance)
+  - **Status:** Active (Created October 1, 2025) - REPLACES comprehensive_compliance_prd.md
+  - **Size:** 80KB, 1,800+ lines
+  - **Research-Validated:** All claims backed by market research
+  - **Key Sections:** User personas (Forms Manager Frank primary), Epic hierarchy (Forms Engine P0, Compliance P1), Pricing strategy (user roles, volume discounts)
+
+- ACTIVE **[Product Positioning](../design/product_positioning.md)** - MASTER POSITIONING DOCUMENT
+  - **Purpose:** Market positioning, competitive differentiation, go-to-market strategy
+  - **Status:** Active (Created October 1, 2025)
+  - **Size:** 48KB, 400+ lines
+  - **Coverage:** Value proposition hierarchy (80/20), competitive analysis, sales messaging, pricing tiers
+  - **Target Market:** Small contractors (5-25 employees) with volume discounts for 25-50
+
+- ACTIVE **[Product Vision v2.0](../design/brave-forms-product-vision.md)** - STRATEGIC VISION DOCUMENT
+  - **Purpose:** Strategic vision, mission statement, market opportunity, competitive positioning
+  - **Status:** Active (Created October 1, 2025) - REPLACES archived v1.0 (compliance-first)
+  - **Size:** 18KB, 450+ lines
+  - **Key Sections:** Vision/mission statements, market analysis, 3-phase strategy, ROI calculations, product principles
+  - **Positioning:** Forms-first (80%) with compliance automation bonus (20%)
+  - **Differentiation:** Construction-native forms specialist vs general tools
 
 ### Product & Business Documents
 
-- ✅ **[Product Vision](../design/brave-forms-product-vision.md)**
-  - **Purpose:** Market opportunity and strategic vision
-  - **Status:** Active
-- ✅ **[Business Case](../design/brave-forms-business-case.md)**
+- ACTIVE **[Business Case](../design/brave-forms-business-case.md)**
   - **Purpose:** ROI analysis and investment justification
-  - **Status:** Active
+  - **Status:** Active - NEEDS UPDATE per DESIGN_DOCS_UPDATE_SUMMARY.md
+  - **Update Required:** Reframe ROI around time savings (primary) vs compliance fines (secondary)
 
-- ✅ **[Comprehensive Compliance PRD](../design/comprehensive_compliance_prd.md)**
-  - **Purpose:** Detailed product requirements with EPA/OSHA focus
-  - **Status:** Active, critical document
+- ARCHIVED **[Product Vision](../archive/design/legacy/brave-forms-product-vision.md)**
+  - **Status:** ARCHIVED (October 1, 2025) - Compliance-first positioning, contains emojis
+  - **Superseded By:** comprehensive_prd.md executive summary
+  - **Action Required:** Rewrite using forms-first messaging
 
-- ✅ **[Market Requirements](../design/Market%20Requirements%20Document.md)**
-  - **Purpose:** Market analysis and positioning
-  - **Status:** Active
+- ARCHIVED **[Comprehensive Compliance PRD](../archive/design/legacy/comprehensive_compliance_prd.md)**
+  - **Status:** ARCHIVED (October 1, 2025) - Compliance-first (60/40 split)
+  - **Superseded By:** comprehensive_prd.md with correct 80/20 forms/compliance split
+
+- ARCHIVED **[Market Requirements Document](../archive/design/legacy/Market-Requirements-Document.md)**
+  - **Status:** ARCHIVED (October 1, 2025) - EPA threshold error (0.5" vs 0.25"), compliance-first
+  - **Superseded By:** comprehensive_prd.md Market Opportunity section
+  - **Critical Issue:** Documented 0.5" rain threshold (INCORRECT per EPA CGP 2022)
+
+- ARCHIVED **[Product Requirements Document (Early Version)](../archive/design/legacy/Product-Requirements-Document-EARLY-VERSION.txt)**
+  - **Status:** ARCHIVED - Very early text file version
+  - **Superseded By:** comprehensive_prd.md
 
 ### Technical Architecture
 
 - ✅ **[Revised Architecture with Clerk](../design/revised_architecture_clerk.md)**
   - **Purpose:** Current system design with Clerk authentication
   - **Status:** Active, current architecture
-- ✅ **[Software Architecture Document](../design/brave-forms-sad.md)**
+- ACTIVE **[Software Architecture Document](../design/brave-forms-sad.md)**
   - **Purpose:** Detailed software architecture
-  - **Status:** Active
+  - **Status:** Active (UPDATED October 1, 2025)
+  - **Update:** Forms-first positioning complete, priority levels added (P0 forms, P1 compliance)
 
-- ✅ **[API Interface Control](../design/brave-forms-api-icd.md)**
+- ACTIVE **[API Interface Control](../design/brave-forms-api-icd.md)**
   - **Purpose:** GraphQL API specifications
-  - **Status:** Active
+  - **Status:** Active (UPDATED October 1, 2025)
+  - **Update:** User role types added (FIELD $39, OFFICE $19, INSPECTOR FREE), JWT claims enhanced
 
-- ✅ **[Database Design](../design/database%20design%20document.md)**
-  - **Purpose:** PostgreSQL schema with JSONB
-  - **Status:** Active
+- ACTIVE **[Database Design](../design/database%20design%20document.md)**
+  - **Purpose:** PostgreSQL 15 schema with JSONB
+  - **Status:** Active (UPDATED October 1, 2025)
+  - **Update:** PostgreSQL 15 verified, user role schema added with pricing tiers
 
 ### Tech Stack Documentation
 
-- ⚠️ **Multiple Tech Stack Documents** - Need consolidation:
-  - **[TECH_STACK.md](../design/TECH_STACK.md)** - Main tech stack doc
-  - **[brave-forms-final-tech-stack.md](../design/brave-forms-final-tech-stack.md)** - "Final" version
-  - **[Tech Stack Recommendations.md](../design/Tech%20Stack%20Recommendations.md)** - Recommendations doc
-  - **Issue:** Three documents with overlapping content
-  - **Recommendation:** Consolidate into single TECH_STACK.md
+- ACTIVE **[TECH_STACK_DETAILS.md](TECH_STACK_DETAILS.md)** - MASTER TECH STACK (Root docs/)
+  - **Purpose:** Single authoritative source for all technology decisions
+  - **Status:** Active (Created September 30, 2025)
+  - **Coverage:** Backend, Frontend, Infrastructure, Performance targets, Security
+  - **Referenced By:** CLAUDE.md, comprehensive_prd.md
+
+- ARCHIVED **Tech Stack Duplicates (Consolidated October 1, 2025)**
+  - **[TECH_STACK.md](../archive/design/duplicate/TECH_STACK.md)** - Original version
+  - **[brave-forms-final-tech-stack.md](../archive/design/duplicate/brave-forms-final-tech-stack.md)** - "Final" version
+  - **[Tech Stack Recommendations.md](../archive/design/duplicate/Tech-Stack-Recommendations.md)** - Recommendations
+  - **Status:** All three consolidated into TECH_STACK_DETAILS.md
+  - **Reason:** Inconsistencies (PostgreSQL 15 vs 16, React Native vs Capacitor 6), maintenance burden
 
 ### Requirements & Specifications
 
-- ✅ **[Functional Requirements](../design/brave-forms-frd.md)**
-  - **Purpose:** Detailed functional specifications
-  - **Status:** Active
+- ARCHIVED **[Functional Requirements](../archive/design/legacy/brave-forms-frd.md)**
+  - **Status:** ARCHIVED (October 1, 2025) - Compliance-heavy module priorities
+  - **Superseded By:** comprehensive_prd.md Feature Requirements section
+  - **Action Required:** Major rewrite (8-12 hours) - Reorder modules: Forms Engine first, Compliance last
 
-- ✅ **[Non-Functional Requirements](../design/brave-forms-nfr.md)**
+- ACTIVE **[Non-Functional Requirements](../design/brave-forms-nfr.md)**
   - **Purpose:** Performance, security, compliance requirements
-  - **Status:** Active
+  - **Status:** Active (UPDATED October 1, 2025)
+  - **Update:** EPA requirements reframed with forms workflow context, compliance automation emphasis
 
 - ✅ **[Use Cases](../design/brave-forms-use-cases.md)**
   - **Purpose:** User scenarios and workflows
   - **Status:** Active
 
-- ✅ **[UX Design Document](../design/brave-forms-ux-design-doc.md)**
+- ACTIVE **[UX Design Document](../design/brave-forms-ux-design-doc.md)**
   - **Purpose:** Field-optimized UI specifications
-  - **Status:** Active
+  - **Status:** Active (UPDATED October 1, 2025)
+  - **Update:** User journey maps emphasize forms workflows, user role pricing added ($39 Field, $19 Office, FREE Inspector)
 
-- ✅ **[Software Development Plan](../design/sdp-brave-forms.md)**
-  - **Purpose:** Development methodology and practices
-  - **Status:** Active
+- ACTIVE **[Software Development Plan v2.0](../design/sdp-brave-forms.md)** - Forms-first repositioning
+  - **Purpose:** Development methodology, AI practices, CLAUDE.md v1.6 alignment
+  - **Status:** Active (Updated October 1, 2025)
+  - **Version:** 2.0 (Forms-first 80/20 split)
+  - **Key Updates:** Evidence-based TDD, PostgreSQL 15 correction, Capacitor 6 clarification, GitHub Projects
 
 - ⚠️ **[Product Requirements Document.txt](../design/Product%20Requirements%20Document.txt)**
   - **Purpose:** Product requirements
@@ -151,6 +197,31 @@ This master index provides a complete inventory of all documentation in the BrAv
   - **Baseline:** 25% backend, 10% web, 0% mobile (honest assessment)
   - **Research:** Based on actual K8s infrastructure audit
 
+- ACTIVE **[ISSUE-047: Discovery Tracker](../sprints/sprint1/issues/ISSUE-047-discovery-tracker.md)** - NEW
+  - **Purpose:** Centralized tracker for new issues uncovered during Sprint 1 implementation
+  - **Status:** Active (Created October 1, 2025)
+  - **Tracks:** 3 critical blockers, 4 monitoring requirements, 2 documentation gaps, 2 resolved technical debt
+  - **Critical Items:**
+    - BLOCKER-001: TanStack Query version mismatch (5.14.2 vs 5.86.0)
+    - BLOCKER-002: Valtio store hard dependency verification needed
+    - BLOCKER-003: iOS IndexedDB transience (CRITICAL for EPA compliance - data loss risk)
+  - **Sprint Assignments:** Sprint 2 (blockers), Sprint 3 (monitoring), Sprint 5 (iOS SQLite)
+  - **Integration:** Links to deployment tracker, converts to GitHub issues
+
+- ACTIVE **[Deployment Requirements Tracker](../sprints/DEPLOYMENT_REQUIREMENTS_TRACKER.md)** - NEW
+  - **Purpose:** Pre-production deployment checklist to ensure critical requirements not forgotten
+  - **Status:** Active (Created October 1, 2025)
+  - **Coverage:** 3 critical pre-production blockers, 4 monitoring requirements, 30+ item deployment checklist
+  - **Source:** ISSUE-012 deployment requirements discovery
+  - **Review Schedule:** Weekly standup, sprint planning, pre-release gate
+  - **Escalation Path:** Same-day flagging, 24-hour escalation to Product Owner
+
+- ACTIVE **[Deployment Requirements Resolved](../sprints/DEPLOYMENT_REQUIREMENTS_RESOLVED.md)** - NEW
+  - **Purpose:** Historical archive for completed deployment requirements
+  - **Status:** Active (Created October 1, 2025)
+  - **Tracks:** Resolution evidence, lessons learned, completion statistics
+  - **Integration:** Items moved from tracker when resolved
+
 - ACTIVE **[Sprint 1 Issues (20 Atomic Tasks)](../sprints/sprint1/issues/)**
   - **Purpose:** Individual issue tracking with step-by-step instructions
   - **Status:** Active
@@ -167,6 +238,10 @@ This master index provides a complete inventory of all documentation in the BrAv
   - **Requirements:** Actual screenshots, real API responses, genuine test results
   - **Structure:** deployment/, test-results/, performance/, compliance/
   - **Per Issue:** Separate folder for each ISSUE-001 through ISSUE-020
+  - **Recent Additions:**
+    - **ISSUE-010/COMPLETION-REPORT.md** - GraphQL API testing with Playwright MCP (authentication verified, schema introspection)
+    - **ISSUE-012/COMPLETION-REPORT-FINAL.md** - TanStack Query setup (research phase, code review, networkMode fix)
+    - **ISSUE-012/deployment/DEPLOYMENT_REQUIREMENTS.md** - Comprehensive deployment checklist (dependencies, monitoring, iOS warnings, rollback procedures)
 
 ### Legacy Sprint Plans (ARCHIVED - Historical Only)
 
@@ -358,14 +433,20 @@ This master index provides a complete inventory of all documentation in the BrAv
 
 ## Documentation Health Metrics
 
-- **Total Documents:** 67+ (increased with Phase 2 additions)
-- **Active Documents:** 47 (added TECH_STACK_DETAILS.md, COMMON_PITFALLS.md)
+- **Total Documents:** 72+ (increased with Phase 2, Phase 4, and Sprint 1 tracking additions)
+- **Active Documents:** 52 (added discovery tracker, deployment trackers, ISSUE-012 evidence)
 - **Archived Documents:** 8
-- **Deprecated/Outdated:** 3
-- **Duplicates Found:** 2
+- **Deprecated/Outdated:** 0 (all resolved in Phase 3-4)
+- **Duplicates Found:** 0 (all consolidated in Phase 3)
 - **Misplaced Files:** 2
-- **Coverage:** Excellent for design/architecture, improved technical documentation
-- **New Coverage Areas:** Technical stack details, common pitfalls, best practices research
+- **Coverage:** Excellent for design/architecture, comprehensive technical documentation, deployment tracking
+- **New Coverage Areas:**
+  - Technical stack details, common pitfalls, forms-first positioning evidence
+  - Sprint 1 discovery tracking (ISSUE-047)
+  - Pre-production deployment requirements tracking
+  - Evidence-based completion reports (ISSUE-010, ISSUE-012)
+- **Forms-First Alignment:** 15/15 documents (100% consistency)
+- **Sprint 1 Progress:** 12/46 issues complete (26%), 11 new issues discovered and tracked
 
 ---
 
@@ -397,6 +478,164 @@ This master index provides a complete inventory of all documentation in the BrAv
    - Updated all status indicators to text-only format
    - Added Phase 2 completion tracking
 
+### Phase 3: Forms-First Repositioning (October 1, 2025) - COMPLETED
+
+**Strategic Initiative:** Reposition BrAve Forms from compliance-first to forms-first
+
+#### New Master Documents Created:
+1. **comprehensive_prd.md (80KB):** Master PRD with 80/20 forms/compliance split
+   - User personas: Forms Manager Frank (primary), Compliance Carlos (tertiary)
+   - Epic hierarchy: Forms Engine P0, Compliance P1
+   - Pricing strategy: User roles (Field $39, Office $19, Inspector FREE), volume discounts
+   - Issues/Actions tracking (Epic 7) for competitive parity with SafetyCulture
+
+2. **product_positioning.md (48KB):** Market positioning and go-to-market
+   - Value proposition: 80% forms messaging, 20% compliance bonus
+   - Target market: 5-25 employees (PRIMARY), 25-50 with volume discounts (STRETCH)
+   - Competitive analysis: vs Procore (too expensive), SafetyCulture (not construction-specific)
+   - Sales framework: Discovery questions, objection handling, ROI calculator
+
+#### Documents Archived (October 1, 2025):
+- **Legacy (Compliance-First):** 4 documents moved to docs/archive/design/legacy/
+  - comprehensive_compliance_prd.md (compliance-first 60/40 split)
+  - brave-forms-product-vision.md (contains emojis, compliance-first)
+  - Market Requirements Document.md (EPA threshold error 0.5" vs 0.25")
+  - brave-forms-frd.md (wrong module priorities)
+  - Product Requirements Document.txt (very early version)
+
+- **Duplicates (Consolidated):** 3 documents moved to docs/archive/design/duplicate/
+  - TECH_STACK.md, brave-forms-final-tech-stack.md, Tech Stack Recommendations.md
+  - All consolidated into TECH_STACK_DETAILS.md
+
+#### Files Removed (October 1, 2025):
+- Binary files (5): .docx files (808KB), .png screenshots (320KB), package.json
+- Reason: Unrelated (GIRGID screenshots), binary format, or superseded
+
+#### Key Corrections Applied:
+1. **Target Market:** Changed from "10-500 employees" to "5-25 employees (PRIMARY)"
+2. **Volume Discounts:** Added 15% (11-25 users), 25% (26-50 users) discounts
+3. **User Role Pricing:** Field User ($39), Office User ($19), Inspector Portal (FREE)
+4. **EPA Threshold:** Documented correct 0.25" (not 0.5" error in archived docs)
+5. **SWPPP Differentiation:** Automation vs templates (SafetyCulture has templates)
+
+#### Design Folder Summary:
+- **Before:** 26 files (1.8MB) with duplicates and binary files
+- **After:** 13 markdown files (450KB) - 75% reduction
+- **Active Documents:** 11 aligned with forms-first direction
+- **Archive Structure:** docs/archive/design/legacy/ and duplicate/
+
+#### Related Documents:
+- ULTRA_THINK_MODE_ANALYSIS.md - Strategic validation with research
+- DESIGN_DOCS_UPDATE_SUMMARY.md - Action plan for remaining 5 docs
+- DESIGN_DOCS_REVIEW_AND_ARCHIVE_PLAN.md - Complete archive execution plan
+
+### Phase 4: Final 5 Documents Update (October 1, 2025) - COMPLETED
+
+**Objective:** Complete forms-first alignment for remaining 5 technical design documents
+
+**Documents Updated:**
+1. **brave-forms-sad.md** - Software Architecture Document
+   - Forms service priority: P0 (Core product functionality)
+   - Compliance engine priority: P1 (Competitive differentiation)
+   - Enhanced feature descriptions with 50+ templates, multi-format export
+   - PostgreSQL 15 database emphasis on JSONB for forms first
+
+2. **brave-forms-nfr.md** - Non-Functional Requirements
+   - EPA requirements reframed with forms workflow context
+   - Added time savings metric: 2-3 hours to 30 minutes
+   - Compliance automation positioned as supporting feature
+
+3. **brave-forms-api-icd.md** - API Interface Control Document
+   - Added user role types in JWT: FIELD, OFFICE, INSPECTOR
+   - Added pricing tier metadata: field $39, office $19, inspector FREE
+   - Enhanced role_metadata structure with features_enabled
+
+4. **database design document.md** - Database Schema
+   - Verified PostgreSQL 15 (corrected any PostgreSQL 16 references)
+   - Added user_role_type ENUM with pricing tiers
+   - Created users table schema with pricing_tier CHECK constraint
+
+5. **brave-forms-ux-design-doc.md** - UX Design
+   - User journey maps emphasize forms workflows
+   - Added user role pricing to personas (Field $39, Office $19, Inspector FREE)
+   - Time savings metric prominent: "2-3 hours reduced to 30 minutes via smart forms"
+
+**Evidence:**
+- REMAINING_DOCS_UPDATE_COMPLETE.md - Detailed completion report with line-by-line changes
+
+**Results:**
+- Total documents aligned: 15 (10 previously + 5 now)
+- Forms-first positioning: 100% consistency across all documentation
+- Technical accuracy: PostgreSQL 15, Capacitor 6, user role pricing verified
+- NO emoji, NO AI branding maintained
+
+### Phase 5: Sprint 1 Discovery & Deployment Tracking (October 1, 2025) - COMPLETED
+
+**Strategic Initiative:** Ensure critical deployment requirements and discovered issues are not forgotten
+
+#### New Documents Created:
+
+1. **ISSUE-047: Discovery Tracker** (sprint1/issues/ISSUE-047-discovery-tracker.md)
+   - Centralized tracker for issues uncovered during Sprint 1 implementation
+   - Tracks 11 total issues: 3 critical blockers, 4 monitoring requirements, 2 documentation gaps, 2 resolved technical debt
+   - **Critical Blockers:**
+     - BLOCKER-001: TanStack Query version mismatch (5.14.2 vs 5.86.0) → Sprint 2
+     - BLOCKER-002: Valtio store hard dependency verification → Sprint 2
+     - BLOCKER-003: iOS IndexedDB transience (EPA compliance risk) → Sprint 5
+   - Integration: Converts to GitHub issues, links to deployment tracker
+   - Review schedule: Weekly standup, sprint planning
+
+2. **Deployment Requirements Tracker** (sprints/DEPLOYMENT_REQUIREMENTS_TRACKER.md)
+   - Pre-production deployment checklist (30+ items)
+   - 3 critical pre-production blockers with action plans
+   - 4 production monitoring requirements with implementation specs
+   - Sprint integration roadmap (Sprint 2, 3, 5 assignments)
+   - Escalation path: Same-day flagging, 24-hour escalation to Product Owner
+   - Review schedule: Weekly standup, sprint planning, pre-release gate
+
+3. **Deployment Requirements Resolved** (sprints/DEPLOYMENT_REQUIREMENTS_RESOLVED.md)
+   - Historical archive for completed deployment requirements
+   - Tracks resolution evidence, lessons learned, completion statistics
+   - Integration: Items moved from tracker when resolved
+
+4. **ISSUE-012 Deployment Requirements** (sprint1/evidence/ISSUE-012/deployment/DEPLOYMENT_REQUIREMENTS.md)
+   - Comprehensive deployment checklist for TanStack Query implementation
+   - Dependency version management (5.14.2 vs 5.86.0 gap analysis)
+   - Critical runtime dependencies (Valtio store exports required)
+   - Browser storage requirements (IndexedDB, localStorage, iOS warnings)
+   - Production monitoring requirements (5 critical metrics with code)
+   - iOS-specific considerations (IndexedDB transience, SQLite migration plan)
+   - Rollback procedures (3 options with detailed steps)
+   - Success metrics and automated monitoring
+
+#### Evidence Documentation:
+
+- **ISSUE-010/COMPLETION-REPORT.md** - GraphQL API testing with Playwright MCP
+  - Authentication properly requires Clerk JWT (correct behavior)
+  - Schema introspection working
+  - Discovered: `organizations` query doesn't exist (uses `projects` instead)
+
+- **ISSUE-012/COMPLETION-REPORT-FINAL.md** - TanStack Query setup
+  - Research phase: Web searches for v5 best practices
+  - Code review: Frontend-ux-developer agent found networkMode issue
+  - Consolidation: Deleted duplicate, fixed existing implementation
+  - CRITICAL FIX: Changed networkMode from 'online' to 'offlineFirst'
+
+#### Integration into Workflow:
+
+- **Sprint Planning:** Discovery tracker issues assigned to Sprint 2, 3, 5
+- **Weekly Standup:** Review blocker status, flag at-risk items
+- **Pre-Release Gate:** 30+ item deployment checklist MUST be completed
+- **GitHub Issues:** Convert discovered issues to trackable items with assignments
+
+#### Key Discoveries:
+
+- 72 minor version jump in TanStack Query (5.14.2 → 5.86.0)
+- Hard dependency on Valtio store (3 required exports)
+- iOS IndexedDB transience (CRITICAL for EPA compliance - data loss risk)
+- networkMode configuration error in existing code (violated offline-first requirement)
+- GraphQL schema documentation mismatch (organizations vs projects query)
+
 ### Next Phase (Pending)
 
 - KUBERNETES_GUIDE.md - Local development and production deployment
@@ -406,5 +645,6 @@ This master index provides a complete inventory of all documentation in the BrAv
 
 _This master library is maintained by the Documentation Library Manager agent and should be updated whenever documentation changes occur._
 
-**Last Full Audit:** September 30, 2025
-**Next Scheduled Audit:** October 30, 2025
+**Last Full Audit:** October 1, 2025 (Forms-First Repositioning + Sprint 1 Discovery Tracking)
+**Next Scheduled Audit:** November 1, 2025
+**Last Update:** October 1, 2025 (Phase 5: Sprint 1 tracking documentation added)

@@ -32,58 +32,77 @@ import {
   IconRefresh,
 } from '@tabler/icons-react';
 import { useAuth } from '@clerk/nextjs';
-import { gql, useQuery } from '@apollo/client';
+import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/query/client';
 import { notifications } from '@mantine/notifications';
 
-// GraphQL Queries
-const GET_ORGANIZATION_DASHBOARD = gql`
-  query GetOrganizationDashboard {
-    currentOrganization {
-      id
-      name
-      plan
-      stats {
-        totalProjects
-        activeProjects
-        totalInspections
-        pendingInspections
-        complianceRate
-        totalUsers
-        usersByRole {
-          role
-          count
+// GraphQL Fetcher Function
+async function fetchOrganizationDashboard() {
+  const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:30101/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `
+        query GetOrganizationDashboard {
+          currentOrganization {
+            id
+            name
+            plan
+            stats {
+              totalProjects
+              activeProjects
+              totalInspections
+              pendingInspections
+              complianceRate
+              totalUsers
+              usersByRole {
+                role
+                count
+              }
+              projectsByStatus {
+                status
+                count
+              }
+              inspectionStats {
+                type
+                total
+                compliant
+                overdue
+              }
+            }
+          }
+          projects {
+            id
+            name
+            status
+            compliance {
+              overallScore
+              requiresAttention
+              overdueInspections
+            }
+            recentInspections {
+              id
+              type
+              status
+              overdue
+              inspectionDate
+            }
+          }
         }
-        projectsByStatus {
-          status
-          count
-        }
-        inspectionStats {
-          type
-          total
-          compliant
-          overdue
-        }
-      }
-    }
-    projects {
-      id
-      name
-      status
-      compliance {
-        overallScore
-        requiresAttention
-        overdueInspections
-      }
-      recentInspections {
-        id
-        type
-        status
-        overdue
-        inspectionDate
-      }
-    }
+      `,
+    }),
+  });
+
+  const json = await response.json();
+
+  if (json.errors) {
+    throw new Error(json.errors[0].message);
   }
-`;
+
+  return json.data;
+}
 
 interface OrganizationDashboardProps {
   userRole: 'OWNER' | 'ADMIN' | 'MANAGER' | 'MEMBER' | 'INSPECTOR';
@@ -93,10 +112,12 @@ export function OrganizationDashboard({ userRole }: OrganizationDashboardProps) 
   const { orgId } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
-  const { data, loading, error, refetch } = useQuery(GET_ORGANIZATION_DASHBOARD, {
-    errorPolicy: 'all',
-    notifyOnNetworkStatusChange: true,
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: queryKeys.organizationDashboard,
+    queryFn: fetchOrganizationDashboard,
   });
+
+  const loading = isLoading; // Alias for compatibility with existing code
 
   const handleRefresh = async () => {
     setRefreshing(true);

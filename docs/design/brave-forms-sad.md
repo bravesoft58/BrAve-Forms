@@ -32,7 +32,7 @@
 
 ### 1.1 Purpose
 
-This System Architecture Document defines the comprehensive technical architecture for the BrAve Forms Platform v1.0, a web-first construction compliance and forms management system designed to reduce daily documentation time from 2-3 hours to under 30 minutes while ensuring regulatory compliance across federal, state, and local jurisdictions.
+This System Architecture Document defines the comprehensive technical architecture for the BrAve Forms Platform v1.0, a web-first construction forms management platform with compliance automation capabilities designed to reduce daily documentation time from 2-3 hours to under 30 minutes while ensuring regulatory compliance across federal, state, and local jurisdictions.
 
 ### 1.2 Scope
 
@@ -53,7 +53,7 @@ The architecture encompasses:
 | **Cross-Platform Framework** | Capacitor 6 + React | 90%+ code reuse, superior offline support, 3-4 month MVP |
 | **Authentication Provider** | Clerk | 2-3 months faster development, SOC 2 compliance, built-in SSO |
 | **Backend Framework** | NestJS + TypeScript | Enterprise patterns, microservices support, strong typing |
-| **Database** | PostgreSQL 15 with TimescaleDB + JSONB | Time-series optimization for weather data, flexible schemas, ACID compliance |
+| **Database** | PostgreSQL 15 with TimescaleDB + JSONB | JSONB for dynamic forms, time-series weather monitoring, ACID compliance |
 | **Mobile State Management** | TanStack Query v5 + Valtio | Built-in offline support, minimal boilerplate |
 | **Message Queue** | BullMQ + Redis | Simple setup, $5-100/month cost, sufficient for scale |
 | **File Storage** | Hybrid (PostgreSQL + S3) | Cost optimization, 40-70% savings vs pure cloud |
@@ -182,13 +182,15 @@ service_boundaries:
   
   forms_management:
     technology: NestJS
-    responsibility: Form templates, submissions, validation
-    database: PostgreSQL with JSONB
-  
+    responsibility: Form templates, submissions, validation, photo documentation
+    database: PostgreSQL 15 with JSONB
+    priority: P0 - Core product functionality
+
   compliance_engine:
     technology: NestJS
-    responsibility: Rules evaluation, violation tracking
+    responsibility: Rules evaluation, violation tracking, weather-triggered automation
     integrations: EPA, OSHA, state systems
+    priority: P1 - Competitive differentiation
   
   weather_service:
     technology: NestJS
@@ -364,21 +366,25 @@ services:
     
   forms_service:
     framework: NestJS 10+
+    priority: P0 - Core product functionality
     features:
-      - Dynamic form builder
-      - JSONB schema storage
+      - Dynamic form builder with 50+ templates
+      - JSONB schema storage for flexibility
       - Conditional logic engine
       - Validation framework
-      - Version control
-    
+      - Version control and approval routing
+      - Multi-format export (PDF, Excel, CSV)
+
   compliance_engine:
     framework: NestJS 10+
+    priority: P1 - Competitive differentiation
     capabilities:
+      - Weather-triggered inspections (0.25" EPA threshold)
       - Multi-jurisdiction rules
       - EPA CGP 2022 compliance
       - OSHA standards
       - State regulations
-      - Violation tracking
+      - Automated violation tracking
     
   weather_service:
     framework: NestJS 10+

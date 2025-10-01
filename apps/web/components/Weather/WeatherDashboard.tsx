@@ -33,18 +33,72 @@ import {
   IconCalendar,
   IconMapPin
 } from '@tabler/icons-react';
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@clerk/nextjs';
 import { useAppStore } from '@/lib/store/app.store';
-import { 
-  GET_PENDING_INSPECTIONS,
-  GET_RECENT_WEATHER_EVENTS,
+import { queryKeys } from '@/lib/query/client';
+import {
   useWeatherMonitoring,
-  type WeatherEvent 
+  type WeatherEvent
 } from '@/lib/graphql/weather.queries';
 import { WeatherAlert } from './WeatherAlert';
 import Link from 'next/link';
 import { useState } from 'react';
+
+// Fetcher functions for GraphQL
+async function fetchPendingInspections() {
+  const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:30101/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      query: `
+        query GetPendingInspections {
+          pendingInspections {
+            id
+            projectId
+            type
+            dueDate
+            rainEvent {
+              id
+              precipitationInches
+              timestamp
+            }
+          }
+        }
+      `,
+    }),
+  });
+
+  const json = await response.json();
+  if (json.errors) throw new Error(json.errors[0].message);
+  return json.data;
+}
+
+async function fetchRecentWeatherEvents(projectId: string, days: number) {
+  const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:30101/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      query: `
+        query GetRecentWeatherEvents($projectId: ID!, $days: Int!) {
+          recentWeatherEvents(projectId: $projectId, days: $days) {
+            id
+            timestamp
+            precipitationInches
+            temperature
+            conditions
+            triggerInspection
+          }
+        }
+      `,
+      variables: { projectId, days },
+    }),
+  });
+
+  const json = await response.json();
+  if (json.errors) throw new Error(json.errors[0].message);
+  return json.data;
+}
 
 interface WeatherDashboardProps {
   projectId?: string;
@@ -63,28 +117,32 @@ export function WeatherDashboard({
   const [refetchLoading, setRefetchLoading] = useState(false);
 
   // Get pending inspections
-  const { 
-    data: pendingData, 
-    loading: pendingLoading, 
-    error: pendingError, 
-    refetch: refetchPending 
-  } = useQuery(GET_PENDING_INSPECTIONS, {
-    pollInterval: 60000, // Refresh every minute
-    errorPolicy: 'all',
-    notifyOnNetworkStatusChange: true,
+  const {
+    data: pendingData,
+    isLoading: pendingIsLoading,
+    error: pendingError,
+    refetch: refetchPending
+  } = useQuery({
+    queryKey: ['weather', 'pendingInspections'],
+    queryFn: fetchPendingInspections,
+    refetchInterval: 60000, // Refresh every minute
   });
 
   // Get recent weather events for context
-  const { 
-    data: recentData, 
-    loading: recentLoading,
-    error: recentError 
-  } = useQuery(GET_RECENT_WEATHER_EVENTS, {
-    variables: { projectId: projectId || '', days: 14 },
-    skip: !projectId,
-    pollInterval: 300000, // Refresh every 5 minutes
-    errorPolicy: 'all',
+  const {
+    data: recentData,
+    isLoading: recentIsLoading,
+    error: recentError
+  } = useQuery({
+    queryKey: ['weather', 'recent', projectId, 14],
+    queryFn: () => fetchRecentWeatherEvents(projectId || '', 14),
+    enabled: !!projectId,
+    refetchInterval: 300000, // Refresh every 5 minutes
   });
+
+  // Aliases for compatibility
+  const pendingLoading = pendingIsLoading;
+  const recentLoading = recentIsLoading;
 
   const handleRefresh = async () => {
     setRefetchLoading(true);

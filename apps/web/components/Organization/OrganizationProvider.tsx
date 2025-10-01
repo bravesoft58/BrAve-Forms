@@ -2,22 +2,41 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { gql, useQuery } from '@apollo/client';
+import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/query/client';
 import { Loader, Center, Stack, Text, Alert } from '@mantine/core';
 import { IconBuilding, IconAlertTriangle } from '@tabler/icons-react';
 import { UserRole } from '../Auth/RoleGuard';
 
-// GraphQL Query for Organization Context
-const GET_ORGANIZATION_CONTEXT = gql`
-  query GetOrganizationContext {
-    currentOrganization {
-      id
-      name
-      plan
-      createdAt
-    }
+// GraphQL fetcher function for organization context
+async function fetchOrganizationContext() {
+  const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:30101/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `
+        query GetOrganizationContext {
+          currentOrganization {
+            id
+            name
+            plan
+            createdAt
+          }
+        }
+      `,
+    }),
+  });
+
+  const json = await response.json();
+
+  if (json.errors) {
+    throw new Error(json.errors[0].message);
   }
-`;
+
+  return json.data;
+}
 
 interface OrganizationData {
   id: string;
@@ -62,14 +81,20 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
   const { orgId, orgRole, isLoaded: authLoaded } = useAuth();
   const [contextError, setContextError] = useState<string | null>(null);
 
-  const { data, loading, error, refetch } = useQuery(GET_ORGANIZATION_CONTEXT, {
-    skip: !authLoaded || !orgId,
-    errorPolicy: 'all',
-    onError: (error) => {
+  const { data, isPending, error, refetch } = useQuery({
+    queryKey: queryKeys.organizations,
+    queryFn: fetchOrganizationContext,
+    enabled: authLoaded && !!orgId,
+    retry: 2,
+  });
+
+  // Handle query errors
+  useEffect(() => {
+    if (error) {
       console.error('Organization context error:', error);
       setContextError(error.message);
-    },
-  });
+    }
+  }, [error]);
 
   // Ensure we have proper tenant context
   useEffect(() => {
@@ -139,9 +164,9 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
 
   // Plan-based feature access
   const hasFeatureAccess = React.useCallback((feature: string): boolean => {
-    const plan = data?.currentOrganization?.plan || 'STARTER';
-    
-    const featureMatrix = {
+    const plan = (data?.currentOrganization?.plan || 'STARTER') as 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE';
+
+    const featureMatrix: Record<'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE', string[]> = {
       STARTER: [
         'basic_inspections',
         'weather_monitoring',
@@ -181,7 +206,7 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
   const contextValue: OrganizationContextType = {
     organization: data?.currentOrganization || null,
     userRole,
-    isLoading: !authLoaded || loading,
+    isLoading: !authLoaded || isPending,
     error: contextError || error?.message || null,
     refetch,
     ...permissions,
@@ -189,7 +214,7 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
   };
 
   // Show loading state during initial auth/organization load
-  if (!authLoaded || (authLoaded && orgId && loading)) {
+  if (!authLoaded || (authLoaded && orgId && isPending)) {
     return (
       <Center h="100vh">
         <Stack align="center" gap="md">

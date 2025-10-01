@@ -12,6 +12,88 @@ import {
 import { OrganizationsService } from './organizations.service';
 import { PrismaService } from '../database/prisma.service';
 
+// Analytics and Dashboard Types (defined first to avoid circular references)
+@ObjectType('UserRoleStats')
+export class UserRoleStatsGQL {
+  @Field()
+  role: string;
+
+  @Field()
+  count: number;
+}
+
+@ObjectType('ProjectStatusStats')
+export class ProjectStatusStatsGQL {
+  @Field()
+  status: string;
+
+  @Field()
+  count: number;
+}
+
+@ObjectType('InspectionStats')
+export class InspectionStatsGQL {
+  @Field()
+  type: string;
+
+  @Field()
+  total: number;
+
+  @Field()
+  compliant: number;
+
+  @Field()
+  overdue: number;
+}
+
+@ObjectType('OrganizationStats')
+export class OrganizationStatsGQL {
+  @Field()
+  totalProjects: number;
+
+  @Field()
+  activeProjects: number;
+
+  @Field()
+  totalInspections: number;
+
+  @Field()
+  pendingInspections: number;
+
+  @Field()
+  complianceRate: number;
+
+  @Field()
+  totalUsers: number;
+
+  @Field(() => [UserRoleStatsGQL])
+  usersByRole: UserRoleStatsGQL[];
+
+  @Field(() => [ProjectStatusStatsGQL])
+  projectsByStatus: ProjectStatusStatsGQL[];
+
+  @Field(() => [InspectionStatsGQL])
+  inspectionStats: InspectionStatsGQL[];
+}
+
+@ObjectType('ProjectStats')
+export class ProjectStatsGQL {
+  @Field()
+  totalInspections: number;
+
+  @Field()
+  compliantInspections: number;
+
+  @Field()
+  overdue: number;
+
+  @Field({ nullable: true })
+  lastInspection?: Date;
+
+  @Field({ nullable: true })
+  nextDeadline?: Date;
+}
+
 // GraphQL Types for Organization Management
 @ObjectType('Organization')
 export class OrganizationGQL {
@@ -39,8 +121,8 @@ export class OrganizationGQL {
   @Field(() => [UserOrganizationGQL])
   users: UserOrganizationGQL[];
 
-  @Field(() => OrganizationStatsGQL)
-  stats: OrganizationStatsGQL;
+  @Field(() => OrganizationStatsGQL, { nullable: true })
+  stats?: OrganizationStatsGQL;
 }
 
 @ObjectType('Project')
@@ -84,8 +166,8 @@ export class ProjectGQL {
   @Field(() => [InspectionGQL])
   inspections: InspectionGQL[];
 
-  @Field(() => ProjectStatsGQL)
-  stats: ProjectStatsGQL;
+  @Field(() => ProjectStatsGQL, { nullable: true })
+  stats?: ProjectStatsGQL;
 }
 
 @ObjectType('Inspection')
@@ -170,88 +252,6 @@ export class UserOrganizationGQL {
 
   @Field()
   joinedAt: Date;
-}
-
-// Analytics and Dashboard Types
-@ObjectType('OrganizationStats')
-export class OrganizationStatsGQL {
-  @Field()
-  totalProjects: number;
-
-  @Field()
-  activeProjects: number;
-
-  @Field()
-  totalInspections: number;
-
-  @Field()
-  pendingInspections: number;
-
-  @Field()
-  complianceRate: number;
-
-  @Field()
-  totalUsers: number;
-
-  @Field(() => [UserRoleStatsGQL])
-  usersByRole: UserRoleStatsGQL[];
-
-  @Field(() => [ProjectStatusStatsGQL])
-  projectsByStatus: ProjectStatusStatsGQL[];
-
-  @Field(() => [InspectionStatsGQL])
-  inspectionStats: InspectionStatsGQL[];
-}
-
-@ObjectType('ProjectStats')
-export class ProjectStatsGQL {
-  @Field()
-  totalInspections: number;
-
-  @Field()
-  compliantInspections: number;
-
-  @Field()
-  overdue: number;
-
-  @Field()
-  lastInspection?: Date;
-
-  @Field()
-  nextDeadline?: Date;
-}
-
-@ObjectType('UserRoleStats')
-export class UserRoleStatsGQL {
-  @Field()
-  role: string;
-
-  @Field()
-  count: number;
-}
-
-@ObjectType('ProjectStatusStats')
-export class ProjectStatusStatsGQL {
-  @Field()
-  status: string;
-
-  @Field()
-  count: number;
-}
-
-@ObjectType('InspectionStats')
-export class InspectionStatsGQL {
-  @Field()
-  type: string;
-
-  @Field()
-  total: number;
-
-  @Field()
-  compliant: number;
-
-  @Field()
-  overdue: number;
 }
 
 // Input Types

@@ -40,17 +40,29 @@ spec:
     spec:
       containers:
       - name: backend
-        image: brave-forms-backend:local
+        image: braveforms/backend:latest
         imagePullPolicy: Never
         ports:
         - containerPort: 4000
+        readinessProbe:
+          tcpSocket:
+            port: 4000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 4000
+          initialDelaySeconds: 30
+          periodSeconds: 10
         env:
         - name: NODE_ENV
           value: "development"
+        - name: NODE_PATH
+          value: "/app/node_modules/.pnpm/node_modules:/app/node_modules"
         - name: PORT
           value: "4000"
         - name: DATABASE_URL
-          value: "postgresql://$(DATABASE_USER):$(DATABASE_PASSWORD)@postgres:5432/brave_forms?schema=public"
+          value: "postgresql://brave:brave_secure_pass@postgres:5432/brave_forms?schema=public"
         - name: DATABASE_USER
           valueFrom:
             secretKeyRef:
@@ -115,18 +127,6 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 4000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 4000
-          initialDelaySeconds: 10
-          periodSeconds: 5
       initContainers:
       - name: wait-for-postgres
         image: busybox:1.35

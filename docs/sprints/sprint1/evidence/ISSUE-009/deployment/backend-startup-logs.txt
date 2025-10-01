@@ -1,0 +1,37 @@
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +87ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPassportModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mUsersModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mProjectsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mFormsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mInspectionsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mComplianceModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mReportsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mQueueModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mHealthModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mHttpModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mNotificationsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[PhotoStorageService] [39m[32mInitialized S3 client with endpoint: http://minio:9000[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDatabaseModule dependencies initialized[39m[38;5;3m +3ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[WeatherService] [39m[32mEPA CGP compliance enabled: 0.25" precipitation threshold[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mGraphQLSchemaBuilderModule dependencies initialized[39m[38;5;3m +0ms[39m
+[33m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [33m   WARN[39m [38;5;3m[ClerkWebhookService] [39m[33mCLERK_WEBHOOK_SECRET not configured - webhook verification disabled[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mStorageModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mWebhooksModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mOrganizationsModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mOrganizationModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mGraphQLModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mWeatherModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mClerkWebhookController {/webhooks}:[39m[38;5;3m +223ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/webhooks/clerk, POST} route[39m[38;5;3m +2ms[39m
+prisma:info Starting a postgresql pool with 21 connections.
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[PrismaService] [39m[32mDatabase connected successfully[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[GraphQLModule] [39m[32mMapped {/graphql, POST} route[39m[38;5;3m +186ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[WeatherMonitoringService] [39m[32mWeather monitoring service initialized[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[Bootstrap] [39m[32mApplication is running on: http://localhost:4000[39m
+[32m[Nest] 1  - [39m10/01/2025, 3:31:23 PM [32m    LOG[39m [38;5;3m[Bootstrap] [39m[32mGraphQL Playground: http://localhost:4000/graphql[39m

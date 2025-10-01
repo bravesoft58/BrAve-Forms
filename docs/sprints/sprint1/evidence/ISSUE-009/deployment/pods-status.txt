@@ -1,0 +1,16 @@
+NAME                        READY   STATUS    RESTARTS      AGE     IP           NODE   NOMINATED NODE   READINESS GATES
+backend-796777b958-lkx9b    1/1     Running   0             2m21s   10.42.0.75   kong   <none>           <none>
+minio-f8c96978d-j68x6       1/1     Running   1 (80m ago)   172m    10.42.0.19   kong   <none>           <none>
+postgres-7cc8847c5b-c7g64   1/1     Running   1 (80m ago)   114m    10.42.0.45   kong   <none>           <none>
+redis-6fb8786468-kvhps      1/1     Running   1 (80m ago)   114m    10.42.0.47   kong   <none>           <none>
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE    CONTAINERS   IMAGES                              SELECTOR
+backend    1/1     1            1           101m   backend      braveforms/backend:latest           app=backend
+minio      1/1     1            1           177m   minio        minio/minio:latest                  app=minio
+postgres   1/1     1            1           14h    postgres     timescale/timescaledb:latest-pg15   app=postgres
+redis      1/1     1            1           177m   redis        redis:7-alpine                      app=redis
+NAME            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE    SELECTOR
+backend         NodePort    10.43.120.227   <none>        4000:30101/TCP      124m   app=backend
+minio           ClusterIP   10.43.229.166   <none>        9000/TCP,9001/TCP   177m   app=minio
+minio-console   NodePort    10.43.156.28    <none>        9001:30103/TCP      177m   app=minio
+postgres        ClusterIP   10.43.37.92     <none>        5432/TCP            14h    app=postgres
+redis           ClusterIP   10.43.154.201   <none>        6379/TCP            177m   app=redis

@@ -201,15 +201,23 @@ interface ClerkJWTPayload {
   azp: string,           // Authorized party
   email: string,         // User email
   email_verified: boolean,
-  
+
   // Organization context (critical for multi-tenancy)
   org_id: string,        // Organization ID (o.id claim)
   org_role: string,      // Organization role (o.rol claim)
   org_slug: string,      // Organization slug (o.slg claim)
-  
+
+  // BrAve Forms user role types
+  user_role: 'FIELD' | 'OFFICE' | 'INSPECTOR', // Pricing tiers
+  role_metadata: {
+    pricing_tier: string,    // field: $39, office: $19, inspector: FREE
+    features_enabled: string[],
+    max_projects?: number
+  },
+
   // Additional metadata
   permissions: string[], // User permissions
-  metadata: {           
+  metadata: {
     offline_extended?: boolean,
     device_trusted?: boolean
   }

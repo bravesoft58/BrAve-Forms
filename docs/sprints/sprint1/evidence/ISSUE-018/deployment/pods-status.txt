@@ -1,0 +1,5 @@
+NAME                        READY   STATUS    RESTARTS        AGE
+backend-796777b958-lkx9b    1/1     Running   0               6h26m
+minio-f8c96978d-j68x6       1/1     Running   1 (7h44m ago)   9h
+postgres-7cc8847c5b-c7g64   1/1     Running   1 (7h44m ago)   8h
+redis-6fb8786468-kvhps      1/1     Running   1 (7h44m ago)   8h
