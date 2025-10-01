@@ -17,7 +17,6 @@
     "test:compliance": "vitest --run --testPathPattern=compliance"
   },
   "dependencies": {
-    "@apollo/client": "^4.0.4",
     "@clerk/nextjs": "^5.7.5",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/modifiers": "^7.0.0",
@@ -36,7 +35,6 @@
     "@tanstack/react-query-devtools": "^5.14.2",
     "@tanstack/react-query-persist-client": "^5.14.2",
     "@types/react-beautiful-dnd": "^13.1.8",
-    "apollo3-cache-persist": "^0.15.0",
     "dayjs": "^1.11.10",
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
