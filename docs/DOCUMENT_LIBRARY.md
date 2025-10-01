@@ -139,39 +139,78 @@ This master index provides a complete inventory of all documentation in the BrAv
 
 ---
 
-## 🏃 Sprint Documentation
+## Sprint Documentation
 
-### Active Sprint Plans
+### Current Sprint (Sprint 1 - Active)
 
-- ✅ **[Master Sprint Roadmap V2](../sprints/MASTER_SPRINT_ROADMAP_V2.md)**
-  - **Purpose:** Current sprint planning and roadmap
+- ACTIVE **[Sprint 1 Master Plan (FINAL)](../sprints/sprint1/SPRINT_1_MASTER_PLAN_FINAL.md)**
+  - **Purpose:** Active Sprint 1 execution plan (properly researched)
+  - **Status:** Active (September 30, 2025)
+  - **Format:** 20 atomic issues (1-3 hours each, 25-30 hours total)
+  - **Approach:** Evidence-based, Kubernetes deployment focus
+  - **Baseline:** 25% backend, 10% web, 0% mobile (honest assessment)
+  - **Research:** Based on actual K8s infrastructure audit
+
+- ACTIVE **[Sprint 1 Issues (20 Atomic Tasks)](../sprints/sprint1/issues/)**
+  - **Purpose:** Individual issue tracking with step-by-step instructions
   - **Status:** Active
-- ✅ **[Sprint Execution Guide](../sprints/SPRINT_EXECUTION_GUIDE.md)**
+  - **Phase 0 - Pre-Deployment:** ISSUE-001 through ISSUE-003 (port check, images, secrets)
+  - **Phase 1 - Kubernetes:** ISSUE-004 through ISSUE-008 (deploy postgres, redis, migrations, seed)
+  - **Phase 2 - Backend:** ISSUE-009 through ISSUE-010 (deploy backend, test GraphQL)
+  - **Phase 3 - Apollo Removal:** ISSUE-011 through ISSUE-015 (remove Apollo, migrate TanStack Query)
+  - **Phase 4 - Weather API:** ISSUE-016 through ISSUE-018 (NOAA client, 0.25" threshold, caching)
+  - **Phase 5 - PWA & Testing:** ISSUE-019 through ISSUE-020 (PWA config, test coverage 40%)
+
+- ACTIVE **[Sprint 1 Evidence](../sprints/sprint1/evidence/)**
+  - **Purpose:** Real proof of completed work (NO mocks, NO fake validation)
+  - **Status:** Active
+  - **Requirements:** Actual screenshots, real API responses, genuine test results
+  - **Structure:** deployment/, test-results/, performance/, compliance/
+  - **Per Issue:** Separate folder for each ISSUE-001 through ISSUE-020
+
+### Legacy Sprint Plans (ARCHIVED - Historical Only)
+
+**WARNING:** These documents claimed "COMPLETED" for features that were only partially implemented or not implemented at all. Archived for historical context only.
+
+- ARCHIVED **[docs/archive/sprints/SPRINT_1_PLAN_LEGACY.md](../archive/sprints/SPRINT_1_PLAN_LEGACY.md)**
+  - **Status:** Archived (claimed complete, actually minimal implementation)
+  - **Reality:** Weather API structure only, no actual API calls
+  - **See:** [Archive README](../archive/sprints/README.md) for context
+
+- ARCHIVED **[docs/archive/sprints/sprint2/](../archive/sprints/sprint2/)**
+  - **Status:** Archived (claimed complete, EPA rules not implemented)
+
+- ARCHIVED **[docs/archive/sprints/sprint3/](../archive/sprints/sprint3/)**
+  - **Status:** Archived (claimed complete, web build failing)
+
+- ARCHIVED **[docs/archive/sprints/sprint4/](../archive/sprints/sprint4/)**
+  - **Status:** Archived (claimed complete, zero implementation)
+
+### Other Sprint Planning Documents
+
+- UNDER_REVIEW **[Master Sprint Roadmap V2](../sprints/MASTER_SPRINT_ROADMAP_V2.md)**
+  - **Purpose:** High-level sprint planning (may need update based on reality check)
+  - **Status:** Under review
+
+- UNDER_REVIEW **[Sprint Execution Guide](../sprints/SPRINT_EXECUTION_GUIDE.md)**
   - **Purpose:** Sprint execution methodology
-  - **Status:** Active
+  - **Status:** Under review (may need atomic task updates)
 
-- ✅ **[Web MVP Launch Plan](../sprints/WEB_MVP_LAUNCH_PLAN.md)**
+- UNDER_REVIEW **[Web MVP Launch Plan](../sprints/WEB_MVP_LAUNCH_PLAN.md)**
   - **Purpose:** Web platform launch strategy
-  - **Status:** Active
+  - **Status:** Under review (dependent on Sprint 1 completion)
 
-- ✅ **[Mobile Sprints 7-10 Plan](../sprints/MOBILE_SPRINTS_7-10_PLAN.md)**
+- UNDER_REVIEW **[Mobile Sprints 7-10 Plan](../sprints/MOBILE_SPRINTS_7-10_PLAN.md)**
   - **Purpose:** Mobile development sprints
-  - **Status:** Active
+  - **Status:** Under review (mobile at 0% implementation)
 
-### Sprint History
+### Archived General Sprint Documents
 
-- ✅ **[Sprint 1 Plan](../sprints/sprint1/SPRINT_1_PLAN.md)** - Foundation setup
-- ✅ **[Sprint 2 Plan](../sprints/sprint2/SPRINT_2_PLAN.md)** - Core infrastructure
-- ✅ **[Sprint 3 Web UI](../sprints/sprint3/SPRINT_3_WEB_UI_FOUNDATION.md)** - UI foundation
-- ✅ **[Sprint 4 Forms](../sprints/sprint4/SPRINT_4_WEB_FORMS_WORKFLOWS.md)** - Forms implementation
-
-### Archived Sprint Documents
-
-- 🗄️ **[docs/archive/MASTER_SPRINT_ROADMAP.md](../archive/MASTER_SPRINT_ROADMAP.md)** - Old roadmap
-- 🗄️ **[docs/archive/SPRINT_PLAN.md](../archive/SPRINT_PLAN.md)** - Original sprint plan
-- 🗄️ **[docs/archive/SPRINTS_3-10_OVERVIEW.md](../archive/SPRINTS_3-10_OVERVIEW.md)** - Old overview
-- 🗄️ **[docs/archive/SPRINT_3_SUMMARY.md](../archive/SPRINT_3_SUMMARY.md)** - Sprint 3 summary
-- 🗄️ **[docs/archive/alignment.md](../archive/alignment.md)** - Alignment notes
+- ARCHIVED **[docs/archive/MASTER_SPRINT_ROADMAP.md](../archive/MASTER_SPRINT_ROADMAP.md)** - Old roadmap
+- ARCHIVED **[docs/archive/SPRINT_PLAN.md](../archive/SPRINT_PLAN.md)** - Original sprint plan
+- ARCHIVED **[docs/archive/SPRINTS_3-10_OVERVIEW.md](../archive/SPRINTS_3-10_OVERVIEW.md)** - Old overview
+- ARCHIVED **[docs/archive/SPRINT_3_SUMMARY.md](../archive/SPRINT_3_SUMMARY.md)** - Sprint 3 summary
+- ARCHIVED **[docs/archive/alignment.md](../archive/alignment.md)** - Alignment notes
 
 ---
 

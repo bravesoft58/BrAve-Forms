@@ -419,6 +419,9 @@ evidence/{sprint-or-iteration}/{issue-id}/
 - Document multi-tenancy considerations
 - NO emoji in documentation
 - NO AI branding in documentation
+- **ALWAYS use full timestamps (date + time)** in format: YYYY-MM-DD HH:MM:SS
+- Include timezone (UTC or local) for precision
+- Update timestamps whenever document is modified
 
 ## Project-Specific Context
 
