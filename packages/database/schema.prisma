@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://brave:brave_secure_pass@localhost:5434/brave_forms?schema=public"
+  url      = env("DATABASE_URL")
 }
 
 model Organization {
