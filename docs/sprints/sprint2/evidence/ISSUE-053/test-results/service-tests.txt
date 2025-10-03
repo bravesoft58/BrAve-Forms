@@ -1,0 +1,24 @@
+
+> @brave-forms/backend@1.0.0 test E:\BrAve Forms\apps\backend
+> jest "forms.service.spec.ts"
+
+PASS src/modules/forms/forms.service.spec.ts
+  FormsService
+    createFormTemplate
+      √ should create a form template with all fields (9 ms)
+      √ should create template without optional description (1 ms)
+      √ should create template without optional compliance (1 ms)
+      √ should handle JSONB schema field correctly (1 ms)
+      √ should properly isolate by orgId (1 ms)
+    getFormTemplates
+      √ should return only active templates for org (1 ms)
+    getFormTemplate
+      √ should return template when found (1 ms)
+      √ should throw NotFoundException when template not found (7 ms)
+      √ should enforce orgId isolation (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       9 passed, 9 total
+Snapshots:   0 total
+Time:        2.911 s
+Ran all test suites matching /forms.service.spec.ts/i.
