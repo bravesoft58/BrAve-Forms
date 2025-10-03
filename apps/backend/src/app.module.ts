@@ -18,6 +18,7 @@ import { DatabaseModule } from './modules/database/database.module';
 import { HealthModule } from './modules/health/health.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
+import { SubmissionsModule } from './modules/submissions/submissions.module';
 
 @Module({
   imports: [
@@ -26,8 +27,8 @@ import { WebhooksModule } from './modules/webhooks/webhooks.module';
       envFilePath: [
         join(process.cwd(), '../../.env.local'),
         join(process.cwd(), '../../.env'),
-        '.env.local', 
-        '.env'
+        '.env.local',
+        '.env',
       ],
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
@@ -50,6 +51,7 @@ import { WebhooksModule } from './modules/webhooks/webhooks.module';
     UsersModule,
     ProjectsModule,
     FormsModule,
+    SubmissionsModule,
     InspectionsModule,
     WeatherModule,
     ComplianceModule,

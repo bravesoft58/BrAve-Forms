@@ -21,7 +21,8 @@
       "@/*": ["src/*"],
       "@modules/*": ["src/modules/*"],
       "@common/*": ["src/common/*"],
-      "@config/*": ["src/config/*"]
+      "@config/*": ["src/config/*"],
+      "@brave-forms/types": ["../../packages/types/src"]
     }
   }
 }

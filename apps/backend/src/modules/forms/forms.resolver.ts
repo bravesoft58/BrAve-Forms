@@ -140,7 +140,10 @@ export class FormsResolver {
     return this.formsService.updateFormSubmission(id, user.orgId, {
       ...input,
       reviewedBy:
-        input.status && ['REVIEWED', 'APPROVED', 'REJECTED'].includes(input.status)
+        input.status &&
+        (input.status === FormStatus.REVIEWED ||
+          input.status === FormStatus.APPROVED ||
+          input.status === FormStatus.REJECTED)
           ? user.id
           : undefined,
     });

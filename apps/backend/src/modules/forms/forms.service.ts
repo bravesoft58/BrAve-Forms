@@ -168,7 +168,7 @@ export class FormsService {
       templateId?: string;
       projectId?: string;
       inspectionId?: string;
-      status?: 'DRAFT' | 'SUBMITTED' | 'REVIEWED' | 'APPROVED' | 'REJECTED';
+      status?: 'DRAFT' | 'IN_PROGRESS' | 'SUBMITTED' | 'REVIEWED' | 'APPROVED' | 'REJECTED';
     }
   ) {
     return this.prisma.formSubmission.findMany({
@@ -213,7 +213,7 @@ export class FormsService {
     data: {
       data?: any;
       metadata?: any;
-      status?: 'DRAFT' | 'SUBMITTED' | 'REVIEWED' | 'APPROVED' | 'REJECTED';
+      status?: 'DRAFT' | 'IN_PROGRESS' | 'SUBMITTED' | 'REVIEWED' | 'APPROVED' | 'REJECTED';
       reviewNotes?: string;
       reviewedBy?: string;
     }

@@ -14,7 +14,7 @@ export const WeatherEventSchema = z.object({
   eventDate: z.date(),
   source: z.enum(['NOAA', 'OPENWEATHER', 'MANUAL']),
   inspectionDeadline: z.date(),
-  requiresInspection: z.boolean()
+  requiresInspection: z.boolean(),
 });
 
 export type WeatherEvent = z.infer<typeof WeatherEventSchema>;
@@ -26,42 +26,48 @@ export const SwpppInspectionSchema = z.object({
   inspectionDate: z.date(),
   weatherTriggered: z.boolean(),
   precipitationInches: z.number().optional(),
-  
+
   // BMP Status
-  bmps: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    type: z.enum(['SILT_FENCE', 'CHECK_DAM', 'INLET_PROTECTION', 'SEDIMENT_BASIN', 'OTHER']),
-    installed: z.boolean(),
-    functional: z.boolean(),
-    maintenanceRequired: z.boolean(),
-    notes: z.string().optional()
-  })),
-  
+  bmps: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      type: z.enum(['SILT_FENCE', 'CHECK_DAM', 'INLET_PROTECTION', 'SEDIMENT_BASIN', 'OTHER']),
+      installed: z.boolean(),
+      functional: z.boolean(),
+      maintenanceRequired: z.boolean(),
+      notes: z.string().optional(),
+    })
+  ),
+
   // Discharge Points
-  dischargePoints: z.array(z.object({
-    id: z.string(),
-    location: z.string(),
-    hasDischarge: z.boolean(),
-    turbidity: z.enum(['CLEAR', 'SLIGHTLY_TURBID', 'TURBID', 'VERY_TURBID']).optional(),
-    controlMeasures: z.string().optional()
-  })),
-  
+  dischargePoints: z.array(
+    z.object({
+      id: z.string(),
+      location: z.string(),
+      hasDischarge: z.boolean(),
+      turbidity: z.enum(['CLEAR', 'SLIGHTLY_TURBID', 'TURBID', 'VERY_TURBID']).optional(),
+      controlMeasures: z.string().optional(),
+    })
+  ),
+
   // Violations
-  violations: z.array(z.object({
-    type: z.string(),
-    location: z.string(),
-    severity: z.enum(['MINOR', 'MAJOR', 'CRITICAL']),
-    description: z.string(),
-    correctiveAction: z.string(),
-    photoIds: z.array(z.string())
-  })),
-  
+  violations: z.array(
+    z.object({
+      type: z.string(),
+      location: z.string(),
+      severity: z.enum(['MINOR', 'MAJOR', 'CRITICAL']),
+      description: z.string(),
+      correctiveAction: z.string(),
+      photoIds: z.array(z.string()),
+    })
+  ),
+
   // Overall Status
   overallCompliant: z.boolean(),
   additionalNotes: z.string().optional(),
   signature: z.string(),
-  signedAt: z.date()
+  signedAt: z.date(),
 });
 
 export type SwpppInspection = z.infer<typeof SwpppInspectionSchema>;
@@ -78,7 +84,7 @@ export const PhotoMetadataSchema = z.object({
   takenAt: z.date(),
   caption: z.string().optional(),
   s3Key: z.string().optional(),
-  localPath: z.string().optional()
+  localPath: z.string().optional(),
 });
 
 export type PhotoMetadata = z.infer<typeof PhotoMetadataSchema>;
@@ -91,7 +97,7 @@ export const OrganizationSchema = z.object({
   plan: z.enum(['STARTER', 'PROFESSIONAL', 'ENTERPRISE']),
   maxProjects: z.number(),
   maxUsers: z.number(),
-  features: z.array(z.string())
+  features: z.array(z.string()),
 });
 
 export type Organization = z.infer<typeof OrganizationSchema>;
@@ -114,7 +120,7 @@ export const ProjectSchema = z.object({
   disturbedAcres: z.number().min(0),
   status: z.enum(['PLANNING', 'ACTIVE', 'SUSPENDED', 'COMPLETED', 'CLOSED']),
   swpppConfig: z.record(z.any()).optional(),
-  bmps: z.array(z.record(z.any()))
+  bmps: z.array(z.record(z.any())),
 });
 
 export type Project = z.infer<typeof ProjectSchema>;
@@ -130,7 +136,7 @@ export const OfflineSyncSchema = z.object({
   userId: z.string(),
   synced: z.boolean().default(false),
   syncedAt: z.date().optional(),
-  conflictResolution: z.enum(['CLIENT_WINS', 'SERVER_WINS', 'MERGE']).optional()
+  conflictResolution: z.enum(['CLIENT_WINS', 'SERVER_WINS', 'MERGE']).optional(),
 });
 
 export type OfflineSync = z.infer<typeof OfflineSyncSchema>;
@@ -142,7 +148,7 @@ export const InspectorAccessTokenSchema = z.object({
   expiresAt: z.date(),
   permissions: z.array(z.enum(['VIEW_INSPECTIONS', 'VIEW_PHOTOS', 'VIEW_BMPS', 'VIEW_VIOLATIONS'])),
   createdBy: z.string(),
-  createdAt: z.date()
+  createdAt: z.date(),
 });
 
 export type InspectorAccessToken = z.infer<typeof InspectorAccessTokenSchema>;
@@ -205,7 +211,7 @@ export const FieldTypes = {
   FILE_UPLOAD: 'fileUpload',
 } as const;
 
-export type FieldType = typeof FieldTypes[keyof typeof FieldTypes];
+export type FieldType = (typeof FieldTypes)[keyof typeof FieldTypes];
 
 // Field Validation Schema
 export const FieldValidationSchema = z.object({
@@ -226,17 +232,37 @@ export type FieldValidation = z.infer<typeof FieldValidationSchema>;
 // Conditional Logic Schema
 export const ConditionalRuleSchema = z.object({
   id: z.string().uuid(),
-  conditions: z.array(z.object({
-    field: z.string(),
-    operator: z.enum(['equals', 'not_equals', 'contains', 'greater_than', 'less_than', 'in', 'not_in']),
-    value: z.any(),
-  })),
+  conditions: z.array(
+    z.object({
+      field: z.string(),
+      operator: z.enum([
+        'equals',
+        'not_equals',
+        'contains',
+        'greater_than',
+        'less_than',
+        'in',
+        'not_in',
+      ]),
+      value: z.any(),
+    })
+  ),
   operator: z.enum(['AND', 'OR']).default('AND'),
-  actions: z.array(z.object({
-    type: z.enum(['show', 'hide', 'enable', 'disable', 'require', 'set_value', 'trigger_calculation']),
-    target: z.string(),
-    value: z.any().optional(),
-  })),
+  actions: z.array(
+    z.object({
+      type: z.enum([
+        'show',
+        'hide',
+        'enable',
+        'disable',
+        'require',
+        'set_value',
+        'trigger_calculation',
+      ]),
+      target: z.string(),
+      value: z.any().optional(),
+    })
+  ),
 });
 
 export type ConditionalRule = z.infer<typeof ConditionalRuleSchema>;
@@ -245,35 +271,62 @@ export type ConditionalRule = z.infer<typeof ConditionalRuleSchema>;
 export const FieldDefinitionSchema = z.object({
   id: z.string().uuid(),
   type: z.enum([
-    'text', 'number', 'date', 'time', 'select', 'multiSelect', 'radio', 'checkbox',
-    'textarea', 'photo', 'signature', 'gpsLocation', 'weather', 'inspector',
-    'bmpChecklist', 'measurement', 'swpppTrigger', 'violationCode',
-    'correctiveAction', 'repeater', 'table', 'calculation', 'fileUpload'
+    'text',
+    'number',
+    'date',
+    'time',
+    'select',
+    'multiSelect',
+    'radio',
+    'checkbox',
+    'textarea',
+    'photo',
+    'signature',
+    'gpsLocation',
+    'weather',
+    'inspector',
+    'bmpChecklist',
+    'measurement',
+    'swpppTrigger',
+    'violationCode',
+    'correctiveAction',
+    'repeater',
+    'table',
+    'calculation',
+    'fileUpload',
   ]),
   label: z.string().min(1),
   name: z.string().min(1),
   description: z.string().optional(),
   placeholder: z.string().optional(),
   defaultValue: z.any().optional(),
-  options: z.array(z.object({
-    label: z.string(),
-    value: z.any(),
-  })).optional(),
+  options: z
+    .array(
+      z.object({
+        label: z.string(),
+        value: z.any(),
+      })
+    )
+    .optional(),
   validation: FieldValidationSchema.optional(),
   conditional: ConditionalRuleSchema.optional(),
-  metadata: z.object({
-    gpsRequired: z.boolean().optional(),
-    photoQuality: z.enum(['high', 'medium', 'low']).optional(),
-    signatureCertificate: z.boolean().optional(),
-    weatherSource: z.enum(['noaa', 'openweather']).optional(),
-    units: z.string().optional(), // For measurement fields
-    calculation: z.string().optional(), // JavaScript expression
-    epaCompliance: z.object({
-      regulation: z.string(),
-      section: z.string(),
-      criticalField: z.boolean().default(false),
-    }).optional(),
-  }).optional(),
+  metadata: z
+    .object({
+      gpsRequired: z.boolean().optional(),
+      photoQuality: z.enum(['high', 'medium', 'low']).optional(),
+      signatureCertificate: z.boolean().optional(),
+      weatherSource: z.enum(['noaa', 'openweather']).optional(),
+      units: z.string().optional(), // For measurement fields
+      calculation: z.string().optional(), // JavaScript expression
+      epaCompliance: z
+        .object({
+          regulation: z.string(),
+          section: z.string(),
+          criticalField: z.boolean().default(false),
+        })
+        .optional(),
+    })
+    .optional(),
   order: z.number().default(0),
   width: z.enum(['full', 'half', 'third', 'quarter']).default('full'),
 });
@@ -291,46 +344,60 @@ export const FormTemplateSchema = z.object({
   isActive: z.boolean().default(true),
   fields: z.array(FieldDefinitionSchema),
   logic: z.array(ConditionalRuleSchema),
-  calculations: z.array(z.object({
-    id: z.string().uuid(),
-    name: z.string(),
-    formula: z.string(), // JavaScript expression
-    targetField: z.string(),
-    dependencies: z.array(z.string()),
-  })),
-  compliance: z.object({
-    regulation: z.string(),
-    deadline: z.string(),
-    authority: z.string(),
-    retention: z.object({
-      years: z.number(),
-      archival: z.boolean(),
-    }),
-    criticalThresholds: z.array(z.object({
-      field: z.string(),
-      value: z.any(),
-      message: z.string(),
-    })),
-  }).optional(),
-  workflow: z.object({
-    stages: z.array(z.string()),
-    approvalRequired: z.boolean().default(false),
-    notifications: z.array(z.object({
-      trigger: z.string(),
-      recipients: z.array(z.string()),
-      template: z.string(),
-    })),
-  }).optional(),
-  styling: z.object({
-    theme: z.enum(['construction', 'minimal', 'branded']).default('construction'),
-    colors: z.object({
-      primary: z.string(),
-      secondary: z.string(),
-      accent: z.string(),
-    }).optional(),
-    layout: z.enum(['single-column', 'two-column', 'adaptive']).default('single-column'),
-    mobileOptimized: z.boolean().default(true),
-  }).optional(),
+  calculations: z.array(
+    z.object({
+      id: z.string().uuid(),
+      name: z.string(),
+      formula: z.string(), // JavaScript expression
+      targetField: z.string(),
+      dependencies: z.array(z.string()),
+    })
+  ),
+  compliance: z
+    .object({
+      regulation: z.string(),
+      deadline: z.string(),
+      authority: z.string(),
+      retention: z.object({
+        years: z.number(),
+        archival: z.boolean(),
+      }),
+      criticalThresholds: z.array(
+        z.object({
+          field: z.string(),
+          value: z.any(),
+          message: z.string(),
+        })
+      ),
+    })
+    .optional(),
+  workflow: z
+    .object({
+      stages: z.array(z.string()),
+      approvalRequired: z.boolean().default(false),
+      notifications: z.array(
+        z.object({
+          trigger: z.string(),
+          recipients: z.array(z.string()),
+          template: z.string(),
+        })
+      ),
+    })
+    .optional(),
+  styling: z
+    .object({
+      theme: z.enum(['construction', 'minimal', 'branded']).default('construction'),
+      colors: z
+        .object({
+          primary: z.string(),
+          secondary: z.string(),
+          accent: z.string(),
+        })
+        .optional(),
+      layout: z.enum(['single-column', 'two-column', 'adaptive']).default('single-column'),
+      mobileOptimized: z.boolean().default(true),
+    })
+    .optional(),
   createdBy: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -354,27 +421,35 @@ export const FormSubmissionSchema = z.object({
     formVersion: z.number(),
     submittedAt: z.date(),
     submittedBy: z.string(),
-    gpsLocation: z.object({
-      latitude: z.number(),
-      longitude: z.number(),
-      accuracy: z.number(),
-    }).optional(),
+    gpsLocation: z
+      .object({
+        latitude: z.number(),
+        longitude: z.number(),
+        accuracy: z.number(),
+      })
+      .optional(),
     offline: z.boolean().default(false),
-    deviceInfo: z.object({
-      userAgent: z.string(),
-      platform: z.string(),
-      version: z.string(),
-    }).optional(),
+    deviceInfo: z
+      .object({
+        userAgent: z.string(),
+        platform: z.string(),
+        version: z.string(),
+      })
+      .optional(),
     completionTime: z.number().optional(), // Milliseconds
-    validationErrors: z.array(z.object({
-      field: z.string(),
-      message: z.string(),
-    })),
-    complianceChecks: z.array(z.object({
-      rule: z.string(),
-      passed: z.boolean(),
-      message: z.string().optional(),
-    })),
+    validationErrors: z.array(
+      z.object({
+        field: z.string(),
+        message: z.string(),
+      })
+    ),
+    complianceChecks: z.array(
+      z.object({
+        rule: z.string(),
+        passed: z.boolean(),
+        message: z.string().optional(),
+      })
+    ),
   }),
   offlineCreated: z.boolean().default(false),
   submittedAt: z.date().optional(),
@@ -388,21 +463,26 @@ export const FormSubmissionSchema = z.object({
 export type FormSubmission = z.infer<typeof FormSubmissionSchema>;
 
 // EPA Compliance Validation Functions
-export const validateEpaThreshold = (value: number, threshold: number = EPA_RAIN_THRESHOLD_INCHES): boolean => {
+export const validateEpaThreshold = (
+  value: number,
+  threshold: number = EPA_RAIN_THRESHOLD_INCHES
+): boolean => {
   return value >= threshold;
 };
 
-export const calculateInspectionDeadline = (eventDate: Date, workingHours: boolean = true): Date => {
+export const calculateInspectionDeadline = (
+  eventDate: Date,
+  workingHours: boolean = true
+): Date => {
   const deadline = new Date(eventDate);
   if (workingHours) {
     // Add 24 working hours (3 business days)
-    let daysToAdd = 0;
     let hoursToAdd = EPA_INSPECTION_DEADLINE_HOURS;
-    
+
     while (hoursToAdd > 0) {
       deadline.setDate(deadline.getDate() + 1);
       const dayOfWeek = deadline.getDay();
-      
+
       // Skip weekends (0 = Sunday, 6 = Saturday)
       if (dayOfWeek !== 0 && dayOfWeek !== 6) {
         hoursToAdd -= 8; // 8-hour work day
@@ -411,12 +491,13 @@ export const calculateInspectionDeadline = (eventDate: Date, workingHours: boole
   } else {
     deadline.setHours(deadline.getHours() + EPA_INSPECTION_DEADLINE_HOURS);
   }
-  
+
   return deadline;
 };
 
 // Utility function to generate UUIDs (simplified for templates)
-const generateId = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+const generateId = () =>
+  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
 // Form Builder Preset Templates
 export const EPA_SWPPP_INSPECTION_TEMPLATE: Partial<FormTemplate> = {
@@ -454,7 +535,7 @@ export const EPA_SWPPP_INSPECTION_TEMPLATE: Partial<FormTemplate> = {
       type: 'date',
       name: 'inspectionDate',
       label: 'Inspection Date',
-      validation: { 
+      validation: {
         required: true,
         maxDate: 'today',
       },
@@ -536,3 +617,6 @@ export const schemas = {
   FormTemplateSchema,
   FormSubmissionSchema,
 };
+
+// Export form submission types
+export * from './form-submission';
