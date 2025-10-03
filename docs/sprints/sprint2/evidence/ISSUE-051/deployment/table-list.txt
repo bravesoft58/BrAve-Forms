@@ -1,0 +1,15 @@
+                List of relations
+ Schema |          Name          | Type  | Owner 
+--------+------------------------+-------+-------
+ public | _prisma_migrations     | table | brave
+ public | form_submissions       | table | brave
+ public | form_template_versions | table | brave
+ public | form_templates         | table | brave
+ public | inspections            | table | brave
+ public | organizations          | table | brave
+ public | photos                 | table | brave
+ public | projects               | table | brave
+ public | user_organizations     | table | brave
+ public | weather_events         | table | brave
+(10 rows)
+

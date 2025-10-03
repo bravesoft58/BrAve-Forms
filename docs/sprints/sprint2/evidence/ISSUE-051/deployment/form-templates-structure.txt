@@ -1,0 +1,26 @@
+                              Table "public.form_templates"
+   Column    |              Type              | Collation | Nullable |      Default      
+-------------+--------------------------------+-----------+----------+-------------------
+ id          | text                           |           | not null | 
+ org_id      | text                           |           | not null | 
+ name        | text                           |           | not null | 
+ description | text                           |           |          | 
+ category    | text                           |           | not null | 
+ version     | integer                        |           | not null | 1
+ is_active   | boolean                        |           | not null | true
+ schema      | jsonb                          |           | not null | 
+ compliance  | jsonb                          |           |          | 
+ created_by  | text                           |           | not null | 
+ created_at  | timestamp(3) without time zone |           | not null | CURRENT_TIMESTAMP
+ updated_at  | timestamp(3) without time zone |           | not null | 
+Indexes:
+    "form_templates_pkey" PRIMARY KEY, btree (id)
+    "form_templates_category_idx" btree (category)
+    "form_templates_is_active_idx" btree (is_active)
+    "form_templates_org_id_idx" btree (org_id)
+Foreign-key constraints:
+    "form_templates_org_id_fkey" FOREIGN KEY (org_id) REFERENCES organizations(id) ON DELETE CASCADE
+Referenced by:
+    TABLE "form_submissions" CONSTRAINT "form_submissions_template_id_fkey" FOREIGN KEY (template_id) REFERENCES form_templates(id) ON DELETE CASCADE
+    TABLE "form_template_versions" CONSTRAINT "form_template_versions_template_id_fkey" FOREIGN KEY (template_id) REFERENCES form_templates(id) ON DELETE CASCADE
+

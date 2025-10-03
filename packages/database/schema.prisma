@@ -8,12 +8,12 @@ datasource db {
 }
 
 model Organization {
-  id          String             @id @default(uuid())
-  clerkOrgId  String             @unique @map("clerk_org_id")
-  name        String
-  plan        PlanType           @default(STARTER)
-  createdAt   DateTime           @default(now()) @map("created_at")
-  updatedAt   DateTime           @updatedAt @map("updated_at")
+  id              String             @id @default(uuid())
+  clerkOrgId      String             @unique @map("clerk_org_id")
+  name            String
+  plan            PlanType           @default(STARTER)
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
   inspections     Inspection[]
   photos          Photo[]
   projects        Project[]
@@ -37,23 +37,23 @@ model UserOrganization {
 }
 
 model Project {
-  id             String         @id @default(uuid())
-  orgId          String         @map("org_id")
-  name           String
-  address        String
-  latitude       Float
-  longitude      Float
-  permitNumber   String?        @map("permit_number")
-  startDate      DateTime       @map("start_date")
-  endDate        DateTime?      @map("end_date")
-  disturbedAcres Float          @map("disturbed_acres")
-  status         ProjectStatus  @default(ACTIVE)
-  createdAt      DateTime       @default(now()) @map("created_at")
-  updatedAt      DateTime       @updatedAt @map("updated_at")
-  swpppConfig    Json?          @map("swppp_config")
-  bmps           Json[]         @map("bmps")
+  id              String           @id @default(uuid())
+  orgId           String           @map("org_id")
+  name            String
+  address         String
+  latitude        Float
+  longitude       Float
+  permitNumber    String?          @map("permit_number")
+  startDate       DateTime         @map("start_date")
+  endDate         DateTime?        @map("end_date")
+  disturbedAcres  Float            @map("disturbed_acres")
+  status          ProjectStatus    @default(ACTIVE)
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  swpppConfig     Json?            @map("swppp_config")
+  bmps            Json[]           @map("bmps")
   inspections     Inspection[]
-  organization    Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  organization    Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
   weatherEvents   WeatherEvent[]
   formSubmissions FormSubmission[]
 
@@ -168,25 +168,41 @@ enum InspectionStatus {
 }
 
 model FormTemplate {
-  id          String               @id @default(uuid())
-  orgId       String               @map("org_id")
-  name        String
-  description String?
-  category    FormCategory
-  version     Int                  @default(1)
-  isActive    Boolean              @default(true) @map("is_active")
-  schema      Json                 @map("schema")
-  compliance  Json?                @map("compliance")
-  createdBy   String               @map("created_by")
-  createdAt   DateTime             @default(now()) @map("created_at")
-  updatedAt   DateTime             @updatedAt @map("updated_at")
-  organization Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  id           String                @id @default(uuid())
+  orgId        String                @map("org_id")
+  name         String
+  description  String?
+  category     FormCategory
+  version      Int                   @default(1)
+  isActive     Boolean               @default(true) @map("is_active")
+  schema       Json                  @map("schema")
+  compliance   Json?                 @map("compliance")
+  createdBy    String                @map("created_by")
+  createdAt    DateTime              @default(now()) @map("created_at")
+  updatedAt    DateTime              @updatedAt @map("updated_at")
+  organization Organization          @relation(fields: [orgId], references: [id], onDelete: Cascade)
   submissions  FormSubmission[]
+  versions     FormTemplateVersion[]
 
   @@index([orgId])
   @@index([category])
   @@index([isActive])
   @@map("form_templates")
+}
+
+model FormTemplateVersion {
+  id         String       @id @default(uuid())
+  templateId String       @map("template_id")
+  template   FormTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  version    Int
+  schema     Json
+  changeLog  String?      @map("change_log")
+  createdAt  DateTime     @default(now()) @map("created_at")
+  createdBy  String       @map("created_by")
+
+  @@index([templateId])
+  @@index([version])
+  @@map("form_template_versions")
 }
 
 model FormSubmission {

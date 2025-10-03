@@ -1,0 +1,58 @@
+diff --git a/packages/database/schema.prisma b/packages/database/schema.prisma
+index dda5963..2b0f28b 100644
+--- a/packages/database/schema.prisma
++++ b/packages/database/schema.prisma
+@@ -168,20 +168,21 @@ enum InspectionStatus {
+ }
+ 
+ model FormTemplate {
+-  id          String               @id @default(uuid())
+-  orgId       String               @map("org_id")
++  id          String                @id @default(uuid())
++  orgId       String                @map("org_id")
+   name        String
+   description String?
+   category    FormCategory
+-  version     Int                  @default(1)
+-  isActive    Boolean              @default(true) @map("is_active")
+-  schema      Json                 @map("schema")
+-  compliance  Json?                @map("compliance")
+-  createdBy   String               @map("created_by")
+-  createdAt   DateTime             @default(now()) @map("created_at")
+-  updatedAt   DateTime             @updatedAt @map("updated_at")
+-  organization Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
++  version     Int                   @default(1)
++  isActive    Boolean               @default(true) @map("is_active")
++  schema      Json                  @map("schema")
++  compliance  Json?                 @map("compliance")
++  createdBy   String                @map("created_by")
++  createdAt   DateTime              @default(now()) @map("created_at")
++  updatedAt   DateTime              @updatedAt @map("updated_at")
++  organization Organization         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+   submissions  FormSubmission[]
++  versions     FormTemplateVersion[]
+ 
+   @@index([orgId])
+   @@index([category])
+@@ -189,6 +190,21 @@ model FormTemplate {
+   @@map("form_templates")
+ }
+ 
++model FormTemplateVersion {
++  id         String       @id @default(uuid())
++  templateId String       @map("template_id")
++  template   FormTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
++  version    Int
++  schema     Json
++  changeLog  String?      @map("change_log")
++  createdAt  DateTime     @default(now()) @map("created_at")
++  createdBy  String       @map("created_by")
++
++  @@index([templateId])
++  @@index([version])
++  @@map("form_template_versions")
++}
++
+ model FormSubmission {
+   id             String       @id @default(uuid())
+   orgId          String       @map("org_id")

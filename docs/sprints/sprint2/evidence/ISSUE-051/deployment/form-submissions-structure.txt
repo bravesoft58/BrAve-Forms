@@ -1,0 +1,33 @@
+                               Table "public.form_submissions"
+     Column      |              Type              | Collation | Nullable |      Default      
+-----------------+--------------------------------+-----------+----------+-------------------
+ id              | text                           |           | not null | 
+ org_id          | text                           |           | not null | 
+ template_id     | text                           |           | not null | 
+ inspection_id   | text                           |           |          | 
+ project_id      | text                           |           |          | 
+ submitted_by    | text                           |           | not null | 
+ status          | text                           |           | not null | 'DRAFT'::text
+ data            | jsonb                          |           | not null | 
+ metadata        | jsonb                          |           |          | 
+ offline_created | boolean                        |           | not null | false
+ submitted_at    | timestamp(3) without time zone |           |          | 
+ reviewed_by     | text                           |           |          | 
+ reviewed_at     | timestamp(3) without time zone |           |          | 
+ review_notes    | text                           |           |          | 
+ created_at      | timestamp(3) without time zone |           | not null | CURRENT_TIMESTAMP
+ updated_at      | timestamp(3) without time zone |           | not null | 
+Indexes:
+    "form_submissions_pkey" PRIMARY KEY, btree (id)
+    "form_submissions_inspection_id_idx" btree (inspection_id)
+    "form_submissions_org_id_idx" btree (org_id)
+    "form_submissions_project_id_idx" btree (project_id)
+    "form_submissions_status_idx" btree (status)
+    "form_submissions_submitted_by_idx" btree (submitted_by)
+    "form_submissions_template_id_idx" btree (template_id)
+Foreign-key constraints:
+    "form_submissions_inspection_id_fkey" FOREIGN KEY (inspection_id) REFERENCES inspections(id) ON DELETE SET NULL
+    "form_submissions_org_id_fkey" FOREIGN KEY (org_id) REFERENCES organizations(id) ON DELETE CASCADE
+    "form_submissions_project_id_fkey" FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL
+    "form_submissions_template_id_fkey" FOREIGN KEY (template_id) REFERENCES form_templates(id) ON DELETE CASCADE
+

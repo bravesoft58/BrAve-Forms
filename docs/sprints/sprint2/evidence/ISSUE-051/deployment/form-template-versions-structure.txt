@@ -1,0 +1,17 @@
+                          Table "public.form_template_versions"
+   Column    |              Type              | Collation | Nullable |      Default      
+-------------+--------------------------------+-----------+----------+-------------------
+ id          | text                           |           | not null | 
+ template_id | text                           |           | not null | 
+ version     | integer                        |           | not null | 
+ schema      | jsonb                          |           | not null | 
+ change_log  | text                           |           |          | 
+ created_at  | timestamp(3) without time zone |           | not null | CURRENT_TIMESTAMP
+ created_by  | text                           |           | not null | 
+Indexes:
+    "form_template_versions_pkey" PRIMARY KEY, btree (id)
+    "form_template_versions_template_id_idx" btree (template_id)
+    "form_template_versions_version_idx" btree (version)
+Foreign-key constraints:
+    "form_template_versions_template_id_fkey" FOREIGN KEY (template_id) REFERENCES form_templates(id) ON DELETE CASCADE
+
