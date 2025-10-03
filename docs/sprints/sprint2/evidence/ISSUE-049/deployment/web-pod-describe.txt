@@ -1,0 +1,68 @@
+Name:             web-74c69f7679-ptqjj
+Namespace:        braveforms
+Priority:         0
+Service Account:  default
+Node:             kong/192.168.127.2
+Start Time:       Fri, 03 Oct 2025 08:27:48 -0400
+Labels:           app=web
+                  pod-template-hash=74c69f7679
+                  tier=frontend
+Annotations:      <none>
+Status:           Running
+IP:               10.42.0.216
+IPs:
+  IP:           10.42.0.216
+Controlled By:  ReplicaSet/web-74c69f7679
+Containers:
+  web:
+    Container ID:   containerd://f2f6f2ec530b17c3d5b724d7475945a2547081e46b49ea20280eb69b9470ae3b
+    Image:          brave-forms-web:local
+    Image ID:       sha256:a68619b89c81dcfb1113c4ffa0ab54daf1c91bbddfbaa91ad232113d6a80efbf
+    Port:           3000/TCP (http)
+    Host Port:      0/TCP (http)
+    State:          Running
+      Started:      Fri, 03 Oct 2025 08:27:49 -0400
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     500m
+      memory:  512Mi
+    Requests:
+      cpu:      250m
+      memory:   256Mi
+    Liveness:   http-get http://:3000/ delay=30s timeout=5s period=10s #success=1 #failure=3
+    Readiness:  http-get http://:3000/ delay=10s timeout=3s period=5s #success=1 #failure=3
+    Environment:
+      NODE_ENV:                           production
+      NEXT_PUBLIC_BACKEND_URL:            http://backend:4000/graphql
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:  <set to the key 'clerk-publishable-key' in secret 'brave-forms-secrets'>  Optional: false
+      CLERK_SECRET_KEY:                   <set to the key 'clerk-secret-key' in secret 'brave-forms-secrets'>       Optional: false
+      NEXT_PUBLIC_EPA_THRESHOLD:          0.25
+      NEXT_PUBLIC_OFFLINE_DAYS:           30
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-rpvsp (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       True 
+  ContainersReady             True 
+  PodScheduled                True 
+Volumes:
+  kube-api-access-rpvsp:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age    From               Message
+  ----    ------     ----   ----               -------
+  Normal  Scheduled  4m54s  default-scheduler  Successfully assigned braveforms/web-74c69f7679-ptqjj to kong
+  Normal  Pulled     4m53s  kubelet            Container image "brave-forms-web:local" already present on machine
+  Normal  Created    4m53s  kubelet            Created container: web
+  Normal  Started    4m53s  kubelet            Started container web

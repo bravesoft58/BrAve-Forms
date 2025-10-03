@@ -14,6 +14,7 @@ A comprehensive web application for managing construction jobsite logs, inspecti
 ## Tech Stack
 
 ### Frontend
+
 - React.js
 - Material UI
 - React Query for data fetching
@@ -23,6 +24,7 @@ A comprehensive web application for managing construction jobsite logs, inspecti
 - Yup for form validation
 
 ### Backend
+
 - Node.js
 - Express.js
 - MongoDB with Mongoose
@@ -32,30 +34,35 @@ A comprehensive web application for managing construction jobsite logs, inspecti
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js (v14 or higher)
 - MongoDB
 
 ### Installation
 
 1. Clone the repository
+
    ```bash
    git clone https://github.com/yourusername/jobsite-logs.git
    cd jobsite-logs
    ```
 
 2. Install backend dependencies
+
    ```bash
    cd backend
    npm install
    ```
 
 3. Install frontend dependencies
+
    ```bash
    cd ../frontend
    npm install
    ```
 
 4. Create a `.env` file in the backend directory with the following variables:
+
    ```
    PORT=5000
    MONGODB_URI=mongodb://localhost:27017/jobsite-logs
@@ -71,12 +78,14 @@ A comprehensive web application for managing construction jobsite logs, inspecti
 ### Running the Application
 
 1. Start the backend server
+
    ```bash
    cd backend
    npm run dev
    ```
 
 2. Start the frontend development server
+
    ```bash
    cd frontend
    npm start
@@ -87,7 +96,9 @@ A comprehensive web application for managing construction jobsite logs, inspecti
 ## Deployment
 
 ### Backend
+
 1. Build the backend
+
    ```bash
    cd backend
    npm run build
@@ -99,7 +110,9 @@ A comprehensive web application for managing construction jobsite logs, inspecti
    ```
 
 ### Frontend
+
 1. Build the frontend
+
    ```bash
    cd frontend
    npm run build

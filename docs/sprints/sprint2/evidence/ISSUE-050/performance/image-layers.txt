@@ -1,0 +1,20 @@
+SNAPSHOT                                         CREATED              CREATED BY                                       SIZE       COMMENT
+<missing>                                        About an hour ago    CMD ["node" "apps/web/server.js"]                0B         buildkit.dockerfile.v0
+<missing>                                        About an hour ago    ENV HOSTNAME=0.0.0.0                             0B         buildkit.dockerfile.v0
+<missing>                                        About an hour ago    ENV PORT=3000                                    0B         buildkit.dockerfile.v0
+<missing>                                        About an hour ago    EXPOSE map[3000/tcp:{}]                          0B         buildkit.dockerfile.v0
+<missing>                                        About an hour ago    USER nextjs                                      0B         buildkit.dockerfile.v0
+sha256:276dec4b1ce1159ab9c61305378a638b09f31…    About an hour ago    COPY --chown=nextjs:nodejs /app/apps/web/.ne…    2.367MB    buildkit.dockerfile.v0
+sha256:fe6eeb3147d089a5219fc69e46182835533de…    About an hour ago    COPY --chown=nextjs:nodejs /app/apps/web/.ne…    49.41MB    buildkit.dockerfile.v0
+sha256:4b65aef80b519e99742961525e63e297b648b…    About an hour ago    COPY /app/apps/web/public ./public # buildkit    61.44kB    buildkit.dockerfile.v0
+sha256:4eff478983428759f9a6556bf54d669a3f265…    About an hour ago    RUN /bin/sh -c adduser --system --uid 1001 n…    40.96kB    buildkit.dockerfile.v0
+sha256:3d95cc007d7ddffea5d9385f9477d05c390de…    About an hour ago    RUN /bin/sh -c addgroup --system --gid 1001 …    16.38kB    buildkit.dockerfile.v0
+<missing>                                        About an hour ago    ENV NEXT_TELEMETRY_DISABLED=1                    0B         buildkit.dockerfile.v0
+<missing>                                        About an hour ago    ENV NODE_ENV=production                          0B         buildkit.dockerfile.v0
+sha256:5ec052fc39b4aa120714a6fc93de4c9aa1622…    About an hour ago    WORKDIR /app                                     8.192kB    buildkit.dockerfile.v0
+<missing>                                        6 months ago         CMD ["node"]                                     0B         buildkit.dockerfile.v0
+<missing>                                        6 months ago         ENTRYPOINT ["docker-entrypoint.sh"]              0B         buildkit.dockerfile.v0
+sha256:0651a8adb9173aa253206e2403d033598996d…    6 months ago         COPY docker-entrypoint.sh /usr/local/bin/ # …    20.48kB    buildkit.dockerfile.v0
+sha256:3603644c7663feb5f3c537355d5b91dc0fab5…    6 months ago         RUN /bin/sh -c apk add --no-cache --virtual …    5.472MB    buildkit.dockerfile.v0
+<missing>                                        6 months ago         ENV YARN_VERSION=1.22.22                         0B         buildkit.dockerfile.v0
+sha256:339e88a868ff4123c6e91492fe1f29bd6932e…    6 months ago         RUN /bin/sh -c addgroup -g 1000 node     && …    122MB      buildkit.dockerfile.v0

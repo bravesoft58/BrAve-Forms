@@ -6,6 +6,7 @@ import { FormTemplate, UpdateFormTemplateInput, FormCategory } from './forms.typ
 
 describe('FormsResolver - CRUD Operations', () => {
   let resolver: FormsResolver;
+  let _service: FormsService;
 
   const mockFormsService = {
     getFormTemplates: jest.fn(),
@@ -36,7 +37,7 @@ describe('FormsResolver - CRUD Operations', () => {
       .compile();
 
     resolver = module.get<FormsResolver>(FormsResolver);
-    service = module.get<FormsService>(FormsService);
+    _service = module.get<FormsService>(FormsService);
 
     jest.clearAllMocks();
   });

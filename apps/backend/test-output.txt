@@ -1,0 +1,36 @@
+
+> @brave-forms/backend@1.0.0 test E:\BrAve Forms\apps\backend
+> jest "forms.resolver.spec.ts"
+
+FAIL src/modules/forms/forms.resolver.spec.ts
+  ● Test suite failed to run
+
+    [96msrc/modules/forms/forms.resolver.spec.ts[0m:[93m105[0m:[93m61[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 2.
+
+    [7m105[0m       const result = await resolver.formTemplates(mockUser, FormCategory.EPA_SWPPP);
+    [7m   [0m [91m                                                            ~~~~~~~~~~~~~~~~~~~~~~[0m
+    [96msrc/modules/forms/forms.resolver.spec.ts[0m:[93m131[0m:[93m61[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 3.
+
+    [7m131[0m       const result = await resolver.formTemplates(mockUser, undefined, true);
+    [7m   [0m [91m                                                            ~~~~~~~~~~~~~~~[0m
+    [96msrc/modules/forms/forms.resolver.spec.ts[0m:[93m157[0m:[93m61[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 5.
+
+    [7m157[0m       const result = await resolver.formTemplates(mockUser, undefined, undefined, 10, 10);
+    [7m   [0m [91m                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [96msrc/modules/forms/forms.resolver.spec.ts[0m:[93m173[0m:[93m9[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 5.
+
+    [7m173[0m         FormCategory.EPA_CGP,
+    [7m   [0m [91m        ~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m174[0m         true,
+    [7m   [0m [91m~~~~~~~~~~~~~[0m
+    [7m175[0m         20,
+    [7m   [0m [91m~~~~~~~~~~~[0m
+    [7m176[0m         5
+    [7m   [0m [91m~~~~~~~~~[0m
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        2.539 s
+Ran all test suites matching /forms.resolver.spec.ts/i.
+ ELIFECYCLE  Test failed. See above for more details.

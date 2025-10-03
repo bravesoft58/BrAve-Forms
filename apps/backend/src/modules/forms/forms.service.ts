@@ -76,14 +76,30 @@ export class FormsService {
       schema?: any;
       compliance?: any;
       isActive?: boolean;
+      changeLog?: string;
     }
   ) {
     const template = await this.getFormTemplate(id, orgId);
 
+    if (data.schema) {
+      await this.prisma.formTemplateVersion.create({
+        data: {
+          templateId: id,
+          version: template.version,
+          schema: template.schema,
+          createdBy: template.createdBy,
+          changeLog: data.changeLog || 'Schema updated',
+        },
+      });
+    }
+
+    const updateData: any = { ...data };
+    delete updateData.changeLog;
+
     return this.prisma.formTemplate.update({
       where: { id },
       data: {
-        ...data,
+        ...updateData,
         version: data.schema ? template.version + 1 : template.version,
       },
     });
@@ -391,6 +407,77 @@ export class FormsService {
     };
 
     return this.createFormTemplate(template);
+  }
+
+  async getFormTemplateVersions(templateId: string, orgId: string) {
+    await this.getFormTemplate(templateId, orgId);
+
+    return this.prisma.formTemplateVersion.findMany({
+      where: { templateId },
+      orderBy: { version: 'desc' },
+    });
+  }
+
+  async getFormTemplateVersion(templateId: string, version: number, orgId: string) {
+    await this.getFormTemplate(templateId, orgId);
+
+    const versionRecord = await this.prisma.formTemplateVersion.findFirst({
+      where: {
+        templateId,
+        version,
+      },
+    });
+
+    if (!versionRecord) {
+      throw new NotFoundException('Form template version not found');
+    }
+
+    return versionRecord;
+  }
+
+  compareFormTemplateVersions(schemaA: any, schemaB: any) {
+    const fieldsA = schemaA?.fields || [];
+    const fieldsB = schemaB?.fields || [];
+
+    const added: any[] = [];
+    const removed: any[] = [];
+    const modified: any[] = [];
+
+    const fieldMapA = new Map(fieldsA.map((f: any) => [f.id, f]));
+    const fieldMapB = new Map(fieldsB.map((f: any) => [f.id, f]));
+
+    for (const field of fieldsB) {
+      if (!fieldMapA.has(field.id)) {
+        added.push(field);
+      } else {
+        const originalField = fieldMapA.get(field.id);
+        const changes: any = {};
+
+        for (const key of Object.keys(field)) {
+          if (JSON.stringify(originalField[key]) !== JSON.stringify(field[key])) {
+            changes[key] = {
+              from: originalField[key],
+              to: field[key],
+            };
+          }
+        }
+
+        if (Object.keys(changes).length > 0) {
+          modified.push({
+            id: field.id,
+            changes,
+          });
+        }
+      }
+    }
+
+    for (const field of fieldsA) {
+      if (!fieldMapB.has(field.id)) {
+        removed.push(field);
+      }
+    }
+
+    return { added, removed, modified };
   }
 
   private generateId(): string {

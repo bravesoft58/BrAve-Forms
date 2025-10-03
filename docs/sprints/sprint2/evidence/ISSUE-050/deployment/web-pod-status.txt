@@ -1,0 +1,2 @@
+NAME                   READY   STATUS    RESTARTS   AGE   IP            NODE   NOMINATED NODE   READINESS GATES
+web-74c69f7679-ptqjj   1/1     Running   0          76m   10.42.0.216   kong   <none>           <none>

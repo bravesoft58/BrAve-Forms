@@ -5,6 +5,7 @@ import { NotFoundException } from '@nestjs/common';
 
 describe('FormsService', () => {
   let service: FormsService;
+  let _prismaService: PrismaService;
 
   const mockPrismaService = {
     formTemplate: {
@@ -12,6 +13,11 @@ describe('FormsService', () => {
       findMany: jest.fn(),
       findFirst: jest.fn(),
       update: jest.fn(),
+    },
+    formTemplateVersion: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      findFirst: jest.fn(),
     },
     formSubmission: {
       create: jest.fn(),
@@ -33,7 +39,7 @@ describe('FormsService', () => {
     }).compile();
 
     service = module.get<FormsService>(FormsService);
-    prismaService = module.get<PrismaService>(PrismaService);
+    _prismaService = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {
@@ -369,6 +375,288 @@ describe('FormsService', () => {
           id: '1',
           orgId: 'wrong_org',
         },
+      });
+    });
+  });
+
+  describe('Form Versioning', () => {
+    describe('updateFormTemplate with version history', () => {
+      it('should create version history when schema changes', async () => {
+        const existingTemplate = {
+          id: 'template_1',
+          orgId: 'org_123',
+          name: 'Test Form',
+          version: 1,
+          schema: { fields: [{ id: 'field1', type: 'text' }] },
+          createdBy: 'user_456',
+        };
+
+        const updatedSchema = {
+          fields: [
+            { id: 'field1', type: 'text' },
+            { id: 'field2', type: 'number' },
+          ],
+        };
+
+        mockPrismaService.formTemplate.findFirst.mockResolvedValue(existingTemplate);
+        mockPrismaService.formTemplateVersion.create.mockResolvedValue({
+          id: 'version_1',
+          templateId: 'template_1',
+          version: 1,
+          schema: existingTemplate.schema,
+          createdBy: 'user_456',
+          createdAt: new Date(),
+        });
+        mockPrismaService.formTemplate.update.mockResolvedValue({
+          ...existingTemplate,
+          version: 2,
+          schema: updatedSchema,
+        });
+
+        await service.updateFormTemplate('template_1', 'org_123', {
+          schema: updatedSchema,
+        });
+
+        expect(mockPrismaService.formTemplateVersion.create).toHaveBeenCalledWith({
+          data: {
+            templateId: 'template_1',
+            version: 1,
+            schema: existingTemplate.schema,
+            createdBy: 'user_456',
+            changeLog: 'Schema updated',
+          },
+        });
+        expect(mockPrismaService.formTemplate.update).toHaveBeenCalledWith({
+          where: { id: 'template_1' },
+          data: {
+            schema: updatedSchema,
+            version: 2,
+          },
+        });
+      });
+
+      it('should NOT create version history when only name or description changes', async () => {
+        const existingTemplate = {
+          id: 'template_1',
+          orgId: 'org_123',
+          name: 'Old Name',
+          version: 1,
+          schema: { fields: [] },
+          createdBy: 'user_456',
+        };
+
+        mockPrismaService.formTemplate.findFirst.mockResolvedValue(existingTemplate);
+        mockPrismaService.formTemplate.update.mockResolvedValue({
+          ...existingTemplate,
+          name: 'New Name',
+        });
+
+        await service.updateFormTemplate('template_1', 'org_123', {
+          name: 'New Name',
+        });
+
+        expect(mockPrismaService.formTemplateVersion.create).not.toHaveBeenCalled();
+        expect(mockPrismaService.formTemplate.update).toHaveBeenCalledWith({
+          where: { id: 'template_1' },
+          data: {
+            name: 'New Name',
+            version: 1,
+          },
+        });
+      });
+
+      it('should include custom changeLog when provided', async () => {
+        const existingTemplate = {
+          id: 'template_1',
+          orgId: 'org_123',
+          name: 'Test Form',
+          version: 2,
+          schema: { fields: [] },
+          createdBy: 'user_456',
+        };
+
+        mockPrismaService.formTemplate.findFirst.mockResolvedValue(existingTemplate);
+        mockPrismaService.formTemplateVersion.create.mockResolvedValue({});
+        mockPrismaService.formTemplate.update.mockResolvedValue({});
+
+        await service.updateFormTemplate('template_1', 'org_123', {
+          schema: { fields: [{ id: 'new_field', type: 'date' }] },
+          changeLog: 'Added inspection date field per EPA requirement',
+        });
+
+        expect(mockPrismaService.formTemplateVersion.create).toHaveBeenCalledWith({
+          data: expect.objectContaining({
+            changeLog: 'Added inspection date field per EPA requirement',
+          }),
+        });
+      });
+    });
+
+    describe('getFormTemplateVersions', () => {
+      it('should return all versions for a template', async () => {
+        const versions = [
+          {
+            id: 'version_3',
+            templateId: 'template_1',
+            version: 3,
+            schema: { fields: [] },
+            changeLog: 'Added signature field',
+            createdAt: new Date('2025-10-03'),
+            createdBy: 'user_456',
+          },
+          {
+            id: 'version_2',
+            templateId: 'template_1',
+            version: 2,
+            schema: { fields: [] },
+            changeLog: 'Added GPS field',
+            createdAt: new Date('2025-10-02'),
+            createdBy: 'user_456',
+          },
+          {
+            id: 'version_1',
+            templateId: 'template_1',
+            version: 1,
+            schema: { fields: [] },
+            changeLog: 'Initial version',
+            createdAt: new Date('2025-10-01'),
+            createdBy: 'user_456',
+          },
+        ];
+
+        mockPrismaService.formTemplate.findFirst.mockResolvedValue({
+          id: 'template_1',
+          orgId: 'org_123',
+        });
+        mockPrismaService.formTemplateVersion.findMany.mockResolvedValue(versions);
+
+        const result = await service.getFormTemplateVersions('template_1', 'org_123');
+
+        expect(result).toEqual(versions);
+        expect(mockPrismaService.formTemplateVersion.findMany).toHaveBeenCalledWith({
+          where: { templateId: 'template_1' },
+          orderBy: { version: 'desc' },
+        });
+      });
+
+      it('should throw NotFoundException when template not found', async () => {
+        mockPrismaService.formTemplate.findFirst.mockResolvedValue(null);
+
+        await expect(service.getFormTemplateVersions('template_999', 'org_123')).rejects.toThrow(
+          NotFoundException
+        );
+      });
+
+      it('should enforce orgId isolation', async () => {
+        mockPrismaService.formTemplate.findFirst.mockResolvedValue(null);
+
+        await expect(service.getFormTemplateVersions('template_1', 'wrong_org')).rejects.toThrow(
+          NotFoundException
+        );
+
+        expect(mockPrismaService.formTemplate.findFirst).toHaveBeenCalledWith({
+          where: { id: 'template_1', orgId: 'wrong_org' },
+        });
+      });
+    });
+
+    describe('getFormTemplateVersion', () => {
+      it('should return specific version', async () => {
+        const version = {
+          id: 'version_2',
+          templateId: 'template_1',
+          version: 2,
+          schema: { fields: [{ id: 'field1', type: 'text' }] },
+          changeLog: 'Added text field',
+          createdAt: new Date(),
+          createdBy: 'user_456',
+        };
+
+        mockPrismaService.formTemplate.findFirst.mockResolvedValue({
+          id: 'template_1',
+          orgId: 'org_123',
+        });
+        mockPrismaService.formTemplateVersion.findFirst.mockResolvedValue(version);
+
+        const result = await service.getFormTemplateVersion('template_1', 2, 'org_123');
+
+        expect(result).toEqual(version);
+        expect(mockPrismaService.formTemplateVersion.findFirst).toHaveBeenCalledWith({
+          where: {
+            templateId: 'template_1',
+            version: 2,
+          },
+        });
+      });
+
+      it('should throw NotFoundException when version not found', async () => {
+        mockPrismaService.formTemplate.findFirst.mockResolvedValue({
+          id: 'template_1',
+          orgId: 'org_123',
+        });
+        mockPrismaService.formTemplateVersion.findFirst.mockResolvedValue(null);
+
+        await expect(service.getFormTemplateVersion('template_1', 999, 'org_123')).rejects.toThrow(
+          NotFoundException
+        );
+      });
+
+      it('should throw NotFoundException when template not found', async () => {
+        mockPrismaService.formTemplate.findFirst.mockResolvedValue(null);
+
+        await expect(service.getFormTemplateVersion('template_999', 1, 'org_123')).rejects.toThrow(
+          NotFoundException
+        );
+      });
+    });
+
+    describe('compareFormTemplateVersions', () => {
+      it('should return differences between two versions', () => {
+        const version1Schema = {
+          fields: [
+            { id: 'field1', type: 'text', name: 'name', label: 'Name' },
+            { id: 'field2', type: 'number', name: 'age', label: 'Age' },
+          ],
+        };
+
+        const version2Schema = {
+          fields: [
+            { id: 'field1', type: 'text', name: 'name', label: 'Full Name' },
+            { id: 'field3', type: 'date', name: 'dob', label: 'Date of Birth' },
+          ],
+        };
+
+        const comparison = service.compareFormTemplateVersions(version1Schema, version2Schema);
+
+        expect(comparison).toMatchObject({
+          added: [{ id: 'field3', type: 'date', name: 'dob' }],
+          removed: [{ id: 'field2', type: 'number', name: 'age' }],
+          modified: [{ id: 'field1', changes: { label: { from: 'Name', to: 'Full Name' } } }],
+        });
+      });
+
+      it('should handle identical versions', () => {
+        const schema = {
+          fields: [{ id: 'field1', type: 'text', name: 'name', label: 'Name' }],
+        };
+
+        const comparison = service.compareFormTemplateVersions(schema, schema);
+
+        expect(comparison).toMatchObject({
+          added: [],
+          removed: [],
+          modified: [],
+        });
+      });
+
+      it('should handle empty schemas', () => {
+        const comparison = service.compareFormTemplateVersions({ fields: [] }, { fields: [] });
+
+        expect(comparison).toMatchObject({
+          added: [],
+          removed: [],
+          modified: [],
+        });
       });
     });
   });

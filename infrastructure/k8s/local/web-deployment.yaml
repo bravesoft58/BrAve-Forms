@@ -16,6 +16,7 @@ spec:
       targetPort: 3000
       nodePort: 30102
       protocol: TCP
+      name: http
   selector:
     app: web
 ---
@@ -28,7 +29,7 @@ metadata:
     app: web
     tier: frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: web
@@ -39,46 +40,51 @@ spec:
         tier: frontend
     spec:
       containers:
-      - name: web
-        image: brave-forms-web:local
-        imagePullPolicy: Never
-        ports:
-        - containerPort: 3000
-        env:
-        - name: NODE_ENV
-          value: "development"
-        - name: NEXT_PUBLIC_API_URL
-          value: "http://localhost:30001/graphql"
-        - name: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: brave-forms-secrets
-              key: clerk-publishable-key
-        - name: CLERK_SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              name: brave-forms-secrets
-              key: clerk-secret-key
-        - name: NEXT_PUBLIC_EPA_THRESHOLD
-          value: "0.25"  # Display exact EPA threshold
-        - name: NEXT_PUBLIC_OFFLINE_DAYS
-          value: "30"    # 30-day offline capability
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 3000
-          initialDelaySeconds: 10
-          periodSeconds: 5
+        - name: web
+          image: brave-forms-web:local
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: NODE_ENV
+              value: 'production'
+            - name: NEXT_PUBLIC_BACKEND_URL
+              value: 'http://backend:4000/graphql'
+            - name: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: brave-forms-secrets
+                  key: clerk-publishable-key
+            - name: CLERK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: brave-forms-secrets
+                  key: clerk-secret-key
+            - name: NEXT_PUBLIC_EPA_THRESHOLD
+              value: '0.25'
+            - name: NEXT_PUBLIC_OFFLINE_DAYS
+              value: '30'
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '250m'
+            limits:
+              memory: '512Mi'
+              cpu: '500m'
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3

@@ -1,8 +1,8 @@
 # BrAve Forms - Master Documentation Library
 
-**Last Updated:** 2025-10-01
+**Last Updated:** 2025-10-03
 **Maintained By:** Documentation Library Manager Agent
-**Status:** UPDATED - Forms-First Repositioning Complete, Design Docs Archived
+**Status:** UPDATED - Documentation Cleanup Complete, Sprint Structure Simplified
 
 ## Documentation Overview
 
@@ -483,6 +483,7 @@ This master index provides a complete inventory of all documentation in the BrAv
 **Strategic Initiative:** Reposition BrAve Forms from compliance-first to forms-first
 
 #### New Master Documents Created:
+
 1. **comprehensive_prd.md (80KB):** Master PRD with 80/20 forms/compliance split
    - User personas: Forms Manager Frank (primary), Compliance Carlos (tertiary)
    - Epic hierarchy: Forms Engine P0, Compliance P1
@@ -496,6 +497,7 @@ This master index provides a complete inventory of all documentation in the BrAv
    - Sales framework: Discovery questions, objection handling, ROI calculator
 
 #### Documents Archived (October 1, 2025):
+
 - **Legacy (Compliance-First):** 4 documents moved to docs/archive/design/legacy/
   - comprehensive_compliance_prd.md (compliance-first 60/40 split)
   - brave-forms-product-vision.md (contains emojis, compliance-first)
@@ -508,10 +510,12 @@ This master index provides a complete inventory of all documentation in the BrAv
   - All consolidated into TECH_STACK_DETAILS.md
 
 #### Files Removed (October 1, 2025):
+
 - Binary files (5): .docx files (808KB), .png screenshots (320KB), package.json
 - Reason: Unrelated (GIRGID screenshots), binary format, or superseded
 
 #### Key Corrections Applied:
+
 1. **Target Market:** Changed from "10-500 employees" to "5-25 employees (PRIMARY)"
 2. **Volume Discounts:** Added 15% (11-25 users), 25% (26-50 users) discounts
 3. **User Role Pricing:** Field User ($39), Office User ($19), Inspector Portal (FREE)
@@ -519,12 +523,14 @@ This master index provides a complete inventory of all documentation in the BrAv
 5. **SWPPP Differentiation:** Automation vs templates (SafetyCulture has templates)
 
 #### Design Folder Summary:
+
 - **Before:** 26 files (1.8MB) with duplicates and binary files
 - **After:** 13 markdown files (450KB) - 75% reduction
 - **Active Documents:** 11 aligned with forms-first direction
 - **Archive Structure:** docs/archive/design/legacy/ and duplicate/
 
 #### Related Documents:
+
 - ULTRA_THINK_MODE_ANALYSIS.md - Strategic validation with research
 - DESIGN_DOCS_UPDATE_SUMMARY.md - Action plan for remaining 5 docs
 - DESIGN_DOCS_REVIEW_AND_ARCHIVE_PLAN.md - Complete archive execution plan
@@ -534,6 +540,7 @@ This master index provides a complete inventory of all documentation in the BrAv
 **Objective:** Complete forms-first alignment for remaining 5 technical design documents
 
 **Documents Updated:**
+
 1. **brave-forms-sad.md** - Software Architecture Document
    - Forms service priority: P0 (Core product functionality)
    - Compliance engine priority: P1 (Competitive differentiation)
@@ -561,9 +568,11 @@ This master index provides a complete inventory of all documentation in the BrAv
    - Time savings metric prominent: "2-3 hours reduced to 30 minutes via smart forms"
 
 **Evidence:**
+
 - REMAINING_DOCS_UPDATE_COMPLETE.md - Detailed completion report with line-by-line changes
 
 **Results:**
+
 - Total documents aligned: 15 (10 previously + 5 now)
 - Forms-first positioning: 100% consistency across all documentation
 - Technical accuracy: PostgreSQL 15, Capacitor 6, user role pricing verified
@@ -645,6 +654,46 @@ This master index provides a complete inventory of all documentation in the BrAv
 
 _This master library is maintained by the Documentation Library Manager agent and should be updated whenever documentation changes occur._
 
-**Last Full Audit:** October 1, 2025 (Forms-First Repositioning + Sprint 1 Discovery Tracking)
+**Last Full Audit:** October 3, 2025 (Documentation Cleanup + Sprint Structure Simplification)
 **Next Scheduled Audit:** November 1, 2025
-**Last Update:** October 1, 2025 (Phase 5: Sprint 1 tracking documentation added)
+**Last Update:** October 3, 2025 (Phase 6: Legacy documentation archived, sprint folders cleaned)
+
+---
+
+## Phase 6: Documentation Cleanup (October 3, 2025) - COMPLETED
+
+**Objective:** Archive legacy/unused documentation to prevent confusion during Sprint 2 transition
+
+### Documents Archived:
+
+**Legacy Sept 30 Reports** (archived to docs/archive/sprints/legacy-sept30-reports/):
+
+- SPRINT_1_COMPLETION_REPORT.md (Sept 30) - Superseded by sprint1/SPRINT_1_COMPLETION_SUMMARY.md
+- SPRINT_2_COMPLETION_REPORT.md (Sept 30) - Sprint 2 hasn't started yet
+- SPRINT_2_KICKOFF.md (Sept 30) - Premature
+- SPRINT_3_PLANNING_PREPARATION.md (Sept 30) - Too early
+
+**Old Planning Docs** (archived to docs/archive/sprints/old-planning/):
+
+- MOBILE_SPRINTS_7-10_PLAN.md - Too far ahead
+- WEB_MVP_LAUNCH_PLAN.md - Part of Sprint 2 now
+
+**Historical Reports** (archived to docs/archive/historical/):
+
+- DOC_SYNC_REPORT_2025-10-02.md - Historical
+- REORGANIZATION_PLAN.md - Reorganization complete
+
+**Legacy Project** (archived to docs/archive/legacy-project/):
+
+- "To Be Updated" folder - Old Express/MongoDB codebase
+
+### Folders Removed:
+
+- sprint5/ through sprint10/ - Empty, never used
+
+### Result:
+
+- **Before:** 18 files in docs/sprints/, 7 empty folders, high confusion risk
+- **After:** 6 active files in docs/sprints/, 0 empty folders, low confusion risk
+- **Active Sprints:** Only sprint1/ and sprint2/ visible
+- **Benefit:** Clear sprint structure for Sprint 2 transition period

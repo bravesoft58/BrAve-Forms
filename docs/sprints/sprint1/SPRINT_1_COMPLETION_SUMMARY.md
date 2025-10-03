@@ -275,6 +275,61 @@ Sprint 1 has been successfully completed with 44 out of 45 atomic issues finishe
 
 ---
 
+## Post-Completion Carryover Work (October 3-13, 2025)
+
+After Sprint 1 formal completion (October 2, 2025), additional infrastructure issues were addressed during the transition period to Sprint 2:
+
+### Carryover Issues Completed:
+
+**ISSUE-047: Resolve Sprint 1 Blockers** - COMPLETE (Oct 2)
+
+- Fixed TanStack Query version lock (5.90.2)
+- Created 17 integration tests for query client + Valtio store
+- Verified Dashboard pre-rendering already working
+- Time: 3h actual / 8h estimated (5h saved)
+- Evidence: [ISSUE-047/COMPLETION-REPORT.md](../sprint2/evidence/ISSUE-047/COMPLETION-REPORT.md)
+
+**ISSUE-048: Lighthouse PWA Audit** - COMPLETE (Oct 2)
+
+- Lighthouse v12 installed and working
+- Service worker and manifest verified
+- Discovered: PWA category removed in Lighthouse v12
+- Time: 1h actual / 2h estimated (1h saved)
+- Evidence: [ISSUE-048/COMPLETION-REPORT.md](../sprint2/evidence/ISSUE-048/COMPLETION-REPORT.md)
+
+**ISSUE-049: Deploy Web Frontend to Kubernetes** - COMPLETE (Oct 3)
+
+- Multi-stage Dockerfile created (150MB production image)
+- Web deployed to NodePort 30102
+- Playwright E2E tests passing (6/6)
+- Page load time: 734ms (well under 3s requirement)
+- Time: 1.5h actual / 4h estimated (2.5h saved)
+- Evidence: [ISSUE-049/COMPLETION-REPORT.md](../sprint2/evidence/ISSUE-049/COMPLETION-REPORT.md)
+
+**ISSUE-050: Frontend Build Optimization** - IN PROGRESS
+
+- Target: Container size optimization
+- Multi-stage build enhancements
+- Estimated: 2h
+
+These issues are tracked in **docs/sprints/sprint2/issues/** (Phase 0) but conceptually complete Sprint 1 infrastructure work. Total carryover time: 5.5h actual / 14h estimated (saving 8.5 hours through efficient execution).
+
+### Sprint 1 Extended Metrics:
+
+- **Original completion:** 44/45 issues (98%)
+- **With carryover:** 47/49 issues (96%)
+- **Outstanding:** ISSUE-041 (Lighthouse manual tests, non-blocking)
+- **Total time saved:** 8.5 hours across carryover issues
+- **Velocity:** 2.5x faster than estimates
+
+### Transition Period Status:
+
+- **Period:** October 3-13, 2025 (10 days)
+- **Purpose:** Complete carryover work, research Phase 1, buffer before Sprint 2
+- **Sprint 2 Start:** October 14, 2025 (on track)
+
+---
+
 **Created:** 2025-10-02 16:45:00 EDT
-**Last Updated:** 2025-10-02 16:45:00 EDT
-**Next Review:** Sprint 2 Planning
+**Last Updated:** 2025-10-03 09:15:00 EDT
+**Next Review:** Sprint 2 Kickoff (October 14, 2025)

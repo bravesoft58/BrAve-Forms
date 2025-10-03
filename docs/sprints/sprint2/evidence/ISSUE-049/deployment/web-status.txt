@@ -1,0 +1,5 @@
+NAME                       READY   STATUS    RESTARTS   AGE     IP            NODE   NOMINATED NODE   READINESS GATES
+pod/web-74c69f7679-ptqjj   1/1     Running   0          4m47s   10.42.0.216   kong   <none>           <none>
+
+NAME          TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE     SELECTOR
+service/web   NodePort   10.43.145.120   <none>        3000:30102/TCP   5m40s   app=web
