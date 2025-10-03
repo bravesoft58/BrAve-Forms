@@ -70,6 +70,31 @@ describe('Field Type Validators', () => {
     });
   });
 
+  describe('textarea validator', () => {
+    it('should validate textarea with required', () => {
+      const schema = fieldValueValidators.textarea('test', { required: true });
+      expect(() => schema.parse('test')).not.toThrow();
+      expect(() => schema.parse('')).toThrow('This field is required');
+    });
+
+    it('should validate minLength constraint', () => {
+      const schema = fieldValueValidators.textarea('short', { minLength: 10 });
+      expect(() => schema.parse('short')).toThrow('Minimum 10 characters');
+      expect(() => schema.parse('this is long enough')).not.toThrow();
+    });
+
+    it('should validate maxLength constraint', () => {
+      const schema = fieldValueValidators.textarea('x'.repeat(100), { maxLength: 50 });
+      expect(() => schema.parse('x'.repeat(100))).toThrow('Maximum 50 characters');
+      expect(() => schema.parse('x'.repeat(25))).not.toThrow();
+    });
+
+    it('should allow optional textarea', () => {
+      const schema = fieldValueValidators.textarea(undefined, {});
+      expect(() => schema.parse(undefined)).not.toThrow();
+    });
+  });
+
   describe('date validator', () => {
     it('should validate valid date string', () => {
       const schema = fieldValueValidators.date('2025-10-03', {});
@@ -97,6 +122,12 @@ describe('Field Type Validators', () => {
       const today = new Date().toISOString();
       const schema = fieldValueValidators.date(today, { maxDate: 'today' });
       expect(() => schema.parse(today)).not.toThrow();
+    });
+
+    it('should validate maxDate with specific date', () => {
+      const schema = fieldValueValidators.date('2026-01-01', { maxDate: '2025-12-31' });
+      expect(() => schema.parse('2026-01-01')).toThrow('Date must be on or before 2025-12-31');
+      expect(() => schema.parse('2025-12-31')).not.toThrow();
     });
   });
 
@@ -402,6 +433,20 @@ describe('Conditional Logic Engine', () => {
     const formData = { amount: 50 };
     const result = evaluateConditionalLogic(rules, formData);
     expect(result.requiredFields.has('managerApproval')).toBe(false);
+  });
+
+  it('should show previously hidden fields based on condition', () => {
+    const rules = [
+      {
+        fieldId: 'field1',
+        condition: 'showDetails === true',
+        action: 'show' as const,
+        targetFields: ['detailField'],
+      },
+    ];
+    const formData = { showDetails: true };
+    const result = evaluateConditionalLogic(rules, formData);
+    expect(result.hiddenFields.has('detailField')).toBe(false);
   });
 
   it('should handle complex conditions with multiple operators', () => {
