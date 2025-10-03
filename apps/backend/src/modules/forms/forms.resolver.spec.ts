@@ -362,5 +362,68 @@ describe('FormsResolver - CRUD Operations', () => {
       await resolver.deleteFormTemplate('template_123', mockUser);
       expect(mockFormsService.deleteFormTemplate).toHaveBeenCalledWith('template_123', 'org_456');
     });
+
+    it('should reject cross-org template access', async () => {
+      const orgBUser = { id: 'user_b', orgId: 'org_b' };
+
+      mockFormsService.getFormTemplate.mockRejectedValue(new Error('Form template not found'));
+
+      await expect(resolver.formTemplate('template_from_org_a', orgBUser)).rejects.toThrow();
+      expect(mockFormsService.getFormTemplate).toHaveBeenCalledWith('template_from_org_a', 'org_b');
+    });
+
+    it('should reject cross-org template updates', async () => {
+      const orgBUser = { id: 'user_b', orgId: 'org_b' };
+      const updateInput: UpdateFormTemplateInput = { name: 'Malicious Update' };
+
+      mockFormsService.updateFormTemplate.mockRejectedValue(new Error('Form template not found'));
+
+      await expect(
+        resolver.updateFormTemplate('template_from_org_a', updateInput, orgBUser)
+      ).rejects.toThrow();
+      expect(mockFormsService.updateFormTemplate).toHaveBeenCalledWith(
+        'template_from_org_a',
+        'org_b',
+        updateInput
+      );
+    });
+
+    it('should reject cross-org template deletion', async () => {
+      const orgBUser = { id: 'user_b', orgId: 'org_b' };
+
+      mockFormsService.deleteFormTemplate.mockRejectedValue(new Error('Form template not found'));
+
+      await expect(resolver.deleteFormTemplate('template_from_org_a', orgBUser)).rejects.toThrow();
+      expect(mockFormsService.deleteFormTemplate).toHaveBeenCalledWith(
+        'template_from_org_a',
+        'org_b'
+      );
+    });
+
+    it('should only return templates belonging to current org', async () => {
+      const orgATemplates: FormTemplate[] = [
+        {
+          id: 'template_a1',
+          orgId: 'org_a',
+          name: 'Org A Template',
+          category: FormCategory.CUSTOM,
+          version: 1,
+          isActive: true,
+          schema: { fields: [] },
+          createdBy: 'user_a',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+
+      mockFormsService.getFormTemplates.mockResolvedValue(orgATemplates);
+
+      const userA = { id: 'user_a', orgId: 'org_a' };
+      const result = await resolver.formTemplates(userA);
+
+      expect(result).toEqual(orgATemplates);
+      expect(mockFormsService.getFormTemplates).toHaveBeenCalledWith('org_a', undefined);
+      expect(result.every((t) => t.orgId === 'org_a')).toBe(true);
+    });
   });
 });
