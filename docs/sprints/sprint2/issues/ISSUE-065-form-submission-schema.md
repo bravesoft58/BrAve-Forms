@@ -124,3 +124,22 @@ Create `apps/backend/src/modules/submissions/docs/STATE_MACHINE.md`:
 ## Next Issue
 
 **ISSUE-066:** Submission CRUD Resolvers (4h)
+
+## Status: COMPLETE (2025-10-03)
+
+**Evidence:** [COMPLETION-REPORT.md](../evidence/ISSUE-065/COMPLETION-REPORT.md)
+
+**Time:** ~2 hours
+
+**Commit:** d9e9e1b
+
+**Summary:**
+
+- IN_PROGRESS status added to FormStatus enum (6 states total)
+- Comprehensive STATE_MACHINE.md created (244 lines)
+- TypeScript types with validation helpers (form-submission.ts, 61 lines)
+- Valid transitions documented with business rules
+- Workflow examples: standard, fast-track, rejection/resubmission
+- EPA/OSHA compliance: 3-year retention, immutability
+- Offline considerations with IndexedDB queue
+- Testing requirements specified for ISSUE-066/068
