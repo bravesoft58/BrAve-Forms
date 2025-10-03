@@ -1,0 +1,114 @@
+
+> @brave-forms/backend@1.0.0 test E:\BrAve Forms\apps\backend
+> jest "forms.validation.spec.ts"
+
+  console.error
+    Failed to evaluate conditional logic for rule: field1 Error: Suspicious pattern detected in condition: eval
+        at evaluateCondition (E:\BrAve Forms\apps\backend\src\modules\forms\forms.validation.ts:344:13)
+        at evaluateConditionalLogic (E:\BrAve Forms\apps\backend\src\modules\forms\forms.validation.ts:300:31)
+        at E:\BrAve Forms\apps\backend\src\modules\forms\forms.validation.spec.ts:422:42
+        at Object.<anonymous> (E:\BrAve Forms\node_modules\expect\build\toThrowMatchers.js:74:11)
+        at Object.throwingMatcher [as toThrow] (E:\BrAve Forms\node_modules\expect\build\index.js:320:21)
+        at Object.<anonymous> (E:\BrAve Forms\apps\backend\src\modules\forms\forms.validation.spec.ts:422:74)
+        at Promise.then.completed (E:\BrAve Forms\node_modules\jest-circus\build\utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (E:\BrAve Forms\node_modules\jest-circus\build\utils.js:231:10)
+        at _callCircusTest (E:\BrAve Forms\node_modules\jest-circus\build\run.js:316:40)
+        at _runTest (E:\BrAve Forms\node_modules\jest-circus\build\run.js:252:3)
+        at _runTestsForDescribeBlock (E:\BrAve Forms\node_modules\jest-circus\build\run.js:126:9)
+        at _runTestsForDescribeBlock (E:\BrAve Forms\node_modules\jest-circus\build\run.js:121:9)
+        at run (E:\BrAve Forms\node_modules\jest-circus\build\run.js:71:3)
+        at runAndTransformResultsToJestFormat (E:\BrAve Forms\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+        at jestAdapter (E:\BrAve Forms\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+        at runTestInternal (E:\BrAve Forms\node_modules\jest-runner\build\runTest.js:367:16)
+        at runTest (E:\BrAve Forms\node_modules\jest-runner\build\runTest.js:444:34)
+
+    [0m [90m 314 |[39m       }
+     [90m 315 |[39m     } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 316 |[39m       console[33m.[39merror([32m`Failed to evaluate conditional logic for rule: ${rule.fieldId}`[39m[33m,[39m error)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 317 |[39m     }
+     [90m 318 |[39m   }
+     [90m 319 |[39m[0m
+
+      at evaluateConditionalLogic (modules/forms/forms.validation.ts:316:15)
+      at modules/forms/forms.validation.spec.ts:422:42
+      at Object.<anonymous> (../../../node_modules/expect/build/toThrowMatchers.js:74:11)
+      at Object.throwingMatcher [as toThrow] (../../../node_modules/expect/build/index.js:320:21)
+      at Object.<anonymous> (modules/forms/forms.validation.spec.ts:422:74)
+
+PASS src/modules/forms/forms.validation.spec.ts
+  Field Type Validators
+    text validator
+      √ should validate required text field (2 ms)
+      √ should reject empty required text (10 ms)
+      √ should validate minLength
+      √ should validate maxLength
+      √ should validate pattern regex (1 ms)
+      √ should allow optional field when not required
+    number validator
+      √ should validate number within range
+      √ should reject number below minimum (1 ms)
+      √ should reject number above maximum
+      √ should validate step increments (1 ms)
+      √ should handle EPA 0.25 inch threshold exactly
+    date validator
+      √ should validate valid date string (1 ms)
+      √ should reject invalid date format
+      √ should validate minDate constraint
+      √ should validate maxDate as today (1 ms)
+      √ should allow date today or earlier
+    select validator
+      √ should validate value from options
+      √ should reject value not in options (1 ms)
+      √ should throw error if no options provided (3 ms)
+    checkbox validator
+      √ should validate checked boolean
+      √ should reject unchecked required checkbox (1 ms)
+      √ should allow unchecked optional checkbox
+    photo validator
+      √ should validate photo with all required fields
+      √ should reject invalid URL
+      √ should reject invalid MIME type
+      √ should require GPS location when metadata.gpsRequired is true (1 ms)
+      √ should validate photo with GPS location
+    signature validator
+      √ should validate signature with required fields
+      √ should reject invalid data URL format (1 ms)
+      √ should require certificate when metadata.signatureCertificate is true (2 ms)
+      √ should validate signature with certificate
+    gps validator
+      √ should validate GPS coordinates within valid range
+      √ should reject latitude out of range (1 ms)
+      √ should reject longitude out of range
+      √ should validate GPS at extreme valid values
+    weather_data validator
+      √ should validate weather data with all fields (1 ms)
+      √ should reject negative precipitation (EPA compliance)
+      √ should validate EPA 0.25 inch threshold exactly
+      √ should validate NOAA and OpenWeatherMap sources
+      √ should always require weather data (not optional)
+    bmpChecklist validator
+      √ should validate BMP checklist with items
+      √ should reject empty checklist
+      √ should validate checklist with photo URLs (1 ms)
+  Conditional Logic Engine
+    √ should hide fields when condition is true
+    √ should show fields when hide condition is false
+    √ should require fields based on condition
+    √ should unrequire fields based on condition (1 ms)
+    √ should handle complex conditions with multiple operators
+    √ should prevent code injection attacks (19 ms)
+  Form Submission Validator
+    √ should validate complete valid submission
+    √ should detect missing required fields (1 ms)
+    √ should validate field-level rules
+    √ should skip hidden fields when skipHiddenFields is true
+    √ should apply conditional required fields (1 ms)
+    √ should collect warnings for unknown field types
+
+Test Suites: 1 passed, 1 total
+Tests:       55 passed, 55 total
+Snapshots:   0 total
+Time:        3.042 s
+Ran all test suites matching /forms.validation.spec.ts/i.
