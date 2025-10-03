@@ -1,9 +1,11 @@
 import { QueryClient } from '@tanstack/react-query';
 import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import { get, set, del } from 'idb-keyval';
 import { appActions } from '../store/app.store';
 
 // Create persister for offline capability (30-day retention)
+// ISSUE-040: Simplified using idb-keyval for IndexedDB access
 const createPersister = () => {
   if (typeof window === 'undefined') return undefined;
 
@@ -11,51 +13,23 @@ const createPersister = () => {
     storage: {
       getItem: async (key: string) => {
         try {
-          // Try localStorage first
-          const item = localStorage.getItem(key);
-          if (item) return item;
-
-          // Fallback to IndexedDB for larger data
-          const db = await openQueryDB();
-          const transaction = db.transaction(['queryCache'], 'readonly');
-          const store = transaction.objectStore('queryCache');
-          const result = await new Promise<any>((resolve, reject) => {
-            const request = store.get(key);
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-          });
-          return result?.value || null;
+          const value = await get(key);
+          return value ?? null;
         } catch (error) {
           console.warn('Query cache read failed:', error);
           return null;
         }
       },
-      setItem: async (key: string, value: string) => {
+      setItem: async (key: string, value: unknown) => {
         try {
-          // Store in localStorage for quick access
-          localStorage.setItem(key, value);
-
-          // Also store in IndexedDB for persistence
-          const db = await openQueryDB();
-          const transaction = db.transaction(['queryCache'], 'readwrite');
-          const store = transaction.objectStore('queryCache');
-          await store.put({ 
-            key, 
-            value, 
-            timestamp: Date.now(),
-            size: new Blob([value]).size 
-          });
+          await set(key, value);
         } catch (error) {
           console.error('Query cache write failed:', error);
         }
       },
       removeItem: async (key: string) => {
-        localStorage.removeItem(key);
         try {
-          const db = await openQueryDB();
-          const transaction = db.transaction(['queryCache'], 'readwrite');
-          const store = transaction.objectStore('queryCache');
-          await store.delete(key);
+          await del(key);
         } catch (error) {
           console.warn('Query cache delete failed:', error);
         }
@@ -63,45 +37,8 @@ const createPersister = () => {
     },
     // 30-day retention for construction site offline capability
     throttleTime: 1000,
-    // Compress large payloads
-    serialize: (data) => {
-      try {
-        return JSON.stringify(data);
-      } catch (error) {
-        console.error('Serialization failed:', error);
-        return '{}';
-      }
-    },
-    deserialize: (data) => {
-      try {
-        return JSON.parse(data);
-      } catch (error) {
-        console.error('Deserialization failed:', error);
-        return {};
-      }
-    },
   });
 };
-
-// IndexedDB helper for query persistence
-async function openQueryDB(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('brave-forms-queries', 1);
-    
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
-    
-    request.onupgradeneeded = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-      
-      if (!db.objectStoreNames.contains('queryCache')) {
-        const store = db.createObjectStore('queryCache', { keyPath: 'key' });
-        store.createIndex('timestamp', 'timestamp', { unique: false });
-        store.createIndex('size', 'size', { unique: false });
-      }
-    };
-  });
-}
 
 // Create query client with construction-optimized settings
 export const createQueryClient = (): QueryClient => {
@@ -145,7 +82,7 @@ export const createQueryClient = (): QueryClient => {
         // Add mutations to offline queue when they fail
         onError: (error: any, variables, context) => {
           console.error('Mutation failed:', error);
-          
+
           // Add to offline queue if it's a network error
           if (!error?.response || error?.code === 'NETWORK_ERROR') {
             appActions.addToOfflineQueue({
@@ -214,18 +151,19 @@ export const queryKeys = {
   // Weather data (critical for EPA compliance)
   weather: ['weather'] as const,
   currentWeather: (location: string) => ['weather', 'current', location] as const,
-  weatherHistory: (location: string, days: number) => ['weather', 'history', location, days] as const,
+  weatherHistory: (location: string, days: number) =>
+    ['weather', 'history', location, days] as const,
 
   // Compliance
   compliance: ['compliance'] as const,
   complianceStatus: (projectId: string) => ['compliance', 'status', projectId] as const,
   complianceDeadlines: ['compliance', 'deadlines'] as const,
-  
+
   // Forms
   forms: ['forms'] as const,
   form: (id: string) => ['forms', id] as const,
   formTemplate: (type: string) => ['forms', 'template', type] as const,
-  
+
   // Files and photos
   files: ['files'] as const,
   file: (id: string) => ['files', id] as const,
@@ -234,20 +172,29 @@ export const queryKeys = {
 
 // Network status listener to update query client behavior
 if (typeof window !== 'undefined') {
-  const updateNetworkStatus = () => {
+  const updateNetworkStatus = async () => {
     const isOnline = navigator.onLine;
     appActions.setNetworkStatus(isOnline ? 'online' : 'offline');
-    
+
     // Resume queries when coming back online
     if (isOnline && queryClient) {
-      queryClient.resumePausedMutations();
-      queryClient.refetchQueries();
+      try {
+        await queryClient.resumePausedMutations();
+        await queryClient.refetchQueries();
+      } catch (error) {
+        console.error('Failed to sync after reconnection:', error);
+        appActions.addNotification({
+          type: 'warning',
+          title: 'Sync Issue',
+          message: 'Some offline changes failed to sync. Will retry automatically.',
+        });
+      }
     }
   };
 
   window.addEventListener('online', updateNetworkStatus);
   window.addEventListener('offline', updateNetworkStatus);
-  
+
   // Initial status
   updateNetworkStatus();
 }

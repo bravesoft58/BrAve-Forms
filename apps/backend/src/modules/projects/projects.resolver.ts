@@ -7,52 +7,7 @@ import { ManagementAccess, TeamAccess, AdminAccess } from '../../common/decorato
 import { ProjectsService } from './projects.service';
 import { PrismaService } from '../database/prisma.service';
 
-// GraphQL Types for Project Management
-@ObjectType('Project')
-export class ProjectGQL {
-  @Field()
-  id: string;
-
-  @Field()
-  name: string;
-
-  @Field()
-  address: string;
-
-  @Field()
-  latitude: number;
-
-  @Field()
-  longitude: number;
-
-  @Field({ nullable: true })
-  permitNumber?: string;
-
-  @Field()
-  startDate: Date;
-
-  @Field({ nullable: true })
-  endDate?: Date;
-
-  @Field()
-  disturbedAcres: number;
-
-  @Field()
-  status: string;
-
-  @Field()
-  createdAt: Date;
-
-  @Field()
-  updatedAt: Date;
-
-  @Field(() => [InspectionGQL])
-  recentInspections: InspectionGQL[];
-
-  @Field(() => ProjectComplianceGQL)
-  compliance: ProjectComplianceGQL;
-}
-
+// GraphQL Types for Project Management (order matters for circular references)
 @ObjectType('Inspection')
 export class InspectionGQL {
   @Field()
@@ -96,6 +51,51 @@ export class ProjectComplianceGQL {
 
   @Field()
   requiresAttention: boolean;
+}
+
+@ObjectType('Project')
+export class ProjectGQL {
+  @Field()
+  id: string;
+
+  @Field()
+  name: string;
+
+  @Field()
+  address: string;
+
+  @Field()
+  latitude: number;
+
+  @Field()
+  longitude: number;
+
+  @Field({ nullable: true })
+  permitNumber?: string;
+
+  @Field()
+  startDate: Date;
+
+  @Field({ nullable: true })
+  endDate?: Date;
+
+  @Field()
+  disturbedAcres: number;
+
+  @Field()
+  status: string;
+
+  @Field()
+  createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
+
+  @Field(() => [InspectionGQL])
+  recentInspections: InspectionGQL[];
+
+  @Field(() => ProjectComplianceGQL)
+  compliance: ProjectComplianceGQL;
 }
 
 // Input Types

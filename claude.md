@@ -99,8 +99,6 @@ All code must be production-ready, professional, and contain ZERO references to 
    - Check documentation for current best practices
    - Look up the latest API patterns for libraries being used
    - NEVER assume - ALWAYS verify with current documentation
-   - **EPA Compliance Check:** Verify regulatory accuracy for any compliance features
-   - **EPA CGP Requirement:** Inspections within 24 hours of 0.25" precipitation (during working hours)
 
 2. **Plan and Validate:**
    - State your understanding of the task
@@ -109,27 +107,37 @@ All code must be production-ready, professional, and contain ZERO references to 
    - Consider construction site constraints (gloves, weather, connectivity)
    - Get confirmation before proceeding
 
-3. **Implement with Quality Gates:**
-   - Write failing tests FIRST (TDD approach)
-   - Implement the minimal working solution
+3. **Implement with Quality Gates (TDD):**
+   - Write failing tests FIRST (TDD approach - red phase)
+   - Implement the minimal working solution (green phase)
    - Add comprehensive error handling
    - Include input validation and edge cases
-   - **0.25" Rain Trigger:** MUST be exactly 0.25", not 0.24" or 0.26"
 
 4. **Quality Validation (MANDATORY):**
    - Run linting: `pnpm lint`
    - Run type checking: `pnpm type-check`
    - Run all tests: `pnpm test`
    - Verify build passes: `pnpm build`
-   - Check offline functionality: `pnpm test:offline`
-   - Validate compliance rules: `pnpm test:compliance`
 
-5. **Double-Check Before Completion:**
+5. **Code Review (NEW - Sprint 2+):**
+   - Run `/review` command (launches code-reviewer agent)
+   - Code-reviewer checks code against all project standards
+   - Findings added to issue tracker (e.g., ISSUE-075 for Sprint 2)
+   - Address Critical and High severity issues immediately
+   - Track Medium/Low issues for later resolution
+
+6. **Manual Testing and Evidence:**
+   - Test manually in development environment
+   - Test edge cases and offline scenarios
+   - Collect evidence (screenshots, test results, coverage reports)
+   - Create completion report
+
+7. **Commit and Close:**
    - Review code against project patterns
    - Confirm all error cases are handled
    - Verify documentation is updated
-   - Test manually in development environment
-   - Test with construction site conditions (offline, gloves, sunlight)
+   - Commit with proper format (NO emoji, NO AI branding)
+   - Close issue
 
 ## PLAN MODE (SHIFT+TAB TWICE) - MANDATORY FOR COMPLEX FEATURES
 

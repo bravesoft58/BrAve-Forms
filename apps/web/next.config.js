@@ -1,5 +1,77 @@
 const path = require('path');
 
+// PWA configuration for offline support (ISSUE-037)
+const withPWA = require('@ducanh2912/next-pwa').default({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development', // Disable in dev for faster builds
+  register: true,
+  skipWaiting: true,
+  runtimeCaching: [
+    // Google Fonts - Cache-first with long expiration
+    {
+      urlPattern: /^https:\/\/fonts\.(?:gstatic)\.com\/.*/i,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'google-fonts-webfonts',
+        expiration: {
+          maxEntries: 4,
+          maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+        },
+      },
+    },
+    // GraphQL API calls - Network-first with fallback to cache
+    {
+      urlPattern: /^https?:\/\/.*\/graphql$/i,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'graphql-api-cache',
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 6 * 60 * 60, // 6 hours (matches Redis TTL)
+        },
+        networkTimeoutSeconds: 10, // Fallback to cache after 10s
+      },
+    },
+    // REST API calls - Network-first with fallback
+    {
+      urlPattern: /\/api\/.*$/i,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'api-cache',
+        expiration: {
+          maxEntries: 32,
+          maxAgeSeconds: 6 * 60 * 60, // 6 hours
+        },
+        networkTimeoutSeconds: 10,
+      },
+    },
+    // Static images - Cache-first for performance
+    {
+      urlPattern: /\.(?:jpg|jpeg|png|webp|avif)$/i,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'static-images',
+        expiration: {
+          maxEntries: 64,
+          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+        },
+      },
+    },
+    // Static assets (JS, CSS) - Stale-while-revalidate for best performance
+    {
+      urlPattern: /\.(?:js|css)$/i,
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'static-assets',
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+        },
+      },
+    },
+  ],
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Enable experimental features for better performance
@@ -84,7 +156,7 @@ const nextConfig = {
   },
 
   // Webpack configuration for optimal bundling
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+  webpack: (config) => {
     // Optimize bundle for construction site performance
     config.optimization = {
       ...config.optimization,
@@ -133,14 +205,9 @@ const nextConfig = {
   // Skip build-time static generation for dynamic pages
   // These pages require runtime authentication/data
   skipTrailingSlashRedirect: true,
-  
+
   // Transpile packages for better compatibility
-  transpilePackages: [
-    '@brave-forms/types',
-    '@brave-forms/compliance',
-    '@apollo/client',
-    'graphql',
-  ],
+  transpilePackages: ['@brave-forms/types', '@brave-forms/compliance', '@apollo/client', 'graphql'],
 };
 
-module.exports = nextConfig;
+module.exports = withPWA(nextConfig);

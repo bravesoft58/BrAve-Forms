@@ -66,10 +66,9 @@ brave-forms/
 
 ### Requirements Documents (`docs/design/`)
 
-- **[Functional Requirements](docs/design/brave-forms-frd.md)** - Detailed functional specifications
+- **[Product Positioning](docs/design/product_positioning.md)** - Market positioning and go-to-market strategy
 - **[Non-Functional Requirements](docs/design/brave-forms-nfr.md)** - Performance, security, compliance
 - **[Use Cases](docs/design/brave-forms-use-cases.md)** - User scenarios and workflows
-- **[Market Requirements](docs/design/Market%20Requirements%20Document.md)** - Market analysis and positioning
 
 ### EPA/OSHA Form Samples (`docs/form-samples/`)
 
@@ -85,10 +84,12 @@ Real-world construction compliance forms that BrAve Forms digitizes:
 
 ### Development Resources
 
-- **[CLAUDE.md](claude.md)** - AI development instructions and guidelines
-- **[Tech Stack](docs/design/TECH_STACK.md)** - Technology choices and rationale
-- **[Development Plan](docs/design/sdp-brave-forms.md)** - Software development plan
-- **[AI Agents](agents/)** - 17 specialized development agents
+- **[CLAUDE.md](CLAUDE.md)** - AI development instructions and guidelines (v1.6)
+- **[Tech Stack Details](docs/TECH_STACK_DETAILS.md)** - Comprehensive technical stack documentation
+- **[Common Pitfalls](docs/COMMON_PITFALLS.md)** - Development anti-patterns guide
+- **[Document Library](docs/DOCUMENT_LIBRARY.md)** - Master documentation index
+- **[Development Plan](docs/design/sdp-brave-forms.md)** - Software development plan (v2.0)
+- **[AI Agents](.claude/agents/)** - 25 specialized development agents
 
 ### Legacy Documents
 

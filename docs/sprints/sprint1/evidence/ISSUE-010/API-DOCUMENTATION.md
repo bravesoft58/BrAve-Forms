@@ -17,16 +17,19 @@ The BrAve Forms backend provides a GraphQL API for construction compliance manag
 ## Authentication
 
 **Required Header:**
+
 ```
 Authorization: Bearer <clerk_jwt_token>
 ```
 
 **JWT Claims Required:**
+
 - `o.id` - Organization ID (Clerk org ID)
 - `o.rol` - User role (OWNER, ADMIN, MEMBER)
 - `o.slg` - Organization slug
 
 **Unauthenticated Access:**
+
 - GraphQL introspection queries (`__schema`, `__type`, `__typename`)
 - No data queries work without authentication
 
@@ -37,9 +40,11 @@ Authorization: Bearer <clerk_jwt_token>
 ### Weather & Compliance
 
 #### `checkProjectWeather`
+
 **Description:** Check if project location has exceeded EPA 0.25 inch threshold
 
 **Arguments:**
+
 - `projectId: String!` - Project UUID
 - `latitude: Float!` - Project latitude
 - `longitude: Float!` - Project longitude
@@ -47,6 +52,7 @@ Authorization: Bearer <clerk_jwt_token>
 **Returns:** `PrecipitationCheckResult!`
 
 **Example:**
+
 ```graphql
 query {
   checkProjectWeather(
@@ -67,21 +73,21 @@ query {
 ---
 
 #### `recentWeatherEvents`
+
 **Description:** Get recent weather events for a project
 
 **Arguments:**
+
 - `projectId: String!` - Project UUID
 - `days: Float = 7` - Number of days to look back (default: 7)
 
 **Returns:** `[WeatherEvent!]!`
 
 **Example:**
+
 ```graphql
 query {
-  recentWeatherEvents(
-    projectId: "00000000-0000-0000-0000-000000000001"
-    days: 7
-  ) {
+  recentWeatherEvents(projectId: "00000000-0000-0000-0000-000000000001", days: 7) {
     id
     eventDate
     precipitationInches
@@ -96,6 +102,7 @@ query {
 ---
 
 #### `pendingInspections`
+
 **Description:** Get all pending inspections for the organization
 
 **Arguments:** None
@@ -103,6 +110,7 @@ query {
 **Returns:** `[Inspection!]!`
 
 **Example:**
+
 ```graphql
 query {
   pendingInspections {
@@ -124,16 +132,45 @@ query {
 ### Organization Management
 
 #### `currentOrganization`
-**Description:** Get current user's organization (basic info)
+
+**Description:** Get current user's organization with full details including projects and stats
 
 **Arguments:** None
 
-**Returns:** `String` (likely organization ID or JSON string)
+**Returns:** `Organization!` (complete organization object)
 
 **Example:**
+
 ```graphql
 query {
-  currentOrganization
+  currentOrganization {
+    id
+    clerkOrgId
+    name
+    plan
+    createdAt
+    updatedAt
+    projects {
+      id
+      name
+      address
+      status
+    }
+    users {
+      id
+      userId
+      role
+      joinedAt
+    }
+    stats {
+      totalProjects
+      activeProjects
+      totalInspections
+      pendingInspections
+      complianceRate
+      totalUsers
+    }
+  }
 }
 ```
 
@@ -142,6 +179,7 @@ query {
 ---
 
 #### `organizationDashboard`
+
 **Description:** Get comprehensive organization statistics for dashboard
 
 **Arguments:** None
@@ -149,6 +187,7 @@ query {
 **Returns:** `OrganizationStats!`
 
 **Example:**
+
 ```graphql
 query {
   organizationDashboard {
@@ -181,6 +220,7 @@ query {
 ---
 
 #### `organizationStats`
+
 **Description:** Get organization statistics (simplified)
 
 **Arguments:** None
@@ -188,6 +228,7 @@ query {
 **Returns:** `String` (likely JSON string)
 
 **Example:**
+
 ```graphql
 query {
   organizationStats
@@ -199,6 +240,7 @@ query {
 ---
 
 #### `organizationProjects`
+
 **Description:** Get all projects for the organization
 
 **Arguments:** None
@@ -206,6 +248,7 @@ query {
 **Returns:** `[Project!]!`
 
 **Example:**
+
 ```graphql
 query {
   organizationProjects
@@ -219,6 +262,7 @@ query {
 ---
 
 #### `organizationUsers`
+
 **Description:** Get all users in the organization
 
 **Arguments:** None
@@ -226,6 +270,7 @@ query {
 **Returns:** `[UserOrganization!]!`
 
 **Example:**
+
 ```graphql
 query {
   organizationUsers
@@ -239,9 +284,11 @@ query {
 ### Project Management
 
 #### `projects`
+
 **Description:** Get projects with optional filtering
 
 **Arguments:**
+
 - `filter: ProjectFilterInput` (optional)
   - `status: String` - Filter by project status (ACTIVE, PLANNING, etc.)
   - `search: String` - Search by project name or address
@@ -251,6 +298,7 @@ query {
 **Returns:** `[Project!]!`
 
 **Example:**
+
 ```graphql
 query {
   projects(filter: { status: "ACTIVE", limit: 10 }) {
@@ -272,6 +320,7 @@ query {
 ### Storage & Files
 
 #### `getStorageStats`
+
 **Description:** Get photo storage statistics for organization
 
 **Arguments:** None
@@ -279,6 +328,7 @@ query {
 **Returns:** `String!` (likely JSON string with storage metrics)
 
 **Example:**
+
 ```graphql
 query {
   getStorageStats
@@ -290,14 +340,17 @@ query {
 ---
 
 #### `generatePhotoUrl`
+
 **Description:** Generate signed URL for photo access
 
 **Arguments:**
+
 - `photoKey: String!` - S3 key for the photo
 
 **Returns:** `String!` (signed URL)
 
 **Example:**
+
 ```graphql
 query {
   generatePhotoUrl(photoKey: "photos/inspection-123/photo-1.jpg")
@@ -309,14 +362,17 @@ query {
 ---
 
 #### `getCompliancePackage`
+
 **Description:** Generate compliance package (PDF report) for inspection
 
 **Arguments:**
+
 - `inspectionId: String!` - Inspection UUID
 
 **Returns:** `String!` (likely PDF URL or base64)
 
 **Example:**
+
 ```graphql
 query {
   getCompliancePackage(inspectionId: "00000000-0000-0000-0000-000000000201")
@@ -332,14 +388,17 @@ query {
 ### Organization Management
 
 #### `updateOrganization`
+
 **Description:** Update organization details
 
 **Arguments:**
+
 - TBD (requires introspection of `UpdateOrganizationInput` type)
 
 **Returns:** `Organization!`
 
 **Example:**
+
 ```graphql
 mutation {
   updateOrganization(input: { name: "New Company Name" }) {
@@ -355,15 +414,18 @@ mutation {
 ---
 
 #### `syncOrganization`
+
 **Description:** Sync organization from Clerk webhook
 
 **Arguments:**
+
 - `clerkOrgId: String!` - Clerk organization ID
 - `orgData: String!` - JSON string with organization data
 
 **Returns:** `String!` (confirmation message)
 
 **Example:**
+
 ```graphql
 mutation {
   syncOrganization(
@@ -378,21 +440,20 @@ mutation {
 ---
 
 #### `syncUserOrganization`
+
 **Description:** Sync user-organization membership from Clerk webhook
 
 **Arguments:**
+
 - TBD (requires introspection)
 
 **Returns:** `String!` (confirmation message)
 
 **Example:**
+
 ```graphql
 mutation {
-  syncUserOrganization(
-    userId: "user_123"
-    orgId: "org_acme"
-    role: "ADMIN"
-  )
+  syncUserOrganization(userId: "user_123", orgId: "org_acme", role: "ADMIN")
 }
 ```
 
@@ -401,14 +462,17 @@ mutation {
 ---
 
 #### `removeUserFromOrganization`
+
 **Description:** Remove user from organization
 
 **Arguments:**
+
 - TBD (requires introspection)
 
 **Returns:** `String!` (confirmation message)
 
 **Example:**
+
 ```graphql
 mutation {
   removeUserFromOrganization(userId: "user_123", orgId: "org_acme")
@@ -430,6 +494,7 @@ The API implements EPA Construction General Permit (CGP) requirements:
 **Working Hours:** Project's normal business hours (not calendar hours)
 
 **Relevant Queries:**
+
 - `checkProjectWeather` - Real-time precipitation check
 - `recentWeatherEvents` - Historical rain events
 - `pendingInspections` - Inspections triggered by weather
@@ -443,6 +508,7 @@ The API implements EPA Construction General Permit (CGP) requirements:
 ### Authentication Errors
 
 **Missing Authorization Header:**
+
 ```json
 {
   "errors": [
@@ -459,6 +525,7 @@ The API implements EPA Construction General Permit (CGP) requirements:
 ### Validation Errors
 
 **Invalid Field:**
+
 ```json
 {
   "errors": [
@@ -514,6 +581,7 @@ curl http://localhost:30101/graphql \
 ## Multi-Tenancy
 
 **All queries automatically filter by organization:**
+
 - Extracted from Clerk JWT `o.id` claim
 - Prisma middleware injects `orgId` filter
 - PostgreSQL RLS enforces tenant boundaries

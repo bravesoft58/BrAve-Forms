@@ -1,5 +1,4 @@
 import { proxy, useSnapshot } from 'valtio';
-import { proxyWithComputed } from 'valtio/utils';
 
 // Types for the application state
 export interface OfflineAction {
@@ -41,14 +40,14 @@ export interface AppState {
   syncStatus: 'idle' | 'syncing' | 'error' | 'success';
   networkStatus: 'online' | 'offline';
   lastSync: Date | null;
-  
+
   // Offline queue management
   offlineQueue: OfflineAction[];
-  
+
   // Current user and organization context
   user: User | null;
   currentProject: Project | null;
-  
+
   // UI state
   sidebarCollapsed: boolean;
   notifications: Array<{
@@ -59,7 +58,7 @@ export interface AppState {
     timestamp: Date;
     read: boolean;
   }>;
-  
+
   // Application settings
   settings: {
     theme: 'light' | 'dark' | 'auto';
@@ -69,7 +68,7 @@ export interface AppState {
     syncInterval: number; // minutes
     offlineRetentionDays: number;
   };
-  
+
   // Construction-specific state
   weatherData: {
     lastRainfall: number | null; // inches in last 24 hours
@@ -81,7 +80,7 @@ export interface AppState {
       conditions: string;
     }>;
   } | null;
-  
+
   // EPA Compliance tracking
   compliance: {
     pendingInspections: number;
@@ -125,30 +124,31 @@ const initialState: AppState = {
 // Create store with basic proxy (we'll add persistence later)
 export const appStore = proxy(initialState);
 
-// IndexedDB helper for persistent storage
-async function openIndexedDB(): Promise<IDBDatabase> {
+// IndexedDB helper for persistent storage (future use)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function _openIndexedDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open('brave-forms-db', 1);
-    
+
     request.onerror = () => reject(request.error);
     request.onsuccess = () => resolve(request.result);
-    
+
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
-      
+
       // Create app store for persistent state
       if (!db.objectStoreNames.contains('appStore')) {
         const appStore = db.createObjectStore('appStore', { keyPath: 'key' });
         appStore.createIndex('timestamp', 'timestamp', { unique: false });
       }
-      
+
       // Create offline queue store
       if (!db.objectStoreNames.contains('offlineQueue')) {
         const queueStore = db.createObjectStore('offlineQueue', { keyPath: 'id' });
         queueStore.createIndex('timestamp', 'timestamp', { unique: false });
         queueStore.createIndex('priority', 'priority', { unique: false });
       }
-      
+
       // Create form data cache
       if (!db.objectStoreNames.contains('formData')) {
         const formStore = db.createObjectStore('formData', { keyPath: 'id' });
@@ -159,12 +159,25 @@ async function openIndexedDB(): Promise<IDBDatabase> {
   });
 }
 
-// Store actions for updating state
+/**
+ * Store Actions for Updating State
+ *
+ * CRITICAL: Query client has hard dependencies on these actions.
+ * Required exports (integration tested in query-client-store-integration.test.ts):
+ * - appActions.addToOfflineQueue (line 88 in query/client.ts)
+ * - appActions.setSyncStatus (line 100 in query/client.ts)
+ * - appActions.setNetworkStatus (line 176 in query/client.ts)
+ *
+ * DO NOT modify these exports without updating query client tests.
+ *
+ * @see apps/web/lib/query/__tests__/query-client-store-integration.test.ts
+ * @see apps/web/lib/query/client.ts
+ */
 export const appActions = {
   // Network status management
   setNetworkStatus: (status: 'online' | 'offline') => {
     appStore.networkStatus = status;
-    
+
     // Auto-trigger sync when coming back online
     if (status === 'online' && appStore.offlineQueue.length > 0) {
       appActions.triggerSync();
@@ -185,9 +198,9 @@ export const appActions = {
       ...action,
       id: `offline-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     };
-    
+
     appStore.offlineQueue.push(queueItem);
-    
+
     // Auto-trigger sync if online
     if (appStore.networkStatus === 'online') {
       appActions.triggerSync();
@@ -195,7 +208,7 @@ export const appActions = {
   },
 
   removeFromOfflineQueue: (actionId: string) => {
-    const index = appStore.offlineQueue.findIndex(item => item.id === actionId);
+    const index = appStore.offlineQueue.findIndex((item) => item.id === actionId);
     if (index !== -1) {
       appStore.offlineQueue.splice(index, 1);
     }
@@ -211,16 +224,18 @@ export const appActions = {
   },
 
   // Notification management
-  addNotification: (notification: Omit<AppState['notifications'][0], 'id' | 'timestamp' | 'read'>) => {
+  addNotification: (
+    notification: Omit<AppState['notifications'][0], 'id' | 'timestamp' | 'read'>
+  ) => {
     const newNotification = {
       ...notification,
       id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date(),
       read: false,
     };
-    
+
     appStore.notifications.unshift(newNotification);
-    
+
     // Keep only last 50 notifications
     if (appStore.notifications.length > 50) {
       appStore.notifications = appStore.notifications.slice(0, 50);
@@ -228,7 +243,7 @@ export const appActions = {
   },
 
   markNotificationRead: (notificationId: string) => {
-    const notification = appStore.notifications.find((n: any) => n.id === notificationId);
+    const notification = appStore.notifications.find((n) => n.id === notificationId);
     if (notification) {
       notification.read = true;
     }
@@ -237,7 +252,7 @@ export const appActions = {
   // Weather data management (critical for EPA compliance)
   updateWeatherData: (weatherData: AppState['weatherData']) => {
     appStore.weatherData = weatherData;
-    
+
     // Check for 0.25" rainfall trigger (EPA CGP requirement)
     if (weatherData?.lastRainfall && weatherData.lastRainfall >= 0.25) {
       appActions.checkComplianceDeadlines();
@@ -264,19 +279,19 @@ export const appActions = {
   // Trigger sync operation
   triggerSync: async () => {
     if (appStore.syncStatus === 'syncing') return; // Already syncing
-    
+
     appActions.setSyncStatus('syncing');
-    
+
     try {
       // This would implement the actual sync logic
       // For now, we'll simulate a sync operation
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // Clear successful items from queue
-      appStore.offlineQueue = appStore.offlineQueue.filter((item: OfflineAction) => 
-        item.retryCount >= item.maxRetries
+      appStore.offlineQueue = appStore.offlineQueue.filter(
+        (item: OfflineAction) => item.retryCount >= item.maxRetries
       );
-      
+
       appActions.setSyncStatus('success');
     } catch (error) {
       appActions.setSyncStatus('error');
@@ -309,10 +324,10 @@ export const appActions = {
 
   processOfflineQueue: async () => {
     // Process offline GraphQL operations
-    const graphqlOperations = appStore.offlineQueue.filter(item => 
-      item.type === 'graphql_operation'
+    const graphqlOperations = appStore.offlineQueue.filter(
+      (item) => item.type === 'graphql_operation'
     );
-    
+
     for (const operation of graphqlOperations) {
       try {
         // Retry GraphQL operation - would implement actual retry logic here

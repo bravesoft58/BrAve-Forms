@@ -7,14 +7,12 @@ import { NOAAService } from './providers/noaa.service';
 import { OpenWeatherMapService } from './providers/openweathermap.service';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { DatabaseModule } from '../database/database.module';
+import { RedisService } from '../../common/cache/redis.service';
 
 @Module({
-  imports: [
-    HttpModule,
-    DatabaseModule,
-    forwardRef(() => NotificationsModule),
-  ],
+  imports: [HttpModule, DatabaseModule, forwardRef(() => NotificationsModule)],
   providers: [
+    RedisService,
     WeatherService,
     WeatherResolver,
     WeatherMonitoringService,

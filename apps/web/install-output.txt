@@ -1,0 +1,31 @@
+Scope: all 7 workspace projects
+../..                                    | Progress: resolved 0, reused 1, downloaded 0, added 0
+../backend                               |  WARN  deprecated apollo-server-express@3.13.0
+../backend                               |  WARN  deprecated supertest@6.3.4
+../backend                               |  WARN  deprecated eslint@8.57.1
+../backend                               |  WARN  deprecated @apollo/server@4.12.2
+ WARN  deprecated react-beautiful-dnd@13.1.1: react-beautiful-dnd is now deprecated. Context and options: https://github.com/atlassian/react-beautiful-dnd/issues/2672
+
+   ╭───────────────────────────────────────────────────────────────────╮
+   │                                                                   │
+   │                Update available! 8.15.9 → 10.18.0.                │
+   │   Changelog: https://github.com/pnpm/pnpm/releases/tag/v10.18.0   │
+   │                 Run "pnpm add -g pnpm" to update.                 │
+   │                                                                   │
+   │      Follow @pnpmjs for updates: https://twitter.com/pnpmjs       │
+   │                                                                   │
+   ╰───────────────────────────────────────────────────────────────────╯
+
+ ERR_PNPM_NO_MATCHING_VERSION  No matching version found for @tanstack/react-query-devtools@5.90.0
+
+This error happened while installing a direct dependency of E:\BrAve Forms\apps\web
+
+The latest release of @tanstack/react-query-devtools is "5.90.2".
+
+Other releases are:
+  * alpha: 5.0.0-alpha.91
+  * beta: 5.0.0-beta.37
+  * rc: 5.0.0-rc.16
+  * previous: 4.41.0
+
+If you need the full list of all 523 published versions run "$ pnpm view @tanstack/react-query-devtools versions".
