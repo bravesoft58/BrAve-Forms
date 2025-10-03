@@ -244,14 +244,20 @@ Sprint 2 marks the critical transition from infrastructure (Sprint 1 completed 4
 - Dependencies: ISSUE-051 (form_templates exists)
 - Success: Submissions table deployed
 
-**ISSUE-066: Submission CRUD Resolvers** - Medium (4h)
+**ISSUE-066: Submission CRUD Resolvers** - Medium (4h) ✅ COMPLETE
 
-- Implement createFormSubmission, updateFormSubmission mutations
-- Add status workflow validation (state machine)
-- Implement required field validation (server-side)
-- Test in GraphQL Playground
+- ✅ Implemented createFormSubmission, updateFormSubmission mutations
+- ✅ Added status workflow validation (state machine with 6 states)
+- ✅ Implemented required field validation (server-side with type checking)
+- ✅ Created SubmissionValidationService with 4 validation methods
+- ✅ Created FormSubmissionsService with full CRUD operations
+- ✅ Created GraphQL resolver with multi-tenant isolation
+- ✅ Updated FormsService to support IN_PROGRESS status
+- ✅ Added @brave-forms/types path mapping for TypeScript
 - Dependencies: ISSUE-065 (schema exists)
-- Success: Create and update submissions via API
+- Success: Create and update submissions via API, type-check passing
+- Evidence: [ISSUE-066/COMPLETION-REPORT.md](evidence/ISSUE-066/COMPLETION-REPORT.md)
+- Completed: 2025-10-03
 
 **ISSUE-067: Approval Workflow** - Small (2h)
 
