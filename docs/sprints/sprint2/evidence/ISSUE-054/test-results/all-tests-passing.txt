@@ -1,0 +1,12 @@
+
+> @brave-forms/backend@1.0.0 test E:\BrAve Forms\apps\backend
+> jest "forms.resolver.spec.ts" "forms.service.spec.ts"
+
+PASS src/modules/forms/forms.service.spec.ts
+PASS src/modules/forms/forms.resolver.spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       25 passed, 25 total
+Snapshots:   0 total
+Time:        2.925 s, estimated 3 s
+Ran all test suites matching /forms.resolver.spec.ts|forms.service.spec.ts/i.

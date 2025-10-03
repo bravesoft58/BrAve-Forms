@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/modules/database/prisma.service';
 
 @Injectable()
@@ -28,15 +28,27 @@ export class FormsService {
     });
   }
 
-  async getFormTemplates(orgId: string) {
+  async getFormTemplates(
+    orgId: string,
+    filters?: {
+      category?: 'EPA_SWPPP' | 'EPA_CGP' | 'OSHA_SAFETY' | 'STATE_PERMIT' | 'CUSTOM';
+      isActive?: boolean;
+      take?: number;
+      skip?: number;
+    }
+  ) {
+    const where: any = { orgId };
+
+    if (filters?.category) where.category = filters.category;
+    if (filters?.isActive !== undefined) where.isActive = filters.isActive;
+
     return this.prisma.formTemplate.findMany({
-      where: {
-        orgId,
-        isActive: true,
-      },
+      where,
       orderBy: {
         createdAt: 'desc',
       },
+      skip: filters?.skip,
+      take: filters?.take,
     });
   }
 
@@ -134,12 +146,15 @@ export class FormsService {
     });
   }
 
-  async getFormSubmissions(orgId: string, filters?: {
-    templateId?: string;
-    projectId?: string;
-    inspectionId?: string;
-    status?: 'DRAFT' | 'SUBMITTED' | 'REVIEWED' | 'APPROVED' | 'REJECTED';
-  }) {
+  async getFormSubmissions(
+    orgId: string,
+    filters?: {
+      templateId?: string;
+      projectId?: string;
+      inspectionId?: string;
+      status?: 'DRAFT' | 'SUBMITTED' | 'REVIEWED' | 'APPROVED' | 'REJECTED';
+    }
+  ) {
     return this.prisma.formSubmission.findMany({
       where: {
         orgId,
@@ -193,12 +208,14 @@ export class FormsService {
       where: { id },
       data: {
         ...data,
-        submittedAt: data.status === 'SUBMITTED' && !submission.submittedAt
-          ? new Date()
-          : submission.submittedAt,
-        reviewedAt: data.status && ['REVIEWED', 'APPROVED', 'REJECTED'].includes(data.status)
-          ? new Date()
-          : submission.reviewedAt,
+        submittedAt:
+          data.status === 'SUBMITTED' && !submission.submittedAt
+            ? new Date()
+            : submission.submittedAt,
+        reviewedAt:
+          data.status && ['REVIEWED', 'APPROVED', 'REJECTED'].includes(data.status)
+            ? new Date()
+            : submission.reviewedAt,
       },
       include: {
         template: true,
@@ -224,7 +241,7 @@ export class FormsService {
       for (const threshold of compliance.criticalThresholds) {
         const submissionData = submission.data as any;
         const fieldValue = submissionData[threshold.field];
-        
+
         if (threshold.field === 'rainfallAmount' && fieldValue !== undefined) {
           // EPA CGP requires exactly 0.25" threshold - no rounding
           if (fieldValue < 0.25) {
@@ -243,9 +260,7 @@ export class FormsService {
       for (const field of schema.fields) {
         const submissionData = submission.data as any;
         if (field.validation?.required && !submissionData[field.name]) {
-          validationResults.violations.push(
-            `Required field "${field.label}" is missing`
-          );
+          validationResults.violations.push(`Required field "${field.label}" is missing`);
           validationResults.isCompliant = false;
         }
       }
@@ -258,9 +273,7 @@ export class FormsService {
           const submissionData = submission.data as any;
           const photoData = submissionData[field.name];
           if (photoData && !photoData.gpsLocation) {
-            validationResults.violations.push(
-              'Photo must include GPS location for EPA compliance'
-            );
+            validationResults.violations.push('Photo must include GPS location for EPA compliance');
             validationResults.isCompliant = false;
           }
         }
@@ -293,7 +306,7 @@ export class FormsService {
             type: 'date',
             name: 'inspectionDate',
             label: 'Inspection Date',
-            validation: { 
+            validation: {
               required: true,
               maxDate: 'today',
             },
@@ -381,6 +394,8 @@ export class FormsService {
   }
 
   private generateId(): string {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    return (
+      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    );
   }
 }

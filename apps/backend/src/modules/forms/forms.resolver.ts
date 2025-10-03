@@ -23,16 +23,26 @@ export class FormsResolver {
   // Form Template Queries
   @Query(() => [FormTemplate])
   async formTemplates(
-    @CurrentUser() user: any
+    @CurrentUser() user: any,
+    @Args('category', { nullable: true }) category?: FormCategory,
+    @Args('isActive', { nullable: true }) isActive?: boolean,
+    @Args('take', { nullable: true }) take?: number,
+    @Args('skip', { nullable: true }) skip?: number
   ): Promise<FormTemplate[]> {
-    return this.formsService.getFormTemplates(user.orgId);
+    const filters: any = {};
+    if (category !== undefined) filters.category = category;
+    if (isActive !== undefined) filters.isActive = isActive;
+    if (take !== undefined) filters.take = take;
+    if (skip !== undefined) filters.skip = skip;
+
+    return this.formsService.getFormTemplates(
+      user.orgId,
+      Object.keys(filters).length > 0 ? filters : undefined
+    );
   }
 
   @Query(() => FormTemplate)
-  async formTemplate(
-    @Args('id') id: string,
-    @CurrentUser() user: any
-  ): Promise<FormTemplate> {
+  async formTemplate(@Args('id') id: string, @CurrentUser() user: any): Promise<FormTemplate> {
     return this.formsService.getFormTemplate(id, user.orgId);
   }
 
@@ -71,18 +81,13 @@ export class FormsResolver {
   }
 
   @Mutation(() => Boolean)
-  async deleteFormTemplate(
-    @Args('id') id: string,
-    @CurrentUser() user: any
-  ): Promise<boolean> {
+  async deleteFormTemplate(@Args('id') id: string, @CurrentUser() user: any): Promise<boolean> {
     await this.formsService.deleteFormTemplate(id, user.orgId);
     return true;
   }
 
   @Mutation(() => FormTemplate)
-  async createEpaSwpppTemplate(
-    @CurrentUser() user: any
-  ): Promise<FormTemplate> {
+  async createEpaSwpppTemplate(@CurrentUser() user: any): Promise<FormTemplate> {
     return this.formsService.createEpaSwpppTemplate(user.orgId, user.id);
   }
 
@@ -104,10 +109,7 @@ export class FormsResolver {
   }
 
   @Query(() => FormSubmission)
-  async formSubmission(
-    @Args('id') id: string,
-    @CurrentUser() user: any
-  ): Promise<FormSubmission> {
+  async formSubmission(@Args('id') id: string, @CurrentUser() user: any): Promise<FormSubmission> {
     return this.formsService.getFormSubmission(id, user.orgId);
   }
 
@@ -137,9 +139,10 @@ export class FormsResolver {
   ): Promise<FormSubmission> {
     return this.formsService.updateFormSubmission(id, user.orgId, {
       ...input,
-      reviewedBy: input.status && ['REVIEWED', 'APPROVED', 'REJECTED'].includes(input.status)
-        ? user.id
-        : undefined,
+      reviewedBy:
+        input.status && ['REVIEWED', 'APPROVED', 'REJECTED'].includes(input.status)
+          ? user.id
+          : undefined,
     });
   }
 

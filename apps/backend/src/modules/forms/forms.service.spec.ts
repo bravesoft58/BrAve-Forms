@@ -5,7 +5,6 @@ import { NotFoundException } from '@nestjs/common';
 
 describe('FormsService', () => {
   let service: FormsService;
-  let prismaService: PrismaService;
 
   const mockPrismaService = {
     formTemplate: {
@@ -39,6 +38,159 @@ describe('FormsService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('getFormTemplates', () => {
+    it('should return all templates for org when no filters provided', async () => {
+      const templates = [
+        {
+          id: 'template_1',
+          orgId: 'org_123',
+          name: 'Daily Inspection',
+          category: 'OSHA_SAFETY',
+          version: 1,
+          isActive: true,
+          schema: { fields: [] },
+          createdBy: 'user_456',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'template_2',
+          orgId: 'org_123',
+          name: 'EPA SWPPP',
+          category: 'EPA_SWPPP',
+          version: 1,
+          isActive: true,
+          schema: { fields: [] },
+          createdBy: 'user_456',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+
+      mockPrismaService.formTemplate.findMany.mockResolvedValue(templates);
+
+      const result = await service.getFormTemplates('org_123');
+
+      expect(result).toEqual(templates);
+      expect(mockPrismaService.formTemplate.findMany).toHaveBeenCalledWith({
+        where: { orgId: 'org_123' },
+        orderBy: { createdAt: 'desc' },
+        skip: undefined,
+        take: undefined,
+      });
+    });
+
+    it('should filter templates by category', async () => {
+      const templates = [
+        {
+          id: 'template_2',
+          orgId: 'org_123',
+          name: 'EPA SWPPP',
+          category: 'EPA_SWPPP',
+          version: 1,
+          isActive: true,
+          schema: { fields: [] },
+          createdBy: 'user_456',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+
+      mockPrismaService.formTemplate.findMany.mockResolvedValue(templates);
+
+      const result = await service.getFormTemplates('org_123', {
+        category: 'EPA_SWPPP',
+      });
+
+      expect(result).toEqual(templates);
+      expect(mockPrismaService.formTemplate.findMany).toHaveBeenCalledWith({
+        where: { orgId: 'org_123', category: 'EPA_SWPPP' },
+        orderBy: { createdAt: 'desc' },
+        skip: undefined,
+        take: undefined,
+      });
+    });
+
+    it('should filter templates by active status', async () => {
+      const templates = [
+        {
+          id: 'template_1',
+          orgId: 'org_123',
+          name: 'Active Template',
+          category: 'OSHA_SAFETY',
+          version: 1,
+          isActive: true,
+          schema: { fields: [] },
+          createdBy: 'user_456',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+
+      mockPrismaService.formTemplate.findMany.mockResolvedValue(templates);
+
+      const result = await service.getFormTemplates('org_123', { isActive: true });
+
+      expect(result).toEqual(templates);
+      expect(mockPrismaService.formTemplate.findMany).toHaveBeenCalledWith({
+        where: { orgId: 'org_123', isActive: true },
+        orderBy: { createdAt: 'desc' },
+        skip: undefined,
+        take: undefined,
+      });
+    });
+
+    it('should support pagination with skip and take', async () => {
+      const templates = [
+        {
+          id: 'template_11',
+          orgId: 'org_123',
+          name: 'Page 2 Item',
+          category: 'CUSTOM',
+          version: 1,
+          isActive: true,
+          schema: { fields: [] },
+          createdBy: 'user_456',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+
+      mockPrismaService.formTemplate.findMany.mockResolvedValue(templates);
+
+      const result = await service.getFormTemplates('org_123', { skip: 10, take: 10 });
+
+      expect(result).toEqual(templates);
+      expect(mockPrismaService.formTemplate.findMany).toHaveBeenCalledWith({
+        where: { orgId: 'org_123' },
+        orderBy: { createdAt: 'desc' },
+        skip: 10,
+        take: 10,
+      });
+    });
+
+    it('should combine all filters and pagination', async () => {
+      const templates = [];
+
+      mockPrismaService.formTemplate.findMany.mockResolvedValue(templates);
+
+      const result = await service.getFormTemplates('org_123', {
+        category: 'EPA_CGP',
+        isActive: false,
+        skip: 5,
+        take: 20,
+      });
+
+      expect(result).toEqual(templates);
+      expect(mockPrismaService.formTemplate.findMany).toHaveBeenCalledWith({
+        where: { orgId: 'org_123', category: 'EPA_CGP', isActive: false },
+        orderBy: { createdAt: 'desc' },
+        skip: 5,
+        take: 20,
+      });
+    });
   });
 
   describe('createFormTemplate', () => {
@@ -190,30 +342,6 @@ describe('FormsService', () => {
     });
   });
 
-  describe('getFormTemplates', () => {
-    it('should return only active templates for org', async () => {
-      const templates = [
-        { id: '1', name: 'Template 1', isActive: true },
-        { id: '2', name: 'Template 2', isActive: true },
-      ];
-
-      mockPrismaService.formTemplate.findMany.mockResolvedValue(templates);
-
-      const result = await service.getFormTemplates('org_123');
-
-      expect(result).toEqual(templates);
-      expect(mockPrismaService.formTemplate.findMany).toHaveBeenCalledWith({
-        where: {
-          orgId: 'org_123',
-          isActive: true,
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-      });
-    });
-  });
-
   describe('getFormTemplate', () => {
     it('should return template when found', async () => {
       const template = { id: '1', name: 'Template 1', orgId: 'org_123' };
@@ -228,17 +356,13 @@ describe('FormsService', () => {
     it('should throw NotFoundException when template not found', async () => {
       mockPrismaService.formTemplate.findFirst.mockResolvedValue(null);
 
-      await expect(service.getFormTemplate('999', 'org_123')).rejects.toThrow(
-        NotFoundException
-      );
+      await expect(service.getFormTemplate('999', 'org_123')).rejects.toThrow(NotFoundException);
     });
 
     it('should enforce orgId isolation', async () => {
       mockPrismaService.formTemplate.findFirst.mockResolvedValue(null);
 
-      await expect(service.getFormTemplate('1', 'wrong_org')).rejects.toThrow(
-        NotFoundException
-      );
+      await expect(service.getFormTemplate('1', 'wrong_org')).rejects.toThrow(NotFoundException);
 
       expect(mockPrismaService.formTemplate.findFirst).toHaveBeenCalledWith({
         where: {
