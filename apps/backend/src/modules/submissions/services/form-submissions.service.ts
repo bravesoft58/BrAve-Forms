@@ -200,6 +200,74 @@ export class FormSubmissionsService {
     });
   }
 
+  async approve(id: string, orgId: string, userId: string) {
+    const submission = await this.prisma.formSubmission.findFirst({
+      where: { id, orgId },
+    });
+
+    if (!submission) {
+      throw new NotFoundException('Form submission not found');
+    }
+
+    const currentStatus = this.mapFromFormStatus(submission.status);
+    if (currentStatus !== FormSubmissionStatus.SUBMITTED) {
+      throw new BadRequestException(
+        `Cannot approve submission with status ${currentStatus}. Only SUBMITTED forms can be approved.`
+      );
+    }
+
+    return this.prisma.formSubmission.update({
+      where: { id },
+      data: {
+        status: FormStatus.APPROVED,
+        reviewedAt: new Date(),
+        reviewedBy: userId,
+      },
+      include: {
+        template: true,
+        project: true,
+        inspection: true,
+      },
+    });
+  }
+
+  async reject(id: string, notes: string, orgId: string, userId: string) {
+    const submission = await this.prisma.formSubmission.findFirst({
+      where: { id, orgId },
+    });
+
+    if (!submission) {
+      throw new NotFoundException('Form submission not found');
+    }
+
+    const currentStatus = this.mapFromFormStatus(submission.status);
+    if (currentStatus !== FormSubmissionStatus.SUBMITTED) {
+      throw new BadRequestException(
+        `Cannot reject submission with status ${currentStatus}. Only SUBMITTED forms can be rejected.`
+      );
+    }
+
+    const notesValidation = this.validationService.validateRejectionNotes(notes);
+    if (!notesValidation.isValid) {
+      throw new BadRequestException(notesValidation.errors.join(', '));
+    }
+
+    return this.prisma.formSubmission.update({
+      where: { id },
+      data: {
+        status: FormStatus.REJECTED,
+        reviewNotes: notes,
+        reviewedAt: new Date(),
+        reviewedBy: userId,
+      },
+      include: {
+        template: true,
+        project: true,
+        inspection: true,
+      },
+    });
+  }
+
   async delete(id: string, orgId: string) {
     const existing = await this.prisma.formSubmission.findFirst({
       where: { id, orgId },

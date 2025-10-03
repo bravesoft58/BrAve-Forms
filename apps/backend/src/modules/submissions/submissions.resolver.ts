@@ -88,6 +88,23 @@ export class FormSubmissionsResolver {
     });
   }
 
+  @Mutation(() => String)
+  async approveFormSubmission(
+    @Args('id', { type: () => ID }) id: string,
+    @CurrentUser() user: ClerkUser
+  ) {
+    return this.submissionsService.approve(id, user.orgId, user.userId);
+  }
+
+  @Mutation(() => String)
+  async rejectFormSubmission(
+    @Args('id', { type: () => ID }) id: string,
+    @Args('notes') notes: string,
+    @CurrentUser() user: ClerkUser
+  ) {
+    return this.submissionsService.reject(id, notes, user.orgId, user.userId);
+  }
+
   @Mutation(() => Boolean)
   async deleteFormSubmission(
     @Args('id', { type: () => ID }) id: string,

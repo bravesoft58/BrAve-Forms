@@ -120,6 +120,23 @@ mutation RejectSubmission {
 - `form-submissions.service.ts` (add approve/reject methods)
 - `form-submissions.resolver.ts` (add mutations)
 
+## Verification Checklist
+
+- [x] approveFormSubmission mutation implemented
+- [x] rejectFormSubmission mutation implemented
+- [x] Status transition logic enforced
+- [x] Rejection notes validation working
+- [x] Type-check passing
+- [x] Build successful
+
+## Status: COMPLETE (2025-10-03)
+
+**Evidence:** [COMPLETION-REPORT.md](../evidence/ISSUE-067/COMPLETION-REPORT.md)
+
+**Time Spent:** 2 hours (matches estimate)
+
+**Summary:** Added approve() and reject() methods to FormSubmissionsService with status validation and audit trail tracking. Created GraphQL mutations with ClerkAuthGuard authentication. All quality gates passing.
+
 ## Time Estimate: 2 hours
 
 ## Next Issue
