@@ -61,4 +61,4 @@ ENV NODE_PATH=/app/node_modules/.pnpm/node_modules:/app/node_modules
 
 # Start the application (maintain workspace structure)
 WORKDIR /app/apps/backend
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/apps/backend/src/main.js"]

@@ -1,17 +1,42 @@
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, InputType, Field } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { ClerkAuthGuard } from '@/modules/auth/guards/clerk-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
-import {
-  FormSubmissionsService,
-  CreateFormSubmissionInput,
-  UpdateFormSubmissionInput,
-} from './services/form-submissions.service';
+import { GraphQLJSON } from 'graphql-type-json';
+import { FormSubmissionsService } from './services/form-submissions.service';
+import { FormSubmissionStatus } from '@brave-forms/types';
 
 interface ClerkUser {
   userId: string;
   orgId: string;
   role: string;
+}
+
+@InputType()
+class CreateFormSubmissionInput {
+  @Field()
+  templateId: string;
+
+  @Field({ nullable: true })
+  inspectionId?: string;
+
+  @Field({ nullable: true })
+  projectId?: string;
+
+  @Field(() => GraphQLJSON)
+  data: Record<string, unknown>;
+}
+
+@InputType()
+class UpdateFormSubmissionInput {
+  @Field(() => GraphQLJSON, { nullable: true })
+  data?: Record<string, unknown>;
+
+  @Field({ nullable: true })
+  status?: FormSubmissionStatus;
+
+  @Field({ nullable: true })
+  reviewNotes?: string;
 }
 
 @Resolver('FormSubmission')
