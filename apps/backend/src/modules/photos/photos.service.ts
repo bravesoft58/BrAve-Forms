@@ -106,6 +106,42 @@ export class PhotosService {
     return photo;
   }
 
+  async getPhotosByProject(
+    projectId: string,
+    orgId: string,
+    filters?: {
+      startDate?: Date;
+      endDate?: Date;
+      hasGps?: boolean;
+      take?: number;
+      skip?: number;
+    }
+  ) {
+    const where: any = { orgId };
+
+    if (filters?.startDate || filters?.endDate) {
+      where.takenAt = {};
+      if (filters.startDate) where.takenAt.gte = filters.startDate;
+      if (filters.endDate) where.takenAt.lte = filters.endDate;
+    }
+
+    if (filters?.hasGps) {
+      where.latitude = { not: null };
+      where.longitude = { not: null };
+    }
+
+    where.inspection = {
+      projectId,
+    };
+
+    return this.prisma.photo.findMany({
+      where,
+      orderBy: { takenAt: 'desc' },
+      take: filters?.take,
+      skip: filters?.skip,
+    });
+  }
+
   async deletePhoto(id: string, orgId: string) {
     const photo = await this.getPhoto(id, orgId);
 

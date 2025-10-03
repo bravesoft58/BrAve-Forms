@@ -23,6 +23,25 @@ export class PhotosResolver {
     return this.photosService.getPhoto(id, user.orgId);
   }
 
+  @Query(() => [Photo])
+  async photosByProject(
+    @Args('projectId') projectId: string,
+    @Args('startDate', { nullable: true }) startDate?: Date,
+    @Args('endDate', { nullable: true }) endDate?: Date,
+    @Args('hasGps', { nullable: true }) hasGps?: boolean,
+    @Args('take', { nullable: true }) take?: number,
+    @Args('skip', { nullable: true }) skip?: number,
+    @CurrentUser() user?: any
+  ): Promise<Photo[]> {
+    return this.photosService.getPhotosByProject(projectId, user.orgId, {
+      startDate,
+      endDate,
+      hasGps,
+      take,
+      skip,
+    });
+  }
+
   @Mutation(() => Boolean)
   async deletePhoto(@Args('id') id: string, @CurrentUser() user: any): Promise<boolean> {
     await this.photosService.deletePhoto(id, user.orgId);
