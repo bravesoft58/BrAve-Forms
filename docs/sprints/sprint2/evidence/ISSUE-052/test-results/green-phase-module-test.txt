@@ -1,0 +1,33 @@
+
+> @brave-forms/backend@1.0.0 test E:\BrAve Forms\apps\backend
+> jest "forms.module.spec.ts"
+
+FAIL src/modules/forms/forms.module.spec.ts
+  ● Test suite failed to run
+
+    Cannot find module '@/modules/auth/guards/clerk-auth.guard' from 'modules/forms/forms.resolver.ts'
+
+    Require stack:
+      modules/forms/forms.resolver.ts
+      modules/forms/forms.module.ts
+      modules/forms/forms.module.spec.ts
+
+    [0m [90m 1 |[39m [36mimport[39m { [33mResolver[39m[33m,[39m [33mQuery[39m[33m,[39m [33mMutation[39m[33m,[39m [33mArgs[39m[33m,[39m [33mContext[39m[33m,[39m [33mObjectType[39m[33m,[39m [33mField[39m[33m,[39m [33mID[39m[33m,[39m [33mInputType[39m[33m,[39m registerEnumType } [36mfrom[39m [32m'@nestjs/graphql'[39m[33m;[39m
+     [90m 2 |[39m [36mimport[39m { [33mUseGuards[39m } [36mfrom[39m [32m'@nestjs/common'[39m[33m;[39m
+    [31m[1m>[22m[39m[90m 3 |[39m [36mimport[39m { [33mClerkAuthGuard[39m } [36mfrom[39m [32m'@/modules/auth/guards/clerk-auth.guard'[39m[33m;[39m
+     [90m   |[39m [31m[1m^[22m[39m
+     [90m 4 |[39m [36mimport[39m { [33mCurrentUser[39m } [36mfrom[39m [32m'@/common/decorators/current-user.decorator'[39m[33m;[39m
+     [90m 5 |[39m [36mimport[39m { [33mFormsService[39m } [36mfrom[39m [32m'./forms.service'[39m[33m;[39m
+     [90m 6 |[39m [36mimport[39m { [33mGraphQLJSON[39m } [36mfrom[39m [32m'graphql-type-json'[39m[33m;[39m[0m
+
+      at Resolver._throwModNotFoundError (../../../node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (modules/forms/forms.resolver.ts:3:1)
+      at Object.<anonymous> (modules/forms/forms.module.ts:2:1)
+      at Object.<anonymous> (modules/forms/forms.module.spec.ts:2:1)
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        3.176 s
+Ran all test suites matching /forms.module.spec.ts/i.
+ ELIFECYCLE  Test failed. See above for more details.

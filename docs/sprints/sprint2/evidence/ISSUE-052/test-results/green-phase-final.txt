@@ -1,0 +1,60 @@
+      at TestingInstanceLoader.createInstancesOfDependencies (../../../node_modules/@nestjs/testing/testing-instance-loader.js:9:9)
+      at TestingModuleBuilder.createInstancesOfDependencies (../../../node_modules/@nestjs/testing/testing-module.builder.js:118:9)
+      at TestingModuleBuilder.compile (../../../node_modules/@nestjs/testing/testing-module.builder.js:74:9)
+      at Object.<anonymous> (modules/forms/forms.module.spec.ts:11:14)
+
+  ● FormsModule › FormsResolver › should have deleteFormTemplate mutation
+
+    Nest can't resolve dependencies of the PrismaService (?). Please make sure that the argument ConfigService at index [0] is available in the DatabaseModule context.
+
+    Potential solutions:
+    - Is DatabaseModule a valid NestJS module?
+    - If ConfigService is a provider, is it part of the current DatabaseModule?
+    - If ConfigService is exported from a separate @Module, is that module imported within DatabaseModule?
+      @Module({
+        imports: [ /* the Module containing ConfigService */ ]
+      })
+
+    [0m [90m  9 |[39m
+     [90m 10 |[39m   beforeEach([36masync[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 11 |[39m     module [33m=[39m [36mawait[39m [33mTest[39m[33m.[39mcreateTestingModule({
+     [90m    |[39m              [31m[1m^[22m[39m
+     [90m 12 |[39m       imports[33m:[39m [[33mFormsModule[39m[33m,[39m [33mDatabaseModule[39m][33m,[39m
+     [90m 13 |[39m     })[33m.[39mcompile()[33m;[39m
+     [90m 14 |[39m   })[33m;[39m[0m
+
+      at TestingInjector.lookupComponentInParentModules (../../../node_modules/@nestjs/core/injector/injector.js:262:19)
+      at TestingInjector.resolveComponentInstance (../../../node_modules/@nestjs/core/injector/injector.js:215:33)
+      at TestingInjector.resolveComponentInstance (../../../node_modules/@nestjs/testing/testing-injector.js:19:45)
+      at resolveParam (../../../node_modules/@nestjs/core/injector/injector.js:129:38)
+          at async Promise.all (index 0)
+      at TestingInjector.resolveConstructorParams (../../../node_modules/@nestjs/core/injector/injector.js:144:27)
+      at TestingInjector.loadInstance (../../../node_modules/@nestjs/core/injector/injector.js:70:13)
+      at TestingInjector.loadProvider (../../../node_modules/@nestjs/core/injector/injector.js:98:9)
+      at TestingInjector.lookupComponentInImports (../../../node_modules/@nestjs/core/injector/injector.js:297:17)
+      at TestingInjector.lookupComponentInParentModules (../../../node_modules/@nestjs/core/injector/injector.js:260:33)
+      at TestingInjector.resolveComponentInstance (../../../node_modules/@nestjs/core/injector/injector.js:215:33)
+      at TestingInjector.resolveComponentInstance (../../../node_modules/@nestjs/testing/testing-injector.js:19:45)
+      at resolveParam (../../../node_modules/@nestjs/core/injector/injector.js:129:38)
+          at async Promise.all (index 0)
+      at TestingInjector.resolveConstructorParams (../../../node_modules/@nestjs/core/injector/injector.js:144:27)
+      at TestingInjector.loadInstance (../../../node_modules/@nestjs/core/injector/injector.js:70:13)
+      at TestingInjector.loadProvider (../../../node_modules/@nestjs/core/injector/injector.js:98:9)
+      at ../../../node_modules/@nestjs/core/injector/instance-loader.js:56:13
+          at async Promise.all (index 4)
+      at TestingInstanceLoader.createInstancesOfProviders (../../../node_modules/@nestjs/core/injector/instance-loader.js:55:9)
+      at ../../../node_modules/@nestjs/core/injector/instance-loader.js:40:13
+          at async Promise.all (index 2)
+      at TestingInstanceLoader.createInstances (../../../node_modules/@nestjs/core/injector/instance-loader.js:39:9)
+      at TestingInstanceLoader.createInstancesOfDependencies (../../../node_modules/@nestjs/core/injector/instance-loader.js:22:13)
+      at TestingInstanceLoader.createInstancesOfDependencies (../../../node_modules/@nestjs/testing/testing-instance-loader.js:9:9)
+      at TestingModuleBuilder.createInstancesOfDependencies (../../../node_modules/@nestjs/testing/testing-module.builder.js:118:9)
+      at TestingModuleBuilder.compile (../../../node_modules/@nestjs/testing/testing-module.builder.js:74:9)
+      at Object.<anonymous> (modules/forms/forms.module.spec.ts:11:14)
+
+Test Suites: 1 failed, 1 total
+Tests:       8 failed, 8 total
+Snapshots:   0 total
+Time:        3.543 s
+Ran all test suites matching /forms.module.spec.ts/i.
+ ELIFECYCLE  Test failed. See above for more details.

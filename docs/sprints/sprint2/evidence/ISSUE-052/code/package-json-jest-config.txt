@@ -1,0 +1,18 @@
+diff --git a/apps/backend/package.json b/apps/backend/package.json
+index 35139cd..c82c626 100644
+--- a/apps/backend/package.json
++++ b/apps/backend/package.json
+@@ -98,6 +98,12 @@
+       "**/*.(t|j)s"
+     ],
+     "coverageDirectory": "../coverage",
+-    "testEnvironment": "node"
++    "testEnvironment": "node",
++    "moduleNameMapper": {
++      "^@/(.*)$": "<rootDir>/$1",
++      "^@modules/(.*)$": "<rootDir>/modules/$1",
++      "^@common/(.*)$": "<rootDir>/common/$1",
++      "^@config/(.*)$": "<rootDir>/config/$1"
++    }
+   }
+ }

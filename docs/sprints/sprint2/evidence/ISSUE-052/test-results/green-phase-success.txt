@@ -1,0 +1,28 @@
+
+> @brave-forms/backend@1.0.0 test E:\BrAve Forms\apps\backend
+> jest "forms.module.spec.ts"
+
+PASS src/modules/forms/forms.module.spec.ts
+  FormsModule Configuration
+    √ should export FormsResolver (2 ms)
+    √ should export FormsService
+    √ should export FormsModule
+  GraphQL Types
+    √ should export FormTemplate ObjectType
+    √ should export FormSubmission ObjectType
+    √ should export CreateFormTemplateInput (1 ms)
+    √ should export UpdateFormTemplateInput
+    √ should export FormCategory enum
+    √ should export FormStatus enum
+  FormsResolver Methods
+    √ should have formTemplates query method
+    √ should have formTemplate query method
+    √ should have createFormTemplate mutation method
+    √ should have updateFormTemplate mutation method
+    √ should have deleteFormTemplate mutation method
+
+Test Suites: 1 passed, 1 total
+Tests:       14 passed, 14 total
+Snapshots:   0 total
+Time:        2.348 s, estimated 3 s
+Ran all test suites matching /forms.module.spec.ts/i.

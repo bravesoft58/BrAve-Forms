@@ -1,0 +1,231 @@
+diff --git a/apps/backend/src/modules/forms/forms.resolver.ts b/apps/backend/src/modules/forms/forms.resolver.ts
+index dbacefd..dd0dedb 100644
+--- a/apps/backend/src/modules/forms/forms.resolver.ts
++++ b/apps/backend/src/modules/forms/forms.resolver.ts
+@@ -1,26 +1,19 @@
+-import { Resolver, Query, Mutation, Args, Context, ObjectType, Field, ID, InputType, registerEnumType } from '@nestjs/graphql';
++import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+ import { UseGuards } from '@nestjs/common';
+ import { ClerkAuthGuard } from '@/modules/auth/guards/clerk-auth.guard';
+ import { CurrentUser } from '@/common/decorators/current-user.decorator';
+ import { FormsService } from './forms.service';
+-import { GraphQLJSON } from 'graphql-type-json';
+-
+-import { FormCategory as PrismaFormCategory, FormStatus as PrismaFormStatus } from '@prisma/client';
+-
+-// Re-export Prisma enums for GraphQL
+-export const FormCategory = PrismaFormCategory;
+-export type FormCategory = PrismaFormCategory;
+-
+-export const FormStatus = PrismaFormStatus;
+-export type FormStatus = PrismaFormStatus;
+-
+-registerEnumType(FormCategory, {
+-  name: 'FormCategory',
+-});
+-
+-registerEnumType(FormStatus, {
+-  name: 'FormStatus',
+-});
++import {
++  FormTemplate,
++  FormSubmission,
++  ComplianceValidation,
++  CreateFormTemplateInput,
++  UpdateFormTemplateInput,
++  CreateFormSubmissionInput,
++  UpdateFormSubmissionInput,
++  FormCategory,
++  FormStatus,
++} from './forms.types';
+ 
+ @Resolver()
+ @UseGuards(ClerkAuthGuard)
+@@ -158,186 +151,4 @@ export class FormsResolver {
+   ): Promise<ComplianceValidation> {
+     return this.formsService.validateEpaCompliance(submissionId, user.orgId);
+   }
+-}
+-
+-// Supporting Types for GraphQL Schema
+-
+-@ObjectType()
+-export class FormTemplate {
+-  @Field(() => ID)
+-  id: string;
+-
+-  @Field()
+-  orgId: string;
+-
+-  @Field()
+-  name: string;
+-
+-  @Field({ nullable: true })
+-  description?: string;
+-
+-  @Field(() => FormCategory)
+-  category: FormCategory;
+-
+-  @Field()
+-  version: number;
+-
+-  @Field()
+-  isActive: boolean;
+-
+-  @Field(() => GraphQLJSON)
+-  schema: any;
+-
+-  @Field(() => GraphQLJSON, { nullable: true })
+-  compliance?: any;
+-
+-  @Field()
+-  createdBy: string;
+-
+-  @Field()
+-  createdAt: Date;
+-
+-  @Field()
+-  updatedAt: Date;
+-}
+-
+-@ObjectType()
+-export class FormSubmission {
+-  @Field(() => ID)
+-  id: string;
+-
+-  @Field()
+-  orgId: string;
+-
+-  @Field()
+-  templateId: string;
+-
+-  @Field({ nullable: true })
+-  inspectionId?: string;
+-
+-  @Field({ nullable: true })
+-  projectId?: string;
+-
+-  @Field()
+-  submittedBy: string;
+-
+-  @Field(() => FormStatus)
+-  status: FormStatus;
+-
+-  @Field(() => GraphQLJSON)
+-  data: any;
+-
+-  @Field(() => GraphQLJSON, { nullable: true })
+-  metadata?: any;
+-
+-  @Field()
+-  offlineCreated: boolean;
+-
+-  @Field({ nullable: true })
+-  submittedAt?: Date;
+-
+-  @Field({ nullable: true })
+-  reviewedBy?: string;
+-
+-  @Field({ nullable: true })
+-  reviewedAt?: Date;
+-
+-  @Field({ nullable: true })
+-  reviewNotes?: string;
+-
+-  @Field()
+-  createdAt: Date;
+-
+-  @Field()
+-  updatedAt: Date;
+-
+-  @Field(() => FormTemplate)
+-  template: FormTemplate;
+-}
+-
+-@ObjectType()
+-export class ComplianceValidation {
+-  @Field()
+-  isCompliant: boolean;
+-
+-  @Field(() => [String])
+-  violations: string[];
+-
+-  @Field(() => [String])
+-  warnings: string[];
+-
+-  @Field(() => [String])
+-  recommendations: string[];
+-}
+-
+-@InputType()
+-export class CreateFormTemplateInput {
+-  @Field()
+-  name: string;
+-
+-  @Field({ nullable: true })
+-  description?: string;
+-
+-  @Field(() => FormCategory)
+-  category: FormCategory;
+-
+-  @Field(() => GraphQLJSON)
+-  schema: any;
+-
+-  @Field(() => GraphQLJSON, { nullable: true })
+-  compliance?: any;
+-}
+-
+-@InputType()
+-export class UpdateFormTemplateInput {
+-  @Field({ nullable: true })
+-  name?: string;
+-
+-  @Field({ nullable: true })
+-  description?: string;
+-
+-  @Field(() => GraphQLJSON, { nullable: true })
+-  schema?: any;
+-
+-  @Field(() => GraphQLJSON, { nullable: true })
+-  compliance?: any;
+-
+-  @Field({ nullable: true })
+-  isActive?: boolean;
+-}
+-
+-@InputType()
+-export class CreateFormSubmissionInput {
+-  @Field()
+-  templateId: string;
+-
+-  @Field({ nullable: true })
+-  inspectionId?: string;
+-
+-  @Field({ nullable: true })
+-  projectId?: string;
+-
+-  @Field(() => GraphQLJSON)
+-  data: any;
+-
+-  @Field(() => GraphQLJSON, { nullable: true })
+-  metadata?: any;
+-
+-  @Field({ nullable: true })
+-  offlineCreated?: boolean;
+-}
+-
+-@InputType()
+-export class UpdateFormSubmissionInput {
+-  @Field(() => GraphQLJSON, { nullable: true })
+-  data?: any;
+-
+-  @Field(() => GraphQLJSON, { nullable: true })
+-  metadata?: any;
+-
+-  @Field(() => FormStatus, { nullable: true })
+-  status?: FormStatus;
+-
+-  @Field({ nullable: true })
+-  reviewNotes?: string;
+ }
+\ No newline at end of file
