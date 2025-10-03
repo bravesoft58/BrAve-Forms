@@ -1,0 +1,14 @@
+
+> @brave-forms/backend@1.0.0 test E:\BrAve Forms\apps\backend
+> jest "photos"
+
+PASS src/modules/photos/exif.service.spec.ts
+PASS src/modules/photos/storage.service.spec.ts
+PASS src/modules/photos/photos.service.spec.ts
+PASS src/modules/photos/photos.integration.spec.ts
+
+Test Suites: 4 passed, 4 total
+Tests:       41 passed, 41 total
+Snapshots:   0 total
+Time:        4.408 s
+Ran all test suites matching /photos/i.

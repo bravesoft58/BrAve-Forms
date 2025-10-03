@@ -1,0 +1,123 @@
+
+> @brave-forms/backend@1.0.0 test:cov E:\BrAve Forms\apps\backend
+> jest --coverage "photos"
+
+PASS src/modules/photos/exif.service.spec.ts
+PASS src/modules/photos/storage.service.spec.ts
+PASS src/modules/photos/photos.service.spec.ts
+PASS src/modules/photos/photos.integration.spec.ts
+-----------------------------------|---------|----------|---------|---------|-------------------
+File                               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-----------------------------------|---------|----------|---------|---------|-------------------
+All files                          |     3.4 |     6.77 |    2.68 |    3.38 |                   
+ src                               |       0 |        0 |       0 |       0 |                   
+  app.module.ts                    |       0 |        0 |       0 |       0 | 1-69              
+  main.ts                          |       0 |      100 |       0 |       0 | 1-40              
+ src/common/cache                  |       0 |        0 |       0 |       0 |                   
+  redis.service.ts                 |       0 |        0 |       0 |       0 | 1-578             
+ src/common/decorators             |       0 |      100 |       0 |       0 |                   
+  current-user.decorator.ts        |       0 |      100 |       0 |       0 | 1-19              
+  roles.decorator.ts               |       0 |      100 |       0 |       0 | 1-52              
+ src/common/guards                 |       0 |        0 |       0 |       0 |                   
+  roles.guard.ts                   |       0 |        0 |       0 |       0 | 1-119             
+ src/common/middleware             |       0 |        0 |       0 |       0 |                   
+  performance.middleware.ts        |       0 |        0 |       0 |       0 | 1-376             
+ src/modules/auth                  |       0 |      100 |       0 |       0 |                   
+  auth.module.ts                   |       0 |      100 |     100 |       0 | 1-20              
+  auth.resolver.ts                 |       0 |      100 |       0 |       0 | 1-6               
+  auth.service.ts                  |       0 |      100 |     100 |       0 | 1-4               
+ src/modules/auth/guards           |       0 |        0 |       0 |       0 |                   
+  clerk-auth.guard.ts              |       0 |        0 |       0 |       0 | 1-27              
+  roles.guard.ts                   |       0 |        0 |       0 |       0 | 1-84              
+ src/modules/auth/strategies       |       0 |        0 |       0 |       0 |                   
+  clerk.strategy.ts                |       0 |        0 |       0 |       0 | 1-140             
+ src/modules/compliance            |       0 |      100 |       0 |       0 |                   
+  compliance.module.ts             |       0 |      100 |     100 |       0 | 1-7               
+  compliance.resolver.ts           |       0 |      100 |       0 |       0 | 1-6               
+  compliance.service.ts            |       0 |      100 |     100 |       0 | 1-4               
+ src/modules/database              |   13.33 |        0 |       0 |      10 |                   
+  database.module.ts               |       0 |      100 |     100 |       0 | 1-9               
+  prisma.service.ts                |      15 |        0 |       0 |   10.81 | 7-88              
+ src/modules/forms                 |       0 |        0 |       0 |       0 |                   
+  forms.module.ts                  |       0 |      100 |     100 |       0 | 1-12              
+  forms.resolver.ts                |       0 |        0 |       0 |       0 | 1-158             
+  forms.service.ts                 |       0 |        0 |       0 |       0 | 1-484             
+  forms.types.ts                   |       0 |      100 |       0 |       0 | 1-201             
+  forms.validation.ts              |       0 |        0 |       0 |       0 | 1-455             
+ src/modules/health                |       0 |      100 |       0 |       0 |                   
+  health.module.ts                 |       0 |      100 |     100 |       0 | 1-7               
+  health.resolver.ts               |       0 |      100 |       0 |       0 | 1-6               
+  health.service.ts                |       0 |      100 |     100 |       0 | 1-4               
+ src/modules/inspections           |       0 |      100 |       0 |       0 |                   
+  inspections.module.ts            |       0 |      100 |     100 |       0 | 1-7               
+  inspections.resolver.ts          |       0 |      100 |       0 |       0 | 1-6               
+  inspections.service.ts           |       0 |      100 |     100 |       0 | 1-4               
+ src/modules/notifications         |       0 |      100 |       0 |       0 |                   
+  notifications.module.ts          |       0 |      100 |     100 |       0 | 1-11              
+  notifications.resolver.ts        |       0 |      100 |       0 |       0 | 1-6               
+  notifications.service.ts         |       0 |      100 |       0 |       0 | 1-18              
+ src/modules/organization          |       0 |        0 |       0 |       0 |                   
+  organization.module.ts           |       0 |      100 |     100 |       0 | 1-11              
+  organization.resolver.ts         |       0 |        0 |       0 |       0 | 1-123             
+  organization.service.ts          |       0 |        0 |       0 |       0 | 1-362             
+ src/modules/organizations         |       0 |        0 |       0 |       0 |                   
+  organizations.module.ts          |       0 |      100 |     100 |       0 | 1-11              
+  organizations.resolver.ts        |       0 |        0 |       0 |       0 | 1-552             
+  organizations.service.ts         |       0 |        0 |       0 |       0 | 1-394             
+ src/modules/photos                |   58.22 |       98 |   51.85 |   59.15 |                   
+  exif.service.ts                  |     100 |      100 |     100 |     100 |                   
+  photos.module.ts                 |       0 |      100 |     100 |       0 | 1-14              
+  photos.resolver.ts               |       0 |      100 |       0 |       0 | 1-48              
+  photos.service.ts                |     100 |     92.3 |     100 |     100 | 40                
+  photos.types.ts                  |       0 |      100 |       0 |       0 | 1-71              
+  storage.service.ts               |     100 |      100 |     100 |     100 |                   
+ src/modules/projects              |       0 |        0 |       0 |       0 |                   
+  projects.module.ts               |       0 |      100 |     100 |       0 | 1-7               
+  projects.resolver.ts             |       0 |        0 |       0 |       0 | 1-380             
+  projects.service.ts              |       0 |        0 |       0 |       0 | 1-300             
+ src/modules/queue                 |       0 |      100 |       0 |       0 |                   
+  queue.module.ts                  |       0 |      100 |     100 |       0 | 1-7               
+  queue.resolver.ts                |       0 |      100 |       0 |       0 | 1-6               
+  queue.service.ts                 |       0 |      100 |     100 |       0 | 1-4               
+ src/modules/reports               |       0 |      100 |       0 |       0 |                   
+  reports.module.ts                |       0 |      100 |     100 |       0 | 1-7               
+  reports.resolver.ts              |       0 |      100 |       0 |       0 | 1-6               
+  reports.service.ts               |       0 |      100 |     100 |       0 | 1-4               
+ src/modules/storage               |       0 |        0 |       0 |       0 |                   
+  photo-storage.service.ts         |       0 |        0 |       0 |       0 | 7-519             
+  storage.module.ts                |       0 |      100 |     100 |       0 | 1-12              
+  storage.resolver.ts              |       0 |      100 |       0 |       0 | 1-20              
+  storage.service.ts               |       0 |        0 |       0 |       0 | 1-32              
+ src/modules/submissions           |       0 |      100 |       0 |       0 |                   
+  submissions.module.ts            |       0 |      100 |     100 |       0 | 1-18              
+  submissions.resolver.ts          |       0 |      100 |       0 |       0 | 1-71              
+ src/modules/submissions/services  |       0 |        0 |       0 |       0 |                   
+  form-submissions.service.ts      |       0 |        0 |       0 |       0 | 1-246             
+  submission-validation.service.ts |       0 |        0 |       0 |       0 | 1-126             
+ src/modules/users                 |       0 |      100 |       0 |       0 |                   
+  users.module.ts                  |       0 |      100 |     100 |       0 | 1-7               
+  users.resolver.ts                |       0 |      100 |       0 |       0 | 1-40              
+  users.service.ts                 |       0 |      100 |     100 |       0 | 1-4               
+ src/modules/weather               |       0 |        0 |       0 |       0 |                   
+  weather-monitoring.service.ts    |       0 |        0 |       0 |       0 | 1-111             
+  weather.integration.test.ts      |       0 |        0 |       0 |       0 | 7-226             
+  weather.module.ts                |       0 |      100 |       0 |       0 | 1-24              
+  weather.resolver.ts              |       0 |      100 |       0 |       0 | 1-173             
+  weather.service.ts               |       0 |        0 |       0 |       0 | 1-238             
+ src/modules/weather/providers     |       0 |        0 |       0 |       0 |                   
+  noaa.service.ts                  |       0 |        0 |       0 |       0 | 1-359             
+  openweathermap.service.ts        |       0 |        0 |       0 |       0 | 1-48              
+ src/modules/weather/utils         |       0 |        0 |       0 |       0 |                   
+  inspection.utils.ts              |       0 |        0 |       0 |       0 | 53-81             
+  precipitation.utils.ts           |       0 |        0 |       0 |       0 | 28-256            
+ src/modules/webhooks              |       0 |        0 |       0 |       0 |                   
+  clerk-webhook.controller.ts      |       0 |      100 |       0 |       0 | 1-21              
+  clerk-webhook.service.ts         |       0 |        0 |       0 |       0 | 1-251             
+  webhooks.module.ts               |       0 |      100 |     100 |       0 | 1-11              
+-----------------------------------|---------|----------|---------|---------|-------------------
+
+Test Suites: 4 passed, 4 total
+Tests:       41 passed, 41 total
+Snapshots:   0 total
+Time:        19.267 s
+Ran all test suites matching /photos/i.
