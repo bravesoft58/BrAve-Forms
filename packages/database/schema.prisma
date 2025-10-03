@@ -93,21 +93,34 @@ model Photo {
   id           String       @id @default(uuid())
   orgId        String       @map("org_id")
   inspectionId String       @map("inspection_id")
-  s3Key        String       @map("s3_key")
+  s3Key        String?      @map("s3_key")
   thumbnailKey String?      @map("thumbnail_key")
+  imageData    Bytes?       @map("image_data")
   latitude     Float?
   longitude    Float?
+  altitude     Float?
   takenAt      DateTime     @map("taken_at")
   caption      String?
   fileSize     Int          @map("file_size")
   mimeType     String       @map("mime_type")
+  storageType  StorageType  @default(S3) @map("storage_type")
+  deviceModel  String?      @map("device_model")
+  deviceMake   String?      @map("device_make")
+  exifData     Json?        @map("exif_data")
+  uploadedBy   String       @map("uploaded_by")
   uploadedAt   DateTime     @default(now()) @map("uploaded_at")
   inspection   Inspection   @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
   @@index([orgId])
   @@index([inspectionId])
+  @@index([storageType])
   @@map("photos")
+}
+
+enum StorageType {
+  POSTGRESQL
+  S3
 }
 
 model WeatherEvent {
