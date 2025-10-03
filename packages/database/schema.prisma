@@ -259,6 +259,7 @@ enum FormCategory {
 
 enum FormStatus {
   DRAFT
+  IN_PROGRESS
   SUBMITTED
   REVIEWED
   APPROVED
