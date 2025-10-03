@@ -1,11 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PhotosService } from './photos.service';
 import { PrismaService } from '@/modules/database/prisma.service';
+import { ExifService } from './exif.service';
+import { StorageService } from './storage.service';
 import { StorageType } from '@prisma/client';
 
 describe('PhotosService', () => {
   let service: PhotosService;
   let _prismaService: PrismaService;
+  let _exifService: ExifService;
+  let _storageService: StorageService;
 
   const mockPrismaService = {
     photo: {
@@ -16,6 +20,18 @@ describe('PhotosService', () => {
     },
   };
 
+  const mockExifService = {
+    extractExifData: jest.fn(),
+    extractFullExifMetadata: jest.fn(),
+    validateGpsCoordinates: jest.fn(),
+  };
+
+  const mockStorageService = {
+    compressImage: jest.fn(),
+    uploadToS3: jest.fn(),
+    processAndStorePhoto: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -24,11 +40,21 @@ describe('PhotosService', () => {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
+        {
+          provide: ExifService,
+          useValue: mockExifService,
+        },
+        {
+          provide: StorageService,
+          useValue: mockStorageService,
+        },
       ],
     }).compile();
 
     service = module.get<PhotosService>(PhotosService);
     _prismaService = module.get<PrismaService>(PrismaService);
+    _exifService = module.get<ExifService>(ExifService);
+    _storageService = module.get<StorageService>(StorageService);
   });
 
   afterEach(() => {
