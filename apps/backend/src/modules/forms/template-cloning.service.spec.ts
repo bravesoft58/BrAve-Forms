@@ -14,6 +14,7 @@ describe('TemplateCloningService', () => {
     formTemplateVersion: {
       create: jest.fn(),
     },
+    $transaction: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -72,6 +73,9 @@ describe('TemplateCloningService', () => {
         updatedAt: new Date(),
       };
 
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        return callback(mockPrisma);
+      });
       mockPrisma.formTemplate.findFirst.mockResolvedValue(sourceTemplate);
       mockPrisma.formTemplate.create.mockResolvedValue(clonedTemplate);
       mockPrisma.formTemplateVersion.create.mockResolvedValue({
@@ -87,7 +91,7 @@ describe('TemplateCloningService', () => {
       const result = await service.cloneTemplate(sourceTemplate.id, targetOrgId, targetUserId);
 
       expect(mockPrisma.formTemplate.findFirst).toHaveBeenCalledWith({
-        where: { id: sourceTemplate.id },
+        where: { id: sourceTemplate.id, orgId: targetOrgId },
       });
 
       expect(mockPrisma.formTemplate.create).toHaveBeenCalledWith({
@@ -353,6 +357,293 @@ describe('TemplateCloningService', () => {
           createdBy: userId,
         }),
       });
+    });
+  });
+
+  describe('Security: Multi-Tenant Isolation', () => {
+    it('should prevent cross-tenant template cloning (CRITICAL-1 fix)', async () => {
+      const differentOrgId = 'org-999';
+
+      // Mock: Template exists but belongs to different org
+      mockPrisma.formTemplate.findFirst
+        .mockResolvedValueOnce(null) // First call with orgId filter returns null
+        .mockResolvedValueOnce({ id: 'template-123', orgId: 'org-different' }); // Second call without orgId filter finds it
+
+      await expect(
+        service.cloneTemplate('template-123', differentOrgId, 'user-123')
+      ).rejects.toThrow('Cross-tenant template cloning is not permitted');
+
+      expect(mockPrisma.formTemplate.create).not.toHaveBeenCalled();
+    });
+
+    it('should allow same-org template cloning', async () => {
+      const sameOrgId = 'org-123';
+      const sourceTemplate = {
+        id: 'template-123',
+        orgId: sameOrgId,
+        name: 'Test Template',
+        description: 'Test',
+        category: 'CUSTOM' as any,
+        schema: { fields: [] },
+        compliance: null,
+        version: 1,
+        isActive: true,
+        createdBy: 'user-123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        return callback(mockPrisma);
+      });
+      mockPrisma.formTemplate.findFirst.mockResolvedValue(sourceTemplate);
+      mockPrisma.formTemplate.create.mockResolvedValue({ ...sourceTemplate, id: 'new-id' });
+      mockPrisma.formTemplateVersion.create.mockResolvedValue({});
+
+      await expect(
+        service.cloneTemplate('template-123', sameOrgId, 'user-123')
+      ).resolves.toBeDefined();
+
+      expect(mockPrisma.formTemplate.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('Offline Capability: Metadata Tracking (CRITICAL-2 fix)', () => {
+    it('should track offline created flag in changelog', async () => {
+      const sourceTemplate = {
+        id: 'template-123',
+        orgId: 'org-123',
+        name: 'Test Template',
+        description: 'Test',
+        category: 'CUSTOM' as any,
+        schema: { fields: [] },
+        compliance: null,
+        version: 1,
+        isActive: true,
+        createdBy: 'user-123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        return callback(mockPrisma);
+      });
+      mockPrisma.formTemplate.findFirst.mockResolvedValue(sourceTemplate);
+      mockPrisma.formTemplate.create.mockResolvedValue({ ...sourceTemplate, id: 'new-id' });
+      mockPrisma.formTemplateVersion.create.mockResolvedValue({});
+
+      await service.cloneTemplate('template-123', 'org-123', 'user-123', {
+        offlineCreated: true,
+      });
+
+      expect(mockPrisma.formTemplateVersion.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          changeLog: 'Cloned from template template-123 (offline)',
+        }),
+      });
+    });
+
+    it('should default to online created when flag not provided', async () => {
+      const sourceTemplate = {
+        id: 'template-123',
+        orgId: 'org-123',
+        name: 'Test Template',
+        description: 'Test',
+        category: 'CUSTOM' as any,
+        schema: { fields: [] },
+        compliance: null,
+        version: 1,
+        isActive: true,
+        createdBy: 'user-123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        return callback(mockPrisma);
+      });
+      mockPrisma.formTemplate.findFirst.mockResolvedValue(sourceTemplate);
+      mockPrisma.formTemplate.create.mockResolvedValue({ ...sourceTemplate, id: 'new-id' });
+      mockPrisma.formTemplateVersion.create.mockResolvedValue({});
+
+      await service.cloneTemplate('template-123', 'org-123', 'user-123');
+
+      expect(mockPrisma.formTemplateVersion.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          changeLog: 'Cloned from template template-123',
+        }),
+      });
+    });
+  });
+
+  describe('Compliance: EPA/OSHA Field Validation (CRITICAL-3 fix)', () => {
+    it('should prevent removal of required EPA compliance fields', async () => {
+      const epaTemplate = {
+        id: 'epa-template',
+        orgId: 'org-123',
+        name: 'EPA SWPPP Inspection',
+        description: 'EPA compliance form',
+        category: 'EPA_SWPPP' as any,
+        schema: {
+          fields: [
+            { id: 'rain_amount', type: 'number', label: 'Rain Amount (inches)', required: true },
+            { id: 'inspector_name', type: 'text', label: 'Inspector', required: true },
+          ],
+        },
+        compliance: {
+          regulation: 'EPA CGP 2022 Section 4.4',
+          requiredFields: ['rain_amount', 'inspector_name'],
+        },
+        version: 1,
+        isActive: true,
+        createdBy: 'user-123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const invalidSchema = {
+        fields: [
+          { id: 'inspector_name', type: 'text', label: 'Inspector', required: true },
+          // Missing rain_amount field - should trigger validation error
+        ],
+      };
+
+      mockPrisma.formTemplate.findFirst.mockResolvedValue(epaTemplate);
+
+      await expect(
+        service.cloneTemplate('epa-template', 'org-123', 'user-123', {
+          schema: invalidSchema,
+        })
+      ).rejects.toThrow('Cannot remove required compliance fields: rain_amount');
+
+      await expect(
+        service.cloneTemplate('epa-template', 'org-123', 'user-123', {
+          schema: invalidSchema,
+        })
+      ).rejects.toThrow('$50,000 per day');
+
+      expect(mockPrisma.formTemplate.create).not.toHaveBeenCalled();
+    });
+
+    it('should allow cloning EPA template with all required fields intact', async () => {
+      const epaTemplate = {
+        id: 'epa-template',
+        orgId: 'org-123',
+        name: 'EPA SWPPP Inspection',
+        description: 'EPA compliance form',
+        category: 'EPA_SWPPP' as any,
+        schema: {
+          fields: [
+            { id: 'rain_amount', type: 'number', label: 'Rain Amount (inches)', required: true },
+            { id: 'inspector_name', type: 'text', label: 'Inspector', required: true },
+          ],
+        },
+        compliance: {
+          regulation: 'EPA CGP 2022 Section 4.4',
+          requiredFields: ['rain_amount', 'inspector_name'],
+        },
+        version: 1,
+        isActive: true,
+        createdBy: 'user-123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const validSchema = {
+        fields: [
+          { id: 'rain_amount', type: 'number', label: 'Rain Amount (inches)', required: true },
+          { id: 'inspector_name', type: 'text', label: 'Inspector', required: true },
+          { id: 'custom_field', type: 'text', label: 'Custom Field', required: false },
+        ],
+      };
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        return callback(mockPrisma);
+      });
+      mockPrisma.formTemplate.findFirst.mockResolvedValue(epaTemplate);
+      mockPrisma.formTemplate.create.mockResolvedValue({ ...epaTemplate, id: 'new-id' });
+      mockPrisma.formTemplateVersion.create.mockResolvedValue({});
+
+      await expect(
+        service.cloneTemplate('epa-template', 'org-123', 'user-123', {
+          schema: validSchema,
+        })
+      ).resolves.toBeDefined();
+
+      expect(mockPrisma.formTemplate.create).toHaveBeenCalled();
+    });
+
+    it('should allow non-compliance templates without field validation', async () => {
+      const customTemplate = {
+        id: 'custom-template',
+        orgId: 'org-123',
+        name: 'Custom Form',
+        description: 'Non-compliance form',
+        category: 'CUSTOM' as any,
+        schema: {
+          fields: [
+            { id: 'field1', type: 'text', label: 'Field 1' },
+            { id: 'field2', type: 'text', label: 'Field 2' },
+          ],
+        },
+        compliance: null, // No compliance metadata
+        version: 1,
+        isActive: true,
+        createdBy: 'user-123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const customSchema = {
+        fields: [{ id: 'field1', type: 'text', label: 'Field 1' }], // Removed field2 - should be allowed
+      };
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        return callback(mockPrisma);
+      });
+      mockPrisma.formTemplate.findFirst.mockResolvedValue(customTemplate);
+      mockPrisma.formTemplate.create.mockResolvedValue({ ...customTemplate, id: 'new-id' });
+      mockPrisma.formTemplateVersion.create.mockResolvedValue({});
+
+      await expect(
+        service.cloneTemplate('custom-template', 'org-123', 'user-123', {
+          schema: customSchema,
+        })
+      ).resolves.toBeDefined();
+
+      expect(mockPrisma.formTemplate.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('Database Transaction: Atomicity (CRITICAL-4 fix)', () => {
+    it('should use transaction to ensure template and version created atomically', async () => {
+      const sourceTemplate = {
+        id: 'template-123',
+        orgId: 'org-123',
+        name: 'Test Template',
+        description: 'Test',
+        category: 'CUSTOM' as any,
+        schema: { fields: [] },
+        compliance: null,
+        version: 1,
+        isActive: true,
+        createdBy: 'user-123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        return callback(mockPrisma);
+      });
+      mockPrisma.formTemplate.findFirst.mockResolvedValue(sourceTemplate);
+      mockPrisma.formTemplate.create.mockResolvedValue({ ...sourceTemplate, id: 'new-id' });
+      mockPrisma.formTemplateVersion.create.mockResolvedValue({});
+
+      await service.cloneTemplate('template-123', 'org-123', 'user-123');
+
+      expect(mockPrisma.$transaction).toHaveBeenCalled();
+      expect(mockPrisma.formTemplate.create).toHaveBeenCalled();
+      expect(mockPrisma.formTemplateVersion.create).toHaveBeenCalled();
     });
   });
 });

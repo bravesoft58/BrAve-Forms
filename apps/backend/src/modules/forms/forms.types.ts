@@ -214,4 +214,7 @@ export class CloneFormTemplateInput {
 
   @Field(() => GraphQLJSON, { nullable: true })
   schema?: any;
+
+  @Field({ nullable: true })
+  offlineCreated?: boolean;
 }
