@@ -3,6 +3,7 @@ import { UseGuards } from '@nestjs/common';
 import { ClerkAuthGuard } from '@/modules/auth/guards/clerk-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { FormsService } from './forms.service';
+import { TemplateCloningService } from './template-cloning.service';
 import {
   FormTemplate,
   FormSubmission,
@@ -11,6 +12,7 @@ import {
   UpdateFormTemplateInput,
   CreateFormSubmissionInput,
   UpdateFormSubmissionInput,
+  CloneFormTemplateInput,
   FormCategory,
   FormStatus,
 } from './forms.types';
@@ -18,7 +20,10 @@ import {
 @Resolver()
 @UseGuards(ClerkAuthGuard)
 export class FormsResolver {
-  constructor(private readonly formsService: FormsService) {}
+  constructor(
+    private readonly formsService: FormsService,
+    private readonly templateCloningService: TemplateCloningService
+  ) {}
 
   // Form Template Queries
   @Query(() => [FormTemplate])
@@ -89,6 +94,20 @@ export class FormsResolver {
   @Mutation(() => FormTemplate)
   async createEpaSwpppTemplate(@CurrentUser() user: any): Promise<FormTemplate> {
     return this.formsService.createEpaSwpppTemplate(user.orgId, user.id);
+  }
+
+  @Mutation(() => FormTemplate)
+  async cloneFormTemplate(
+    @Args('sourceTemplateId') sourceTemplateId: string,
+    @Args('input', { nullable: true }) input: CloneFormTemplateInput,
+    @CurrentUser() user: any
+  ): Promise<FormTemplate> {
+    return this.templateCloningService.cloneTemplate(
+      sourceTemplateId,
+      user.orgId,
+      user.id,
+      input || undefined
+    );
   }
 
   // Form Submission Queries

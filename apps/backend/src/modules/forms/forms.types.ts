@@ -200,3 +200,18 @@ export class UpdateFormSubmissionInput {
   @Field({ nullable: true })
   reviewNotes?: string;
 }
+
+@InputType()
+export class CloneFormTemplateInput {
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field({ nullable: true })
+  description?: string;
+
+  @Field(() => FormCategory, { nullable: true })
+  category?: FormCategory;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  schema?: any;
+}
