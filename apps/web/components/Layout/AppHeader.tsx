@@ -161,11 +161,16 @@ export function AppHeader({
   return (
     <Group
       h={48}
-      px={isMobile ? 'sm' : 'md'}
+      px={isMobile ? rem(8) : 'md'}
+      py={0}
       justify="space-between"
       style={{
         backgroundColor: theme.white,
         borderBottom: `1px solid ${theme.colors.gray[2]}`,
+        height: rem(48),
+        maxHeight: rem(48),
+        minHeight: rem(48),
+        boxSizing: 'border-box',
       }}
     >
       {/* Left Section: Hamburger (mobile) + Logo */}
@@ -196,6 +201,8 @@ export function AppHeader({
             style={{
               width: rem(24),
               height: rem(24),
+              maxWidth: rem(24),
+              maxHeight: rem(24),
               borderRadius: rem(4),
               backgroundColor: theme.colors.blue[6],
               display: 'flex',
@@ -204,6 +211,7 @@ export function AppHeader({
               color: 'white',
               fontWeight: 600,
               fontSize: rem(12),
+              flexShrink: 0,
             }}
           >
             BF

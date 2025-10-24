@@ -86,11 +86,14 @@ export function AppNavbar() {
               label={item.label}
               leftSection={<Icon size={18} />}
               active={active}
-              style={{
-                borderRadius: rem(6),
-                fontSize: rem(13),
-                fontWeight: active ? 600 : 500,
-                minHeight: rem(40),
+              styles={{
+                root: {
+                  height: rem(40),
+                  maxHeight: rem(40),
+                  borderRadius: rem(6),
+                  fontSize: rem(13),
+                  fontWeight: active ? 600 : 500,
+                },
               }}
             />
           );
@@ -110,13 +113,16 @@ export function AppNavbar() {
         left: 0,
         right: 0,
         height: rem(56),
-        backgroundColor: theme.white,
+        maxHeight: rem(56),
+        minHeight: rem(56),
+        backgroundColor: '#FFFFFF',
         borderTop: `1px solid ${theme.colors.gray[2]}`,
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
-        padding: `0 ${rem(8)}`,
+        padding: 0,
         zIndex: 100,
+        boxSizing: 'border-box',
       }}
     >
       {navItems.map((item) => {
@@ -132,17 +138,21 @@ export function AppNavbar() {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              minWidth: rem(60),
+              flex: 1,
+              height: rem(48),
+              maxHeight: rem(48),
               minHeight: rem(48),
               textDecoration: 'none',
-              color: active ? theme.colors.blue[6] : theme.colors.gray[6],
+              color: active ? theme.colors.blue[7] : theme.colors.gray[6],
               fontSize: rem(11),
               fontWeight: active ? 600 : 500,
               gap: rem(2),
+              padding: rem(4),
+              boxSizing: 'border-box',
             }}
           >
             <Icon size={20} />
-            <span>{item.label}</span>
+            <span style={{ lineHeight: 1 }}>{item.label}</span>
           </Link>
         );
       })}
