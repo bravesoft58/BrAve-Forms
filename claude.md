@@ -719,15 +719,55 @@ Every session start:
 - [ ] Documentation updated
 - [ ] Compliance validated if applicable
 
-### Git Workflow Standards:
+### Git Workflow Standards (MANDATORY):
+
+**CRITICAL: See [@docs/GITHUB_WORKFLOW.md](docs/GITHUB_WORKFLOW.md) for complete workflow guide**
+
+**Workflow Strategy:** GitHub Flow (feature branches + pull requests)
+
+**ABSOLUTE REQUIREMENTS:**
+
+1. **ALWAYS create feature branch for new work** - NEVER commit directly to master
+2. **ALWAYS create pull request** - Even for solo work (quality gates, evidence)
+3. **ALWAYS pass quality gates** - Lint, type-check, test (>80%), build
+4. **ALWAYS provide evidence** - Screenshots, coverage reports in PR
+
+**Branch Protection Enabled:** Direct commits to master are BLOCKED after initial setup
 
 **Branch Naming (REQUIRED):**
 
-- `feature/<descriptive-name>` - New functionality
-- `fix/<issue-number>-<brief>` - Bug fixes
-- `refactor/<area>` - Code improvements
-- `compliance/<regulation>-<feature>` - EPA/OSHA features
-- `docs/<what-changed>` - Documentation updates
+Format: `<type>/ISSUE-XXX-<short-description>`
+
+- `feature/ISSUE-123-photo-gallery` - New functionality
+- `fix/ISSUE-047-database-error` - Bug fixes
+- `compliance/ISSUE-018-rain-threshold` - EPA/OSHA features
+- `docs/ISSUE-075-api-docs` - Documentation updates
+- `refactor/ISSUE-080-auth-logic` - Code improvements
+
+**Quick Start Workflow:**
+
+```bash
+# 1. Create branch for new work
+git checkout master && git pull origin master
+git checkout -b feature/ISSUE-XXX-description
+
+# 2. Implement with TDD (red → green → refactor)
+# Write tests FIRST, then implement
+
+# 3. Run quality gates
+pnpm lint && pnpm type-check && pnpm test && pnpm build
+
+# 4. Commit with conventional format (NO emoji, NO AI branding)
+git add . && git commit -m "feat: brief description..."
+
+# 5. Push and create PR
+git push origin feature/ISSUE-XXX-description
+
+# 6. Fill PR template with evidence
+# 7. Wait for automated checks to pass
+# 8. Merge via "Squash and merge"
+# 9. Delete branch, pull master
+```
 
 **Commit Message Format (REQUIRED):**
 
@@ -736,7 +776,7 @@ Every session start:
 
 <detailed explanation of WHY, not WHAT>
 
-<optional footer for breaking changes or issue references>
+<optional footer for issue references>
 ```
 
 **Types:** feat, fix, refactor, docs, test, compliance, perf, chore, security
@@ -762,39 +802,60 @@ Refs: EPA-CGP-2022-Section-4.4
 - NO "Generated with Claude Code" or AI branding
 - NO "Co-Authored-By: Claude" lines
 - NO anthropic.com links
+- NO direct commits to master (use feature branches)
+- NO merging PRs with failing checks
 
-**Pull Request Template (REQUIRED):**
+**Automated Quality Gates (GitHub Actions):**
 
-```markdown
-## Summary
+Every PR automatically runs:
 
-Brief description of changes
+1. **lint**: ESLint + Prettier validation
+2. **type-check**: TypeScript compilation
+3. **test**: Vitest + Playwright with coverage (>80% required)
+4. **build**: Production build verification
 
-## Changes
+All checks MUST pass before merge is allowed.
 
-- Specific change 1
-- Specific change 2
+**Pull Request Template:**
 
-## Testing
+See `.github/PULL_REQUEST_TEMPLATE.md` for complete template.
 
-- [ ] Unit tests pass
-- [ ] Integration tests pass
-- [ ] Offline scenarios tested (if applicable)
-- [ ] Multi-tenant isolation verified (if applicable)
-- [ ] Compliance validated (if applicable)
+Required sections:
 
-## Database Changes
+- Summary and related issue (ISSUE-XXX)
+- Type of change (feature, fix, compliance, etc.)
+- Testing completed checklist
+- Evidence provided (screenshots, coverage)
+- Quality gates passed
+- Compliance impact (if applicable)
 
-- [ ] No schema changes / Schema changes documented
+**Issue Templates:**
 
-## Breaking Changes
+See `.github/ISSUE_TEMPLATE/` for templates:
 
-- [ ] None / List if applicable
+- `bug_report.md` - Bug reports with reproduction steps
+- `feature_request.md` - New features with acceptance criteria
+- `compliance_issue.md` - EPA/OSHA compliance work
+- `documentation.md` - Documentation updates
 
-## Compliance Impact
+**Emergency Hotfix Workflow:**
 
-- [ ] No EPA/OSHA rules affected / Rules updated with citations
-```
+For production-down or critical security issues:
+
+1. Create `fix/ISSUE-XXX-critical-description` branch
+2. Implement MINIMAL fix only
+3. Quality gates MUST still pass
+4. Merge and deploy immediately
+5. Monitor for 1 hour post-deployment
+
+**For Complete Workflow Details:**
+
+- Branch protection configuration
+- Merge strategies
+- Troubleshooting guide
+- Best practices and anti-patterns
+
+See: [@docs/GITHUB_WORKFLOW.md](docs/GITHUB_WORKFLOW.md)
 
 ### Validation Checks:
 
