@@ -3,11 +3,13 @@
 import { Text, Badge, rem, Button } from '@mantine/core';
 import { IconRefresh } from '@tabler/icons-react';
 import { PageContainer } from '@/components/Layout/PageContainer';
+import { Breadcrumbs } from '@/components/Layout/Breadcrumbs';
 
 export default function HomePage() {
   return (
     <PageContainer
       title="Dashboard"
+      breadcrumbs={<Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Dashboard' }]} />}
       actions={
         <Button
           size="compact-sm"
