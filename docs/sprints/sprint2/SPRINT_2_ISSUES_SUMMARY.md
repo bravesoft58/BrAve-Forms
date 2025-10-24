@@ -81,19 +81,20 @@
 
 ## Issue Status Tracking
 
-**Last Updated:** 2025-10-23 (ISSUE-070 Complete)
+**Last Updated:** 2025-10-24 (Sprint 2 CLOSED - Phase 5 Deferred)
 
-**Completed:** 24/27 issues (89%)
-**In Progress:** None
-**Not Started:** 3/27 issues (11%)
+**Sprint 2 Status:** COMPLETE - 24/27 core features (89%)
+**Completed:** 24/27 issues
+**Deferred:** 3/27 issues (ISSUE-072, ISSUE-073, ISSUE-074) - See deferred/ folder
+**Target:** Post-Sprint 5, Sprint 6: Production Readiness
 
 ### Phase Status
 
 - **Phase 0 (Carryover):** 4/4 complete (100%) ✅
-  - ISSUE-047: DEFERRED (not blocking)
-  - ISSUE-048: DEFERRED (not blocking)
-  - ISSUE-049: COMPLETE ✅
-  - ISSUE-050: COMPLETE ✅
+  - ISSUE-047: COMPLETE ✅ (TanStack Query version lock, integration tests)
+  - ISSUE-048: COMPLETE ✅ (Lighthouse PWA audit)
+  - ISSUE-049: COMPLETE ✅ (Web deployment to Kubernetes)
+  - ISSUE-050: COMPLETE ✅ (Frontend build optimization)
 
 - **Phase 1 (Forms Engine):** 8/8 complete (100%) ✅
   - ISSUE-051: COMPLETE ✅
@@ -119,21 +120,24 @@
   - ISSUE-067: COMPLETE ✅
   - ISSUE-068: COMPLETE ✅
 
-- **Phase 4 (Template Library):** 2/3 complete (67%)
-  - ISSUE-069: COMPLETE ✅
+- **Phase 4 (Template Library):** 3/3 complete (100%) ✅
+  - ISSUE-069: COMPLETE ✅ (4 critical security fixes verified 2025-10-24)
   - ISSUE-070: COMPLETE ✅ (11 templates, expanded scope)
-  - ISSUE-071: Not started
+  - ISSUE-071: COMPLETE ✅ (Template seed script executed 2025-10-24)
 
-- **Phase 5 (Architecture Review):** 0/3 complete (0%)
-  - ISSUE-072: Not started
-  - ISSUE-073: Not started
-  - ISSUE-074: Not started
+- **Phase 5 (Architecture Review):** 0/3 DEFERRED (moved to deferred/ folder)
+  - ISSUE-072: DEFERRED to post-Sprint 5 (Backend Container Optimization)
+  - ISSUE-073: DEFERRED to post-Sprint 5 (Separation of Concerns Review)
+  - ISSUE-074: DEFERRED to post-Sprint 5 (Resource Limits & Health Checks)
+  - **Rationale:** Infrastructure tasks better suited for Sprint 6: Production Readiness
+  - **See:** deferred/README.md for full rationale
 
-### Current Velocity
+### Final Velocity
 
-- **Hours Completed:** 54.5/70 hours (78%)
-- **Sprint Days Elapsed:** 21/14 days (150% - Sprint extending into week 4)
-- **Velocity:** 10.2x target (significantly ahead of schedule)
+- **Hours Completed:** 60/70 hours (86%) - Core features
+- **Hours Deferred:** 8/70 hours (11%) - Infrastructure tasks
+- **Sprint Days Elapsed:** 22/14 days (157% - Extended into week 4)
+- **Sprint Status:** CLOSED - Ready for Sprint 3-5 feature development
 
 ## Evidence Collection Requirements
 
@@ -212,6 +216,8 @@ kubectl get all -n braveforms
 
 ## Completed Evidence Links
 
+- [ISSUE-047: Sprint 1 Blockers Resolution](issues/completed/ISSUE-047-resolve-sprint1-blockers.md)
+- [ISSUE-048: Lighthouse PWA Audit](issues/completed/ISSUE-048-lighthouse-pwa-audit.md)
 - [ISSUE-049: Web Deployment](evidence/ISSUE-049/COMPLETION-REPORT.md)
 - [ISSUE-050: Build Optimization](evidence/ISSUE-050/COMPLETION-REPORT.md)
 - [ISSUE-051: Form Schema Design](evidence/ISSUE-051/COMPLETION-REPORT.md)
@@ -226,5 +232,7 @@ kubectl get all -n braveforms
 - [ISSUE-066: Submission CRUD](evidence/ISSUE-066/COMPLETION-REPORT.md)
 - [ISSUE-067: Approval Workflow](evidence/ISSUE-067/COMPLETION-REPORT.md)
 - [ISSUE-068: Workflow Tests](evidence/ISSUE-068/COMPLETION-REPORT.md)
-- [ISSUE-069: Template Storage](evidence/ISSUE-069/COMPLETION-REPORT.md)
+- [ISSUE-069: Template Storage](issues/completed/ISSUE-069-COMPLETION-REPORT.md)
 - [ISSUE-070: Build 11 Templates](evidence/ISSUE-070/COMPLETION-REPORT.md)
+- [ISSUE-071: Template Seed Script](issues/completed/ISSUE-071-COMPLETION-REPORT.md)
+- [ISSUE-075: Code Issues Tracker](issues/completed/ISSUE-075-code-issues-tracker.md) (Sprint 2 artifact)
