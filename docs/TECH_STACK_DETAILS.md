@@ -413,6 +413,197 @@ const scheduleInspection = (stormEvent: StormEvent): void => {
 };
 ```
 
+### Sprint 5 Libraries (Photo Gallery + Form Builder)
+
+#### Mapping & Geolocation
+
+**MapLibre GL JS (NOT Mapbox GL JS)**
+
+- **License:** BSD 3-Clause (fully open source)
+- **Why Chosen:** Mapbox GL JS v2+ changed to proprietary license (Dec 2020)
+- **Cost:** FREE vs Mapbox's $5-20/month usage-based tile billing
+- **Governance:** Linux Foundation (Amazon, Meta, Microsoft backing)
+- **Features:** WebGL2 renderer, vector tiles, modern performance
+- **Offline Support:** Self-host tiles for construction sites without connectivity
+- **React Integration:** react-map-gl supports both Mapbox and MapLibre (zero code change)
+
+**Installation:**
+
+```bash
+pnpm add maplibre-gl react-map-gl
+```
+
+**Code Example:**
+
+```typescript
+import { Map } from 'react-map-gl/maplibre';
+import maplibregl from 'maplibre-gl';
+
+<Map
+  mapLib={maplibregl}
+  initialViewState={{ longitude: -122.4, latitude: 37.8, zoom: 14 }}
+  mapStyle="https://tiles.stadiamaps.com/styles/osm_bright.json" // Free tiles
+  mapboxAccessToken={undefined} // No Mapbox token needed
+/>
+```
+
+**Free Tile Providers:**
+
+- Stadia Maps (OSM Bright, Alidade)
+- MapTiler (OSM Bright, Basic)
+- OpenStreetMap (direct OSM tiles)
+- Self-hosted (for offline capability)
+
+---
+
+#### Photo Annotation
+
+**Annotorious (@annotorious/react)**
+
+- **License:** BSD 3-Clause (fully open source)
+- **Why Chosen:** react-image-annotate is unmaintained (last update 5 years ago)
+- **Status:** Actively maintained (updates through Sept 2025)
+- **Features:** Annotations, tags, drawing tools, TypeScript support
+- **React Support:** Official @annotorious/react bindings
+
+**Installation:**
+
+```bash
+pnpm add @annotorious/react @annotorious/annotorious
+```
+
+**Code Example:**
+
+```typescript
+import { Annotorious } from '@annotorious/react';
+
+<Annotorious>
+  <img src={photoUrl} alt="Inspection photo" />
+</Annotorious>
+```
+
+---
+
+#### Image Lightbox
+
+**Yet Another React Lightbox**
+
+- **License:** MIT (fully open source)
+- **Why Chosen:** react-image-lightbox is deprecated and no longer supported
+- **Compatibility:** React 19, 18, 17, 16.8+
+- **Features:** Keyboard/mouse/touch navigation, preloading, responsive images (srcset/sizes)
+- **Plugins:** Zoom, thumbnails, video support
+- **Recommendation:** Endorsed by Mantine community
+
+**Installation:**
+
+```bash
+pnpm add yet-another-react-lightbox
+```
+
+**Code Example:**
+
+```typescript
+import Lightbox from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
+
+<Lightbox
+  open={open}
+  close={() => setOpen(false)}
+  slides={photos}
+  plugins={[Zoom, Thumbnails]}
+/>
+```
+
+---
+
+#### Expression Parser (Form Builder Calculated Fields)
+
+**expr-eval (NOT mathjs)**
+
+- **License:** MIT (simple, permissive, NO copyleft)
+- **Why Chosen:**
+  - **Simpler License:** mathjs has Apache 2.0 + LGPL-2.1+ component (copyleft concerns)
+  - **Smaller Size:** 5KB minified vs mathjs's heavy package
+  - **Better Security:** No import/createUnit functions that pose risks in mathjs
+- **Features:** Operators (+, -, \*, /), Functions (SUM, AVG, MIN, MAX)
+- **Use Case:** Calculated fields in form builder (auto-compute totals, averages)
+
+**Installation:**
+
+```bash
+pnpm add expr-eval
+```
+
+**Code Example:**
+
+```typescript
+import { Parser } from 'expr-eval';
+
+const parser = new Parser();
+
+// Basic arithmetic
+parser.evaluate('2 * 3 + 4'); // 10
+
+// With variables (field references)
+parser.evaluate('field1 + field2', { field1: 10, field2: 20 }); // 30
+
+// Functions
+parser.evaluate('SUM(a, b, c)', { a: 10, b: 20, c: 30 }); // 60
+parser.evaluate('AVG(x, y)', { x: 100, y: 200 }); // 150
+```
+
+**Security Considerations:**
+
+- mathjs has `import` and `createUnit` functions that can alter built-in functionality
+- expr-eval has simpler, more secure API with no dangerous functions
+- Always sanitize user input before evaluation
+
+---
+
+#### Drag & Drop (Form Builder)
+
+**@dnd-kit/core**
+
+- **License:** MIT (fully open source)
+- **Why Chosen:** Best-in-class for 2025 (modern, performant, accessible)
+- **Size:** 10KB minified, zero dependencies
+- **Performance:** Minimal re-renders, optimized for React
+- **Accessibility:** Built-in ARIA support
+- **Better Than:** react-beautiful-dnd, react-dnd, react-sortable-hoc
+
+**Installation:**
+
+```bash
+pnpm add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+```
+
+**Code Example (Form Builder Canvas):**
+
+```typescript
+import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+
+<DndContext
+  collisionDetection={closestCenter}
+  onDragEnd={handleDragEnd}
+>
+  <SortableContext
+    items={fields.map((f) => f.id)}
+    strategy={verticalListSortingStrategy}
+  >
+    {/* Sortable field list */}
+  </SortableContext>
+</DndContext>
+```
+
+**Integration with React Hook Form:**
+
+- Well-documented useFieldArray integration
+- Working examples available on StackBlitz and CodeSandbox
+- Community-tested with form builders
+
 ---
 
 ## Performance Targets

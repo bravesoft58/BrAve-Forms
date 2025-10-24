@@ -58,22 +58,686 @@ This issue serves as a **running log** of all code issues, bugs, tech debt, and 
 
 ### Summary Statistics
 
-**Total Issues Reviewed:** 1/27
-**Critical Issues Found:** 0
-**High Priority Issues:** 2 (2 fixed ✅)
-**Medium Priority Issues:** 4
-**Low Priority Issues:** 3
+**Total Issues Reviewed:** 2/27
+**Critical Issues Found:** 4 (ISSUE-069)
+**High Priority Issues:** 5 (2 fixed in ISSUE-047 ✅, 3 open in ISSUE-069)
+**Medium Priority Issues:** 7 (4 from ISSUE-047, 3 from ISSUE-069)
+**Low Priority Issues:** 4 (3 from ISSUE-047, 1 from ISSUE-069)
 **Tech Debt Items:** 4
 
 **Status:**
 
-- Fixed During Development: 2 (2 High) ✅
-- To Fix Before Sprint Close: 4 (Medium only)
-- Deferred to Sprint 3: 3 (Low priority)
+- Fixed During Development: 2 (ISSUE-047 High) ✅
+- MUST Fix Before Merging: 4 (ISSUE-069 Critical) ⚠️
+- To Fix Before Sprint Close: 10 (High + Medium)
+- Deferred to Sprint 3: 4 (Low priority)
 
 ---
 
 ## Issues Identified
+
+## ISSUE-069: Template Storage System (Template Cloning Service)
+
+**Date:** 2025-10-23
+**Reviewer:** code-reviewer agent
+**Severity:** Mixed (4 Critical, 3 High, 3 Medium, 1 Low)
+
+**Files Reviewed:** 6
+
+- apps/backend/src/modules/forms/template-cloning.service.ts (96 lines)
+- apps/backend/src/modules/forms/template-cloning.service.spec.ts (359 lines)
+- apps/backend/src/modules/forms/forms.resolver.ts (lines 100-111)
+- apps/backend/src/modules/forms/forms.types.ts (lines 204-217)
+- apps/backend/src/modules/forms/forms.module.ts (line 10)
+- apps/backend/src/seeds/templates/README.md (145 lines)
+
+**Lines Analyzed:** ~850 lines
+
+**Overall Code Quality Score:** 7.8/10
+
+- Zero tolerance compliance: 10/10
+- Multi-tenancy security: 3/10 (CRITICAL violations)
+- Offline capability: 4/10 (Missing implementation)
+- Error handling: 5/10 (Insufficient coverage)
+- Input validation: 4/10 (Missing validation)
+- Test coverage: 7/10 (Good but missing offline/multi-tenant tests)
+- Documentation: 7.5/10 (Good JSDoc, incomplete examples)
+- Code organization: 9/10 (Clean structure)
+- Type safety: 8/10 (Good but any in GraphQL)
+- Construction industry compliance: 5/10 (No EPA validation)
+
+---
+
+### CRITICAL FINDINGS (MUST FIX BEFORE MERGING)
+
+#### CRITICAL-1: Multi-Tenant Security Violation - Source Template Access
+
+**Severity:** CRITICAL (P0)
+**File:** apps/backend/src/modules/forms/template-cloning.service.ts:33-35
+**Impact:** Cross-organization data leaks, regulatory violations, lawsuits
+**CLAUDE.md Violation:** Lines 234-236 - "EVERY query must filter by orgId from Clerk JWT"
+
+**Issue:**
+The `cloneTemplate` method fetches the source template WITHOUT validating the user has permission to access it. This allows users to clone templates from OTHER organizations by guessing/discovering template IDs.
+
+**Attack Vector:**
+
+```graphql
+mutation CloneFromCompetitor {
+  cloneFormTemplate(
+    sourceTemplateId: "competitor-template-id-discovered-via-enumeration"
+    input: { name: "Stolen Template" }
+  ) {
+    id
+    name
+    schema # Now we have competitor's IP
+  }
+}
+```
+
+**Current Code (Line 33-35):**
+
+```typescript
+const sourceTemplate = await this.prisma.formTemplate.findFirst({
+  where: { id: sourceTemplateId },
+});
+```
+
+**Recommendation:**
+
+```typescript
+async cloneTemplate(
+  sourceTemplateId: string,
+  sourceOrgId: string,  // NEW: Enforce source org check
+  targetOrgId: string,
+  targetUserId: string,
+  options?: CloneTemplateOptions
+) {
+  const sourceTemplate = await this.prisma.formTemplate.findFirst({
+    where: {
+      id: sourceTemplateId,
+      orgId: sourceOrgId  // CRITICAL: Validate user owns source template
+    },
+  });
+
+  if (!sourceTemplate) {
+    throw new NotFoundException(
+      `Source template with ID ${sourceTemplateId} not found or you do not have permission to access it`
+    );
+  }
+
+  // Rest of cloning logic...
+}
+```
+
+**Resolver Update Required (forms.resolver.ts:100-111):**
+
+```typescript
+@Mutation(() => FormTemplate)
+async cloneFormTemplate(
+  @Args('sourceTemplateId') sourceTemplateId: string,
+  @Args('input', { nullable: true }) input: CloneFormTemplateInput,
+  @CurrentUser() user: any
+): Promise<FormTemplate> {
+  return this.templateCloningService.cloneTemplate(
+    sourceTemplateId,
+    user.orgId,  // NEW: Pass source orgId from JWT
+    user.orgId,  // Target orgId (same org for now)
+    user.id,
+    input || undefined
+  );
+}
+```
+
+**Action:** Fix Now (BEFORE merging)
+**Estimated Time:** 30 minutes
+**Status:** Open
+
+---
+
+#### CRITICAL-2: Missing Offline Capability Metadata
+
+**Severity:** CRITICAL (P0)
+**File:** apps/backend/src/modules/forms/template-cloning.service.ts:48-59
+**Impact:** Cloned templates cannot be tracked in offline queue, violates 30-day requirement
+**CLAUDE.md Violation:** Lines 177-180 - "ALL features must work offline for 30 days"
+
+**Issue:**
+The cloned template creation doesn't include offline sync metadata. Construction workers may clone templates while offline, but there's no `offlineCreated` flag or sync tracking.
+
+**Current Code (Line 48-59):**
+
+```typescript
+const clonedTemplate = await this.prisma.formTemplate.create({
+  data: {
+    orgId: targetOrgId,
+    name: clonedName,
+    description: clonedDescription,
+    category: clonedCategory,
+    schema: clonedSchema,
+    compliance: sourceTemplate.compliance,
+    version: 1,
+    createdBy: targetUserId,
+    // MISSING: offlineCreated, syncStatus, lastSyncAt
+  },
+});
+```
+
+**Recommendation:**
+
+```typescript
+// Add offline metadata interface
+interface CloneMetadata {
+  offlineCreated?: boolean;
+  originalTemplateId?: string;
+  clonedAt?: Date;
+}
+
+// Update create call
+const clonedTemplate = await this.prisma.formTemplate.create({
+  data: {
+    orgId: targetOrgId,
+    name: clonedName,
+    description: clonedDescription,
+    category: clonedCategory,
+    schema: clonedSchema,
+    compliance: sourceTemplate.compliance,
+    version: 1,
+    createdBy: targetUserId,
+    metadata: {
+      // NEW: Add offline sync metadata
+      offlineCreated: options?.offlineCreated || false,
+      originalTemplateId: sourceTemplateId,
+      clonedAt: new Date(),
+    },
+  },
+});
+```
+
+**Schema Update Required:**
+
+```prisma
+model FormTemplate {
+  // ... existing fields ...
+  metadata Json? @map("metadata")  // Store offline sync info
+}
+```
+
+**Action:** Fix Now (BEFORE merging)
+**Estimated Time:** 45 minutes
+**Status:** Open
+
+---
+
+#### CRITICAL-3: No EPA/OSHA Compliance Validation
+
+**Severity:** CRITICAL (P0)
+**File:** apps/backend/src/modules/forms/template-cloning.service.ts:26-73
+**Impact:** $25,000-$50,000 per day EPA fines for non-compliant forms
+**CLAUDE.md Violation:** Lines 567-578 - EPA compliance validation requirements
+
+**Issue:**
+When cloning EPA/OSHA compliance templates, there's no validation that:
+
+1. Required compliance fields are preserved
+2. The 0.25" rain threshold is maintained (not approximated)
+3. 24-hour inspection window logic is intact
+4. Audit trail requirements are met
+
+**Current Code (Line 55):**
+
+```typescript
+compliance: sourceTemplate.compliance,  // Blindly copies without validation
+```
+
+**Example Risk:**
+If a user clones an EPA SWPPP template and modifies the schema to remove the rain measurement field, the template becomes non-compliant but the system allows it.
+
+**Recommendation:**
+
+```typescript
+// Add compliance validation method
+private validateComplianceRequirements(
+  category: FormCategory,
+  schema: Prisma.JsonValue,
+  compliance: Prisma.JsonValue
+): void {
+  if (category === 'EPA_SWPPP' || category === 'EPA_CGP') {
+    const complianceObj = compliance as any;
+
+    // Validate 0.25" rain threshold is EXACT (not approximated)
+    if (complianceObj?.rainThreshold !== undefined) {
+      const threshold = parseFloat(complianceObj.rainThreshold);
+      if (threshold !== 0.25) {
+        throw new BadRequestException(
+          `EPA CGP requires EXACT 0.25 inch rain threshold, not ${threshold}. ` +
+          `Approximations violate EPA regulations.`
+        );
+      }
+    }
+
+    // Validate required EPA fields exist in schema
+    const schemaObj = schema as any;
+    const requiredFields = ['inspector_name', 'inspection_date', 'site_conditions'];
+    const missingFields = requiredFields.filter(
+      field => !schemaObj.fields?.some((f: any) => f.id === field)
+    );
+
+    if (missingFields.length > 0) {
+      throw new BadRequestException(
+        `EPA compliance templates require fields: ${missingFields.join(', ')}`
+      );
+    }
+  }
+}
+
+// Call in cloneTemplate method
+async cloneTemplate(...) {
+  // ... fetch source template ...
+
+  const clonedCategory = options?.category || sourceTemplate.category;
+  const clonedSchema = options?.schema || sourceTemplate.schema;
+
+  // NEW: Validate compliance before creating
+  this.validateComplianceRequirements(
+    clonedCategory,
+    clonedSchema,
+    sourceTemplate.compliance
+  );
+
+  // ... create cloned template ...
+}
+```
+
+**Action:** Fix Now (BEFORE merging)
+**Estimated Time:** 1 hour
+**Status:** Open
+
+---
+
+#### CRITICAL-4: Database Transaction Missing
+
+**Severity:** CRITICAL (P0)
+**File:** apps/backend/src/modules/forms/template-cloning.service.ts:48-70
+**Impact:** Data inconsistency if version creation fails after template creation
+
+**Issue:**
+The template creation (line 48-59) and version snapshot creation (line 62-70) are NOT wrapped in a transaction. If the version creation fails, you'll have a template without its initial version history, violating audit trail requirements.
+
+**Current Code:**
+
+```typescript
+// Line 48-59 - Create template
+const clonedTemplate = await this.prisma.formTemplate.create({ ... });
+
+// Line 62-70 - Create version (separate operation - can fail independently)
+await this.prisma.formTemplateVersion.create({ ... });
+
+return clonedTemplate;
+```
+
+**Failure Scenario:**
+
+1. Template created successfully (committed to DB)
+2. Network failure / DB connection lost / Constraint violation
+3. Version creation fails
+4. Template exists WITHOUT version history (audit trail broken)
+5. EPA compliance violated (no change tracking)
+
+**Recommendation:**
+
+```typescript
+async cloneTemplate(...) {
+  const sourceTemplate = await this.prisma.formTemplate.findFirst({
+    where: {
+      id: sourceTemplateId,
+      orgId: sourceOrgId  // Add after fixing CRITICAL-1
+    },
+  });
+
+  if (!sourceTemplate) {
+    throw new NotFoundException(`Source template with ID ${sourceTemplateId} not found`);
+  }
+
+  // Prepare cloned template data
+  const clonedName = options?.name || `${sourceTemplate.name} (Copy)`;
+  const clonedDescription = options?.description || sourceTemplate.description;
+  const clonedCategory = options?.category || sourceTemplate.category;
+  const clonedSchema = options?.schema || sourceTemplate.schema;
+
+  // NEW: Wrap in transaction for atomicity
+  const result = await this.prisma.$transaction(async (tx) => {
+    const clonedTemplate = await tx.formTemplate.create({
+      data: {
+        orgId: targetOrgId,
+        name: clonedName,
+        description: clonedDescription,
+        category: clonedCategory,
+        schema: clonedSchema,
+        compliance: sourceTemplate.compliance,
+        version: 1,
+        createdBy: targetUserId,
+      },
+    });
+
+    await tx.formTemplateVersion.create({
+      data: {
+        templateId: clonedTemplate.id,
+        version: 1,
+        schema: clonedTemplate.schema,
+        changeLog: `Cloned from template ${sourceTemplateId}`,
+        createdBy: targetUserId,
+      },
+    });
+
+    return clonedTemplate;
+  });
+
+  return result;
+}
+```
+
+**Action:** Fix Now (BEFORE merging)
+**Estimated Time:** 30 minutes
+**Status:** Open
+
+---
+
+### HIGH PRIORITY FINDINGS (Fix before Sprint 2 close)
+
+#### HIGH-1: Insufficient Error Handling
+
+**Severity:** High
+**File:** apps/backend/src/modules/forms/template-cloning.service.ts:48-70
+**Impact:** Poor user experience, difficult debugging in production
+**CLAUDE.md Violation:** Line 164 - "MUST handle all error cases explicitly"
+
+**Issue:**
+No error handling for:
+
+- Database constraint violations (duplicate names, invalid JSON schema)
+- Network failures during transaction
+- Prisma serialization errors for JSONB fields
+- Storage quota exceeded
+
+**Recommendation:**
+
+```typescript
+async cloneTemplate(...) {
+  try {
+    // ... validation logic ...
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      // ... transaction logic ...
+    });
+
+    return result;
+  } catch (error) {
+    if (error.code === 'P2002') {  // Unique constraint violation
+      throw new ConflictException(
+        `A template named "${clonedName}" already exists in your organization. ` +
+        `Please choose a different name.`
+      );
+    }
+
+    if (error.code === 'P2025') {  // Record not found
+      throw new NotFoundException(
+        `Source template with ID ${sourceTemplateId} not found or deleted`
+      );
+    }
+
+    console.error('Template cloning failed:', {
+      sourceTemplateId,
+      targetOrgId,
+      error: error.message,
+    });
+
+    throw new InternalServerErrorException(
+      'Failed to clone template. Please try again or contact support.'
+    );
+  }
+}
+```
+
+**Action:** Sprint Close
+**Estimated Time:** 45 minutes
+**Status:** Open
+
+---
+
+#### HIGH-2: Missing Input Validation
+
+**Severity:** High
+**File:** apps/backend/src/modules/forms/template-cloning.service.ts:26-31
+**Impact:** Invalid data in database, potential security issues
+**CLAUDE.md Violation:** Line 168 - "Validate ALL inputs, even from trusted sources"
+
+**Issue:**
+No validation for UUID formats, name length, description length, schema structure.
+
+**Recommendation:**
+
+```typescript
+import { validate as isUuid } from 'uuid';
+
+async cloneTemplate(...) {
+  // Validate UUID formats
+  if (!isUuid(sourceTemplateId)) {
+    throw new BadRequestException('Source template ID must be a valid UUID');
+  }
+  if (!isUuid(targetOrgId)) {
+    throw new BadRequestException('Target organization ID must be a valid UUID');
+  }
+
+  // Validate optional inputs
+  if (options?.name && options.name.length > 255) {
+    throw new BadRequestException('Template name cannot exceed 255 characters');
+  }
+
+  // ... rest of method ...
+}
+```
+
+**Action:** Sprint Close
+**Estimated Time:** 30 minutes
+**Status:** Open
+
+---
+
+#### HIGH-3: Test Coverage Missing Offline Scenarios
+
+**Severity:** High
+**File:** apps/backend/src/modules/forms/template-cloning.service.spec.ts
+**Impact:** Offline functionality untested, 30-day requirement not validated
+**CLAUDE.md Violation:** Line 196 - "Test all features in offline mode"
+
+**Issue:**
+Test suite has excellent coverage for happy paths and edge cases, but ZERO tests for offline scenarios.
+
+**Recommendation:**
+
+```typescript
+describe('Offline Scenarios', () => {
+  it('should queue template cloning operation when offline', async () => {
+    const offlineMetadata = { offlineCreated: true };
+
+    mockPrisma.formTemplate.findFirst.mockResolvedValue(sourceTemplate);
+    mockPrisma.formTemplate.create.mockResolvedValue({
+      ...clonedTemplate,
+      metadata: offlineMetadata,
+    });
+
+    const result = await service.cloneTemplate(sourceTemplate.id, targetOrgId, targetUserId, {
+      offlineCreated: true,
+    });
+
+    expect(result.metadata).toEqual(offlineMetadata);
+  });
+});
+```
+
+**Action:** Sprint Close
+**Estimated Time:** 1 hour
+**Status:** Open
+
+---
+
+### MEDIUM PRIORITY FINDINGS (Fix before Sprint 2 close)
+
+#### MEDIUM-1: Incomplete JSDoc Documentation
+
+**Severity:** Medium
+**File:** apps/backend/src/modules/forms/template-cloning.service.ts:5-10, 75-94
+**Impact:** Poor developer experience, unclear API usage
+**CLAUDE.md Violation:** Line 198 - "Use JSDoc format for TypeScript/JavaScript"
+
+**Issue:**
+
+- `CloneTemplateOptions` interface missing JSDoc
+- `customizeTemplateForProject` missing @throws documentation
+- No usage examples in JSDoc
+
+**Recommendation:**
+Add comprehensive JSDoc with examples.
+
+**Action:** Sprint Close
+**Estimated Time:** 30 minutes
+**Status:** Open
+
+---
+
+#### MEDIUM-2: Unused Parameter in customizeTemplateForProject
+
+**Severity:** Medium
+**File:** apps/backend/src/modules/forms/template-cloning.service.ts:85-94
+**Impact:** Code smell, misleading API
+
+**Issue:**
+The `projectId` parameter is accepted but never used.
+
+**Recommendation:**
+Either use it for metadata tracking or remove it.
+
+**Action:** Sprint Close
+**Estimated Time:** 15 minutes
+**Status:** Open
+
+---
+
+#### MEDIUM-3: GraphQL Input Type Missing Offline Field
+
+**Severity:** Medium
+**File:** apps/backend/src/modules/forms/forms.types.ts:204-217
+**Impact:** Cannot track offline-created templates from GraphQL API
+
+**Issue:**
+`CloneFormTemplateInput` doesn't include `offlineCreated` field.
+
+**Recommendation:**
+
+```typescript
+@InputType()
+export class CloneFormTemplateInput {
+  // ... existing fields ...
+
+  @Field({ nullable: true })
+  offlineCreated?: boolean; // NEW
+}
+```
+
+**Action:** Sprint Close
+**Estimated Time:** 10 minutes
+**Status:** Open
+
+---
+
+### LOW PRIORITY FINDINGS (Defer to Sprint 3)
+
+#### LOW-1: README.md Template Examples Incomplete
+
+**Severity:** Low
+**File:** apps/backend/src/seeds/templates/README.md:105-116
+**Impact:** Documentation completeness
+
+**Issue:**
+The GraphQL mutation example shows cloning but doesn't demonstrate customization options or error handling.
+
+**Recommendation:**
+Add comprehensive examples for basic clone, custom clone, and offline clone.
+
+**Action:** Sprint 3
+**Estimated Time:** 20 minutes
+**Status:** Open
+
+---
+
+## POSITIVE FINDINGS (ISSUE-069)
+
+### Code Quality Strengths
+
+**Zero Tolerance Compliance:** 10/10
+
+- No emoji anywhere in code
+- No AI branding or generation references
+- Professional code standards maintained
+
+**Test Coverage:** 9/10
+
+- Comprehensive unit tests (17 tests)
+- Covers happy path, edge cases, error scenarios
+- Proper mocking with Jest
+- Missing: Offline scenarios, multi-tenant isolation tests
+
+**GraphQL Integration:** 9.5/10
+
+- Proper @nestjs/graphql decorators
+- @UseGuards(ClerkAuthGuard) on resolver
+- @CurrentUser() extracts JWT claims correctly
+- Type safety with GraphQL types
+
+**Code Organization:** 9/10
+
+- Clean separation of concerns
+- Service registered in module exports
+- Clear method names and structure
+- Good use of TypeScript interfaces
+
+**Documentation (README):** 8.5/10
+
+- Well-structured template examples
+- Clear field type definitions
+- Proper category descriptions
+- Missing: Comprehensive cloning examples
+
+---
+
+## ISSUE-069 Completion Assessment
+
+**Can ISSUE-069 be considered complete?**
+
+**NO - Requires revisions before production deployment.**
+
+**Blockers:**
+
+- 4 Critical issues MUST be fixed (multi-tenant security, offline sync, compliance validation, transactions)
+- 3 High priority issues should be fixed before Sprint 2 close
+- 3 Medium priority issues recommended before Sprint 2 close
+
+**Estimated Time to Fix:**
+
+- Critical issues: 2-3 hours
+- High priority: 1.5-2 hours
+- Medium priority: 1 hour
+- **Total:** 4.5-6 hours additional work
+
+**Recommendation:**
+
+1. Fix all CRITICAL issues immediately (before merging to main)
+2. Fix HIGH priority issues before Sprint 2 close
+3. Fix MEDIUM priority issues during Sprint 2 cleanup
+4. Defer LOW priority to Sprint 3 documentation sprint
+
+---
 
 ## ISSUE-047: Sprint 1 Carryover Blockers (TanStack Query Version Lock)
 
@@ -85,7 +749,7 @@ This issue serves as a **running log** of all code issues, bugs, tech debt, and 
 
 - apps/web/package.json (lines 34-37)
 - apps/web/lib/store/app.store.ts (lines 162-175)
-- apps/web/lib/query/**tests**/query-client-store-integration.test.ts (NEW, 270+ lines)
+- apps/web/lib/query/tests/query-client-store-integration.test.ts (NEW, 270+ lines)
 - apps/web/docs/TANSTACK_QUERY_VERSION_LOCK.md (NEW)
 
 **Lines Changed:** +450 / -3
@@ -171,7 +835,7 @@ if (isOnline && queryClient) {
 #### 3. Missing Offline Scenario Tests
 
 **Severity:** Medium
-**File:** apps/web/lib/query/**tests**/query-client-store-integration.test.ts
+**File:** apps/web/lib/query/tests/query-client-store-integration.test.ts
 **Impact:** Integration tests don't simulate actual offline scenarios
 **CLAUDE.md Reference:** Line 196 - "Test all features in offline mode"
 
@@ -281,7 +945,7 @@ export function useAppStore() {
 #### 6. Test Mock Implementation Improper
 
 **Severity:** Medium
-**File:** apps/web/lib/query/**tests**/query-client-store-integration.test.ts:210-224
+**File:** apps/web/lib/query/tests/query-client-store-integration.test.ts:210-224
 **Impact:** Fragile test, improper cleanup
 **Testing Best Practice:** Use built-in spy functions
 
@@ -370,7 +1034,7 @@ updateWeatherData: (weatherData: AppState['weatherData']) => {
 #### 9. Edge Case Test Coverage Gap
 
 **Severity:** Low
-**File:** apps/web/lib/query/**tests**/query-client-store-integration.test.ts
+**File:** apps/web/lib/query/tests/query-client-store-integration.test.ts
 **Impact:** Missing tests for stress scenarios
 **Enhancement:** Comprehensive test coverage
 
@@ -465,6 +1129,19 @@ describe('Edge Cases', () => {
 - [ ] Run final quality gates on entire codebase
 - [ ] Verify all evidence collected for fixed issues
 
+**ISSUE-069 Specific:**
+
+- [ ] Fix CRITICAL-1: Multi-tenant source template access
+- [ ] Fix CRITICAL-2: Offline metadata for cloned templates
+- [ ] Fix CRITICAL-3: EPA/OSHA compliance validation
+- [ ] Fix CRITICAL-4: Database transaction for atomicity
+- [ ] Fix HIGH-1: Comprehensive error handling
+- [ ] Fix HIGH-2: Input validation for all parameters
+- [ ] Fix HIGH-3: Offline scenario tests
+- [ ] Fix MEDIUM-1: JSDoc documentation completion
+- [ ] Fix MEDIUM-2: Use or remove projectId parameter
+- [ ] Fix MEDIUM-3: Add offlineCreated to GraphQL input
+
 **ISSUE-047 Specific:**
 
 - [x] Fix H1: Remove `any` type in app.store.ts:244 ✅
@@ -494,9 +1171,10 @@ _Items deferred from Sprint 2 that need to be addressed in Sprint 3:_
 
 **Low Priority Tech Debt:**
 
-- L1: Add package.json comment for version lock context
-- L2: Weather data timestamp validation for EPA accuracy
-- L3: Edge case test coverage (queue stress, network flapping)
+- L1: Add package.json comment for version lock context (ISSUE-047)
+- L2: Weather data timestamp validation for EPA accuracy (ISSUE-047)
+- L3: Edge case test coverage (queue stress, network flapping) (ISSUE-047)
+- L4: README.md template cloning examples enhancement (ISSUE-069)
 
 ---
 
@@ -579,6 +1257,6 @@ _Items deferred from Sprint 2 that need to be addressed in Sprint 3:_
 
 **This is a living document updated throughout Sprint 2.**
 
-**Last Updated:** 2025-10-02 20:45:00 EDT (ISSUE-047 review added)
+**Last Updated:** 2025-10-23 21:30:00 EDT (ISSUE-069 review added)
 **Next Review:** After each issue completion
 **Final Review:** October 24, 2025 (day before Sprint Review)
