@@ -197,24 +197,8 @@ export const theme: MantineThemeOverride = {
     },
   },
 
-  globalStyles: (theme) => ({
-    body: {
-      backgroundColor: theme.colors.gray ? theme.colors.gray[0] : '#f9fafb',
-      color: theme.colors.gray ? theme.colors.gray[9] : '#111827',
-    },
-
-    // High contrast for sunlight readability
-    '*': {
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale',
-    },
-
-    // Ensure minimum touch targets throughout
-    'button, a, input, select, textarea': {
-      minHeight: '48px',
-      minWidth: '48px',
-    },
-  }),
+  // Note: globalStyles removed due to Next.js 14 Client Component limitations
+  // Global styles are applied via globals.css instead
 };
 
 /**

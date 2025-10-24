@@ -1,5 +1,4 @@
 import { proxy } from 'valtio';
-import { persist } from 'valtio-persist';
 
 /**
  * Navigation Store
@@ -51,17 +50,9 @@ const initialState: NavigationState = {
 };
 
 /**
- * Navigation store with localStorage persistence
+ * Navigation store
  */
-export const navigationStore = persist({
-  name: 'brave-forms-navigation',
-  initialState: proxy<NavigationState>(initialState),
-  version: 1,
-  migrations: {
-    // Migration function for future state shape changes
-  },
-  getStorage: () => localStorage,
-});
+export const navigationStore = proxy<NavigationState>(initialState);
 
 /**
  * Toggle sidebar collapsed state
