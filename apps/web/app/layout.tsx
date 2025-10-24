@@ -8,6 +8,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 // Local imports
 import { theme } from '@/lib/theme/construction.theme';
 import { AppProviders } from './providers';
+import { AppLayout } from '@/components/Layout/AppLayout';
 
 // Import Mantine CSS (required for v7)
 import '@mantine/core/styles.css';
@@ -32,7 +33,8 @@ export const metadata: Metadata = {
     default: 'BrAve Forms - Construction Compliance',
     template: '%s | BrAve Forms',
   },
-  description: 'EPA and OSHA compliance management for construction sites. Storm water inspections, safety reporting, and regulatory compliance made simple.',
+  description:
+    'EPA and OSHA compliance management for construction sites. Storm water inspections, safety reporting, and regulatory compliance made simple.',
   keywords: [
     'construction compliance',
     'EPA storm water',
@@ -45,31 +47,32 @@ export const metadata: Metadata = {
   authors: [{ name: 'BrAve Forms Team' }],
   creator: 'BrAve Forms',
   publisher: 'BrAve Forms',
-  
+
   // App-specific metadata
   applicationName: 'BrAve Forms',
   category: 'Business',
   classification: 'Construction Compliance Software',
-  
+
   // Social media metadata
   openGraph: {
     type: 'website',
     siteName: 'BrAve Forms',
     title: 'BrAve Forms - Construction Compliance Platform',
-    description: 'Streamline EPA and OSHA compliance for construction sites with digital forms, automated inspections, and regulatory tracking.',
+    description:
+      'Streamline EPA and OSHA compliance for construction sites with digital forms, automated inspections, and regulatory tracking.',
     locale: 'en_US',
   },
-  
+
   // Twitter metadata
   twitter: {
     card: 'summary_large_image',
     title: 'BrAve Forms - Construction Compliance',
     description: 'Digital compliance management for construction sites.',
   },
-  
+
   // Progressive Web App metadata
   manifest: '/manifest.json',
-  
+
   // Security and performance
   robots: {
     index: false, // Private business application
@@ -79,7 +82,7 @@ export const metadata: Metadata = {
       follow: false,
     },
   },
-  
+
   // Verification (if needed)
   // verification: {
   //   google: 'your-google-verification-code',
@@ -109,15 +112,18 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <head>
         {/* Color scheme script must be in head */}
         <ColorSchemeScript />
-        
+
         {/* Optimize viewport for mobile construction sites */}
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        
+
         {/* Prevent zoom on input focus (iOS) while maintaining accessibility */}
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
-        
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"
+        />
+
         {/* Construction-specific meta tags */}
         <meta name="application-name" content="BrAve Forms" />
         <meta name="format-detection" content="telephone=yes" />
@@ -134,11 +140,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
             }}
           >
             <AppProviders>
-              {/* Main application content */}
-              <div id="root" className="min-h-screen bg-gray-50">
-                {children}
-              </div>
-              
+              {/* Application layout with header and navigation */}
+              <AppLayout>{children}</AppLayout>
+
               {/* Global notifications */}
               <Notifications
                 position="top-right"
@@ -147,12 +151,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 containerWidth={400}
                 transitionDuration={300}
               />
-              
+
               {/* Development tools */}
               {process.env.NODE_ENV === 'development' && (
-                <ReactQueryDevtools
-                  initialIsOpen={false}
-                />
+                <ReactQueryDevtools initialIsOpen={false} />
               )}
             </AppProviders>
           </ModalsProvider>
