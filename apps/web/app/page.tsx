@@ -1,31 +1,54 @@
 'use client';
 
-import { Container, Title, Text, Badge } from '@mantine/core';
+import { Text, Badge, rem, Button } from '@mantine/core';
+import { IconRefresh } from '@tabler/icons-react';
+import { PageContainer } from '@/components/Layout/PageContainer';
 
 export default function HomePage() {
   return (
-    <Container size="lg" py="xl">
+    <PageContainer
+      title="Dashboard"
+      actions={
+        <Button
+          size="compact-sm"
+          variant="light"
+          leftSection={<IconRefresh size={12} />}
+          styles={{
+            root: {
+              fontSize: rem(11),
+              height: rem(28),
+              padding: `0 ${rem(10)}`,
+            },
+          }}
+        >
+          Refresh
+        </Button>
+      }
+    >
       <div style={{ textAlign: 'center' }}>
-        <Title order={1} size="h1" fw={700} c="blue.6" mb="xs">
+        <Text fw={600} c="blue.6" mb="xs" style={{ fontSize: rem(20), lineHeight: 1.3 }}>
           🏗️ BrAve Forms
-        </Title>
-        <Text size="xl" c="dimmed" fw={500} mb="md">
+        </Text>
+        <Text c="dimmed" fw={500} mb="md" style={{ fontSize: rem(13), lineHeight: 1.4 }}>
           Clean Development Environment Ready!
         </Text>
-        <Badge size="lg" color="green" variant="light">
+        <Badge size="sm" color="green" variant="light" style={{ fontSize: rem(11) }}>
           Authentication Removed - Ready for Development
         </Badge>
-        
-        <div style={{ marginTop: '2rem' }}>
-          <Text>
-            ✅ All containers running<br/>
-            ✅ Frontend: localhost:3005<br/>
-            ✅ Backend: localhost:3002<br/>
-            ✅ Database: localhost:5434<br/>
-            ✅ No authentication barriers
+
+        <div style={{ marginTop: rem(24) }}>
+          <Text style={{ fontSize: rem(12), lineHeight: 1.6 }}>
+            ✅ All containers running
+            <br />
+            ✅ Frontend: localhost:3005
+            <br />
+            ✅ Backend: localhost:3002
+            <br />
+            ✅ Database: localhost:5434
+            <br />✅ No authentication barriers
           </Text>
         </div>
       </div>
-    </Container>
+    </PageContainer>
   );
 }
