@@ -28,13 +28,13 @@ describe('EPA 0.25" Precipitation Threshold Compliance', () => {
       testValues.forEach(({ value, shouldTrigger }) => {
         const exceeded = value >= EPA_RAIN_THRESHOLD_INCHES;
         expect(exceeded).toBe(shouldTrigger);
-        
+
         if (!shouldTrigger && value === 0.249999) {
           // This specific case proves we're not rounding
           expect(exceeded).toBe(false);
           console.log(`✓ 0.249999" correctly does NOT trigger inspection`);
         }
-        
+
         if (shouldTrigger && value === 0.25) {
           // This proves exact threshold triggers
           expect(exceeded).toBe(true);
@@ -47,7 +47,7 @@ describe('EPA 0.25" Precipitation Threshold Compliance', () => {
       // JavaScript floating point: 0.1 + 0.15 might not exactly equal 0.25
       const calculated = 0.1 + 0.15;
       const threshold = 0.25;
-      
+
       // For EPA compliance, we must handle this correctly
       // Using >= handles floating point issues appropriately
       expect(calculated >= threshold).toBe(true);
@@ -74,17 +74,17 @@ describe('EPA 0.25" Precipitation Threshold Compliance', () => {
         },
       ];
 
-      scenarios.forEach(({ eventTime, expectedDeadline, reason }) => {
+      scenarios.forEach(({ eventTime, expectedDeadline: _expectedDeadline, reason }) => {
         const deadline = calculateInspectionDeadline(eventTime);
-        
+
         // Check it's a working day (Monday-Friday)
         expect(deadline.getDay()).toBeGreaterThanOrEqual(1);
         expect(deadline.getDay()).toBeLessThanOrEqual(5);
-        
+
         // Check it's during working hours (7am-5pm)
         expect(deadline.getHours()).toBeGreaterThanOrEqual(7);
         expect(deadline.getHours()).toBeLessThan(17);
-        
+
         console.log(`✓ ${reason}`);
       });
     });
@@ -94,7 +94,7 @@ describe('EPA 0.25" Precipitation Threshold Compliance', () => {
     test('Precipitation must be stored as exact floating point value', () => {
       const testPrecipitation = 0.251234567;
       const stored = testPrecipitation; // Simulating database storage
-      
+
       expect(stored).toBe(testPrecipitation);
       expect(stored.toString()).toBe('0.251234567');
       console.log(`✓ Exact precipitation value preserved: ${stored}`);
@@ -104,13 +104,11 @@ describe('EPA 0.25" Precipitation Threshold Compliance', () => {
       const events = [
         { amount: 0.24, shouldRecord: false },
         { amount: 0.25, shouldRecord: true },
-        { amount: 0.30, shouldRecord: true },
-        { amount: 1.50, shouldRecord: true },
+        { amount: 0.3, shouldRecord: true },
+        { amount: 1.5, shouldRecord: true },
       ];
 
-      const recordedEvents = events.filter(
-        e => e.amount >= EPA_RAIN_THRESHOLD_INCHES
-      );
+      const recordedEvents = events.filter((e) => e.amount >= EPA_RAIN_THRESHOLD_INCHES);
 
       expect(recordedEvents).toHaveLength(3);
       expect(recordedEvents[0].amount).toBe(0.25);
@@ -122,10 +120,10 @@ describe('EPA 0.25" Precipitation Threshold Compliance', () => {
 // Helper function matching the service implementation
 function calculateInspectionDeadline(eventTime: Date): Date {
   const deadline = new Date(eventTime.getTime() + 24 * 60 * 60 * 1000);
-  
+
   const deadlineHour = deadline.getHours();
   const isWeekend = deadline.getDay() === 0 || deadline.getDay() === 6;
-  
+
   // Adjust for working hours (7am-5pm)
   if (deadlineHour < 7) {
     deadline.setHours(7, 0, 0, 0);
@@ -133,7 +131,7 @@ function calculateInspectionDeadline(eventTime: Date): Date {
     deadline.setDate(deadline.getDate() + 1);
     deadline.setHours(7, 0, 0, 0);
   }
-  
+
   // Skip weekends
   if (isWeekend) {
     const daysToAdd = deadline.getDay() === 0 ? 1 : 2;

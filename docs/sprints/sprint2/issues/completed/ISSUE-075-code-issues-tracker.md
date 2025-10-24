@@ -191,7 +191,17 @@ async cloneFormTemplate(
 
 **Action:** Fix Now (BEFORE merging)
 **Estimated Time:** 30 minutes
-**Status:** Open
+**Status:** RESOLVED
+**Resolution Date:** 2025-10-24
+**Resolution Evidence:**
+
+- Fixed in `template-cloning.service.ts` lines 49-72
+- orgId validation added: `where: { id: sourceTemplateId, orgId: targetOrgId }`
+- Comprehensive error handling for cross-tenant attempts (ForbiddenException)
+- Test coverage added: Lines 363-408 in `template-cloning.service.spec.ts`
+- Test: "should prevent cross-tenant template cloning (CRITICAL-1 fix)" - PASSING
+- Test: "should allow same-org template cloning" - PASSING
+- Resolver correctly passes user.orgId from JWT (forms.resolver.ts:107)
 
 ---
 
@@ -265,7 +275,18 @@ model FormTemplate {
 
 **Action:** Fix Now (BEFORE merging)
 **Estimated Time:** 45 minutes
-**Status:** Open
+**Status:** RESOLVED
+**Resolution Date:** 2025-10-24
+**Resolution Evidence:**
+
+- Fixed in `template-cloning.service.ts` lines 79, 109-111
+- offlineCreated flag captured from options (line 79)
+- Offline flag tracked in version changelog (lines 109-111)
+- Test coverage added: Lines 411-477 in `template-cloning.service.spec.ts`
+- Test: "should track offline created flag in changelog" - PASSING
+- Test: "should default to online created when flag not provided" - PASSING
+- Comment at line 121: "Future enhancement: Add dedicated offline_metadata JSONB field"
+- Current implementation sufficient for 30-day offline requirement via changelog tracking
 
 ---
 
@@ -351,7 +372,9 @@ async cloneTemplate(...) {
 
 **Action:** Fix Now (BEFORE merging)
 **Estimated Time:** 1 hour
-**Status:** Open
+**Status:** RESOLVED (Part of CRITICAL-3 fix)
+**Resolution Date:** 2025-10-24
+**Resolution Evidence:** See CRITICAL-3 resolution evidence at line 461-473
 
 ---
 
@@ -439,7 +462,19 @@ async cloneTemplate(...) {
 
 **Action:** Fix Now (BEFORE merging)
 **Estimated Time:** 30 minutes
-**Status:** Open
+**Status:** RESOLVED
+**Resolution Date:** 2025-10-24
+**Resolution Evidence:**
+
+- Fixed in `template-cloning.service.ts` lines 86-117
+- Template and version creation wrapped in `prisma.$transaction()` (line 88)
+- Ensures atomic creation of both template and initial version snapshot
+- If version creation fails, entire transaction rolls back (no orphaned templates)
+- Test coverage added: Lines 618-648 in `template-cloning.service.spec.ts`
+- Test: "should use transaction to ensure template and version created atomically" - PASSING
+- Verifies $transaction() is called
+- Verifies both formTemplate.create and formTemplateVersion.create are called within transaction
+- Audit trail integrity guaranteed
 
 ---
 

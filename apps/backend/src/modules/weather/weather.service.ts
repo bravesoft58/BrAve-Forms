@@ -4,7 +4,7 @@ import { PrismaService } from '../database/prisma.service';
 import { NOAAService } from './providers/noaa.service';
 import { OpenWeatherMapService } from './providers/openweathermap.service';
 
-const EPA_RAIN_THRESHOLD_INCHES = 0.25; // CRITICAL: MUST be exactly 0.25" per EPA CGP
+const _EPA_RAIN_THRESHOLD_INCHES = 0.25; // CRITICAL: MUST be exactly 0.25" per EPA CGP
 
 @Injectable()
 export class WeatherService {
@@ -15,13 +15,13 @@ export class WeatherService {
     private prisma: PrismaService,
     private configService: ConfigService,
     private noaaService: NOAAService,
-    private openWeatherMapService: OpenWeatherMapService,
+    private openWeatherMapService: OpenWeatherMapService
   ) {
     // Validate EPA threshold from environment
     this.EPA_THRESHOLD = parseFloat(
       this.configService.get<string>('EPA_RAIN_THRESHOLD_INCHES', '0.25')
     );
-    
+
     // CRITICAL: Ensure exact 0.25" threshold compliance
     if (this.EPA_THRESHOLD !== 0.25) {
       this.logger.error(
@@ -29,15 +29,21 @@ export class WeatherService {
       );
       throw new Error('EPA compliance violation: Invalid rain threshold');
     }
-    
+
     this.logger.log(`EPA CGP compliance enabled: ${this.EPA_THRESHOLD}" precipitation threshold`);
   }
 
   async checkPrecipitation(
     latitude: number,
     longitude: number,
-    projectId: string,
-  ): Promise<{ exceeded: boolean; amount: number; requiresInspection: boolean; source: string; confidence: 'HIGH' | 'MEDIUM' | 'LOW' }> {
+    projectId: string
+  ): Promise<{
+    exceeded: boolean;
+    amount: number;
+    requiresInspection: boolean;
+    source: string;
+    confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+  }> {
     const startTime = Date.now();
     let precipitationAmount: number = 0;
     let dataSource = 'UNKNOWN';
@@ -46,7 +52,7 @@ export class WeatherService {
     try {
       // Try NOAA first (highest accuracy)
       precipitationAmount = await this.noaaService.getPrecipitation(latitude, longitude);
-      
+
       if (precipitationAmount !== null) {
         dataSource = 'NOAA';
         confidence = 'HIGH';
@@ -54,15 +60,20 @@ export class WeatherService {
       } else {
         // Fallback to OpenWeatherMap
         this.logger.warn(`NOAA unavailable for project ${projectId}, using OpenWeatherMap`);
-        precipitationAmount = await this.openWeatherMapService.getPrecipitation(latitude, longitude);
+        precipitationAmount = await this.openWeatherMapService.getPrecipitation(
+          latitude,
+          longitude
+        );
         dataSource = 'OPENWEATHER';
         confidence = 'MEDIUM';
-        this.logger.debug(`OpenWeatherMap precipitation: ${precipitationAmount}" for project ${projectId}`);
+        this.logger.debug(
+          `OpenWeatherMap precipitation: ${precipitationAmount}" for project ${projectId}`
+        );
       }
 
       // CRITICAL EPA COMPLIANCE CHECK: Exact 0.25" threshold
       const exceeded = precipitationAmount >= this.EPA_THRESHOLD;
-      
+
       // Log threshold comparison for audit trail
       this.logger.log(
         `EPA threshold check: ${precipitationAmount}" ${exceeded ? '>=' : '<'} ${this.EPA_THRESHOLD}" = ${exceeded ? 'EXCEEDED' : 'OK'} (project: ${projectId}, source: ${dataSource})`
@@ -82,8 +93,8 @@ export class WeatherService {
         );
       }
 
-      const requiresInspection = exceeded && await this.isWithinWorkingHours();
-      
+      const requiresInspection = exceeded && (await this.isWithinWorkingHours());
+
       // Performance monitoring
       const duration = Date.now() - startTime;
       this.logger.debug(`Weather check completed in ${duration}ms for project ${projectId}`);
@@ -97,7 +108,7 @@ export class WeatherService {
       };
     } catch (error) {
       this.logger.error(`Failed to check precipitation for project ${projectId}: ${error.message}`);
-      
+
       // For compliance, we cannot assume zero precipitation on errors
       // Return cached data or alert for manual verification
       const cachedData = await this.getCachedWeatherData(projectId);
@@ -111,7 +122,7 @@ export class WeatherService {
           confidence: 'LOW',
         };
       }
-      
+
       throw error;
     }
   }
@@ -147,21 +158,28 @@ export class WeatherService {
     return weatherEvent;
   }
 
-  private async cacheWeatherData(projectId: string, data: {
-    precipitationInches: number;
-    timestamp: Date;
-    source: string;
-  }): Promise<void> {
+  private async cacheWeatherData(
+    projectId: string,
+    data: {
+      precipitationInches: number;
+      timestamp: Date;
+      source: string;
+    }
+  ): Promise<void> {
     try {
       // Store in database for historical reference and offline access
       // This would typically be stored in Redis for faster access, but database works for MVP
-      this.logger.debug(`Caching weather data for project ${projectId}: ${data.precipitationInches}"`);
+      this.logger.debug(
+        `Caching weather data for project ${projectId}: ${data.precipitationInches}"`
+      );
     } catch (error) {
       this.logger.warn(`Failed to cache weather data for project ${projectId}: ${error.message}`);
     }
   }
 
-  private async getCachedWeatherData(projectId: string): Promise<{ precipitationInches: number } | null> {
+  private async getCachedWeatherData(
+    projectId: string
+  ): Promise<{ precipitationInches: number } | null> {
     try {
       // Get most recent weather event for this project (within last 4 hours)
       const recentEvent = await this.prisma.weatherEvent.findFirst({
@@ -178,7 +196,9 @@ export class WeatherService {
 
       return recentEvent ? { precipitationInches: recentEvent.precipitationInches } : null;
     } catch (error) {
-      this.logger.error(`Failed to get cached weather data for project ${projectId}: ${error.message}`);
+      this.logger.error(
+        `Failed to get cached weather data for project ${projectId}: ${error.message}`
+      );
       return null;
     }
   }
@@ -186,17 +206,17 @@ export class WeatherService {
   private calculateInspectionDeadline(): Date {
     const now = new Date();
     const deadline = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    
+
     const deadlineHour = deadline.getHours();
     const isWeekend = deadline.getDay() === 0 || deadline.getDay() === 6;
-    
+
     if (deadlineHour < 7) {
       deadline.setHours(7, 0, 0, 0);
     } else if (deadlineHour >= 17) {
       deadline.setDate(deadline.getDate() + 1);
       deadline.setHours(7, 0, 0, 0);
     }
-    
+
     if (isWeekend) {
       const daysToAdd = deadline.getDay() === 0 ? 1 : 2;
       deadline.setDate(deadline.getDate() + daysToAdd);
@@ -210,10 +230,10 @@ export class WeatherService {
     const now = new Date();
     const hour = now.getHours();
     const day = now.getDay();
-    
+
     const isWeekday = day > 0 && day < 6;
     const isWorkingHour = hour >= 7 && hour < 17;
-    
+
     return isWeekday && isWorkingHour;
   }
 
