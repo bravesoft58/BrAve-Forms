@@ -6,9 +6,9 @@ import { Notifications } from '@mantine/notifications';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 // Local imports
-import { theme } from '@/lib/theme';
+import { theme } from '@/lib/theme/construction.theme';
 import { AppProviders } from './providers';
-import { AppShell } from '@/components/Layout/AppShell';
+import { AppLayout } from '@/components/Layout/AppLayout';
 
 // Import Mantine CSS (required for v7)
 import '@mantine/core/styles.css';
@@ -140,24 +140,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
             }}
           >
             <AppProviders>
-              {/* AppShell provides header, navbar, and main layout structure */}
-              <AppShell
-                header={
-                  <div style={{ padding: '1rem', display: 'flex', alignItems: 'center' }}>
-                    <strong>BrAve Forms</strong>
-                    {/* Full header will be built in ISSUE-077 */}
-                  </div>
-                }
-                navbar={
-                  <div>
-                    <p>Navigation</p>
-                    {/* Full navbar will be built in ISSUE-078 */}
-                  </div>
-                }
-              >
-                {/* Main application content */}
-                {children}
-              </AppShell>
+              {/* Application layout with header and navigation */}
+              <AppLayout>{children}</AppLayout>
 
               {/* Global notifications */}
               <Notifications
