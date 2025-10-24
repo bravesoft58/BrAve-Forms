@@ -160,8 +160,8 @@ export function AppHeader({
 
   return (
     <Group
-      h={56}
-      px={isMobile ? 'md' : 'xl'}
+      h={48}
+      px={isMobile ? 'sm' : 'md'}
       justify="space-between"
       style={{
         backgroundColor: theme.white,
@@ -169,16 +169,16 @@ export function AppHeader({
       }}
     >
       {/* Left Section: Hamburger (mobile) + Logo */}
-      <Group gap="sm">
+      <Group gap="xs">
         {isMobile && (
           <ActionIcon
             variant="subtle"
             color="gray"
-            size={48}
+            size={40}
             onClick={toggleMobileMenu}
             aria-label="Toggle navigation menu"
           >
-            <IconMenu2 size={20} />
+            <IconMenu2 size={18} />
           </ActionIcon>
         )}
 
@@ -194,16 +194,16 @@ export function AppHeader({
           {/* Logo placeholder - will be replaced with actual logo */}
           <div
             style={{
-              width: rem(28),
-              height: rem(28),
-              borderRadius: rem(6),
+              width: rem(24),
+              height: rem(24),
+              borderRadius: rem(4),
               backgroundColor: theme.colors.blue[6],
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'white',
-              fontWeight: 700,
-              fontSize: rem(14),
+              fontWeight: 600,
+              fontSize: rem(12),
             }}
           >
             BF
@@ -212,9 +212,9 @@ export function AppHeader({
           {/* Brand name - hidden on very small mobile */}
           {!isMobile && (
             <Text
-              fw={600}
+              fw={500}
               c={theme.colors.blue[6]}
-              style={{ userSelect: 'none', fontSize: rem(14) }}
+              style={{ userSelect: 'none', fontSize: rem(13), lineHeight: 1 }}
             >
               BrAve Forms
             </Text>
@@ -223,11 +223,11 @@ export function AppHeader({
       </Group>
 
       {/* Right Section: Search + Sync + User */}
-      <Group gap="sm">
+      <Group gap="xs">
         {/* Search - Desktop expands, Mobile opens modal */}
         {!isMobile && searchExpanded ? (
           <TextInput
-            placeholder="Search projects, forms..."
+            placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => {
@@ -236,23 +236,24 @@ export function AppHeader({
             }}
             onBlur={() => setSearchExpanded(false)}
             autoFocus
+            size="xs"
             rightSection={
-              <ActionIcon variant="subtle" onClick={handleSearch}>
-                <IconSearch size={16} />
+              <ActionIcon variant="subtle" onClick={handleSearch} size="xs">
+                <IconSearch size={14} />
               </ActionIcon>
             }
-            style={{ width: rem(300) }}
+            style={{ width: rem(200) }}
           />
         ) : (
           <Tooltip label="Search" position="bottom">
             <ActionIcon
               variant="subtle"
               color="gray"
-              size={48}
+              size={40}
               onClick={() => setSearchExpanded(true)}
               aria-label="Search"
             >
-              <IconSearch size={18} />
+              <IconSearch size={16} />
             </ActionIcon>
           </Tooltip>
         )}
@@ -261,22 +262,22 @@ export function AppHeader({
         <Tooltip label={syncLabel} position="bottom">
           <ActionIcon
             variant="subtle"
-            size={48}
+            size={40}
             style={{ color: syncColor }}
             aria-label={syncLabel}
           >
-            <SyncIcon size={18} />
+            <SyncIcon size={16} />
           </ActionIcon>
         </Tooltip>
 
         {/* User Menu */}
-        <Menu width={240} position="bottom-end" shadow="md" offset={8}>
+        <Menu width={200} position="bottom-end" shadow="md" offset={4}>
           <Menu.Target>
-            <ActionIcon variant="subtle" size={48} radius="xl" aria-label="User menu">
+            <ActionIcon variant="subtle" size={40} radius="xl" aria-label="User menu">
               {user.avatar ? (
-                <Avatar src={user.avatar} size={28} radius="xl" />
+                <Avatar src={user.avatar} size={24} radius="xl" />
               ) : (
-                <Avatar color="blue" size={28} radius="xl">
+                <Avatar color="blue" size={24} radius="xl">
                   {getUserInitials(user.name)}
                 </Avatar>
               )}
