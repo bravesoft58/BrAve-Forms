@@ -160,7 +160,7 @@ export function AppHeader({
 
   return (
     <Group
-      h={64}
+      h={56}
       px={isMobile ? 'md' : 'xl'}
       justify="space-between"
       style={{
@@ -169,7 +169,7 @@ export function AppHeader({
       }}
     >
       {/* Left Section: Hamburger (mobile) + Logo */}
-      <Group gap="md">
+      <Group gap="sm">
         {isMobile && (
           <ActionIcon
             variant="subtle"
@@ -178,7 +178,7 @@ export function AppHeader({
             onClick={toggleMobileMenu}
             aria-label="Toggle navigation menu"
           >
-            <IconMenu2 size={24} />
+            <IconMenu2 size={20} />
           </ActionIcon>
         )}
 
@@ -188,22 +188,22 @@ export function AppHeader({
             textDecoration: 'none',
             display: 'flex',
             alignItems: 'center',
-            gap: rem(8),
+            gap: rem(6),
           }}
         >
           {/* Logo placeholder - will be replaced with actual logo */}
           <div
             style={{
-              width: rem(32),
-              height: rem(32),
-              borderRadius: rem(8),
+              width: rem(28),
+              height: rem(28),
+              borderRadius: rem(6),
               backgroundColor: theme.colors.blue[6],
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'white',
               fontWeight: 700,
-              fontSize: rem(16),
+              fontSize: rem(14),
             }}
           >
             BF
@@ -211,7 +211,11 @@ export function AppHeader({
 
           {/* Brand name - hidden on very small mobile */}
           {!isMobile && (
-            <Text size="lg" fw={600} c={theme.colors.blue[6]} style={{ userSelect: 'none' }}>
+            <Text
+              fw={600}
+              c={theme.colors.blue[6]}
+              style={{ userSelect: 'none', fontSize: rem(14) }}
+            >
               BrAve Forms
             </Text>
           )}
@@ -234,7 +238,7 @@ export function AppHeader({
             autoFocus
             rightSection={
               <ActionIcon variant="subtle" onClick={handleSearch}>
-                <IconSearch size={18} />
+                <IconSearch size={16} />
               </ActionIcon>
             }
             style={{ width: rem(300) }}
@@ -248,7 +252,7 @@ export function AppHeader({
               onClick={() => setSearchExpanded(true)}
               aria-label="Search"
             >
-              <IconSearch size={20} />
+              <IconSearch size={18} />
             </ActionIcon>
           </Tooltip>
         )}
@@ -261,7 +265,7 @@ export function AppHeader({
             style={{ color: syncColor }}
             aria-label={syncLabel}
           >
-            <SyncIcon size={20} />
+            <SyncIcon size={18} />
           </ActionIcon>
         </Tooltip>
 
@@ -270,9 +274,9 @@ export function AppHeader({
           <Menu.Target>
             <ActionIcon variant="subtle" size={48} radius="xl" aria-label="User menu">
               {user.avatar ? (
-                <Avatar src={user.avatar} size={32} radius="xl" />
+                <Avatar src={user.avatar} size={28} radius="xl" />
               ) : (
-                <Avatar color="blue" size={32} radius="xl">
+                <Avatar color="blue" size={28} radius="xl">
                   {getUserInitials(user.name)}
                 </Avatar>
               )}
