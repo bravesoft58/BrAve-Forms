@@ -555,6 +555,17 @@ Use these custom slash commands for streamlined workflows:
 - **Pod Logs:** `kubectl logs -f deployment/backend -n braveforms`
 - **Port Forward:** `kubectl port-forward svc/postgres 5432:5432 -n braveforms`
 
+**Port Allocation (CRITICAL - ALWAYS CHECK BEFORE NEW PODS):**
+
+- **braveforms namespace:** 30101 (backend), 30102 (web), 30103 (minio-console)
+- **velocitymesh namespace:** 30640, 31447, 32323 (api-gateway, frontend)
+- **Available Range:** 30104-30639, 30641-31446, 31448-32322, 32324-32767
+- **Check All Namespaces:** `kubectl get services --all-namespaces -o jsonpath='{range .items[?(@.spec.type=="NodePort")]}{.metadata.namespace}{"\t"}{.metadata.name}{"\t"}{range .spec.ports[*]}{.nodePort}{"("}{.port}{") "}{end}{"\n"}{end}' | sort -k3 -n`
+- **Before Creating New Pod:** MUST verify port not in use across ALL namespaces in Rancher Desktop
+- **NodePort Range:** 30000-32767 (Kubernetes default)
+- **Conflict Resolution:** Change nodePort in YAML manifest if port in use
+- **Verification:** Run netstat to confirm port listening after deployment
+
 **Quality Assurance:**
 
 - **Full Quality Check:** `pnpm qa` (lint + type-check + test)
@@ -699,6 +710,7 @@ Every session start:
 5. Run `/review` after any significant change (>50 lines)
 6. Scan code for emoji/branding before committing
 7. Never claim "done" without passing `/qa`
+8. **BEFORE creating new Kubernetes pods:** Check port conflicts across all namespaces
 
 ### Before Commit (MANDATORY CHECKLIST):
 
