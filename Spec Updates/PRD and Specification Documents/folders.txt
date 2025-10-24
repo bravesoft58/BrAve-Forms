@@ -1,0 +1,16 @@
+project-name/
+├── docs/
+│   ├── prd.md                       # Product Requirements Document
+│   ├── frontend.md                  # Frontend Documentation
+│   ├── backend.md                   # Backend Documentation
+│   ├── api.md                       # API Documentation
+│   ├── database-schema.md           # Database Schema Documentation
+│   ├── user-flow.md                 # User Flow Documentation
+│   ├── devops.md                    # DevOps Documentation
+│   ├── state-management.md          # State Management Documentation
+│   ├── performance-optimization.md  # Performance Optimization Documentation
+│   ├── testing-plan.md              # Testing Documentation
+│   ├── code-documentation.md        # Code Documentation
+│   ├── security.md                  # Security Documentation
+│   └── third-party-libraries.md     # Third-Party Libraries Documentation
+├── README.md                        # Project Overview and Setup Instructions

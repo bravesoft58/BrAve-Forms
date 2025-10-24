@@ -1,0 +1,29 @@
+graph TD
+  A[Log In] --> B[Access Project]
+  B --> C[View Logs]
+  C --> D{Create or Edit Log}
+  D --> E[Create New Log]
+  D --> F[Copy Previous Log]
+  E --> G[Add Photos & Details]
+  F --> G
+  G --> H[Submit Log]
+
+
+
+graph TD
+  A[Scan QR Code] --> B[View Logs]
+  B --> C{Download or Export Logs}
+  C --> D[Download Logs]
+  C --> E[Export Logs]
+
+
+graph TD
+  A[Error Occurs] --> B{Error Type}
+  B --> C[Invalid Login]
+  B --> D[MFA Failure]
+  B --> E[Network Issues]
+  B --> F[Form Validation Errors]
+  C --> G[Display Error Message]
+  D --> G
+  E --> G
+  F --> G

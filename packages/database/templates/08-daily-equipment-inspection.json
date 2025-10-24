@@ -1,0 +1,112 @@
+{
+  "name": "Daily Equipment Inspection",
+  "description": "Daily pre-shift equipment inspection per OSHA 1926.1412 - competent person inspection of heavy equipment, tools, and safety systems",
+  "category": "EQUIPMENT",
+  "version": "1.0.0",
+  "compliance": {
+    "regulation": "OSHA 1926.1412 - Daily Equipment Inspections",
+    "requiredFields": [
+      "date",
+      "shift",
+      "equipment_id",
+      "inspector_name",
+      "safety_features_check",
+      "deficiencies",
+      "inspector_signature"
+    ],
+    "frequency": "Prior to each shift per OSHA requirements",
+    "inspector_requirement": "Competent person per OSHA 1926.1427"
+  },
+  "schema": {
+    "sections": [
+      {
+        "id": "inspection_info",
+        "title": "Inspection Information",
+        "order": 1,
+        "fields": [
+          {"id": "date", "type": "date", "label": "Inspection Date", "required": true, "defaultValue": "{{currentDate}}"},
+          {"id": "shift", "type": "select", "label": "Shift", "required": true, "options": [{"value": "day", "label": "Day Shift"}, {"value": "night", "label": "Night Shift"}, {"value": "swing", "label": "Swing Shift"}]},
+          {"id": "inspector_name", "type": "text", "label": "Inspector Name", "required": true, "defaultValue": "{{currentUser}}"},
+          {"id": "inspector_title", "type": "text", "label": "Inspector Title", "placeholder": "Competent Person, Foreman, Safety Manager", "required": false}
+        ]
+      },
+      {
+        "id": "equipment_info",
+        "title": "Equipment Information",
+        "order": 2,
+        "fields": [
+          {"id": "equipment_type", "type": "select", "label": "Equipment Type", "required": true, "options": [{"value": "excavator", "label": "Excavator"}, {"value": "loader", "label": "Loader"}, {"value": "dozer", "label": "Dozer"}, {"value": "backhoe", "label": "Backhoe"}, {"value": "crane", "label": "Crane"}, {"value": "forklift", "label": "Forklift"}, {"value": "scissor_lift", "label": "Scissor Lift"}, {"value": "boom_lift", "label": "Boom Lift"}, {"value": "skid_steer", "label": "Skid Steer"}, {"value": "compactor", "label": "Compactor"}, {"value": "dump_truck", "label": "Dump Truck"}, {"value": "concrete_pump", "label": "Concrete Pump"}, {"value": "generator", "label": "Generator"}, {"value": "other", "label": "Other"}]},
+          {"id": "equipment_id", "type": "text", "label": "Equipment ID/Number", "required": true, "validation": {"maxLength": 100}},
+          {"id": "make_model", "type": "text", "label": "Make/Model", "required": false},
+          {"id": "operator_name", "type": "text", "label": "Operator Name", "required": false},
+          {"id": "hour_meter", "type": "number", "label": "Hour Meter Reading", "required": false, "validation": {"min": 0, "max": 99999}}
+        ]
+      },
+      {
+        "id": "walk_around",
+        "title": "Walk-Around Check",
+        "order": 3,
+        "fields": [
+          {"id": "tires_tracks", "type": "select", "label": "Tires/Tracks Condition", "required": true, "options": [{"value": "good", "label": "Good - Proper inflation/tension"}, {"value": "fair", "label": "Fair - Acceptable"}, {"value": "poor", "label": "Poor - Needs attention"}, {"value": "na", "label": "N/A"}]},
+          {"id": "fluid_levels", "type": "select", "label": "Fluid Levels (oil, hydraulic, coolant)", "required": true, "options": [{"value": "good", "label": "Good - All levels adequate"}, {"value": "low", "label": "Low - Top-off required"}, {"value": "critical", "label": "Critical - Do not operate"}]},
+          {"id": "leaks", "type": "select", "label": "Leaks (hydraulic, fuel, oil)", "required": true, "options": [{"value": "none", "label": "No leaks"}, {"value": "minor", "label": "Minor leak - Monitor"}, {"value": "major", "label": "Major leak - Repair required"}]},
+          {"id": "bolts_pins", "type": "select", "label": "Bolts/Pins Secure", "required": true, "options": [{"value": "secure", "label": "All secure"}, {"value": "loose", "label": "Loose - Tighten required"}, {"value": "missing", "label": "Missing - Do not operate"}]},
+          {"id": "structural_damage", "type": "select", "label": "Structural Damage", "required": true, "options": [{"value": "none", "label": "No damage"}, {"value": "minor", "label": "Minor damage - Document"}, {"value": "major", "label": "Major damage - Out of service"}]},
+          {"id": "guards_shields", "type": "select", "label": "Guards/Shields in Place", "required": true, "options": [{"value": "installed", "label": "All installed"}, {"value": "missing", "label": "Missing - Do not operate"}]}
+        ]
+      },
+      {
+        "id": "safety_features",
+        "title": "Safety Features",
+        "order": 4,
+        "fields": [
+          {"id": "brakes", "type": "select", "label": "Brakes Functioning", "required": true, "options": [{"value": "good", "label": "Good - Responsive"}, {"value": "marginal", "label": "Marginal - Needs adjustment"}, {"value": "failed", "label": "Failed - Out of service"}]},
+          {"id": "steering", "type": "select", "label": "Steering Controls", "required": true, "options": [{"value": "good", "label": "Good - Responsive"}, {"value": "stiff", "label": "Stiff - Needs service"}, {"value": "failed", "label": "Failed"}]},
+          {"id": "hydraulics", "type": "select", "label": "Hydraulic Systems", "required": true, "options": [{"value": "good", "label": "Good - All functions work"}, {"value": "sluggish", "label": "Sluggish - Check fluid/filter"}, {"value": "failed", "label": "Failed - Out of service"}, {"value": "na", "label": "N/A"}]},
+          {"id": "emergency_stop", "type": "select", "label": "Emergency Stop/Shutdown", "required": true, "options": [{"value": "functional", "label": "Functional - Tested"}, {"value": "not_tested", "label": "Not tested"}, {"value": "failed", "label": "Failed - Do not operate"}, {"value": "na", "label": "N/A"}]},
+          {"id": "horn", "type": "select", "label": "Horn/Backup Alarm", "required": true, "options": [{"value": "functional", "label": "Functional"}, {"value": "weak", "label": "Weak - Replace"}, {"value": "inoperative", "label": "Inoperative - Repair required"}]},
+          {"id": "seatbelt", "type": "select", "label": "Seatbelt", "required": true, "options": [{"value": "good", "label": "Good condition"}, {"value": "worn", "label": "Worn - Replace"}, {"value": "missing", "label": "Missing - Do not operate"}]},
+          {"id": "fire_extinguisher", "type": "select", "label": "Fire Extinguisher", "required": true, "options": [{"value": "present_charged", "label": "Present & Charged"}, {"value": "present_discharged", "label": "Present but discharged"}, {"value": "missing", "label": "Missing"}]},
+          {"id": "lights", "type": "select", "label": "Lights (if applicable)", "required": true, "options": [{"value": "functional", "label": "All functional"}, {"value": "some_out", "label": "Some inoperative"}, {"value": "all_out", "label": "All inoperative"}, {"value": "na", "label": "N/A - Daylight only"}]},
+          {"id": "rops_fops", "type": "select", "label": "ROPS/FOPS (Rollover/Falling Object Protection)", "required": true, "options": [{"value": "intact", "label": "Intact - No damage"}, {"value": "damaged", "label": "Damaged - Do not operate"}, {"value": "removed", "label": "Removed - VIOLATION"}, {"value": "na", "label": "N/A"}]}
+        ]
+      },
+      {
+        "id": "deficiencies",
+        "title": "Deficiencies & Corrective Actions",
+        "order": 5,
+        "fields": [
+          {"id": "deficiencies_found", "type": "radio", "label": "Deficiencies Found?", "required": true, "options": [{"value": "yes", "label": "Yes"}, {"value": "no", "label": "No"}], "defaultValue": "no"},
+          {"id": "deficiency_list", "type": "repeater", "label": "Deficiencies", "required": true, "minItems": 1, "maxItems": 20, "conditionalDisplay": {"field": "deficiencies_found", "operator": "equals", "value": "yes"}, "itemSchema": {"fields": [{"id": "issue", "type": "text", "label": "Issue Description", "required": true}, {"id": "severity", "type": "select", "label": "Severity", "required": true, "options": [{"value": "critical", "label": "Critical - Do not operate"}, {"value": "high", "label": "High - Repair before next shift"}, {"value": "medium", "label": "Medium - Repair this week"}, {"value": "low", "label": "Low - Monitor"}]}, {"id": "corrective_action", "type": "text", "label": "Corrective Action", "required": true}]}}
+        ]
+      },
+      {
+        "id": "equipment_status",
+        "title": "Equipment Status",
+        "order": 6,
+        "fields": [
+          {"id": "status", "type": "select", "label": "Equipment Status", "required": true, "options": [{"value": "approved", "label": "APPROVED - Safe to operate"}, {"value": "approved_with_conditions", "label": "APPROVED WITH CONDITIONS - Minor issues noted"}, {"value": "out_of_service", "label": "OUT OF SERVICE - Do not operate"}]},
+          {"id": "out_of_service_reason", "type": "textarea", "label": "Out of Service Reason", "required": true, "conditionalDisplay": {"field": "status", "operator": "equals", "value": "out_of_service"}},
+          {"id": "photos", "type": "photo", "label": "Inspection Photos", "required": false, "multiple": true, "maxPhotos": 20, "captureGPS": true, "helpText": "Document deficiencies or equipment condition"}
+        ]
+      },
+      {
+        "id": "signature",
+        "title": "Inspector Certification",
+        "order": 7,
+        "fields": [
+          {"id": "notes", "type": "textarea", "label": "Additional Notes", "required": false, "validation": {"maxLength": 1000}},
+          {"id": "inspector_signature", "type": "signature", "label": "Inspector Signature", "required": true, "captureTimestamp": true, "helpText": "I certify this inspection was conducted per OSHA 1926.1412"},
+          {"id": "operator_acknowledgment", "type": "signature", "label": "Operator Acknowledgment", "required": false, "captureTimestamp": true, "helpText": "Operator acknowledges equipment status"}
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "10-15 minutes",
+    "fieldOptimization": "mobile-friendly with large touch targets",
+    "industryStandard": "OSHA 1926.1412, OSHA 1926.20(b)",
+    "targetRole": "Equipment Operator, Competent Person, Foreman"
+  }
+}

@@ -1,0 +1,673 @@
+{
+  "name": "Concrete Pour Inspection",
+  "description": "Comprehensive concrete pour inspection per ACI 318-19 standards - covers pre-pour, during-pour, and post-pour inspection points with test cylinder documentation",
+  "category": "QUALITY_CONTROL",
+  "version": "1.0.0",
+  "compliance": {
+    "regulation": "ACI 318-19 - Building Code Requirements for Structural Concrete",
+    "requiredFields": [
+      "date",
+      "mix_design",
+      "slump_test",
+      "placement_method",
+      "curing_method",
+      "test_cylinders",
+      "inspector_certification",
+      "inspector_signature"
+    ],
+    "inspector_requirement": "ACI Field Testing Technician Grade I certification recommended",
+    "standards": "ACI 318-19, ACI SPEC-311.7-18"
+  },
+  "schema": {
+    "sections": [
+      {
+        "id": "project_info",
+        "title": "Project Information",
+        "order": 1,
+        "fields": [
+          {
+            "id": "date",
+            "type": "date",
+            "label": "Pour Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}",
+            "validation": {
+              "max": "{{currentDate}}"
+            }
+          },
+          {
+            "id": "project_name",
+            "type": "text",
+            "label": "Project Name",
+            "required": true,
+            "defaultValue": "{{projectName}}",
+            "readonly": true
+          },
+          {
+            "id": "element_location",
+            "type": "text",
+            "label": "Element/Location",
+            "placeholder": "e.g., Foundation, Column Grid A-3, Slab Level 2",
+            "required": true,
+            "validation": {
+              "maxLength": 200
+            }
+          },
+          {
+            "id": "inspector_name",
+            "type": "text",
+            "label": "Inspector Name",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "readonly": true
+          },
+          {
+            "id": "inspector_certification",
+            "type": "text",
+            "label": "Inspector Certification",
+            "placeholder": "e.g., ACI Field Testing Technician Grade I",
+            "required": false,
+            "validation": {
+              "maxLength": 150
+            },
+            "helpText": "ACI certification recommended"
+          }
+        ]
+      },
+      {
+        "id": "concrete_spec",
+        "title": "Concrete Specification",
+        "order": 2,
+        "fields": [
+          {
+            "id": "mix_design",
+            "type": "text",
+            "label": "Mix Design Number",
+            "required": true,
+            "validation": {
+              "maxLength": 100
+            }
+          },
+          {
+            "id": "specified_strength",
+            "type": "number",
+            "label": "Specified Compressive Strength (psi)",
+            "placeholder": "e.g., 3000, 4000, 5000",
+            "required": true,
+            "validation": {
+              "min": 2000,
+              "max": 15000
+            }
+          },
+          {
+            "id": "slump_spec",
+            "type": "text",
+            "label": "Specified Slump Range",
+            "placeholder": "e.g., 4-6 inches, 75-125mm",
+            "required": true,
+            "validation": {
+              "maxLength": 50
+            }
+          },
+          {
+            "id": "air_content_spec",
+            "type": "text",
+            "label": "Specified Air Content (%)",
+            "placeholder": "e.g., 4-7%",
+            "required": false,
+            "validation": {
+              "maxLength": 50
+            }
+          },
+          {
+            "id": "supplier",
+            "type": "text",
+            "label": "Concrete Supplier",
+            "required": true,
+            "validation": {
+              "maxLength": 150
+            }
+          }
+        ]
+      },
+      {
+        "id": "pre_pour",
+        "title": "Pre-Pour Inspection",
+        "order": 3,
+        "fields": [
+          {
+            "id": "formwork_condition",
+            "type": "select",
+            "label": "Formwork Condition",
+            "required": true,
+            "options": [
+              { "value": "approved", "label": "Approved - Clean, tight, properly braced" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "not_approved", "label": "Not Approved - Major issues" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "formwork_alignment",
+            "type": "select",
+            "label": "Formwork Alignment/Stability",
+            "required": true,
+            "options": [
+              { "value": "approved", "label": "Approved - Within tolerance" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "not_approved", "label": "Not Approved" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "formwork_cleanliness",
+            "type": "select",
+            "label": "Formwork Cleanliness",
+            "required": true,
+            "options": [
+              { "value": "approved", "label": "Approved - Clean and debris-free" },
+              { "value": "needs_correction", "label": "Needs Correction - Debris present" },
+              { "value": "not_approved", "label": "Not Approved" }
+            ]
+          },
+          {
+            "id": "rebar_placement",
+            "type": "select",
+            "label": "Rebar Placement/Spacing",
+            "required": true,
+            "options": [
+              { "value": "approved", "label": "Approved - Per drawings" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "not_approved", "label": "Not Approved" },
+              { "value": "not_applicable", "label": "N/A - No rebar" }
+            ]
+          },
+          {
+            "id": "rebar_cover",
+            "type": "select",
+            "label": "Rebar Cover Thickness",
+            "required": true,
+            "options": [
+              { "value": "approved", "label": "Approved - Adequate cover maintained" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "not_approved", "label": "Not Approved - Insufficient cover" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "embedments",
+            "type": "select",
+            "label": "Embedments/Inserts",
+            "required": true,
+            "options": [
+              { "value": "approved", "label": "Approved - Properly located/secured" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "not_approved", "label": "Not Approved" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "weather_conditions",
+            "type": "select",
+            "label": "Weather Conditions",
+            "required": true,
+            "options": [
+              { "value": "suitable", "label": "Suitable for pouring" },
+              { "value": "marginal", "label": "Marginal - Precautions required" },
+              { "value": "unsuitable", "label": "Unsuitable - Should not pour" }
+            ]
+          },
+          {
+            "id": "temperature",
+            "type": "number",
+            "label": "Ambient Temperature (°F)",
+            "required": true,
+            "validation": {
+              "min": -20,
+              "max": 150
+            },
+            "helpText": "Critical for cold/hot weather concrete"
+          },
+          {
+            "id": "pre_pour_notes",
+            "type": "textarea",
+            "label": "Pre-Pour Notes",
+            "placeholder": "Document any pre-pour issues or observations...",
+            "required": false,
+            "validation": {
+              "maxLength": 1500
+            }
+          }
+        ]
+      },
+      {
+        "id": "during_pour",
+        "title": "During Pour Inspection",
+        "order": 4,
+        "fields": [
+          {
+            "id": "pour_start_time",
+            "type": "time",
+            "label": "Pour Start Time",
+            "required": true
+          },
+          {
+            "id": "pour_end_time",
+            "type": "time",
+            "label": "Pour End Time",
+            "required": true
+          },
+          {
+            "id": "slump_tests",
+            "type": "repeater",
+            "label": "Slump Tests",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 10,
+            "helpText": "ACI requires slump test at point of placement",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "test_time",
+                  "type": "time",
+                  "label": "Test Time",
+                  "required": true
+                },
+                {
+                  "id": "truck_number",
+                  "type": "text",
+                  "label": "Truck Number",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 50
+                  }
+                },
+                {
+                  "id": "slump_inches",
+                  "type": "number",
+                  "label": "Slump (inches)",
+                  "required": true,
+                  "validation": {
+                    "min": 0,
+                    "max": 12,
+                    "precision": 0.25
+                  },
+                  "helpText": "Typical range: 4-6 inches"
+                },
+                {
+                  "id": "slump_acceptable",
+                  "type": "select",
+                  "label": "Within Spec?",
+                  "required": true,
+                  "options": [
+                    { "value": "yes", "label": "Yes - Within specification" },
+                    { "value": "no", "label": "No - Out of spec" }
+                  ]
+                },
+                {
+                  "id": "temperature_concrete",
+                  "type": "number",
+                  "label": "Concrete Temperature (°F)",
+                  "required": false,
+                  "validation": {
+                    "min": 0,
+                    "max": 150
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "air_content_test",
+            "type": "number",
+            "label": "Air Content Test (%)",
+            "required": false,
+            "validation": {
+              "min": 0,
+              "max": 15,
+              "precision": 0.1
+            },
+            "helpText": "Required for freeze-thaw exposure"
+          },
+          {
+            "id": "placement_method",
+            "type": "select",
+            "label": "Placement Method",
+            "required": true,
+            "options": [
+              { "value": "direct_chute", "label": "Direct Chute" },
+              { "value": "pump", "label": "Concrete Pump" },
+              { "value": "bucket", "label": "Crane/Bucket" },
+              { "value": "wheelbarrow", "label": "Wheelbarrow/Buggy" },
+              { "value": "conveyor", "label": "Conveyor Belt" }
+            ]
+          },
+          {
+            "id": "consolidation_method",
+            "type": "select",
+            "label": "Consolidation Method",
+            "required": true,
+            "options": [
+              { "value": "internal_vibrator", "label": "Internal Vibrator" },
+              { "value": "external_vibrator", "label": "External Vibrator (form)" },
+              { "value": "self_consolidating", "label": "Self-Consolidating Concrete" },
+              { "value": "hand_tools", "label": "Hand Tools Only" }
+            ]
+          },
+          {
+            "id": "free_fall_limit",
+            "type": "select",
+            "label": "Free Fall Limit (<1 meter per ACI)",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Free fall <1 meter" },
+              { "value": "non_compliant", "label": "Non-Compliant - Excessive free fall" }
+            ],
+            "helpText": "ACI 318 limits free fall to prevent segregation"
+          },
+          {
+            "id": "layer_thickness",
+            "type": "select",
+            "label": "Layer Thickness (<450mm per ACI)",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Layers <450mm" },
+              { "value": "non_compliant", "label": "Non-Compliant - Excessive thickness" },
+              { "value": "not_applicable", "label": "N/A - Single lift" }
+            ],
+            "helpText": "ACI recommends max 450mm layer thickness"
+          },
+          {
+            "id": "cold_joints",
+            "type": "select",
+            "label": "Cold Joints/Delays",
+            "required": true,
+            "options": [
+              { "value": "no_delays", "label": "No delays - Continuous pour" },
+              { "value": "acceptable_delay", "label": "Short delay - Within initial set time" },
+              { "value": "cold_joint", "label": "Cold joint formed - Exceeded initial set" }
+            ],
+            "helpText": "Continuous pour preferred per ACI"
+          },
+          {
+            "id": "during_pour_notes",
+            "type": "textarea",
+            "label": "During Pour Notes",
+            "placeholder": "Document placement issues, delays, or observations...",
+            "required": false,
+            "validation": {
+              "maxLength": 1500
+            }
+          }
+        ]
+      },
+      {
+        "id": "test_cylinders",
+        "title": "Test Cylinder Samples",
+        "order": 5,
+        "fields": [
+          {
+            "id": "cylinder_sets",
+            "type": "repeater",
+            "label": "Test Cylinder Sets",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 10,
+            "helpText": "ACI requires minimum 2 cylinders per set for compressive strength testing",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "set_number",
+                  "type": "text",
+                  "label": "Set/Sample ID",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 50
+                  }
+                },
+                {
+                  "id": "sample_time",
+                  "type": "time",
+                  "label": "Sample Time",
+                  "required": true
+                },
+                {
+                  "id": "truck_number",
+                  "type": "text",
+                  "label": "Truck Number",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 50
+                  }
+                },
+                {
+                  "id": "cylinders_made",
+                  "type": "number",
+                  "label": "Number of Cylinders",
+                  "required": true,
+                  "validation": {
+                    "min": 2,
+                    "max": 10
+                  },
+                  "helpText": "Minimum 2 per set per ACI"
+                },
+                {
+                  "id": "test_ages",
+                  "type": "text",
+                  "label": "Test Ages (days)",
+                  "placeholder": "e.g., 7, 28",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 100
+                  },
+                  "helpText": "Common: 7 days, 28 days"
+                },
+                {
+                  "id": "location_represented",
+                  "type": "text",
+                  "label": "Location Represented",
+                  "placeholder": "Which area of pour this sample represents",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 150
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "total_cubic_yards",
+            "type": "number",
+            "label": "Total Concrete Volume (cubic yards)",
+            "required": true,
+            "validation": {
+              "min": 0,
+              "max": 10000,
+              "precision": 0.25
+            }
+          },
+          {
+            "id": "testing_lab",
+            "type": "text",
+            "label": "Testing Laboratory",
+            "required": false,
+            "validation": {
+              "maxLength": 150
+            }
+          }
+        ]
+      },
+      {
+        "id": "post_pour",
+        "title": "Post-Pour Inspection",
+        "order": 6,
+        "fields": [
+          {
+            "id": "finishing_method",
+            "type": "select",
+            "label": "Surface Finishing Method",
+            "required": true,
+            "options": [
+              { "value": "trowel_smooth", "label": "Trowel - Smooth Finish" },
+              { "value": "trowel_rough", "label": "Trowel - Rough Finish" },
+              { "value": "broom", "label": "Broom Finish" },
+              { "value": "float", "label": "Float Finish" },
+              { "value": "as_placed", "label": "As-Placed (no finish)" },
+              { "value": "other", "label": "Other" }
+            ]
+          },
+          {
+            "id": "surface_quality",
+            "type": "select",
+            "label": "Surface Finish Quality",
+            "required": true,
+            "options": [
+              { "value": "excellent", "label": "Excellent" },
+              { "value": "acceptable", "label": "Acceptable" },
+              { "value": "marginal", "label": "Marginal" },
+              { "value": "unacceptable", "label": "Unacceptable - Rework required" }
+            ]
+          },
+          {
+            "id": "curing_method",
+            "type": "select",
+            "label": "Curing Method",
+            "required": true,
+            "options": [
+              { "value": "wet_burlap", "label": "Wet Burlap/Blankets" },
+              { "value": "curing_compound", "label": "Curing Compound" },
+              { "value": "plastic_sheeting", "label": "Plastic Sheeting" },
+              { "value": "water_ponding", "label": "Water Ponding" },
+              { "value": "fog_spray", "label": "Fog/Mist Spray" },
+              { "value": "forms_left_on", "label": "Forms Left in Place" },
+              { "value": "none", "label": "None - Explain in notes" }
+            ]
+          },
+          {
+            "id": "curing_start_time",
+            "type": "time",
+            "label": "Curing Started",
+            "required": false,
+            "helpText": "When was curing initiated?"
+          },
+          {
+            "id": "geometry_check",
+            "type": "select",
+            "label": "Geometry Verification (dimensions, alignment)",
+            "required": true,
+            "options": [
+              { "value": "approved", "label": "Approved - Within tolerance" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "not_approved", "label": "Not Approved" },
+              { "value": "not_measured", "label": "Not Measured - Will verify after stripping" }
+            ]
+          },
+          {
+            "id": "surface_defects",
+            "type": "checkboxes",
+            "label": "Surface Defects (select all that apply)",
+            "required": false,
+            "options": [
+              { "value": "none", "label": "None" },
+              { "value": "honeycomb", "label": "Honeycomb" },
+              { "value": "segregation", "label": "Segregation" },
+              { "value": "cracks", "label": "Cracks" },
+              { "value": "spalling", "label": "Spalling" },
+              { "value": "discoloration", "label": "Discoloration" },
+              { "value": "voids", "label": "Voids/Bug Holes" },
+              { "value": "formwork_defects", "label": "Formwork Defects (tie holes, offsets)" }
+            ]
+          },
+          {
+            "id": "defect_locations",
+            "type": "textarea",
+            "label": "Defect Locations/Descriptions",
+            "placeholder": "Describe location and extent of any defects...",
+            "required": false,
+            "validation": {
+              "maxLength": 1500
+            }
+          },
+          {
+            "id": "post_pour_notes",
+            "type": "textarea",
+            "label": "Post-Pour Notes",
+            "placeholder": "Any additional observations...",
+            "required": false,
+            "validation": {
+              "maxLength": 1500
+            }
+          }
+        ]
+      },
+      {
+        "id": "photos",
+        "title": "Photo Documentation",
+        "order": 7,
+        "fields": [
+          {
+            "id": "pour_photos",
+            "type": "photo",
+            "label": "Pour Documentation Photos",
+            "required": false,
+            "multiple": true,
+            "maxPhotos": 40,
+            "captureGPS": true,
+            "helpText": "Document: formwork, rebar, slump test, placement, finish, defects"
+          }
+        ]
+      },
+      {
+        "id": "signature",
+        "title": "Inspector Certification",
+        "order": 8,
+        "fields": [
+          {
+            "id": "overall_approval",
+            "type": "select",
+            "label": "Overall Pour Approval",
+            "required": true,
+            "options": [
+              { "value": "approved", "label": "Approved - Meets ACI standards" },
+              { "value": "approved_with_conditions", "label": "Approved with Conditions - Minor issues noted" },
+              { "value": "rejected", "label": "Rejected - Major defects/non-compliance" }
+            ]
+          },
+          {
+            "id": "notes",
+            "type": "textarea",
+            "label": "Final Notes/Recommendations",
+            "placeholder": "Any final observations or recommendations...",
+            "required": false,
+            "validation": {
+              "maxLength": 2000
+            }
+          },
+          {
+            "id": "inspector_signature",
+            "type": "signature",
+            "label": "Inspector Signature",
+            "required": true,
+            "captureTimestamp": true,
+            "helpText": "I certify this inspection was conducted per ACI 318 standards"
+          },
+          {
+            "id": "contractor_acknowledgment",
+            "type": "signature",
+            "label": "Contractor Acknowledgment",
+            "required": false,
+            "captureTimestamp": true
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "30-45 minutes (during pour)",
+    "fieldOptimization": "mobile-friendly with large touch targets",
+    "industryStandard": "ACI 318-19, ACI SPEC-311.7-18",
+    "targetRole": "ACI Certified Inspector, Project Engineer",
+    "criticality": "High - Structural integrity verification"
+  }
+}

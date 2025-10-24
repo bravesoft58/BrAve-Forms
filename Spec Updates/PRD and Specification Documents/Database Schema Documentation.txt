@@ -1,0 +1,66 @@
+# Database Schema Documentation
+
+## 1. Database Overview
+- **Database Type**: MongoDB (NoSQL).  
+- **ODM Library**: Mongoose (for schema modeling and validation).  
+- **Hosting**: MongoDB Atlas (cloud-based database service).  
+
+---
+
+## 2. Collections (Tables)  
+### **Users Collection**  
+- **Purpose**: Stores user information, including foremen, inspectors, and admins.  
+- **Schema**:  
+  ```javascript
+  {
+    _id: ObjectId, // Unique user ID
+    email: String, // User email (unique)
+    password: String, // Hashed password
+    role: String, // User role (foreman, inspector, admin)
+    mfaSecret: String, // MFA secret key
+    projects: [ObjectId], // Array of project IDs the user is associated with
+    createdAt: Date, // Timestamp
+    updatedAt: Date // Timestamp
+  }
+
+
+{
+  _id: ObjectId, // Unique project ID
+  name: String, // Project name
+  description: String, // Project description
+  createdBy: ObjectId, // User ID of the creator
+  foremen: [ObjectId], // Array of foreman user IDs
+  inspectors: [ObjectId], // Array of inspector user IDs
+  logs: [ObjectId], // Array of log IDs associated with the project
+  createdAt: Date, // Timestamp
+  updatedAt: Date // Timestamp
+}
+
+{
+  _id: ObjectId, // Unique log ID
+  projectId: ObjectId, // Associated project ID
+  createdBy: ObjectId, // Foreman user ID
+  date: Date, // Log date
+  content: String, // Log content (e.g., text, data)
+  photos: [String], // Array of photo URLs (stored in AWS S3)
+  createdAt: Date, // Timestamp
+  updatedAt: Date // Timestamp
+}
+
+
+{
+  _id: ObjectId, // Unique photo ID
+  logId: ObjectId, // Associated log ID
+  url: String, // Photo URL (stored in AWS S3)
+  uploadedBy: ObjectId, // User ID of the uploader
+  createdAt: Date // Timestamp
+}
+
+Example Queries
+
+db.logs.find({ projectId: ObjectId("project_id") });
+
+db.projects.find({ $or: [{ foremen: ObjectId("user_id") }, { inspectors: ObjectId("user_id") }] });
+
+db.photos.find({ logId: ObjectId("log_id") });
+

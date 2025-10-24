@@ -1,0 +1,76 @@
+# Third-Party Libraries Documentation
+
+## 1. Frontend Libraries
+### **Mobile (React Native)**  
+- **UI Components**:  
+  - [NativeBase](https://nativebase.io/): A popular UI library for React Native with pre-built components and theming support.  
+- **Navigation**:  
+  - [React Navigation](https://reactnavigation.org/): For implementing bottom tabs, stack navigation, and other mobile navigation patterns.  
+- **Forms**:  
+  - [React Hook Form](https://react-hook-form.com/): For efficient and performant form handling.  
+  - [Yup](https://github.com/jquense/yup): For form validation.  
+- **State Management**:  
+  - [Zustand](https://zustand-demo.pmnd.rs/): A lightweight state management library for shared state.  
+  - [React Query](https://tanstack.com/query/v4): For managing server-side data with caching and background updates.  
+- **Photo Upload**:  
+  - [React Native Image Picker](https://github.com/react-native-image-picker/react-native-image-picker): For capturing and uploading photos from mobile devices.  
+
+### **Web (React.js)**  
+- **UI Components**:  
+  - [Material-UI (MUI)](https://mui.com/): A robust UI library with pre-built components and a modern design system.  
+- **Navigation**:  
+  - [React Router](https://reactrouter.com/): For implementing top navigation bars, sidebars, and other web navigation patterns.  
+- **Forms**:  
+  - [React Hook Form](https://react-hook-form.com/): For efficient and performant form handling.  
+  - [Yup](https://github.com/jquense/yup): For form validation.  
+- **State Management**:  
+  - [Zustand](https://zustand-demo.pmnd.rs/): A lightweight state management library for shared state.  
+  - [React Query](https://tanstack.com/query/v4): For managing server-side data with caching and background updates.  
+- **Photo Upload**:  
+  - [FilePond](https://pqina.nl/filepond/): For uploading and managing files on the web.  
+
+## 2. Backend Libraries
+### **Core Libraries**  
+- **Framework**:  
+  - [Express.js](https://expressjs.com/): A minimal and flexible Node.js web application framework.  
+- **Database**:  
+  - [Mongoose](https://mongoosejs.com/): An ODM (Object Data Modeling) library for MongoDB.  
+- **Authentication**:  
+  - [Passport.js](http://www.passportjs.org/): For implementing email/password and social login authentication.  
+  - [Google Authenticator](https://github.com/google/google-authenticator): For multi-factor authentication (MFA).  
+- **Security**:  
+  - [bcrypt](https://www.npmjs.com/package/bcrypt): For hashing passwords.  
+  - [JWT](https://jwt.io/): For secure session management.  
+  - [express-rate-limit](https://www.npmjs.com/package/express-rate-limit): For rate limiting to prevent API abuse.  
+  - [Joi](https://joi.dev/): For input validation and sanitization.  
+
+### **Third-Party Integrations**  
+- **Payment Processing**:  
+  - [Stripe](https://stripe.com/): For handling subscriptions and payments.  
+- **Cloud Storage**:  
+  - [AWS SDK for Node.js](https://aws.amazon.com/sdk-for-node-js/): For uploading and retrieving files from AWS S3.  
+- **Analytics**:  
+  - [Google Analytics API](https://developers.google.com/analytics): For tracking user behavior and app performance.  
+
+## 3. DevOps Libraries
+- **CI/CD**:  
+  - [GitHub Actions](https://github.com/features/actions): For automating testing and deployment.  
+- **Monitoring**:  
+  - [Sentry](https://sentry.io/): For real-time error tracking and performance monitoring.  
+- **Caching**:  
+  - [Redis](https://redis.io/): For caching frequently accessed data.  
+
+## 4. Testing Libraries
+- **Unit Testing**:  
+  - [Jest](https://jestjs.io/): A JavaScript testing framework for unit tests.  
+- **Integration Testing**:  
+  - [Supertest](https://github.com/visionmedia/supertest): For testing API endpoints.  
+- **End-to-End Testing**:  
+  - [Cypress](https://www.cypress.io/): For testing user flows on the web.  
+  - [Detox](https://github.com/wix/Detox): For testing user flows on mobile.  
+
+## 5. Documentation Libraries
+- **API Documentation**:  
+  - [Swagger/OpenAPI](https://swagger.io/): For documenting RESTful APIs.  
+- **Architecture Diagrams**:  
+  - [Mermaid](https://mermaid-js.github.io/mermaid/): For creating diagrams in Markdown.  

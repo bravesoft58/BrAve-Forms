@@ -39,16 +39,16 @@ export declare const SwpppInspectionSchema: z.ZodObject<{
         maintenanceRequired: z.ZodBoolean;
         notes: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         id: string;
+        name: string;
         type: "SILT_FENCE" | "CHECK_DAM" | "INLET_PROTECTION" | "SEDIMENT_BASIN" | "OTHER";
         installed: boolean;
         functional: boolean;
         maintenanceRequired: boolean;
         notes?: string | undefined;
     }, {
-        name: string;
         id: string;
+        name: string;
         type: "SILT_FENCE" | "CHECK_DAM" | "INLET_PROTECTION" | "SEDIMENT_BASIN" | "OTHER";
         installed: boolean;
         functional: boolean;
@@ -106,8 +106,8 @@ export declare const SwpppInspectionSchema: z.ZodObject<{
     inspectionDate: Date;
     weatherTriggered: boolean;
     bmps: {
-        name: string;
         id: string;
+        name: string;
         type: "SILT_FENCE" | "CHECK_DAM" | "INLET_PROTECTION" | "SEDIMENT_BASIN" | "OTHER";
         installed: boolean;
         functional: boolean;
@@ -140,8 +140,8 @@ export declare const SwpppInspectionSchema: z.ZodObject<{
     inspectionDate: Date;
     weatherTriggered: boolean;
     bmps: {
-        name: string;
         id: string;
+        name: string;
         type: "SILT_FENCE" | "CHECK_DAM" | "INLET_PROTECTION" | "SEDIMENT_BASIN" | "OTHER";
         installed: boolean;
         functional: boolean;
@@ -217,17 +217,17 @@ export declare const OrganizationSchema: z.ZodObject<{
     maxUsers: z.ZodNumber;
     features: z.ZodArray<z.ZodString, "many">;
 }, "strip", z.ZodTypeAny, {
+    id: string;
     name: string;
     features: string[];
-    id: string;
     clerkOrgId: string;
     plan: "STARTER" | "PROFESSIONAL" | "ENTERPRISE";
     maxProjects: number;
     maxUsers: number;
 }, {
+    id: string;
     name: string;
     features: string[];
-    id: string;
     clerkOrgId: string;
     plan: "STARTER" | "PROFESSIONAL" | "ENTERPRISE";
     maxProjects: number;
@@ -251,8 +251,8 @@ export declare const ProjectSchema: z.ZodObject<{
     swpppConfig: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     bmps: z.ZodArray<z.ZodRecord<z.ZodString, z.ZodAny>, "many">;
 }, "strip", z.ZodTypeAny, {
-    name: string;
     id: string;
+    name: string;
     address: string;
     status: "PLANNING" | "ACTIVE" | "SUSPENDED" | "COMPLETED" | "CLOSED";
     startDate: Date;
@@ -265,8 +265,8 @@ export declare const ProjectSchema: z.ZodObject<{
     permitNumber?: string | undefined;
     swpppConfig?: Record<string, any> | undefined;
 }, {
-    name: string;
     id: string;
+    name: string;
     address: string;
     status: "PLANNING" | "ACTIVE" | "SUSPENDED" | "COMPLETED" | "CLOSED";
     startDate: Date;
@@ -292,8 +292,8 @@ export declare const OfflineSyncSchema: z.ZodObject<{
     syncedAt: z.ZodOptional<z.ZodDate>;
     conflictResolution: z.ZodOptional<z.ZodEnum<["CLIENT_WINS", "SERVER_WINS", "MERGE"]>>;
 }, "strip", z.ZodTypeAny, {
-    data: Record<string, any>;
     id: string;
+    data: Record<string, any>;
     type: "CREATE" | "UPDATE" | "DELETE";
     entity: "INSPECTION" | "PHOTO" | "PROJECT" | "BMP";
     createdAt: Date;
@@ -303,8 +303,8 @@ export declare const OfflineSyncSchema: z.ZodObject<{
     syncedAt?: Date | undefined;
     conflictResolution?: "CLIENT_WINS" | "SERVER_WINS" | "MERGE" | undefined;
 }, {
-    data: Record<string, any>;
     id: string;
+    data: Record<string, any>;
     type: "CREATE" | "UPDATE" | "DELETE";
     entity: "INSPECTION" | "PHOTO" | "PROJECT" | "BMP";
     createdAt: Date;
@@ -323,15 +323,15 @@ export declare const InspectorAccessTokenSchema: z.ZodObject<{
     createdBy: z.ZodString;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    permissions: ("VIEW_INSPECTIONS" | "VIEW_PHOTOS" | "VIEW_BMPS" | "VIEW_VIOLATIONS")[];
     projectId: string;
+    permissions: ("VIEW_INSPECTIONS" | "VIEW_PHOTOS" | "VIEW_BMPS" | "VIEW_VIOLATIONS")[];
     createdAt: Date;
     token: string;
     expiresAt: Date;
     createdBy: string;
 }, {
-    permissions: ("VIEW_INSPECTIONS" | "VIEW_PHOTOS" | "VIEW_BMPS" | "VIEW_VIOLATIONS")[];
     projectId: string;
+    permissions: ("VIEW_INSPECTIONS" | "VIEW_PHOTOS" | "VIEW_BMPS" | "VIEW_VIOLATIONS")[];
     createdAt: Date;
     token: string;
     expiresAt: Date;
@@ -403,9 +403,9 @@ export declare const FieldValidationSchema: z.ZodObject<{
     customValidation: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     required: boolean;
-    max?: number | undefined;
     min?: number | undefined;
     pattern?: string | undefined;
+    max?: number | undefined;
     minLength?: number | undefined;
     step?: number | undefined;
     maxLength?: number | undefined;
@@ -413,9 +413,9 @@ export declare const FieldValidationSchema: z.ZodObject<{
     maxDate?: string | undefined;
     customValidation?: string | undefined;
 }, {
-    max?: number | undefined;
     min?: number | undefined;
     pattern?: string | undefined;
+    max?: number | undefined;
     minLength?: number | undefined;
     step?: number | undefined;
     required?: boolean | undefined;
@@ -513,9 +513,9 @@ export declare const FieldDefinitionSchema: z.ZodObject<{
         customValidation: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         required: boolean;
-        max?: number | undefined;
         min?: number | undefined;
         pattern?: string | undefined;
+        max?: number | undefined;
         minLength?: number | undefined;
         step?: number | undefined;
         maxLength?: number | undefined;
@@ -523,9 +523,9 @@ export declare const FieldDefinitionSchema: z.ZodObject<{
         maxDate?: string | undefined;
         customValidation?: string | undefined;
     }, {
-        max?: number | undefined;
         min?: number | undefined;
         pattern?: string | undefined;
+        max?: number | undefined;
         minLength?: number | undefined;
         step?: number | undefined;
         required?: boolean | undefined;
@@ -638,12 +638,13 @@ export declare const FieldDefinitionSchema: z.ZodObject<{
     order: z.ZodDefault<z.ZodNumber>;
     width: z.ZodDefault<z.ZodEnum<["full", "half", "third", "quarter"]>>;
 }, "strip", z.ZodTypeAny, {
+    id: string;
     order: number;
     width: "full" | "half" | "third" | "quarter";
     name: string;
-    id: string;
     type: "number" | "text" | "select" | "table" | "textarea" | "time" | "date" | "weather" | "inspector" | "checkbox" | "radio" | "correctiveAction" | "signature" | "multiSelect" | "photo" | "gpsLocation" | "bmpChecklist" | "measurement" | "swpppTrigger" | "violationCode" | "repeater" | "calculation" | "fileUpload";
     label: string;
+    defaultValue?: any;
     metadata?: {
         calculation?: string | undefined;
         gpsRequired?: boolean | undefined;
@@ -658,7 +659,6 @@ export declare const FieldDefinitionSchema: z.ZodObject<{
         } | undefined;
     } | undefined;
     description?: string | undefined;
-    defaultValue?: any;
     placeholder?: string | undefined;
     options?: {
         label: string;
@@ -666,9 +666,9 @@ export declare const FieldDefinitionSchema: z.ZodObject<{
     }[] | undefined;
     validation?: {
         required: boolean;
-        max?: number | undefined;
         min?: number | undefined;
         pattern?: string | undefined;
+        max?: number | undefined;
         minLength?: number | undefined;
         step?: number | undefined;
         maxLength?: number | undefined;
@@ -691,12 +691,13 @@ export declare const FieldDefinitionSchema: z.ZodObject<{
         }[];
     } | undefined;
 }, {
-    name: string;
     id: string;
+    name: string;
     type: "number" | "text" | "select" | "table" | "textarea" | "time" | "date" | "weather" | "inspector" | "checkbox" | "radio" | "correctiveAction" | "signature" | "multiSelect" | "photo" | "gpsLocation" | "bmpChecklist" | "measurement" | "swpppTrigger" | "violationCode" | "repeater" | "calculation" | "fileUpload";
     label: string;
     order?: number | undefined;
     width?: "full" | "half" | "third" | "quarter" | undefined;
+    defaultValue?: any;
     metadata?: {
         calculation?: string | undefined;
         gpsRequired?: boolean | undefined;
@@ -711,16 +712,15 @@ export declare const FieldDefinitionSchema: z.ZodObject<{
         } | undefined;
     } | undefined;
     description?: string | undefined;
-    defaultValue?: any;
     placeholder?: string | undefined;
     options?: {
         label: string;
         value?: any;
     }[] | undefined;
     validation?: {
-        max?: number | undefined;
         min?: number | undefined;
         pattern?: string | undefined;
+        max?: number | undefined;
         minLength?: number | undefined;
         step?: number | undefined;
         required?: boolean | undefined;
@@ -784,9 +784,9 @@ export declare const FormTemplateSchema: z.ZodObject<{
             customValidation: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             required: boolean;
-            max?: number | undefined;
             min?: number | undefined;
             pattern?: string | undefined;
+            max?: number | undefined;
             minLength?: number | undefined;
             step?: number | undefined;
             maxLength?: number | undefined;
@@ -794,9 +794,9 @@ export declare const FormTemplateSchema: z.ZodObject<{
             maxDate?: string | undefined;
             customValidation?: string | undefined;
         }, {
-            max?: number | undefined;
             min?: number | undefined;
             pattern?: string | undefined;
+            max?: number | undefined;
             minLength?: number | undefined;
             step?: number | undefined;
             required?: boolean | undefined;
@@ -909,12 +909,13 @@ export declare const FormTemplateSchema: z.ZodObject<{
         order: z.ZodDefault<z.ZodNumber>;
         width: z.ZodDefault<z.ZodEnum<["full", "half", "third", "quarter"]>>;
     }, "strip", z.ZodTypeAny, {
+        id: string;
         order: number;
         width: "full" | "half" | "third" | "quarter";
         name: string;
-        id: string;
         type: "number" | "text" | "select" | "table" | "textarea" | "time" | "date" | "weather" | "inspector" | "checkbox" | "radio" | "correctiveAction" | "signature" | "multiSelect" | "photo" | "gpsLocation" | "bmpChecklist" | "measurement" | "swpppTrigger" | "violationCode" | "repeater" | "calculation" | "fileUpload";
         label: string;
+        defaultValue?: any;
         metadata?: {
             calculation?: string | undefined;
             gpsRequired?: boolean | undefined;
@@ -929,7 +930,6 @@ export declare const FormTemplateSchema: z.ZodObject<{
             } | undefined;
         } | undefined;
         description?: string | undefined;
-        defaultValue?: any;
         placeholder?: string | undefined;
         options?: {
             label: string;
@@ -937,9 +937,9 @@ export declare const FormTemplateSchema: z.ZodObject<{
         }[] | undefined;
         validation?: {
             required: boolean;
-            max?: number | undefined;
             min?: number | undefined;
             pattern?: string | undefined;
+            max?: number | undefined;
             minLength?: number | undefined;
             step?: number | undefined;
             maxLength?: number | undefined;
@@ -962,12 +962,13 @@ export declare const FormTemplateSchema: z.ZodObject<{
             }[];
         } | undefined;
     }, {
-        name: string;
         id: string;
+        name: string;
         type: "number" | "text" | "select" | "table" | "textarea" | "time" | "date" | "weather" | "inspector" | "checkbox" | "radio" | "correctiveAction" | "signature" | "multiSelect" | "photo" | "gpsLocation" | "bmpChecklist" | "measurement" | "swpppTrigger" | "violationCode" | "repeater" | "calculation" | "fileUpload";
         label: string;
         order?: number | undefined;
         width?: "full" | "half" | "third" | "quarter" | undefined;
+        defaultValue?: any;
         metadata?: {
             calculation?: string | undefined;
             gpsRequired?: boolean | undefined;
@@ -982,16 +983,15 @@ export declare const FormTemplateSchema: z.ZodObject<{
             } | undefined;
         } | undefined;
         description?: string | undefined;
-        defaultValue?: any;
         placeholder?: string | undefined;
         options?: {
             label: string;
             value?: any;
         }[] | undefined;
         validation?: {
-            max?: number | undefined;
             min?: number | undefined;
             pattern?: string | undefined;
+            max?: number | undefined;
             minLength?: number | undefined;
             step?: number | undefined;
             required?: boolean | undefined;
@@ -1078,14 +1078,14 @@ export declare const FormTemplateSchema: z.ZodObject<{
         targetField: z.ZodString;
         dependencies: z.ZodArray<z.ZodString, "many">;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         id: string;
+        name: string;
         formula: string;
         targetField: string;
         dependencies: string[];
     }, {
-        name: string;
         id: string;
+        name: string;
         formula: string;
         targetField: string;
         dependencies: string[];
@@ -1217,8 +1217,8 @@ export declare const FormTemplateSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    name: string;
     id: string;
+    name: string;
     version: number;
     isActive: boolean;
     orgId: string;
@@ -1226,12 +1226,13 @@ export declare const FormTemplateSchema: z.ZodObject<{
     createdBy: string;
     category: "EPA_SWPPP" | "EPA_CGP" | "OSHA_SAFETY" | "STATE_PERMIT" | "CUSTOM";
     fields: {
+        id: string;
         order: number;
         width: "full" | "half" | "third" | "quarter";
         name: string;
-        id: string;
         type: "number" | "text" | "select" | "table" | "textarea" | "time" | "date" | "weather" | "inspector" | "checkbox" | "radio" | "correctiveAction" | "signature" | "multiSelect" | "photo" | "gpsLocation" | "bmpChecklist" | "measurement" | "swpppTrigger" | "violationCode" | "repeater" | "calculation" | "fileUpload";
         label: string;
+        defaultValue?: any;
         metadata?: {
             calculation?: string | undefined;
             gpsRequired?: boolean | undefined;
@@ -1246,7 +1247,6 @@ export declare const FormTemplateSchema: z.ZodObject<{
             } | undefined;
         } | undefined;
         description?: string | undefined;
-        defaultValue?: any;
         placeholder?: string | undefined;
         options?: {
             label: string;
@@ -1254,9 +1254,9 @@ export declare const FormTemplateSchema: z.ZodObject<{
         }[] | undefined;
         validation?: {
             required: boolean;
-            max?: number | undefined;
             min?: number | undefined;
             pattern?: string | undefined;
+            max?: number | undefined;
             minLength?: number | undefined;
             step?: number | undefined;
             maxLength?: number | undefined;
@@ -1294,8 +1294,8 @@ export declare const FormTemplateSchema: z.ZodObject<{
         }[];
     }[];
     calculations: {
-        name: string;
         id: string;
+        name: string;
         formula: string;
         targetField: string;
         dependencies: string[];
@@ -1336,19 +1336,20 @@ export declare const FormTemplateSchema: z.ZodObject<{
         } | undefined;
     } | undefined;
 }, {
-    name: string;
     id: string;
+    name: string;
     orgId: string;
     createdAt: Date;
     createdBy: string;
     category: "EPA_SWPPP" | "EPA_CGP" | "OSHA_SAFETY" | "STATE_PERMIT" | "CUSTOM";
     fields: {
-        name: string;
         id: string;
+        name: string;
         type: "number" | "text" | "select" | "table" | "textarea" | "time" | "date" | "weather" | "inspector" | "checkbox" | "radio" | "correctiveAction" | "signature" | "multiSelect" | "photo" | "gpsLocation" | "bmpChecklist" | "measurement" | "swpppTrigger" | "violationCode" | "repeater" | "calculation" | "fileUpload";
         label: string;
         order?: number | undefined;
         width?: "full" | "half" | "third" | "quarter" | undefined;
+        defaultValue?: any;
         metadata?: {
             calculation?: string | undefined;
             gpsRequired?: boolean | undefined;
@@ -1363,16 +1364,15 @@ export declare const FormTemplateSchema: z.ZodObject<{
             } | undefined;
         } | undefined;
         description?: string | undefined;
-        defaultValue?: any;
         placeholder?: string | undefined;
         options?: {
             label: string;
             value?: any;
         }[] | undefined;
         validation?: {
-            max?: number | undefined;
             min?: number | undefined;
             pattern?: string | undefined;
+            max?: number | undefined;
             minLength?: number | undefined;
             step?: number | undefined;
             required?: boolean | undefined;
@@ -1411,8 +1411,8 @@ export declare const FormTemplateSchema: z.ZodObject<{
         operator?: "AND" | "OR" | undefined;
     }[];
     calculations: {
-        name: string;
         id: string;
+        name: string;
         formula: string;
         targetField: string;
         dependencies: string[];
@@ -1583,8 +1583,8 @@ export declare const FormSubmissionSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    data: Record<string, any>;
     id: string;
+    data: Record<string, any>;
     metadata: {
         submittedBy: string;
         formId: string;
@@ -1627,8 +1627,8 @@ export declare const FormSubmissionSchema: z.ZodObject<{
     reviewedAt?: Date | undefined;
     reviewNotes?: string | undefined;
 }, {
-    data: Record<string, any>;
     id: string;
+    data: Record<string, any>;
     metadata: {
         submittedBy: string;
         formId: string;
@@ -1713,16 +1713,16 @@ export declare const schemas: {
             maintenanceRequired: z.ZodBoolean;
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            name: string;
             id: string;
+            name: string;
             type: "SILT_FENCE" | "CHECK_DAM" | "INLET_PROTECTION" | "SEDIMENT_BASIN" | "OTHER";
             installed: boolean;
             functional: boolean;
             maintenanceRequired: boolean;
             notes?: string | undefined;
         }, {
-            name: string;
             id: string;
+            name: string;
             type: "SILT_FENCE" | "CHECK_DAM" | "INLET_PROTECTION" | "SEDIMENT_BASIN" | "OTHER";
             installed: boolean;
             functional: boolean;
@@ -1780,8 +1780,8 @@ export declare const schemas: {
         inspectionDate: Date;
         weatherTriggered: boolean;
         bmps: {
-            name: string;
             id: string;
+            name: string;
             type: "SILT_FENCE" | "CHECK_DAM" | "INLET_PROTECTION" | "SEDIMENT_BASIN" | "OTHER";
             installed: boolean;
             functional: boolean;
@@ -1814,8 +1814,8 @@ export declare const schemas: {
         inspectionDate: Date;
         weatherTriggered: boolean;
         bmps: {
-            name: string;
             id: string;
+            name: string;
             type: "SILT_FENCE" | "CHECK_DAM" | "INLET_PROTECTION" | "SEDIMENT_BASIN" | "OTHER";
             installed: boolean;
             functional: boolean;
@@ -1889,17 +1889,17 @@ export declare const schemas: {
         maxUsers: z.ZodNumber;
         features: z.ZodArray<z.ZodString, "many">;
     }, "strip", z.ZodTypeAny, {
+        id: string;
         name: string;
         features: string[];
-        id: string;
         clerkOrgId: string;
         plan: "STARTER" | "PROFESSIONAL" | "ENTERPRISE";
         maxProjects: number;
         maxUsers: number;
     }, {
+        id: string;
         name: string;
         features: string[];
-        id: string;
         clerkOrgId: string;
         plan: "STARTER" | "PROFESSIONAL" | "ENTERPRISE";
         maxProjects: number;
@@ -1921,8 +1921,8 @@ export declare const schemas: {
         swpppConfig: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
         bmps: z.ZodArray<z.ZodRecord<z.ZodString, z.ZodAny>, "many">;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         id: string;
+        name: string;
         address: string;
         status: "PLANNING" | "ACTIVE" | "SUSPENDED" | "COMPLETED" | "CLOSED";
         startDate: Date;
@@ -1935,8 +1935,8 @@ export declare const schemas: {
         permitNumber?: string | undefined;
         swpppConfig?: Record<string, any> | undefined;
     }, {
-        name: string;
         id: string;
+        name: string;
         address: string;
         status: "PLANNING" | "ACTIVE" | "SUSPENDED" | "COMPLETED" | "CLOSED";
         startDate: Date;
@@ -1961,8 +1961,8 @@ export declare const schemas: {
         syncedAt: z.ZodOptional<z.ZodDate>;
         conflictResolution: z.ZodOptional<z.ZodEnum<["CLIENT_WINS", "SERVER_WINS", "MERGE"]>>;
     }, "strip", z.ZodTypeAny, {
-        data: Record<string, any>;
         id: string;
+        data: Record<string, any>;
         type: "CREATE" | "UPDATE" | "DELETE";
         entity: "INSPECTION" | "PHOTO" | "PROJECT" | "BMP";
         createdAt: Date;
@@ -1972,8 +1972,8 @@ export declare const schemas: {
         syncedAt?: Date | undefined;
         conflictResolution?: "CLIENT_WINS" | "SERVER_WINS" | "MERGE" | undefined;
     }, {
-        data: Record<string, any>;
         id: string;
+        data: Record<string, any>;
         type: "CREATE" | "UPDATE" | "DELETE";
         entity: "INSPECTION" | "PHOTO" | "PROJECT" | "BMP";
         createdAt: Date;
@@ -1991,15 +1991,15 @@ export declare const schemas: {
         createdBy: z.ZodString;
         createdAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
-        permissions: ("VIEW_INSPECTIONS" | "VIEW_PHOTOS" | "VIEW_BMPS" | "VIEW_VIOLATIONS")[];
         projectId: string;
+        permissions: ("VIEW_INSPECTIONS" | "VIEW_PHOTOS" | "VIEW_BMPS" | "VIEW_VIOLATIONS")[];
         createdAt: Date;
         token: string;
         expiresAt: Date;
         createdBy: string;
     }, {
-        permissions: ("VIEW_INSPECTIONS" | "VIEW_PHOTOS" | "VIEW_BMPS" | "VIEW_VIOLATIONS")[];
         projectId: string;
+        permissions: ("VIEW_INSPECTIONS" | "VIEW_PHOTOS" | "VIEW_BMPS" | "VIEW_VIOLATIONS")[];
         createdAt: Date;
         token: string;
         expiresAt: Date;
@@ -2018,9 +2018,9 @@ export declare const schemas: {
         customValidation: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         required: boolean;
-        max?: number | undefined;
         min?: number | undefined;
         pattern?: string | undefined;
+        max?: number | undefined;
         minLength?: number | undefined;
         step?: number | undefined;
         maxLength?: number | undefined;
@@ -2028,9 +2028,9 @@ export declare const schemas: {
         maxDate?: string | undefined;
         customValidation?: string | undefined;
     }, {
-        max?: number | undefined;
         min?: number | undefined;
         pattern?: string | undefined;
+        max?: number | undefined;
         minLength?: number | undefined;
         step?: number | undefined;
         required?: boolean | undefined;
@@ -2126,9 +2126,9 @@ export declare const schemas: {
             customValidation: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             required: boolean;
-            max?: number | undefined;
             min?: number | undefined;
             pattern?: string | undefined;
+            max?: number | undefined;
             minLength?: number | undefined;
             step?: number | undefined;
             maxLength?: number | undefined;
@@ -2136,9 +2136,9 @@ export declare const schemas: {
             maxDate?: string | undefined;
             customValidation?: string | undefined;
         }, {
-            max?: number | undefined;
             min?: number | undefined;
             pattern?: string | undefined;
+            max?: number | undefined;
             minLength?: number | undefined;
             step?: number | undefined;
             required?: boolean | undefined;
@@ -2251,12 +2251,13 @@ export declare const schemas: {
         order: z.ZodDefault<z.ZodNumber>;
         width: z.ZodDefault<z.ZodEnum<["full", "half", "third", "quarter"]>>;
     }, "strip", z.ZodTypeAny, {
+        id: string;
         order: number;
         width: "full" | "half" | "third" | "quarter";
         name: string;
-        id: string;
         type: "number" | "text" | "select" | "table" | "textarea" | "time" | "date" | "weather" | "inspector" | "checkbox" | "radio" | "correctiveAction" | "signature" | "multiSelect" | "photo" | "gpsLocation" | "bmpChecklist" | "measurement" | "swpppTrigger" | "violationCode" | "repeater" | "calculation" | "fileUpload";
         label: string;
+        defaultValue?: any;
         metadata?: {
             calculation?: string | undefined;
             gpsRequired?: boolean | undefined;
@@ -2271,7 +2272,6 @@ export declare const schemas: {
             } | undefined;
         } | undefined;
         description?: string | undefined;
-        defaultValue?: any;
         placeholder?: string | undefined;
         options?: {
             label: string;
@@ -2279,9 +2279,9 @@ export declare const schemas: {
         }[] | undefined;
         validation?: {
             required: boolean;
-            max?: number | undefined;
             min?: number | undefined;
             pattern?: string | undefined;
+            max?: number | undefined;
             minLength?: number | undefined;
             step?: number | undefined;
             maxLength?: number | undefined;
@@ -2304,12 +2304,13 @@ export declare const schemas: {
             }[];
         } | undefined;
     }, {
-        name: string;
         id: string;
+        name: string;
         type: "number" | "text" | "select" | "table" | "textarea" | "time" | "date" | "weather" | "inspector" | "checkbox" | "radio" | "correctiveAction" | "signature" | "multiSelect" | "photo" | "gpsLocation" | "bmpChecklist" | "measurement" | "swpppTrigger" | "violationCode" | "repeater" | "calculation" | "fileUpload";
         label: string;
         order?: number | undefined;
         width?: "full" | "half" | "third" | "quarter" | undefined;
+        defaultValue?: any;
         metadata?: {
             calculation?: string | undefined;
             gpsRequired?: boolean | undefined;
@@ -2324,16 +2325,15 @@ export declare const schemas: {
             } | undefined;
         } | undefined;
         description?: string | undefined;
-        defaultValue?: any;
         placeholder?: string | undefined;
         options?: {
             label: string;
             value?: any;
         }[] | undefined;
         validation?: {
-            max?: number | undefined;
             min?: number | undefined;
             pattern?: string | undefined;
+            max?: number | undefined;
             minLength?: number | undefined;
             step?: number | undefined;
             required?: boolean | undefined;
@@ -2396,9 +2396,9 @@ export declare const schemas: {
                 customValidation: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
                 required: boolean;
-                max?: number | undefined;
                 min?: number | undefined;
                 pattern?: string | undefined;
+                max?: number | undefined;
                 minLength?: number | undefined;
                 step?: number | undefined;
                 maxLength?: number | undefined;
@@ -2406,9 +2406,9 @@ export declare const schemas: {
                 maxDate?: string | undefined;
                 customValidation?: string | undefined;
             }, {
-                max?: number | undefined;
                 min?: number | undefined;
                 pattern?: string | undefined;
+                max?: number | undefined;
                 minLength?: number | undefined;
                 step?: number | undefined;
                 required?: boolean | undefined;
@@ -2521,12 +2521,13 @@ export declare const schemas: {
             order: z.ZodDefault<z.ZodNumber>;
             width: z.ZodDefault<z.ZodEnum<["full", "half", "third", "quarter"]>>;
         }, "strip", z.ZodTypeAny, {
+            id: string;
             order: number;
             width: "full" | "half" | "third" | "quarter";
             name: string;
-            id: string;
             type: "number" | "text" | "select" | "table" | "textarea" | "time" | "date" | "weather" | "inspector" | "checkbox" | "radio" | "correctiveAction" | "signature" | "multiSelect" | "photo" | "gpsLocation" | "bmpChecklist" | "measurement" | "swpppTrigger" | "violationCode" | "repeater" | "calculation" | "fileUpload";
             label: string;
+            defaultValue?: any;
             metadata?: {
                 calculation?: string | undefined;
                 gpsRequired?: boolean | undefined;
@@ -2541,7 +2542,6 @@ export declare const schemas: {
                 } | undefined;
             } | undefined;
             description?: string | undefined;
-            defaultValue?: any;
             placeholder?: string | undefined;
             options?: {
                 label: string;
@@ -2549,9 +2549,9 @@ export declare const schemas: {
             }[] | undefined;
             validation?: {
                 required: boolean;
-                max?: number | undefined;
                 min?: number | undefined;
                 pattern?: string | undefined;
+                max?: number | undefined;
                 minLength?: number | undefined;
                 step?: number | undefined;
                 maxLength?: number | undefined;
@@ -2574,12 +2574,13 @@ export declare const schemas: {
                 }[];
             } | undefined;
         }, {
-            name: string;
             id: string;
+            name: string;
             type: "number" | "text" | "select" | "table" | "textarea" | "time" | "date" | "weather" | "inspector" | "checkbox" | "radio" | "correctiveAction" | "signature" | "multiSelect" | "photo" | "gpsLocation" | "bmpChecklist" | "measurement" | "swpppTrigger" | "violationCode" | "repeater" | "calculation" | "fileUpload";
             label: string;
             order?: number | undefined;
             width?: "full" | "half" | "third" | "quarter" | undefined;
+            defaultValue?: any;
             metadata?: {
                 calculation?: string | undefined;
                 gpsRequired?: boolean | undefined;
@@ -2594,16 +2595,15 @@ export declare const schemas: {
                 } | undefined;
             } | undefined;
             description?: string | undefined;
-            defaultValue?: any;
             placeholder?: string | undefined;
             options?: {
                 label: string;
                 value?: any;
             }[] | undefined;
             validation?: {
-                max?: number | undefined;
                 min?: number | undefined;
                 pattern?: string | undefined;
+                max?: number | undefined;
                 minLength?: number | undefined;
                 step?: number | undefined;
                 required?: boolean | undefined;
@@ -2690,14 +2690,14 @@ export declare const schemas: {
             targetField: z.ZodString;
             dependencies: z.ZodArray<z.ZodString, "many">;
         }, "strip", z.ZodTypeAny, {
-            name: string;
             id: string;
+            name: string;
             formula: string;
             targetField: string;
             dependencies: string[];
         }, {
-            name: string;
             id: string;
+            name: string;
             formula: string;
             targetField: string;
             dependencies: string[];
@@ -2829,8 +2829,8 @@ export declare const schemas: {
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         id: string;
+        name: string;
         version: number;
         isActive: boolean;
         orgId: string;
@@ -2838,12 +2838,13 @@ export declare const schemas: {
         createdBy: string;
         category: "EPA_SWPPP" | "EPA_CGP" | "OSHA_SAFETY" | "STATE_PERMIT" | "CUSTOM";
         fields: {
+            id: string;
             order: number;
             width: "full" | "half" | "third" | "quarter";
             name: string;
-            id: string;
             type: "number" | "text" | "select" | "table" | "textarea" | "time" | "date" | "weather" | "inspector" | "checkbox" | "radio" | "correctiveAction" | "signature" | "multiSelect" | "photo" | "gpsLocation" | "bmpChecklist" | "measurement" | "swpppTrigger" | "violationCode" | "repeater" | "calculation" | "fileUpload";
             label: string;
+            defaultValue?: any;
             metadata?: {
                 calculation?: string | undefined;
                 gpsRequired?: boolean | undefined;
@@ -2858,7 +2859,6 @@ export declare const schemas: {
                 } | undefined;
             } | undefined;
             description?: string | undefined;
-            defaultValue?: any;
             placeholder?: string | undefined;
             options?: {
                 label: string;
@@ -2866,9 +2866,9 @@ export declare const schemas: {
             }[] | undefined;
             validation?: {
                 required: boolean;
-                max?: number | undefined;
                 min?: number | undefined;
                 pattern?: string | undefined;
+                max?: number | undefined;
                 minLength?: number | undefined;
                 step?: number | undefined;
                 maxLength?: number | undefined;
@@ -2906,8 +2906,8 @@ export declare const schemas: {
             }[];
         }[];
         calculations: {
-            name: string;
             id: string;
+            name: string;
             formula: string;
             targetField: string;
             dependencies: string[];
@@ -2948,19 +2948,20 @@ export declare const schemas: {
             } | undefined;
         } | undefined;
     }, {
-        name: string;
         id: string;
+        name: string;
         orgId: string;
         createdAt: Date;
         createdBy: string;
         category: "EPA_SWPPP" | "EPA_CGP" | "OSHA_SAFETY" | "STATE_PERMIT" | "CUSTOM";
         fields: {
-            name: string;
             id: string;
+            name: string;
             type: "number" | "text" | "select" | "table" | "textarea" | "time" | "date" | "weather" | "inspector" | "checkbox" | "radio" | "correctiveAction" | "signature" | "multiSelect" | "photo" | "gpsLocation" | "bmpChecklist" | "measurement" | "swpppTrigger" | "violationCode" | "repeater" | "calculation" | "fileUpload";
             label: string;
             order?: number | undefined;
             width?: "full" | "half" | "third" | "quarter" | undefined;
+            defaultValue?: any;
             metadata?: {
                 calculation?: string | undefined;
                 gpsRequired?: boolean | undefined;
@@ -2975,16 +2976,15 @@ export declare const schemas: {
                 } | undefined;
             } | undefined;
             description?: string | undefined;
-            defaultValue?: any;
             placeholder?: string | undefined;
             options?: {
                 label: string;
                 value?: any;
             }[] | undefined;
             validation?: {
-                max?: number | undefined;
                 min?: number | undefined;
                 pattern?: string | undefined;
+                max?: number | undefined;
                 minLength?: number | undefined;
                 step?: number | undefined;
                 required?: boolean | undefined;
@@ -3023,8 +3023,8 @@ export declare const schemas: {
             operator?: "AND" | "OR" | undefined;
         }[];
         calculations: {
-            name: string;
             id: string;
+            name: string;
             formula: string;
             targetField: string;
             dependencies: string[];
@@ -3194,8 +3194,8 @@ export declare const schemas: {
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
-        data: Record<string, any>;
         id: string;
+        data: Record<string, any>;
         metadata: {
             submittedBy: string;
             formId: string;
@@ -3238,8 +3238,8 @@ export declare const schemas: {
         reviewedAt?: Date | undefined;
         reviewNotes?: string | undefined;
     }, {
-        data: Record<string, any>;
         id: string;
+        data: Record<string, any>;
         metadata: {
             submittedBy: string;
             formId: string;
@@ -3283,4 +3283,5 @@ export declare const schemas: {
         reviewNotes?: string | undefined;
     }>;
 };
+export * from './form-submission';
 //# sourceMappingURL=index.d.ts.map

@@ -1,0 +1,556 @@
+{
+  "name": "General Daily Log",
+  "description": "Comprehensive daily log for construction project documentation - tracks weather, work activities, labor, equipment, materials, and incidents",
+  "category": "DAILY_LOG",
+  "version": "1.0.0",
+  "compliance": null,
+  "schema": {
+    "sections": [
+      {
+        "id": "project_info",
+        "title": "Project Information",
+        "order": 1,
+        "fields": [
+          {
+            "id": "date",
+            "type": "date",
+            "label": "Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}",
+            "validation": {
+              "max": "{{currentDate}}"
+            }
+          },
+          {
+            "id": "project_name",
+            "type": "text",
+            "label": "Project Name",
+            "required": true,
+            "defaultValue": "{{projectName}}",
+            "readonly": true
+          },
+          {
+            "id": "location",
+            "type": "text",
+            "label": "Location/Address",
+            "required": true,
+            "defaultValue": "{{projectLocation}}",
+            "readonly": true
+          },
+          {
+            "id": "prepared_by",
+            "type": "text",
+            "label": "Prepared By",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "readonly": true
+          }
+        ]
+      },
+      {
+        "id": "weather",
+        "title": "Weather Conditions",
+        "order": 2,
+        "fields": [
+          {
+            "id": "temperature_high",
+            "type": "number",
+            "label": "High Temperature (°F)",
+            "required": true,
+            "validation": {
+              "min": -50,
+              "max": 150
+            }
+          },
+          {
+            "id": "temperature_low",
+            "type": "number",
+            "label": "Low Temperature (°F)",
+            "required": false,
+            "validation": {
+              "min": -50,
+              "max": 150
+            }
+          },
+          {
+            "id": "conditions",
+            "type": "select",
+            "label": "Weather Conditions",
+            "required": true,
+            "options": [
+              { "value": "clear", "label": "Clear" },
+              { "value": "partly_cloudy", "label": "Partly Cloudy" },
+              { "value": "cloudy", "label": "Cloudy" },
+              { "value": "rain", "label": "Rain" },
+              { "value": "heavy_rain", "label": "Heavy Rain" },
+              { "value": "snow", "label": "Snow" },
+              { "value": "fog", "label": "Fog" },
+              { "value": "wind", "label": "Windy" }
+            ]
+          },
+          {
+            "id": "precipitation",
+            "type": "number",
+            "label": "Precipitation (inches)",
+            "required": false,
+            "validation": {
+              "min": 0,
+              "max": 20,
+              "precision": 2
+            },
+            "conditionalDisplay": {
+              "field": "conditions",
+              "operator": "in",
+              "value": ["rain", "heavy_rain", "snow"]
+            }
+          },
+          {
+            "id": "wind_speed",
+            "type": "number",
+            "label": "Wind Speed (mph)",
+            "required": false,
+            "validation": {
+              "min": 0,
+              "max": 100
+            }
+          }
+        ]
+      },
+      {
+        "id": "work_performed",
+        "title": "Work Performed",
+        "order": 3,
+        "fields": [
+          {
+            "id": "work_description",
+            "type": "textarea",
+            "label": "Description of Work Activities",
+            "placeholder": "Describe the work performed today...",
+            "required": true,
+            "validation": {
+              "minLength": 10,
+              "maxLength": 2000
+            }
+          },
+          {
+            "id": "work_areas",
+            "type": "textarea",
+            "label": "Work Areas/Locations",
+            "placeholder": "List areas where work was performed...",
+            "required": false,
+            "validation": {
+              "maxLength": 500
+            }
+          },
+          {
+            "id": "percent_complete",
+            "type": "number",
+            "label": "Overall Project % Complete",
+            "required": false,
+            "validation": {
+              "min": 0,
+              "max": 100
+            }
+          }
+        ]
+      },
+      {
+        "id": "labor",
+        "title": "Labor Hours",
+        "order": 4,
+        "fields": [
+          {
+            "id": "labor_breakdown",
+            "type": "repeater",
+            "label": "Labor by Trade",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 20,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "trade",
+                  "type": "select",
+                  "label": "Trade",
+                  "required": true,
+                  "options": [
+                    { "value": "carpenter", "label": "Carpenter" },
+                    { "value": "laborer", "label": "Laborer" },
+                    { "value": "operator", "label": "Equipment Operator" },
+                    { "value": "electrician", "label": "Electrician" },
+                    { "value": "plumber", "label": "Plumber" },
+                    { "value": "mason", "label": "Mason" },
+                    { "value": "ironworker", "label": "Ironworker" },
+                    { "value": "concrete_finisher", "label": "Concrete Finisher" },
+                    { "value": "foreman", "label": "Foreman" },
+                    { "value": "superintendent", "label": "Superintendent" },
+                    { "value": "other", "label": "Other" }
+                  ]
+                },
+                {
+                  "id": "trade_other",
+                  "type": "text",
+                  "label": "Specify Other Trade",
+                  "required": true,
+                  "conditionalDisplay": {
+                    "field": "trade",
+                    "operator": "equals",
+                    "value": "other"
+                  }
+                },
+                {
+                  "id": "worker_count",
+                  "type": "number",
+                  "label": "Number of Workers",
+                  "required": true,
+                  "validation": {
+                    "min": 1,
+                    "max": 100
+                  }
+                },
+                {
+                  "id": "hours",
+                  "type": "number",
+                  "label": "Hours Worked",
+                  "required": true,
+                  "validation": {
+                    "min": 0,
+                    "max": 24,
+                    "precision": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "total_labor_hours",
+            "type": "number",
+            "label": "Total Labor Hours",
+            "required": false,
+            "readonly": true,
+            "computed": {
+              "formula": "SUM(labor_breakdown.*.worker_count * labor_breakdown.*.hours)"
+            }
+          }
+        ]
+      },
+      {
+        "id": "equipment",
+        "title": "Equipment Used",
+        "order": 5,
+        "fields": [
+          {
+            "id": "equipment_list",
+            "type": "repeater",
+            "label": "Equipment on Site",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 30,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "equipment_type",
+                  "type": "select",
+                  "label": "Equipment Type",
+                  "required": true,
+                  "options": [
+                    { "value": "excavator", "label": "Excavator" },
+                    { "value": "loader", "label": "Loader" },
+                    { "value": "dozer", "label": "Dozer" },
+                    { "value": "backhoe", "label": "Backhoe" },
+                    { "value": "crane", "label": "Crane" },
+                    { "value": "forklift", "label": "Forklift" },
+                    { "value": "concrete_pump", "label": "Concrete Pump" },
+                    { "value": "mixer_truck", "label": "Concrete Mixer Truck" },
+                    { "value": "dump_truck", "label": "Dump Truck" },
+                    { "value": "scissor_lift", "label": "Scissor Lift" },
+                    { "value": "boom_lift", "label": "Boom Lift" },
+                    { "value": "compactor", "label": "Compactor" },
+                    { "value": "generator", "label": "Generator" },
+                    { "value": "other", "label": "Other" }
+                  ]
+                },
+                {
+                  "id": "equipment_id",
+                  "type": "text",
+                  "label": "Equipment ID/Number",
+                  "required": false
+                },
+                {
+                  "id": "hours_operated",
+                  "type": "number",
+                  "label": "Hours Operated",
+                  "required": false,
+                  "validation": {
+                    "min": 0,
+                    "max": 24,
+                    "precision": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "materials",
+        "title": "Materials Delivered/Received",
+        "order": 6,
+        "fields": [
+          {
+            "id": "materials_list",
+            "type": "repeater",
+            "label": "Materials",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 30,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "material_description",
+                  "type": "text",
+                  "label": "Material Description",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 200
+                  }
+                },
+                {
+                  "id": "quantity",
+                  "type": "text",
+                  "label": "Quantity (with unit)",
+                  "placeholder": "e.g., 50 cubic yards, 100 pieces",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 100
+                  }
+                },
+                {
+                  "id": "supplier",
+                  "type": "text",
+                  "label": "Supplier",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 100
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "subcontractors",
+        "title": "Subcontractors & Visitors",
+        "order": 7,
+        "fields": [
+          {
+            "id": "subcontractors_list",
+            "type": "repeater",
+            "label": "Subcontractors on Site",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 20,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "company_name",
+                  "type": "text",
+                  "label": "Company Name",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 150
+                  }
+                },
+                {
+                  "id": "trade_work",
+                  "type": "text",
+                  "label": "Trade/Work Performed",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 150
+                  }
+                },
+                {
+                  "id": "worker_count",
+                  "type": "number",
+                  "label": "Number of Workers",
+                  "required": false,
+                  "validation": {
+                    "min": 1,
+                    "max": 100
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "visitors_list",
+            "type": "repeater",
+            "label": "Visitors",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 20,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "visitor_name",
+                  "type": "text",
+                  "label": "Visitor Name",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 100
+                  }
+                },
+                {
+                  "id": "company",
+                  "type": "text",
+                  "label": "Company",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 100
+                  }
+                },
+                {
+                  "id": "purpose",
+                  "type": "text",
+                  "label": "Purpose of Visit",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 200
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "delays_issues",
+        "title": "Delays & Issues",
+        "order": 8,
+        "fields": [
+          {
+            "id": "delays_occurred",
+            "type": "radio",
+            "label": "Were there any delays today?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no"
+          },
+          {
+            "id": "delay_description",
+            "type": "textarea",
+            "label": "Delay Description",
+            "placeholder": "Describe the delay and its cause...",
+            "required": true,
+            "validation": {
+              "minLength": 10,
+              "maxLength": 1000
+            },
+            "conditionalDisplay": {
+              "field": "delays_occurred",
+              "operator": "equals",
+              "value": "yes"
+            }
+          },
+          {
+            "id": "issues_problems",
+            "type": "textarea",
+            "label": "Problems/Issues Encountered",
+            "placeholder": "Describe any problems or issues...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          }
+        ]
+      },
+      {
+        "id": "safety",
+        "title": "Safety Incidents",
+        "order": 9,
+        "fields": [
+          {
+            "id": "safety_incidents",
+            "type": "radio",
+            "label": "Were there any safety incidents today?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no"
+          },
+          {
+            "id": "incident_description",
+            "type": "textarea",
+            "label": "Incident Description",
+            "placeholder": "Describe the safety incident...",
+            "required": true,
+            "validation": {
+              "minLength": 10,
+              "maxLength": 1000
+            },
+            "conditionalDisplay": {
+              "field": "safety_incidents",
+              "operator": "equals",
+              "value": "yes"
+            },
+            "helpText": "Note: Complete a separate Incident Report for all injuries"
+          }
+        ]
+      },
+      {
+        "id": "photos",
+        "title": "Photos",
+        "order": 10,
+        "fields": [
+          {
+            "id": "daily_photos",
+            "type": "photo",
+            "label": "Daily Progress Photos",
+            "required": false,
+            "multiple": true,
+            "maxPhotos": 20,
+            "captureGPS": true,
+            "helpText": "Capture photos of work progress, conditions, and activities"
+          }
+        ]
+      },
+      {
+        "id": "signature",
+        "title": "Approval",
+        "order": 11,
+        "fields": [
+          {
+            "id": "notes",
+            "type": "textarea",
+            "label": "Additional Notes",
+            "placeholder": "Any additional information...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          },
+          {
+            "id": "prepared_by_signature",
+            "type": "signature",
+            "label": "Foreman/Superintendent Signature",
+            "required": true,
+            "captureTimestamp": true
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "10-15 minutes",
+    "fieldOptimization": "mobile-friendly with large touch targets",
+    "industryStandard": "Construction project management best practice"
+  }
+}

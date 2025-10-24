@@ -1,0 +1,659 @@
+{
+  "name": "Daily Safety Inspection",
+  "description": "Comprehensive daily safety inspection checklist per OSHA 29 CFR 1926.20(b) - covers PPE, fall protection, scaffolding, electrical, equipment, and hazard communication",
+  "category": "SAFETY",
+  "version": "1.0.0",
+  "compliance": {
+    "regulation": "OSHA 29 CFR 1926.20(b) - Accident Prevention Programs",
+    "requiredFields": [
+      "date",
+      "inspector_name",
+      "site_location",
+      "ppe_compliance",
+      "fall_protection",
+      "scaffolding_ladders",
+      "electrical_safety",
+      "inspector_signature"
+    ],
+    "frequency": "Daily inspections required per OSHA regulations",
+    "inspector_requirement": "Competent person per OSHA 1926.32(f)"
+  },
+  "schema": {
+    "sections": [
+      {
+        "id": "inspector_info",
+        "title": "Inspector Information",
+        "order": 1,
+        "fields": [
+          {
+            "id": "date",
+            "type": "date",
+            "label": "Inspection Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}",
+            "validation": {
+              "max": "{{currentDate}}"
+            }
+          },
+          {
+            "id": "inspector_name",
+            "type": "text",
+            "label": "Inspector Name",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "readonly": true
+          },
+          {
+            "id": "site_location",
+            "type": "text",
+            "label": "Site Location",
+            "required": true,
+            "defaultValue": "{{projectLocation}}",
+            "readonly": true
+          },
+          {
+            "id": "inspection_time",
+            "type": "time",
+            "label": "Inspection Time",
+            "required": true,
+            "defaultValue": "{{currentTime}}"
+          },
+          {
+            "id": "weather_conditions",
+            "type": "select",
+            "label": "Weather Conditions",
+            "required": true,
+            "options": [
+              { "value": "clear", "label": "Clear" },
+              { "value": "cloudy", "label": "Cloudy" },
+              { "value": "rain", "label": "Rain" },
+              { "value": "snow", "label": "Snow" },
+              { "value": "wind", "label": "Windy" },
+              { "value": "extreme_heat", "label": "Extreme Heat" },
+              { "value": "extreme_cold", "label": "Extreme Cold" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ppe",
+        "title": "Personal Protective Equipment (PPE)",
+        "order": 2,
+        "fields": [
+          {
+            "id": "hard_hats",
+            "type": "select",
+            "label": "Hard Hats",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - All workers wearing" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "safety_glasses",
+            "type": "select",
+            "label": "Safety Glasses/Eye Protection",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - All workers wearing" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "gloves",
+            "type": "select",
+            "label": "Gloves (where required)",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "safety_boots",
+            "type": "select",
+            "label": "Safety Boots/Footwear",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "high_visibility_vests",
+            "type": "select",
+            "label": "High-Visibility Vests",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "hearing_protection",
+            "type": "select",
+            "label": "Hearing Protection (where required)",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "respiratory_protection",
+            "type": "select",
+            "label": "Respiratory Protection (where required)",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "ppe_notes",
+            "type": "textarea",
+            "label": "PPE Issues/Notes",
+            "placeholder": "Describe any PPE issues or corrective actions...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          }
+        ]
+      },
+      {
+        "id": "fall_protection",
+        "title": "Fall Protection Systems",
+        "order": 3,
+        "fields": [
+          {
+            "id": "guardrails",
+            "type": "select",
+            "label": "Guardrails/Barriers",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Properly installed" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A - No elevated work" }
+            ]
+          },
+          {
+            "id": "personal_fall_arrest",
+            "type": "select",
+            "label": "Personal Fall Arrest Systems",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Harnesses/lanyards in use" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "safety_nets",
+            "type": "select",
+            "label": "Safety Nets (if used)",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "hole_covers",
+            "type": "select",
+            "label": "Floor Opening Covers/Protection",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - All openings protected" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "fall_protection_notes",
+            "type": "textarea",
+            "label": "Fall Protection Issues/Notes",
+            "placeholder": "Describe any issues or corrective actions...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          }
+        ]
+      },
+      {
+        "id": "scaffolding_ladders",
+        "title": "Scaffolding & Ladders",
+        "order": 4,
+        "fields": [
+          {
+            "id": "scaffold_condition",
+            "type": "select",
+            "label": "Scaffold Condition",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Properly erected/tagged" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A - No scaffolding" }
+            ]
+          },
+          {
+            "id": "scaffold_tags",
+            "type": "select",
+            "label": "Scaffold Tags/Permits",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Tagged by competent person" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "ladder_condition",
+            "type": "select",
+            "label": "Ladder Condition",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Good condition, proper setup" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant - Damaged/unsafe" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "ladder_angle",
+            "type": "select",
+            "label": "Ladder Angle/Setup (4:1 ratio)",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Proper angle/secured" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "scaffolding_ladder_notes",
+            "type": "textarea",
+            "label": "Scaffolding/Ladder Issues/Notes",
+            "placeholder": "Describe any issues or corrective actions...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          }
+        ]
+      },
+      {
+        "id": "electrical",
+        "title": "Electrical Safety",
+        "order": 5,
+        "fields": [
+          {
+            "id": "gfci_protection",
+            "type": "select",
+            "label": "GFCI Protection",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - All circuits protected" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "extension_cords",
+            "type": "select",
+            "label": "Extension Cords/Cables",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Good condition, proper use" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant - Damaged/frayed" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "electrical_panels",
+            "type": "select",
+            "label": "Electrical Panels/Boxes",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Covered/secured" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant - Exposed/damaged" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "lockout_tagout",
+            "type": "select",
+            "label": "Lockout/Tagout (if applicable)",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Procedures followed" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "electrical_notes",
+            "type": "textarea",
+            "label": "Electrical Safety Issues/Notes",
+            "placeholder": "Describe any issues or corrective actions...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          }
+        ]
+      },
+      {
+        "id": "fire_first_aid",
+        "title": "Fire Safety & First Aid",
+        "order": 6,
+        "fields": [
+          {
+            "id": "fire_extinguishers",
+            "type": "select",
+            "label": "Fire Extinguishers",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Available/inspected" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant - Missing/expired" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "fire_exits",
+            "type": "select",
+            "label": "Fire Exits/Emergency Routes",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Clear and marked" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant - Blocked/unmarked" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "first_aid_kits",
+            "type": "select",
+            "label": "First Aid Kits",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Available and stocked" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant - Missing/depleted" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "eyewash_stations",
+            "type": "select",
+            "label": "Eyewash Stations (if required)",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Functional" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tools_equipment",
+        "title": "Tools & Equipment",
+        "order": 7,
+        "fields": [
+          {
+            "id": "power_tools",
+            "type": "select",
+            "label": "Power Tools Condition",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Good condition, guards in place" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant - Damaged/missing guards" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "heavy_equipment",
+            "type": "select",
+            "label": "Heavy Equipment Safety",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Inspected, backup alarms working" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "tool_storage",
+            "type": "select",
+            "label": "Tool Storage/Organization",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Organized, no trip hazards" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hazard_communication",
+        "title": "Hazard Communication & Training",
+        "order": 8,
+        "fields": [
+          {
+            "id": "safety_signage",
+            "type": "select",
+            "label": "Safety Signage/Warnings",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Adequate signs posted" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant - Missing/inadequate" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "sds_availability",
+            "type": "select",
+            "label": "SDS (Safety Data Sheets) Available",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - SDS accessible" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant - Not available" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "training_verification",
+            "type": "select",
+            "label": "Worker Training Verification",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Workers trained for tasks" },
+              { "value": "needs_correction", "label": "Needs Correction" },
+              { "value": "non_compliant", "label": "Non-Compliant - Untrained workers" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "corrective_actions",
+        "title": "Corrective Actions Required",
+        "order": 9,
+        "fields": [
+          {
+            "id": "corrective_actions_needed",
+            "type": "radio",
+            "label": "Are corrective actions needed?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no"
+          },
+          {
+            "id": "actions_list",
+            "type": "repeater",
+            "label": "Corrective Actions",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 20,
+            "conditionalDisplay": {
+              "field": "corrective_actions_needed",
+              "operator": "equals",
+              "value": "yes"
+            },
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "hazard_description",
+                  "type": "text",
+                  "label": "Hazard/Issue Description",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 200
+                  }
+                },
+                {
+                  "id": "severity",
+                  "type": "select",
+                  "label": "Severity",
+                  "required": true,
+                  "options": [
+                    { "value": "immediate", "label": "Immediate Danger - Stop Work" },
+                    { "value": "high", "label": "High Priority - Fix Today" },
+                    { "value": "medium", "label": "Medium Priority - Fix This Week" },
+                    { "value": "low", "label": "Low Priority" }
+                  ]
+                },
+                {
+                  "id": "corrective_action",
+                  "type": "text",
+                  "label": "Corrective Action Required",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 200
+                  }
+                },
+                {
+                  "id": "responsible_person",
+                  "type": "text",
+                  "label": "Responsible Person",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 100
+                  }
+                },
+                {
+                  "id": "due_date",
+                  "type": "date",
+                  "label": "Due Date",
+                  "required": true
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "photos",
+        "title": "Photo Documentation",
+        "order": 10,
+        "fields": [
+          {
+            "id": "inspection_photos",
+            "type": "photo",
+            "label": "Inspection Photos",
+            "required": false,
+            "multiple": true,
+            "maxPhotos": 30,
+            "captureGPS": true,
+            "helpText": "Photograph hazards, conditions, and corrective actions"
+          }
+        ]
+      },
+      {
+        "id": "signature",
+        "title": "Inspector Certification",
+        "order": 11,
+        "fields": [
+          {
+            "id": "overall_assessment",
+            "type": "select",
+            "label": "Overall Site Safety Assessment",
+            "required": true,
+            "options": [
+              { "value": "excellent", "label": "Excellent - No issues" },
+              { "value": "good", "label": "Good - Minor issues corrected" },
+              { "value": "fair", "label": "Fair - Corrective actions required" },
+              { "value": "poor", "label": "Poor - Major safety concerns" },
+              { "value": "critical", "label": "Critical - Work stopped" }
+            ]
+          },
+          {
+            "id": "notes",
+            "type": "textarea",
+            "label": "Additional Notes/Comments",
+            "placeholder": "Any additional safety observations or concerns...",
+            "required": false,
+            "validation": {
+              "maxLength": 1500
+            }
+          },
+          {
+            "id": "inspector_signature",
+            "type": "signature",
+            "label": "Inspector Signature",
+            "required": true,
+            "captureTimestamp": true,
+            "helpText": "I certify this inspection was conducted per OSHA requirements"
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "15-20 minutes",
+    "fieldOptimization": "mobile-friendly with large touch targets",
+    "industryStandard": "OSHA 29 CFR 1926.20(b)",
+    "targetRole": "Safety Manager, Competent Person"
+  }
+}

@@ -1,0 +1,636 @@
+{
+  "name": "Superintendent Daily Report",
+  "description": "Comprehensive superintendent daily report for project management - tracks schedule, progress, issues, inspections, RFIs, and change orders",
+  "category": "DAILY_LOG",
+  "version": "1.0.0",
+  "compliance": null,
+  "schema": {
+    "sections": [
+      {
+        "id": "project_info",
+        "title": "Project Information",
+        "order": 1,
+        "fields": [
+          {
+            "id": "date",
+            "type": "date",
+            "label": "Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}",
+            "validation": {
+              "max": "{{currentDate}}"
+            }
+          },
+          {
+            "id": "project_name",
+            "type": "text",
+            "label": "Project Name",
+            "required": true,
+            "defaultValue": "{{projectName}}",
+            "readonly": true
+          },
+          {
+            "id": "superintendent",
+            "type": "text",
+            "label": "Superintendent",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "readonly": true
+          },
+          {
+            "id": "shift",
+            "type": "select",
+            "label": "Shift",
+            "required": true,
+            "options": [
+              { "value": "day", "label": "Day Shift" },
+              { "value": "night", "label": "Night Shift" },
+              { "value": "both", "label": "Both Shifts" }
+            ],
+            "defaultValue": "day"
+          }
+        ]
+      },
+      {
+        "id": "weather",
+        "title": "Weather Conditions",
+        "order": 2,
+        "fields": [
+          {
+            "id": "temperature",
+            "type": "number",
+            "label": "Temperature (°F)",
+            "required": true,
+            "validation": {
+              "min": -50,
+              "max": 150
+            }
+          },
+          {
+            "id": "conditions",
+            "type": "select",
+            "label": "Weather Conditions",
+            "required": true,
+            "options": [
+              { "value": "clear", "label": "Clear" },
+              { "value": "cloudy", "label": "Cloudy" },
+              { "value": "rain", "label": "Rain" },
+              { "value": "snow", "label": "Snow" },
+              { "value": "fog", "label": "Fog" },
+              { "value": "wind", "label": "Windy" }
+            ]
+          },
+          {
+            "id": "weather_impact",
+            "type": "radio",
+            "label": "Did weather impact work?",
+            "required": true,
+            "options": [
+              { "value": "no_impact", "label": "No Impact" },
+              { "value": "minor_impact", "label": "Minor Impact" },
+              { "value": "significant_impact", "label": "Significant Impact" },
+              { "value": "work_stopped", "label": "Work Stopped" }
+            ],
+            "defaultValue": "no_impact"
+          },
+          {
+            "id": "weather_impact_notes",
+            "type": "textarea",
+            "label": "Weather Impact Notes",
+            "required": true,
+            "validation": {
+              "minLength": 10,
+              "maxLength": 500
+            },
+            "conditionalDisplay": {
+              "field": "weather_impact",
+              "operator": "in",
+              "value": ["minor_impact", "significant_impact", "work_stopped"]
+            }
+          }
+        ]
+      },
+      {
+        "id": "schedule",
+        "title": "Schedule Status",
+        "order": 3,
+        "fields": [
+          {
+            "id": "schedule_status",
+            "type": "select",
+            "label": "Schedule Status",
+            "required": true,
+            "options": [
+              { "value": "ahead", "label": "Ahead of Schedule" },
+              { "value": "on_track", "label": "On Track" },
+              { "value": "behind", "label": "Behind Schedule" },
+              { "value": "critical", "label": "Critical Delay" }
+            ]
+          },
+          {
+            "id": "days_ahead_behind",
+            "type": "number",
+            "label": "Days Ahead/Behind (- for behind)",
+            "required": false,
+            "validation": {
+              "min": -365,
+              "max": 365
+            },
+            "helpText": "Enter negative number if behind schedule"
+          },
+          {
+            "id": "critical_path_activities",
+            "type": "textarea",
+            "label": "Critical Path Activities in Progress",
+            "placeholder": "List critical path activities...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          }
+        ]
+      },
+      {
+        "id": "work_progress",
+        "title": "Work Progress",
+        "order": 4,
+        "fields": [
+          {
+            "id": "work_summary",
+            "type": "textarea",
+            "label": "Work Progress Summary",
+            "placeholder": "Summarize work completed today...",
+            "required": true,
+            "validation": {
+              "minLength": 20,
+              "maxLength": 2000
+            }
+          },
+          {
+            "id": "major_activities",
+            "type": "repeater",
+            "label": "Major Activities Completed",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 15,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "activity",
+                  "type": "text",
+                  "label": "Activity Description",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 200
+                  }
+                },
+                {
+                  "id": "location",
+                  "type": "text",
+                  "label": "Location",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 100
+                  }
+                },
+                {
+                  "id": "percent_complete",
+                  "type": "number",
+                  "label": "% Complete",
+                  "required": false,
+                  "validation": {
+                    "min": 0,
+                    "max": 100
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "labor",
+        "title": "Labor Breakdown",
+        "order": 5,
+        "fields": [
+          {
+            "id": "total_workers",
+            "type": "number",
+            "label": "Total Workers on Site",
+            "required": true,
+            "validation": {
+              "min": 0,
+              "max": 500
+            }
+          },
+          {
+            "id": "labor_by_trade",
+            "type": "repeater",
+            "label": "Labor by Trade/Company",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 20,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "trade_or_company",
+                  "type": "text",
+                  "label": "Trade or Company",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 100
+                  }
+                },
+                {
+                  "id": "worker_count",
+                  "type": "number",
+                  "label": "Number of Workers",
+                  "required": true,
+                  "validation": {
+                    "min": 1,
+                    "max": 200
+                  }
+                },
+                {
+                  "id": "work_description",
+                  "type": "text",
+                  "label": "Work Performed",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 150
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "equipment",
+        "title": "Equipment & Materials",
+        "order": 6,
+        "fields": [
+          {
+            "id": "major_equipment",
+            "type": "textarea",
+            "label": "Major Equipment on Site",
+            "placeholder": "List major equipment in use...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          },
+          {
+            "id": "materials_received",
+            "type": "repeater",
+            "label": "Materials Received",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 20,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "material",
+                  "type": "text",
+                  "label": "Material",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 150
+                  }
+                },
+                {
+                  "id": "quantity",
+                  "type": "text",
+                  "label": "Quantity",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 100
+                  }
+                },
+                {
+                  "id": "supplier",
+                  "type": "text",
+                  "label": "Supplier",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 100
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "inspections",
+        "title": "Inspections & Testing",
+        "order": 7,
+        "fields": [
+          {
+            "id": "inspections_conducted",
+            "type": "radio",
+            "label": "Were inspections conducted today?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no"
+          },
+          {
+            "id": "inspection_list",
+            "type": "repeater",
+            "label": "Inspections",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 15,
+            "conditionalDisplay": {
+              "field": "inspections_conducted",
+              "operator": "equals",
+              "value": "yes"
+            },
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "inspection_type",
+                  "type": "text",
+                  "label": "Inspection Type",
+                  "placeholder": "e.g., Concrete slump test, Building inspection",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 150
+                  }
+                },
+                {
+                  "id": "inspector",
+                  "type": "text",
+                  "label": "Inspector/Agency",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 100
+                  }
+                },
+                {
+                  "id": "result",
+                  "type": "select",
+                  "label": "Result",
+                  "required": true,
+                  "options": [
+                    { "value": "passed", "label": "Passed" },
+                    { "value": "failed", "label": "Failed" },
+                    { "value": "conditional", "label": "Conditional Approval" },
+                    { "value": "pending", "label": "Pending" }
+                  ]
+                },
+                {
+                  "id": "notes",
+                  "type": "textarea",
+                  "label": "Notes",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 500
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "issues_delays",
+        "title": "Issues & Delays",
+        "order": 8,
+        "fields": [
+          {
+            "id": "issues_today",
+            "type": "textarea",
+            "label": "Issues/Problems Encountered",
+            "placeholder": "Describe issues encountered today...",
+            "required": false,
+            "validation": {
+              "maxLength": 1500
+            }
+          },
+          {
+            "id": "delays_description",
+            "type": "textarea",
+            "label": "Delays & Causes",
+            "placeholder": "Describe any delays and their causes...",
+            "required": false,
+            "validation": {
+              "maxLength": 1500
+            }
+          }
+        ]
+      },
+      {
+        "id": "change_orders_rfis",
+        "title": "Change Orders & RFIs",
+        "order": 9,
+        "fields": [
+          {
+            "id": "change_orders",
+            "type": "repeater",
+            "label": "Change Orders in Progress",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 15,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "co_number",
+                  "type": "text",
+                  "label": "CO Number",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 50
+                  }
+                },
+                {
+                  "id": "description",
+                  "type": "text",
+                  "label": "Description",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 200
+                  }
+                },
+                {
+                  "id": "status",
+                  "type": "select",
+                  "label": "Status",
+                  "required": true,
+                  "options": [
+                    { "value": "pending_approval", "label": "Pending Approval" },
+                    { "value": "approved", "label": "Approved" },
+                    { "value": "in_progress", "label": "In Progress" },
+                    { "value": "completed", "label": "Completed" }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "rfis",
+            "type": "repeater",
+            "label": "RFIs Submitted/Pending",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 15,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "rfi_number",
+                  "type": "text",
+                  "label": "RFI Number",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 50
+                  }
+                },
+                {
+                  "id": "subject",
+                  "type": "text",
+                  "label": "Subject",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 200
+                  }
+                },
+                {
+                  "id": "status",
+                  "type": "select",
+                  "label": "Status",
+                  "required": true,
+                  "options": [
+                    { "value": "submitted", "label": "Submitted" },
+                    { "value": "under_review", "label": "Under Review" },
+                    { "value": "answered", "label": "Answered" },
+                    { "value": "closed", "label": "Closed" }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "safety",
+        "title": "Safety Observations",
+        "order": 10,
+        "fields": [
+          {
+            "id": "safety_meetings",
+            "type": "radio",
+            "label": "Safety meetings/toolbox talks held?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no"
+          },
+          {
+            "id": "safety_meeting_topics",
+            "type": "text",
+            "label": "Safety Meeting Topics",
+            "required": true,
+            "validation": {
+              "maxLength": 200
+            },
+            "conditionalDisplay": {
+              "field": "safety_meetings",
+              "operator": "equals",
+              "value": "yes"
+            }
+          },
+          {
+            "id": "safety_incidents",
+            "type": "radio",
+            "label": "Any safety incidents today?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no"
+          },
+          {
+            "id": "incident_summary",
+            "type": "textarea",
+            "label": "Incident Summary",
+            "required": true,
+            "validation": {
+              "minLength": 10,
+              "maxLength": 1000
+            },
+            "conditionalDisplay": {
+              "field": "safety_incidents",
+              "operator": "equals",
+              "value": "yes"
+            },
+            "helpText": "Complete separate Incident Report for all injuries"
+          },
+          {
+            "id": "safety_observations",
+            "type": "textarea",
+            "label": "Safety Observations/Concerns",
+            "placeholder": "Note any safety concerns or positive observations...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          }
+        ]
+      },
+      {
+        "id": "photos",
+        "title": "Documentation",
+        "order": 11,
+        "fields": [
+          {
+            "id": "progress_photos",
+            "type": "photo",
+            "label": "Progress Photos",
+            "required": false,
+            "multiple": true,
+            "maxPhotos": 30,
+            "captureGPS": true,
+            "helpText": "Document progress, conditions, and key activities"
+          }
+        ]
+      },
+      {
+        "id": "signature",
+        "title": "Approval",
+        "order": 12,
+        "fields": [
+          {
+            "id": "notes",
+            "type": "textarea",
+            "label": "Additional Notes/Remarks",
+            "placeholder": "Any additional information for the project record...",
+            "required": false,
+            "validation": {
+              "maxLength": 1500
+            }
+          },
+          {
+            "id": "superintendent_signature",
+            "type": "signature",
+            "label": "Superintendent Signature",
+            "required": true,
+            "captureTimestamp": true
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "15-20 minutes",
+    "fieldOptimization": "mobile-friendly with large touch targets",
+    "industryStandard": "Construction project management best practice",
+    "targetRole": "Project Superintendent"
+  }
+}

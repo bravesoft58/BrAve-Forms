@@ -1,0 +1,150 @@
+# API Documentation
+
+## 1. API Overview
+- **API Type**: RESTful API.  
+- **Base URL**: `https://api.your-app.com/v1`.  
+- **Authentication**: JSON Web Tokens (JWT) for secure access.  
+- **Error Handling**: Standard HTTP status codes and custom error messages.  
+
+---
+
+## 2. Authentication Endpoints  
+### **Login**  
+- **Endpoint**: `POST /auth/login`  
+- **Purpose**: Authenticate a user and return a JWT.  
+- **Request Body**:  
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "password123"
+  }
+
+Response:
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "userId": "64f1a2b3c4d5e6f7a8b9c0d1",
+  "role": "foreman"
+}
+
+Endpoint: POST /auth/verify-mfa
+
+Purpose: Verify the MFA code and complete the login process.
+
+{
+  "userId": "64f1a2b3c4d5e6f7a8b9c0d1",
+  "mfaCode": "123456"
+}
+
+Response:
+
+{
+  "message": "MFA verified successfully."
+}
+
+Endpoint: POST /auth/register
+
+Purpose: Register a new user.
+
+{
+  "email": "newuser@example.com",
+  "password": "password123",
+  "role": "foreman",
+  "company": "Example Construction"
+}
+
+Response:
+
+{
+  "message": "User registered successfully.",
+  "userId": "64f1a2b3c4d5e6f7a8b9c0d1"
+}
+
+Endpoint: POST /projects
+
+Purpose: Create a new project.
+
+{
+  "name": "New Construction Project",
+  "description": "A new project for building a residential complex.",
+  "foremen": ["64f1a2b3c4d5e6f7a8b9c0d1"],
+  "inspectors": ["64f1a2b3c4d5e6f7a8b9c0d2"]
+}
+
+Response:
+
+{
+  "message": "Project created successfully.",
+  "projectId": "64f1a2b3c4d5e6f7a8b9c0d3"
+}
+
+Endpoint: GET /projects
+
+Purpose: Fetch all projects for the authenticated user.
+
+[
+  {
+    "_id": "64f1a2b3c4d5e6f7a8b9c0d3",
+    "name": "New Construction Project",
+    "description": "A new project for building a residential complex.",
+    "foremen": ["64f1a2b3c4d5e6f7a8b9c0d1"],
+    "inspectors": ["64f1a2b3c4d5e6f7a8b9c0d2"],
+    "logs": []
+  }
+]
+
+Endpoint: POST /logs
+
+Purpose: Create a new log for a project.
+
+{
+  "projectId": "64f1a2b3c4d5e6f7a8b9c0d3",
+  "date": "2023-10-01",
+  "content": "Completed foundation work.",
+  "photos": ["https://s3.amazonaws.com/photo1.jpg"]
+}
+
+Response:
+
+{
+  "message": "Log created successfully.",
+  "logId": "64f1a2b3c4d5e6f7a8b9c0d4"
+}
+
+Fetch Logs
+Endpoint: GET /logs?projectId=64f1a2b3c4d5e6f7a8b9c0d3
+
+Purpose: Fetch all logs for a specific project.
+
+[
+  {
+    "_id": "64f1a2b3c4d5e6f7a8b9c0d4",
+    "projectId": "64f1a2b3c4d5e6f7a8b9c0d3",
+    "date": "2023-10-01",
+    "content": "Completed foundation work.",
+    "photos": ["https://s3.amazonaws.com/photo1.jpg"]
+  }
+]
+
+Common Errors
+400 Bad Request: Invalid input data.
+
+401 Unauthorized: Missing or invalid JWT.
+
+403 Forbidden: User does not have permission to access the resource.
+
+404 Not Found: Resource not found.
+
+500 Internal Server Error: Server-side error.
+
+Example Error Response
+
+{
+  "error": "Invalid input data.",
+  "details": {
+    "email": "Email is required."
+  }
+}
+
+
+
+

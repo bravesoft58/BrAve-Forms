@@ -1,6 +1,20 @@
 "use strict";
 // Shared TypeScript types for BrAve Forms platform
 // EPA compliance and construction industry types
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.schemas = exports.EPA_SWPPP_INSPECTION_TEMPLATE = exports.calculateInspectionDeadline = exports.validateEpaThreshold = exports.FormSubmissionSchema = exports.FormTemplateSchema = exports.FieldDefinitionSchema = exports.ConditionalRuleSchema = exports.FieldValidationSchema = exports.FieldTypes = exports.InspectorAccessTokenSchema = exports.OfflineSyncSchema = exports.ProjectSchema = exports.UserRoleSchema = exports.OrganizationSchema = exports.PhotoMetadataSchema = exports.SwpppInspectionSchema = exports.WeatherEventSchema = exports.EPA_INSPECTION_DEADLINE_HOURS = exports.EPA_RAIN_THRESHOLD_INCHES = void 0;
 const zod_1 = require("zod");
@@ -456,4 +470,6 @@ exports.schemas = {
     FormTemplateSchema: exports.FormTemplateSchema,
     FormSubmissionSchema: exports.FormSubmissionSchema,
 };
+// Export form submission types
+__exportStar(require("./form-submission"), exports);
 //# sourceMappingURL=index.js.map

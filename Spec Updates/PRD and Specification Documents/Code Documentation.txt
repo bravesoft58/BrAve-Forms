@@ -1,0 +1,138 @@
+# Code Documentation
+
+## 1. Folder Structure  
+### **Frontend (React.js/React Native)**  
+
+frontend/
+├── public/ # Static assets (e.g., images, fonts)
+├── src/
+│ ├── components/ # Reusable UI components
+│ ├── pages/ # Page components (e.g., Home, Projects, Logs)
+│ ├── hooks/ # Custom React hooks
+│ ├── utils/ # Utility functions (e.g., form validation, API helpers)
+│ ├── styles/ # Global styles and themes
+│ ├── store/ # Zustand store for global state
+│ ├── api/ # API service layer (e.g., Axios requests)
+│ ├── App.js # Main app component
+│ └── index.js # Entry point
+
+
+### **Backend (Node.js)**  
+
+backend/
+├── config/ # Configuration files (e.g., database, environment variables)
+├── controllers/ # API controllers (e.g., logController, projectController)
+├── models/ # Database models (e.g., Log, Project, User)
+├── routes/ # API routes (e.g., /logs, /projects)
+├── middleware/ # Custom middleware (e.g., authentication, error handling)
+├── services/ # Business logic (e.g., logService, projectService)
+├── utils/ # Utility functions (e.g., validation, encryption)
+├── tests/ # Unit and integration tests
+├── app.js # Main app file
+└── server.js # Server entry point
+
+
+---
+
+## 2. Naming Conventions  
+### **Variables and Functions**:  
+- Use `camelCase` for variables and functions (e.g., `userName`, `fetchLogs`).  
+- Use descriptive names that reflect the purpose of the variable or function.  
+
+### **Components**:  
+- Use `PascalCase` for React components (e.g., `LogForm`, `ProjectList`).  
+- Prefix reusable components with the feature name (e.g., `LogForm`, `LogList`).  
+
+### **Files and Folders**:  
+- Use `kebab-case` for file and folder names (e.g., `log-form.js`, `project-list.js`).  
+- Group related files in the same folder (e.g., `components/logs/` for log-related components).  
+
+---
+
+## 3. Inline Comments  
+### **Purpose**: Explain complex logic, algorithms, or decisions.  
+### **Guidelines**:  
+- Use `//` for single-line comments.  
+- Use `/** ... */` for multi-line comments.  
+- Avoid over-commenting; only comment when necessary.  
+
+### **Example**:  
+```javascript
+// Calculate the total number of logs for a project
+const totalLogs = logs.filter(log => log.projectId === projectId).length;
+
+/**
+ * Validate user input before creating a new log.
+ * @param {Object} log - The log object to validate.
+ * @returns {boolean} - True if valid, false otherwise.
+ */
+function validateLog(log) {
+  return log.content && log.projectId;
+}
+
+
+Linting:
+
+Use ESLint for JavaScript/React.
+
+Use Prettier for code formatting.
+
+Configuration:
+
+Add .eslintrc and .prettierrc files to enforce consistent code style.
+
+Example Eslint:
+
+{
+  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "rules": {
+    "indent": ["error", 2],
+    "quotes": ["error", "single"],
+    "semi": ["error", "always"]
+  }
+}
+
+Example Codebase:
+
+Frontend:
+
+// src/components/logs/LogForm.js
+import React, { useState } from 'react';
+import { useStore } from '../../store';
+
+function LogForm({ projectId }) {
+  const [content, setContent] = useState('');
+  const addLog = useStore(state => state.addLog);
+
+  const handleSubmit = () => {
+    if (content) {
+      addLog({ projectId, content });
+      setContent('');
+    }
+  };
+
+  return (
+    <div>
+      <textarea value={content} onChange={e => setContent(e.target.value)} />
+      <button onClick={handleSubmit}>Submit</button>
+    </div>
+  );
+}
+
+export default LogForm;
+
+Backend:
+
+// backend/controllers/logController.js
+const Log = require('../models/Log');
+
+exports.createLog = async (req, res) => {
+  try {
+    const { projectId, content } = req.body;
+    const log = new Log({ projectId, content });
+    await log.save();
+    res.status(201).json(log);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create log' });
+  }
+};

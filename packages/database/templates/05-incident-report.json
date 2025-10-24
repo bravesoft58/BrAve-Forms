@@ -1,0 +1,653 @@
+{
+  "name": "Incident Report",
+  "description": "Comprehensive incident report based on OSHA Form 301 - injury and illness incident documentation with 7-day completion requirement",
+  "category": "SAFETY",
+  "version": "1.0.0",
+  "compliance": {
+    "regulation": "OSHA Form 301 - Injury and Illness Incident Report",
+    "requiredFields": [
+      "employee_info",
+      "incident_date_time",
+      "location",
+      "what_doing_before",
+      "what_happened",
+      "injury_description",
+      "body_part",
+      "treatment"
+    ],
+    "timeline": "Must be completed within 7 calendar days of incident",
+    "privacy": "Fields 14-17 must not include PII in OSHA submissions",
+    "recordkeeping": "Keep for 5 years following year incident occurred"
+  },
+  "schema": {
+    "sections": [
+      {
+        "id": "report_info",
+        "title": "Report Information",
+        "order": 1,
+        "fields": [
+          {
+            "id": "report_date",
+            "type": "date",
+            "label": "Report Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}",
+            "validation": {
+              "max": "{{currentDate}}"
+            }
+          },
+          {
+            "id": "report_number",
+            "type": "text",
+            "label": "Report Number",
+            "required": false,
+            "placeholder": "Auto-generated or manual entry",
+            "validation": {
+              "maxLength": 50
+            }
+          },
+          {
+            "id": "prepared_by",
+            "type": "text",
+            "label": "Report Prepared By",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "validation": {
+              "maxLength": 100
+            }
+          }
+        ]
+      },
+      {
+        "id": "employee_info",
+        "title": "Employee Information (OSHA Form 301 Section 1)",
+        "order": 2,
+        "fields": [
+          {
+            "id": "employee_name",
+            "type": "text",
+            "label": "Employee Full Name",
+            "required": true,
+            "validation": {
+              "maxLength": 150
+            },
+            "helpText": "OSHA Form 301 Field 1"
+          },
+          {
+            "id": "job_title",
+            "type": "text",
+            "label": "Job Title",
+            "required": true,
+            "placeholder": "e.g., Carpenter, Laborer, Equipment Operator",
+            "validation": {
+              "maxLength": 100
+            },
+            "helpText": "OSHA Form 301 Field 3"
+          },
+          {
+            "id": "hire_date",
+            "type": "date",
+            "label": "Date Hired",
+            "required": true,
+            "validation": {
+              "max": "{{currentDate}}"
+            },
+            "helpText": "OSHA Form 301 Field 2"
+          },
+          {
+            "id": "gender",
+            "type": "select",
+            "label": "Gender",
+            "required": false,
+            "options": [
+              { "value": "male", "label": "Male" },
+              { "value": "female", "label": "Female" },
+              { "value": "decline", "label": "Decline to Answer" }
+            ],
+            "helpText": "Optional - for statistical purposes only"
+          }
+        ]
+      },
+      {
+        "id": "incident_details",
+        "title": "Incident Details (OSHA Form 301 Section 2)",
+        "order": 3,
+        "fields": [
+          {
+            "id": "incident_date",
+            "type": "date",
+            "label": "Date of Incident",
+            "required": true,
+            "validation": {
+              "max": "{{currentDate}}"
+            },
+            "helpText": "OSHA Form 301 Field 4"
+          },
+          {
+            "id": "incident_time",
+            "type": "time",
+            "label": "Time of Incident",
+            "required": true,
+            "helpText": "OSHA Form 301 Field 5"
+          },
+          {
+            "id": "time_began_work",
+            "type": "time",
+            "label": "Time Employee Began Work",
+            "required": false,
+            "helpText": "What time did employee start their shift?"
+          },
+          {
+            "id": "location",
+            "type": "text",
+            "label": "Where Incident Occurred",
+            "placeholder": "Specific location on site (e.g., 2nd floor east wing, parking lot)",
+            "required": true,
+            "validation": {
+              "maxLength": 300
+            },
+            "helpText": "OSHA Form 301 Field 6 - Be specific"
+          },
+          {
+            "id": "project_site",
+            "type": "text",
+            "label": "Project/Site Name",
+            "required": true,
+            "defaultValue": "{{projectName}}",
+            "validation": {
+              "maxLength": 200
+            }
+          }
+        ]
+      },
+      {
+        "id": "what_happened",
+        "title": "What Happened (OSHA Form 301 Section 3)",
+        "order": 4,
+        "fields": [
+          {
+            "id": "what_doing_before",
+            "type": "textarea",
+            "label": "What was employee doing just before incident occurred?",
+            "placeholder": "Describe the task/activity being performed...",
+            "required": true,
+            "validation": {
+              "minLength": 20,
+              "maxLength": 1500
+            },
+            "helpText": "OSHA Form 301 Field 7"
+          },
+          {
+            "id": "what_happened",
+            "type": "textarea",
+            "label": "What happened? How did the injury occur?",
+            "placeholder": "Describe the sequence of events that led to the injury...",
+            "required": true,
+            "validation": {
+              "minLength": 20,
+              "maxLength": 2000
+            },
+            "helpText": "OSHA Form 301 Field 8 - Be detailed and specific"
+          },
+          {
+            "id": "what_injury_illness",
+            "type": "textarea",
+            "label": "What was the injury or illness?",
+            "placeholder": "e.g., Laceration, fracture, sprain, chemical burn, etc.",
+            "required": true,
+            "validation": {
+              "minLength": 10,
+              "maxLength": 500
+            },
+            "helpText": "OSHA Form 301 Field 9"
+          },
+          {
+            "id": "body_part",
+            "type": "select",
+            "label": "What part of body was affected?",
+            "required": true,
+            "options": [
+              { "value": "head", "label": "Head" },
+              { "value": "eye", "label": "Eye(s)" },
+              { "value": "face", "label": "Face" },
+              { "value": "neck", "label": "Neck" },
+              { "value": "shoulder", "label": "Shoulder" },
+              { "value": "arm_upper", "label": "Upper Arm" },
+              { "value": "elbow", "label": "Elbow" },
+              { "value": "forearm", "label": "Forearm" },
+              { "value": "wrist", "label": "Wrist" },
+              { "value": "hand", "label": "Hand" },
+              { "value": "finger", "label": "Finger(s)" },
+              { "value": "chest", "label": "Chest" },
+              { "value": "back_upper", "label": "Upper Back" },
+              { "value": "back_lower", "label": "Lower Back" },
+              { "value": "abdomen", "label": "Abdomen" },
+              { "value": "hip", "label": "Hip" },
+              { "value": "leg_upper", "label": "Upper Leg/Thigh" },
+              { "value": "knee", "label": "Knee" },
+              { "value": "leg_lower", "label": "Lower Leg" },
+              { "value": "ankle", "label": "Ankle" },
+              { "value": "foot", "label": "Foot" },
+              { "value": "toe", "label": "Toe(s)" },
+              { "value": "multiple", "label": "Multiple Parts" },
+              { "value": "body_systems", "label": "Body System (internal)" }
+            ],
+            "helpText": "OSHA Form 301 Field 10"
+          },
+          {
+            "id": "body_part_detail",
+            "type": "text",
+            "label": "Body Part Details",
+            "placeholder": "e.g., Left index finger, Right knee, Both eyes",
+            "required": false,
+            "validation": {
+              "maxLength": 150
+            },
+            "helpText": "Specify which side (left/right) and additional details"
+          },
+          {
+            "id": "object_substance",
+            "type": "text",
+            "label": "What object or substance directly harmed employee?",
+            "placeholder": "e.g., Concrete floor, power saw, chemicals, vehicle, etc.",
+            "required": true,
+            "validation": {
+              "maxLength": 300
+            },
+            "helpText": "OSHA Form 301 Field 11 - What directly caused the harm?"
+          }
+        ]
+      },
+      {
+        "id": "treatment",
+        "title": "Treatment & Outcome (OSHA Form 301 Section 4)",
+        "order": 5,
+        "fields": [
+          {
+            "id": "treatment_provided",
+            "type": "select",
+            "label": "Treatment Provided",
+            "required": true,
+            "options": [
+              { "value": "first_aid", "label": "First Aid Only" },
+              { "value": "medical_treatment", "label": "Medical Treatment Beyond First Aid" },
+              { "value": "emergency_room", "label": "Emergency Room Visit" },
+              { "value": "hospitalized", "label": "Hospitalized Overnight" },
+              { "value": "none", "label": "No Treatment Needed" }
+            ]
+          },
+          {
+            "id": "treatment_by_whom",
+            "type": "text",
+            "label": "Treatment Provided By",
+            "placeholder": "e.g., On-site first aid, Paramedics, Dr. Smith at XYZ Hospital",
+            "required": true,
+            "validation": {
+              "maxLength": 200
+            },
+            "helpText": "Who provided treatment?"
+          },
+          {
+            "id": "physician_name",
+            "type": "text",
+            "label": "Physician or Health Care Professional Name",
+            "placeholder": "Dr. Jane Doe",
+            "required": false,
+            "validation": {
+              "maxLength": 150
+            },
+            "helpText": "OSHA Form 301 Field 12"
+          },
+          {
+            "id": "facility_name",
+            "type": "text",
+            "label": "Health Facility Name",
+            "placeholder": "e.g., City Medical Center, ABC Urgent Care",
+            "required": false,
+            "validation": {
+              "maxLength": 200
+            },
+            "helpText": "OSHA Form 301 Field 13 - If treated away from site"
+          },
+          {
+            "id": "emergency_room_visit",
+            "type": "radio",
+            "label": "Was employee treated in emergency room?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no",
+            "helpText": "OSHA Form 301 Field 14"
+          },
+          {
+            "id": "hospitalized_overnight",
+            "type": "radio",
+            "label": "Was employee hospitalized overnight as in-patient?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no",
+            "helpText": "OSHA Form 301 Field 15"
+          },
+          {
+            "id": "days_away_from_work",
+            "type": "number",
+            "label": "Days Away From Work",
+            "required": false,
+            "validation": {
+              "min": 0,
+              "max": 365
+            },
+            "helpText": "Number of days employee unable to work (0 if none)"
+          },
+          {
+            "id": "days_restricted_duty",
+            "type": "number",
+            "label": "Days on Restricted/Light Duty",
+            "required": false,
+            "validation": {
+              "min": 0,
+              "max": 365
+            },
+            "helpText": "Number of days on restricted/modified duty"
+          },
+          {
+            "id": "return_to_work_date",
+            "type": "date",
+            "label": "Actual Return to Work Date",
+            "required": false,
+            "helpText": "When did employee return to full duty?"
+          }
+        ]
+      },
+      {
+        "id": "witnesses",
+        "title": "Witnesses & Investigation",
+        "order": 6,
+        "fields": [
+          {
+            "id": "witnesses",
+            "type": "repeater",
+            "label": "Witnesses",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 15,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "witness_name",
+                  "type": "text",
+                  "label": "Witness Name",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 100
+                  }
+                },
+                {
+                  "id": "witness_company",
+                  "type": "text",
+                  "label": "Company",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 100
+                  }
+                },
+                {
+                  "id": "witness_contact",
+                  "type": "text",
+                  "label": "Contact Info",
+                  "placeholder": "Phone or email",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 100
+                  }
+                },
+                {
+                  "id": "statement",
+                  "type": "textarea",
+                  "label": "Witness Statement Summary",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 1000
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "root_cause",
+        "title": "Root Cause & Contributing Factors",
+        "order": 7,
+        "fields": [
+          {
+            "id": "immediate_cause",
+            "type": "textarea",
+            "label": "Immediate Cause of Incident",
+            "placeholder": "What directly caused the incident?",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          },
+          {
+            "id": "root_cause",
+            "type": "textarea",
+            "label": "Root Cause Analysis",
+            "placeholder": "What underlying factors contributed? (procedures, training, equipment, etc.)",
+            "required": false,
+            "validation": {
+              "maxLength": 1500
+            }
+          },
+          {
+            "id": "contributing_factors",
+            "type": "checkboxes",
+            "label": "Contributing Factors (select all that apply)",
+            "required": false,
+            "options": [
+              { "value": "inadequate_training", "label": "Inadequate Training" },
+              { "value": "lack_of_ppe", "label": "Lack of PPE" },
+              { "value": "equipment_failure", "label": "Equipment Failure" },
+              { "value": "unsafe_condition", "label": "Unsafe Condition" },
+              { "value": "unsafe_act", "label": "Unsafe Act" },
+              { "value": "poor_housekeeping", "label": "Poor Housekeeping" },
+              { "value": "inadequate_procedure", "label": "Inadequate Procedure" },
+              { "value": "time_pressure", "label": "Time Pressure/Rushing" },
+              { "value": "fatigue", "label": "Fatigue" },
+              { "value": "communication_failure", "label": "Communication Failure" },
+              { "value": "lack_of_supervision", "label": "Lack of Supervision" },
+              { "value": "environmental", "label": "Environmental Factors (weather, lighting, etc.)" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "corrective_actions",
+        "title": "Corrective Actions",
+        "order": 8,
+        "fields": [
+          {
+            "id": "immediate_actions",
+            "type": "textarea",
+            "label": "Immediate Actions Taken",
+            "placeholder": "What actions were taken immediately after the incident?",
+            "required": true,
+            "validation": {
+              "minLength": 20,
+              "maxLength": 1500
+            }
+          },
+          {
+            "id": "preventive_actions",
+            "type": "repeater",
+            "label": "Preventive/Corrective Actions",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 15,
+            "helpText": "Actions to prevent recurrence",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "action",
+                  "type": "text",
+                  "label": "Corrective Action",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 300
+                  }
+                },
+                {
+                  "id": "responsible_person",
+                  "type": "text",
+                  "label": "Responsible Person",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 100
+                  }
+                },
+                {
+                  "id": "due_date",
+                  "type": "date",
+                  "label": "Due Date",
+                  "required": true
+                },
+                {
+                  "id": "status",
+                  "type": "select",
+                  "label": "Status",
+                  "required": true,
+                  "options": [
+                    { "value": "pending", "label": "Pending" },
+                    { "value": "in_progress", "label": "In Progress" },
+                    { "value": "completed", "label": "Completed" }
+                  ],
+                  "defaultValue": "pending"
+                },
+                {
+                  "id": "completion_date",
+                  "type": "date",
+                  "label": "Completion Date",
+                  "required": false,
+                  "conditionalDisplay": {
+                    "field": "status",
+                    "operator": "equals",
+                    "value": "completed"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "photos",
+        "title": "Photo Documentation",
+        "order": 9,
+        "fields": [
+          {
+            "id": "incident_photos",
+            "type": "photo",
+            "label": "Incident Scene Photos",
+            "required": false,
+            "multiple": true,
+            "maxPhotos": 30,
+            "captureGPS": true,
+            "helpText": "Document scene, equipment, conditions, and injuries (if appropriate)"
+          }
+        ]
+      },
+      {
+        "id": "classification",
+        "title": "Incident Classification (For Internal Use)",
+        "order": 10,
+        "fields": [
+          {
+            "id": "recordable",
+            "type": "select",
+            "label": "OSHA Recordable?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes - OSHA Recordable" },
+              { "value": "no", "label": "No - First Aid Only" },
+              { "value": "pending", "label": "Pending Determination" }
+            ],
+            "helpText": "Requires medical treatment beyond first aid, days away, restricted duty, or death"
+          },
+          {
+            "id": "severity",
+            "type": "select",
+            "label": "Incident Severity",
+            "required": true,
+            "options": [
+              { "value": "first_aid", "label": "First Aid" },
+              { "value": "medical_treatment", "label": "Medical Treatment" },
+              { "value": "restricted_duty", "label": "Restricted Duty" },
+              { "value": "lost_time", "label": "Lost Time" },
+              { "value": "fatality", "label": "Fatality" }
+            ]
+          },
+          {
+            "id": "reportable_to_osha",
+            "type": "radio",
+            "label": "Reportable to OSHA within 8/24 hours?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes - Report immediately" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no",
+            "helpText": "Death, amputation, loss of eye, or in-patient hospitalization = 8 hrs. 3+ workers hospitalized = 24 hrs"
+          }
+        ]
+      },
+      {
+        "id": "signatures",
+        "title": "Signatures & Approval",
+        "order": 11,
+        "fields": [
+          {
+            "id": "notes",
+            "type": "textarea",
+            "label": "Additional Notes/Comments",
+            "placeholder": "Any additional information relevant to this incident...",
+            "required": false,
+            "validation": {
+              "maxLength": 2000
+            }
+          },
+          {
+            "id": "supervisor_signature",
+            "type": "signature",
+            "label": "Supervisor Signature",
+            "required": true,
+            "captureTimestamp": true,
+            "helpText": "Immediate supervisor or foreman"
+          },
+          {
+            "id": "safety_manager_signature",
+            "type": "signature",
+            "label": "Safety Manager/Officer Signature",
+            "required": false,
+            "captureTimestamp": true,
+            "helpText": "Review and approval by safety personnel"
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "20-30 minutes",
+    "fieldOptimization": "mobile-friendly with large touch targets",
+    "industryStandard": "OSHA Form 301 - Injury and Illness Incident Report",
+    "recordkeeping": "Keep for 5 years following year incident occurred",
+    "complianceDeadline": "7 calendar days from incident",
+    "targetRole": "Supervisor, Safety Manager, HR"
+  }
+}

@@ -1,0 +1,504 @@
+{
+  "name": "General Quality Inspection",
+  "description": "Comprehensive quality control inspection for construction workmanship, materials, and compliance with specifications",
+  "category": "QUALITY_CONTROL",
+  "version": "1.0.0",
+  "compliance": null,
+  "schema": {
+    "sections": [
+      {
+        "id": "inspection_info",
+        "title": "Inspection Information",
+        "order": 1,
+        "fields": [
+          {
+            "id": "date",
+            "type": "date",
+            "label": "Inspection Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}",
+            "validation": {
+              "max": "{{currentDate}}"
+            }
+          },
+          {
+            "id": "time",
+            "type": "time",
+            "label": "Inspection Time",
+            "required": true,
+            "defaultValue": "{{currentTime}}"
+          },
+          {
+            "id": "inspector_name",
+            "type": "text",
+            "label": "Inspector Name",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "readonly": true
+          },
+          {
+            "id": "inspector_company",
+            "type": "text",
+            "label": "Inspector Company",
+            "required": false,
+            "defaultValue": "{{organizationName}}",
+            "validation": {
+              "maxLength": 150
+            }
+          },
+          {
+            "id": "project_name",
+            "type": "text",
+            "label": "Project Name",
+            "required": true,
+            "defaultValue": "{{projectName}}",
+            "readonly": true
+          },
+          {
+            "id": "location",
+            "type": "text",
+            "label": "Inspection Location/Area",
+            "placeholder": "e.g., Building A, 2nd Floor, Grid Lines A-D",
+            "required": true,
+            "validation": {
+              "maxLength": 200
+            }
+          }
+        ]
+      },
+      {
+        "id": "work_scope",
+        "title": "Work Scope",
+        "order": 2,
+        "fields": [
+          {
+            "id": "work_type",
+            "type": "select",
+            "label": "Type of Work Being Inspected",
+            "required": true,
+            "options": [
+              { "value": "formwork", "label": "Formwork" },
+              { "value": "rebar_placement", "label": "Rebar Placement" },
+              { "value": "concrete", "label": "Concrete Work" },
+              { "value": "masonry", "label": "Masonry" },
+              { "value": "steel_structural", "label": "Structural Steel" },
+              { "value": "framing_wood", "label": "Wood Framing" },
+              { "value": "framing_metal", "label": "Metal Framing" },
+              { "value": "roofing", "label": "Roofing" },
+              { "value": "siding", "label": "Siding/Exterior Cladding" },
+              { "value": "drywall", "label": "Drywall" },
+              { "value": "electrical", "label": "Electrical" },
+              { "value": "plumbing", "label": "Plumbing" },
+              { "value": "hvac", "label": "HVAC" },
+              { "value": "finishes", "label": "Finishes (paint, flooring, etc.)" },
+              { "value": "sitework", "label": "Sitework/Grading" },
+              { "value": "paving", "label": "Paving/Asphalt" },
+              { "value": "landscaping", "label": "Landscaping" },
+              { "value": "other", "label": "Other" }
+            ]
+          },
+          {
+            "id": "work_type_other",
+            "type": "text",
+            "label": "Specify Other Work Type",
+            "required": true,
+            "validation": {
+              "maxLength": 150
+            },
+            "conditionalDisplay": {
+              "field": "work_type",
+              "operator": "equals",
+              "value": "other"
+            }
+          },
+          {
+            "id": "work_description",
+            "type": "textarea",
+            "label": "Work Description",
+            "placeholder": "Describe the specific work being inspected...",
+            "required": true,
+            "validation": {
+              "minLength": 10,
+              "maxLength": 1000
+            }
+          },
+          {
+            "id": "contractor",
+            "type": "text",
+            "label": "Contractor/Subcontractor",
+            "required": false,
+            "validation": {
+              "maxLength": 150
+            }
+          },
+          {
+            "id": "specification_reference",
+            "type": "text",
+            "label": "Specification/Drawing Reference",
+            "placeholder": "e.g., Drawing A-201, Spec Section 03300",
+            "required": false,
+            "validation": {
+              "maxLength": 200
+            }
+          }
+        ]
+      },
+      {
+        "id": "inspection_points",
+        "title": "Inspection Points",
+        "order": 3,
+        "fields": [
+          {
+            "id": "workmanship",
+            "type": "select",
+            "label": "Workmanship Quality",
+            "required": true,
+            "options": [
+              { "value": "excellent", "label": "Excellent - Exceeds standards" },
+              { "value": "acceptable", "label": "Acceptable - Meets standards" },
+              { "value": "marginal", "label": "Marginal - Barely acceptable" },
+              { "value": "unacceptable", "label": "Unacceptable - Rework required" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "workmanship_notes",
+            "type": "textarea",
+            "label": "Workmanship Notes",
+            "placeholder": "Describe workmanship quality issues or observations...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          },
+          {
+            "id": "materials_compliance",
+            "type": "select",
+            "label": "Materials Compliance",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Correct materials used" },
+              { "value": "non_compliant", "label": "Non-Compliant - Wrong materials" },
+              { "value": "not_verified", "label": "Not Verified" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "materials_notes",
+            "type": "textarea",
+            "label": "Materials Notes",
+            "placeholder": "Describe material issues or observations...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          },
+          {
+            "id": "dimensions_tolerances",
+            "type": "select",
+            "label": "Dimensions/Tolerances",
+            "required": true,
+            "options": [
+              { "value": "within_tolerance", "label": "Within Tolerance" },
+              { "value": "out_of_tolerance", "label": "Out of Tolerance" },
+              { "value": "not_measured", "label": "Not Measured" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "dimensions_notes",
+            "type": "textarea",
+            "label": "Dimensions/Tolerances Notes",
+            "placeholder": "Record measurements and deviations...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          },
+          {
+            "id": "code_compliance",
+            "type": "select",
+            "label": "Code Compliance",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - Meets code" },
+              { "value": "non_compliant", "label": "Non-Compliant - Code violation" },
+              { "value": "not_assessed", "label": "Not Assessed" },
+              { "value": "not_applicable", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "code_notes",
+            "type": "textarea",
+            "label": "Code Compliance Notes",
+            "placeholder": "Note any code issues...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          }
+        ]
+      },
+      {
+        "id": "custom_checklist",
+        "title": "Inspection Checklist",
+        "order": 4,
+        "fields": [
+          {
+            "id": "checklist_items",
+            "type": "repeater",
+            "label": "Inspection Items",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 30,
+            "helpText": "Add specific items to check for this type of work",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "item_description",
+                  "type": "text",
+                  "label": "Item Description",
+                  "placeholder": "e.g., Anchor bolt spacing, Level tolerance, Joint spacing",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 200
+                  }
+                },
+                {
+                  "id": "result",
+                  "type": "select",
+                  "label": "Result",
+                  "required": true,
+                  "options": [
+                    { "value": "pass", "label": "Pass" },
+                    { "value": "fail", "label": "Fail" },
+                    { "value": "na", "label": "N/A" }
+                  ]
+                },
+                {
+                  "id": "measurement",
+                  "type": "text",
+                  "label": "Measurement/Observation",
+                  "placeholder": "Actual measurement or observation",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 150
+                  }
+                },
+                {
+                  "id": "required_value",
+                  "type": "text",
+                  "label": "Required Value/Tolerance",
+                  "placeholder": "Required specification or tolerance",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 150
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "deficiencies",
+        "title": "Deficiencies",
+        "order": 5,
+        "fields": [
+          {
+            "id": "deficiencies_found",
+            "type": "radio",
+            "label": "Were deficiencies found?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no"
+          },
+          {
+            "id": "deficiency_list",
+            "type": "repeater",
+            "label": "Deficiencies",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 30,
+            "conditionalDisplay": {
+              "field": "deficiencies_found",
+              "operator": "equals",
+              "value": "yes"
+            },
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "deficiency_description",
+                  "type": "textarea",
+                  "label": "Deficiency Description",
+                  "required": true,
+                  "validation": {
+                    "minLength": 10,
+                    "maxLength": 500
+                  }
+                },
+                {
+                  "id": "location",
+                  "type": "text",
+                  "label": "Location",
+                  "placeholder": "Specific location of deficiency",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 150
+                  }
+                },
+                {
+                  "id": "severity",
+                  "type": "select",
+                  "label": "Severity",
+                  "required": true,
+                  "options": [
+                    { "value": "critical", "label": "Critical - Stop work" },
+                    { "value": "major", "label": "Major - Must fix before proceeding" },
+                    { "value": "minor", "label": "Minor - Fix when convenient" }
+                  ]
+                },
+                {
+                  "id": "corrective_action",
+                  "type": "text",
+                  "label": "Required Corrective Action",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 300
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "overall_status",
+        "title": "Overall Status & Re-Inspection",
+        "order": 6,
+        "fields": [
+          {
+            "id": "overall_result",
+            "type": "select",
+            "label": "Overall Inspection Result",
+            "required": true,
+            "options": [
+              { "value": "approved", "label": "Approved - Work acceptable" },
+              { "value": "approved_with_conditions", "label": "Approved with Conditions - Minor fixes required" },
+              { "value": "rejected", "label": "Rejected - Major rework required" },
+              { "value": "on_hold", "label": "On Hold - Pending information/correction" }
+            ]
+          },
+          {
+            "id": "reinspection_required",
+            "type": "radio",
+            "label": "Is re-inspection required?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no"
+          },
+          {
+            "id": "reinspection_date",
+            "type": "date",
+            "label": "Re-Inspection Due Date",
+            "required": true,
+            "conditionalDisplay": {
+              "field": "reinspection_required",
+              "operator": "equals",
+              "value": "yes"
+            }
+          },
+          {
+            "id": "reinspection_notes",
+            "type": "textarea",
+            "label": "Re-Inspection Notes",
+            "placeholder": "What needs to be verified at re-inspection?",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            },
+            "conditionalDisplay": {
+              "field": "reinspection_required",
+              "operator": "equals",
+              "value": "yes"
+            }
+          }
+        ]
+      },
+      {
+        "id": "photos",
+        "title": "Photo Documentation",
+        "order": 7,
+        "fields": [
+          {
+            "id": "inspection_photos",
+            "type": "photo",
+            "label": "Inspection Photos",
+            "required": false,
+            "multiple": true,
+            "maxPhotos": 40,
+            "captureGPS": true,
+            "helpText": "Document work conditions, deficiencies, and compliance"
+          }
+        ]
+      },
+      {
+        "id": "signatures",
+        "title": "Signatures & Acknowledgment",
+        "order": 8,
+        "fields": [
+          {
+            "id": "notes",
+            "type": "textarea",
+            "label": "Additional Notes/Comments",
+            "placeholder": "Any additional observations or recommendations...",
+            "required": false,
+            "validation": {
+              "maxLength": 2000
+            }
+          },
+          {
+            "id": "inspector_signature",
+            "type": "signature",
+            "label": "Inspector Signature",
+            "required": true,
+            "captureTimestamp": true
+          },
+          {
+            "id": "contractor_notified",
+            "type": "radio",
+            "label": "Contractor notified of deficiencies?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No - No deficiencies" },
+              { "value": "pending", "label": "Pending" }
+            ],
+            "defaultValue": "pending"
+          },
+          {
+            "id": "contractor_acknowledgment",
+            "type": "signature",
+            "label": "Contractor Acknowledgment Signature",
+            "required": false,
+            "captureTimestamp": true,
+            "helpText": "Contractor signature acknowledging inspection results"
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "15-25 minutes",
+    "fieldOptimization": "mobile-friendly with large touch targets",
+    "industryStandard": "Construction quality control best practices",
+    "targetRole": "Quality Inspector, Project Manager, Engineer"
+  }
+}

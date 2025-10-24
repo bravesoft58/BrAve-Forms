@@ -1,0 +1,61 @@
+# Security Documentation
+
+## 1. Authentication  
+### **Methods**:  
+- **Email/Password**: Users log in with their email and password.  
+- **Multi-Factor Authentication (MFA)**: Users verify their identity using a code sent to their email or authenticator app.  
+- **Social Login**: Optional integration with Google or Facebook for easier sign-up.  
+
+### **Implementation**:  
+- Use [Passport.js](http://www.passportjs.org/) for authentication strategies.  
+- Hash passwords using [bcrypt](https://www.npmjs.com/package/bcrypt).  
+- Use JSON Web Tokens (JWT) for secure session management.  
+
+### **Example Flow**:  
+1. User logs in with email/password.  
+2. Server verifies credentials and sends an MFA code.  
+3. User enters the MFA code to complete login.  
+4. Server issues a JWT for subsequent requests.  
+
+---
+
+## 2. Authorization  
+### **Role-Based Access Control (RBAC)**:  
+- **Foremen**: Can create, edit, and delete logs for assigned projects.  
+- **Inspectors**: Can view logs (read-only) for assigned projects.  
+- **Admins**: Can manage users, projects, and system settings.  
+
+### **Implementation**:  
+- Use middleware to validate user roles and permissions for each API endpoint.  
+
+### **Example Middleware**:  
+```javascript
+function isAdmin(req, res, next) {
+  if (req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ error: 'Forbidden' });
+  }
+}
+
+const Joi = require('joi');
+
+const loginSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().min(8).required(),
+});
+
+const { error } = loginSchema.validate(req.body);
+if (error) {
+  return res.status(400).json({ error: error.details[0].message });
+}
+
+const rateLimit = require('express-rate-limit');
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+});
+
+app.use(limiter);
+

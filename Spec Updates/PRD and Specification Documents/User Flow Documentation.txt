@@ -1,0 +1,22 @@
+# User Flow Documentation
+
+## 1. Onboarding Flow
+### **Steps**  
+1. **Sign Up**:  
+   - User enters email, password, and company details.  
+   - Multi-factor authentication (MFA) is initiated.  
+2. **Verify MFA**:  
+   - User enters the MFA code sent to their email or authenticator app.  
+3. **Set Up Profile**:  
+   - User adds their name, role (foreman, inspector, admin), and profile photo.  
+4. **Join or Create Project**:  
+   - User joins an existing project (via invite code) or creates a new project.  
+
+### **Mermaid Diagram**  
+```mermaid
+graph TD
+  A[Sign Up] --> B[Verify MFA]
+  B --> C[Set Up Profile]
+  C --> D{Join or Create Project}
+  D --> E[Join Project]
+  D --> F[Create Project]

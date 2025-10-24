@@ -1,0 +1,95 @@
+# Testing Documentation
+
+## 1. Testing Overview
+- **Purpose**: Ensure the app is reliable, secure, and performs as expected.  
+- **Types of Tests**:  
+  - Unit Tests: Test individual components and functions.  
+  - Integration Tests: Test interactions between components and APIs.  
+  - End-to-End Tests: Test entire user flows.  
+  - Manual Testing: Exploratory testing to catch edge cases.  
+
+---
+
+## 2. Unit Testing  
+### **Tools**:  
+- **Frontend (React.js/React Native)**: Jest.  
+- **Backend (Node.js)**: Jest.  
+
+### **Scope**:  
+- **Frontend**:  
+  - Test UI components (e.g., buttons, forms, navigation).  
+  - Test state management (e.g., Zustand, React Query).  
+- **Backend**:  
+  - Test API endpoints (e.g., request/response handling).  
+  - Test utility functions (e.g., authentication, validation).  
+
+### **Example Test (Frontend)**:  
+```javascript
+// Example: Test a React component
+import { render, screen } from '@testing-library/react';
+import Button from './Button';
+
+test('renders a button with text', () => {
+  render(<Button text="Click Me" />);
+  const buttonElement = screen.getByText(/Click Me/i);
+  expect(buttonElement).toBeInTheDocument();
+});
+
+Example Test Backend:
+
+// Example: Test an API endpoint
+const request = require('supertest');
+const app = require('../app');
+
+test('GET /projects returns a list of projects', async () => {
+  const response = await request(app).get('/projects');
+  expect(response.statusCode).toBe(200);
+  expect(response.body).toBeInstanceOf(Array);
+});
+
+// Example: Test a form submission
+import { render, screen, fireEvent } from '@testing-library/react';
+import LoginForm from './LoginForm';
+
+test('submits the form with valid data', async () => {
+  render(<LoginForm />);
+  fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'user@example.com' } });
+  fireEvent.change(screen.getByLabelText(/Password/i), { target: { value: 'password123' } });
+  fireEvent.click(screen.getByText(/Submit/i));
+  expect(await screen.findByText(/Welcome/i)).toBeInTheDocument();
+});
+
+// Example: Test database integration
+const mongoose = require('mongoose');
+const Log = require('../models/Log');
+
+test('creates a new log in the database', async () => {
+  const log = new Log({ projectId: '64f1a2b3c4d5e6f7a8b9c0d3', content: 'Test log' });
+  await log.save();
+  const foundLog = await Log.findOne({ content: 'Test log' });
+  expect(foundLog.content).toBe('Test log');
+});
+
+// Example: Test user onboarding with Cypress
+describe('User Onboarding', () => {
+  it('successfully signs up and logs in', () => {
+    cy.visit('/signup');
+    cy.get('input[name="email"]').type('user@example.com');
+    cy.get('input[name="password"]').type('password123');
+    cy.get('button[type="submit"]').click();
+    cy.url().should('include', '/dashboard');
+  });
+});
+
+// Example: Test log creation with Detox
+describe('Log Creation', () => {
+  it('creates a new log', async () => {
+    await element(by.id('projectList')).tap();
+    await element(by.id('createLogButton')).tap();
+    await element(by.id('logContentInput')).typeText('Test log');
+    await element(by.id('submitLogButton')).tap();
+    await expect(element(by.text('Log created successfully'))).toBeVisible();
+  });
+});
+
+

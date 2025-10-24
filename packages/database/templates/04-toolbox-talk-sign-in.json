@@ -1,0 +1,416 @@
+{
+  "name": "Toolbox Talk Sign-In",
+  "description": "Safety meeting attendance and training record per OSHA 29 CFR 1926.21(b)(2) - tracks topics covered, attendees, and signatures for compliance documentation",
+  "category": "SAFETY",
+  "version": "1.0.0",
+  "compliance": {
+    "regulation": "OSHA 29 CFR 1926.21(b)(2) - Safety Training and Education",
+    "requiredFields": [
+      "date",
+      "topic",
+      "trainer_name",
+      "location",
+      "attendees"
+    ],
+    "recordkeeping": "Duration of employment + 3 years per OSHA",
+    "training_requirement": "Documented employee instruction required"
+  },
+  "schema": {
+    "sections": [
+      {
+        "id": "meeting_info",
+        "title": "Meeting Information",
+        "order": 1,
+        "fields": [
+          {
+            "id": "date",
+            "type": "date",
+            "label": "Meeting Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}",
+            "validation": {
+              "max": "{{currentDate}}"
+            }
+          },
+          {
+            "id": "time",
+            "type": "time",
+            "label": "Meeting Time",
+            "required": true,
+            "defaultValue": "{{currentTime}}"
+          },
+          {
+            "id": "location",
+            "type": "text",
+            "label": "Location",
+            "required": true,
+            "defaultValue": "{{projectLocation}}",
+            "placeholder": "e.g., Job site trailer, Main gate"
+          },
+          {
+            "id": "project_name",
+            "type": "text",
+            "label": "Project Name",
+            "required": true,
+            "defaultValue": "{{projectName}}",
+            "readonly": true
+          },
+          {
+            "id": "duration",
+            "type": "number",
+            "label": "Duration (minutes)",
+            "required": true,
+            "validation": {
+              "min": 5,
+              "max": 240
+            },
+            "defaultValue": 15
+          }
+        ]
+      },
+      {
+        "id": "topic",
+        "title": "Training Topic",
+        "order": 2,
+        "fields": [
+          {
+            "id": "topic",
+            "type": "select",
+            "label": "Primary Topic",
+            "required": true,
+            "options": [
+              { "value": "fall_protection", "label": "Fall Protection" },
+              { "value": "electrical_safety", "label": "Electrical Safety" },
+              { "value": "ppe_use", "label": "PPE Use" },
+              { "value": "scaffolding", "label": "Scaffolding Safety" },
+              { "value": "ladder_safety", "label": "Ladder Safety" },
+              { "value": "excavation_trenching", "label": "Excavation & Trenching" },
+              { "value": "confined_spaces", "label": "Confined Spaces" },
+              { "value": "lockout_tagout", "label": "Lockout/Tagout" },
+              { "value": "crane_rigging", "label": "Crane & Rigging Safety" },
+              { "value": "heavy_equipment", "label": "Heavy Equipment Safety" },
+              { "value": "heat_stress", "label": "Heat Stress Prevention" },
+              { "value": "cold_stress", "label": "Cold Stress Prevention" },
+              { "value": "hazard_communication", "label": "Hazard Communication" },
+              { "value": "fire_prevention", "label": "Fire Prevention" },
+              { "value": "housekeeping", "label": "Housekeeping & Cleanliness" },
+              { "value": "hand_power_tools", "label": "Hand & Power Tool Safety" },
+              { "value": "material_handling", "label": "Material Handling" },
+              { "value": "first_aid", "label": "First Aid & Emergency Response" },
+              { "value": "struck_by_hazards", "label": "Struck-By Hazards" },
+              { "value": "caught_between", "label": "Caught-In/Between Hazards" },
+              { "value": "ergonomics", "label": "Ergonomics & Lifting" },
+              { "value": "concrete_operations", "label": "Concrete Operations" },
+              { "value": "demolition", "label": "Demolition Safety" },
+              { "value": "respiratory_protection", "label": "Respiratory Protection" },
+              { "value": "hearing_conservation", "label": "Hearing Conservation" },
+              { "value": "incident_investigation", "label": "Incident Investigation" },
+              { "value": "site_orientation", "label": "New Worker Site Orientation" },
+              { "value": "other", "label": "Other (Specify)" }
+            ]
+          },
+          {
+            "id": "topic_other",
+            "type": "text",
+            "label": "Specify Other Topic",
+            "required": true,
+            "validation": {
+              "maxLength": 150
+            },
+            "conditionalDisplay": {
+              "field": "topic",
+              "operator": "equals",
+              "value": "other"
+            }
+          },
+          {
+            "id": "topic_description",
+            "type": "textarea",
+            "label": "Topic Description/Key Points Covered",
+            "placeholder": "Briefly describe the key safety points discussed...",
+            "required": true,
+            "validation": {
+              "minLength": 20,
+              "maxLength": 2000
+            },
+            "helpText": "Include main hazards discussed and safe work practices covered"
+          }
+        ]
+      },
+      {
+        "id": "trainer",
+        "title": "Trainer Information",
+        "order": 3,
+        "fields": [
+          {
+            "id": "trainer_name",
+            "type": "text",
+            "label": "Trainer/Presenter Name",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "validation": {
+              "maxLength": 100
+            }
+          },
+          {
+            "id": "trainer_title",
+            "type": "text",
+            "label": "Trainer Title/Position",
+            "placeholder": "e.g., Safety Manager, Superintendent, Foreman",
+            "required": false,
+            "validation": {
+              "maxLength": 100
+            }
+          },
+          {
+            "id": "trainer_company",
+            "type": "text",
+            "label": "Trainer Company",
+            "required": false,
+            "defaultValue": "{{organizationName}}",
+            "validation": {
+              "maxLength": 150
+            }
+          }
+        ]
+      },
+      {
+        "id": "hazards",
+        "title": "Hazards Discussed",
+        "order": 4,
+        "fields": [
+          {
+            "id": "specific_hazards",
+            "type": "textarea",
+            "label": "Specific Hazards for Today's Work",
+            "placeholder": "List specific hazards present on site today...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            },
+            "helpText": "Identify site-specific hazards relevant to current work activities"
+          },
+          {
+            "id": "control_measures",
+            "type": "textarea",
+            "label": "Control Measures/Safe Work Practices",
+            "placeholder": "Describe how to control or avoid the hazards...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            },
+            "helpText": "What safety measures must workers follow?"
+          }
+        ]
+      },
+      {
+        "id": "attendees",
+        "title": "Attendee Sign-In",
+        "order": 5,
+        "fields": [
+          {
+            "id": "attendee_count",
+            "type": "number",
+            "label": "Number of Attendees",
+            "required": false,
+            "readonly": true,
+            "computed": {
+              "formula": "COUNT(attendees)"
+            }
+          },
+          {
+            "id": "attendees",
+            "type": "repeater",
+            "label": "Attendees",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 100,
+            "helpText": "All attendees must print name and sign",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "employee_name",
+                  "type": "text",
+                  "label": "Employee Name (Print)",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 100
+                  }
+                },
+                {
+                  "id": "company",
+                  "type": "text",
+                  "label": "Company",
+                  "required": false,
+                  "defaultValue": "{{organizationName}}",
+                  "validation": {
+                    "maxLength": 100
+                  }
+                },
+                {
+                  "id": "trade_position",
+                  "type": "text",
+                  "label": "Trade/Position",
+                  "placeholder": "e.g., Carpenter, Laborer, Operator",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 75
+                  }
+                },
+                {
+                  "id": "signature",
+                  "type": "signature",
+                  "label": "Employee Signature",
+                  "required": true,
+                  "captureTimestamp": true,
+                  "helpText": "Sign to acknowledge attendance and understanding"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "questions_feedback",
+        "title": "Questions & Feedback",
+        "order": 6,
+        "fields": [
+          {
+            "id": "questions_asked",
+            "type": "textarea",
+            "label": "Questions Asked by Attendees",
+            "placeholder": "Document any questions raised and answers provided...",
+            "required": false,
+            "validation": {
+              "maxLength": 1500
+            }
+          },
+          {
+            "id": "employee_feedback",
+            "type": "textarea",
+            "label": "Employee Feedback/Concerns",
+            "placeholder": "Any additional safety concerns raised by workers...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          }
+        ]
+      },
+      {
+        "id": "materials",
+        "title": "Training Materials",
+        "order": 7,
+        "fields": [
+          {
+            "id": "handouts_provided",
+            "type": "radio",
+            "label": "Were handouts or materials provided?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no"
+          },
+          {
+            "id": "handout_description",
+            "type": "text",
+            "label": "Materials Description",
+            "placeholder": "e.g., OSHA fact sheet, company SOP, manufacturer guidelines",
+            "required": true,
+            "validation": {
+              "maxLength": 200
+            },
+            "conditionalDisplay": {
+              "field": "handouts_provided",
+              "operator": "equals",
+              "value": "yes"
+            }
+          },
+          {
+            "id": "material_photos",
+            "type": "photo",
+            "label": "Photos of Materials/Whiteboard",
+            "required": false,
+            "multiple": true,
+            "maxPhotos": 10,
+            "captureGPS": false,
+            "helpText": "Capture photos of whiteboard notes or handouts for record"
+          }
+        ]
+      },
+      {
+        "id": "signature",
+        "title": "Trainer Certification",
+        "order": 8,
+        "fields": [
+          {
+            "id": "training_effective",
+            "type": "select",
+            "label": "Training Effectiveness",
+            "required": true,
+            "options": [
+              { "value": "excellent", "label": "Excellent - High engagement, clear understanding" },
+              { "value": "good", "label": "Good - Workers understood key points" },
+              { "value": "fair", "label": "Fair - Some confusion, follow-up needed" },
+              { "value": "poor", "label": "Poor - Retraining required" }
+            ]
+          },
+          {
+            "id": "follow_up_needed",
+            "type": "radio",
+            "label": "Is follow-up training needed?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no"
+          },
+          {
+            "id": "follow_up_notes",
+            "type": "textarea",
+            "label": "Follow-Up Training Notes",
+            "placeholder": "Describe what follow-up training is needed and when...",
+            "required": true,
+            "validation": {
+              "maxLength": 500
+            },
+            "conditionalDisplay": {
+              "field": "follow_up_needed",
+              "operator": "equals",
+              "value": "yes"
+            }
+          },
+          {
+            "id": "notes",
+            "type": "textarea",
+            "label": "Additional Notes",
+            "placeholder": "Any additional comments about the training session...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          },
+          {
+            "id": "trainer_signature",
+            "type": "signature",
+            "label": "Trainer Signature",
+            "required": true,
+            "captureTimestamp": true,
+            "helpText": "I certify this training was conducted and documented per OSHA requirements"
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "During toolbox talk + 5 min",
+    "fieldOptimization": "mobile-friendly with large signature capture areas",
+    "industryStandard": "OSHA 29 CFR 1926.21(b)(2)",
+    "recordkeeping": "Keep for duration of employment + 3 years",
+    "targetRole": "Safety Manager, Foreman, Superintendent"
+  }
+}
