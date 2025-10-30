@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Stack, NavLink, rem, useMantineTheme } from '@mantine/core';
+import { Stack, NavLink, Box, rem, useMantineTheme } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { IconLayoutDashboard, IconFolder, IconFiles, IconSettings } from '@tabler/icons-react';
 
@@ -93,6 +93,15 @@ export function AppNavbar() {
                   borderRadius: rem(6),
                   fontSize: rem(13),
                   fontWeight: active ? 600 : 500,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    backgroundColor: theme.colors.gray[1],
+                    transform: 'translateX(2px)',
+                  },
+                  '&:active': {
+                    backgroundColor: theme.colors.gray[2],
+                    transform: 'translateX(0)',
+                  },
                 },
               }}
             />
@@ -106,7 +115,7 @@ export function AppNavbar() {
    * Mobile Bottom Navigation
    */
   return (
-    <div
+    <Box
       style={{
         position: 'fixed',
         bottom: 0,
@@ -115,7 +124,7 @@ export function AppNavbar() {
         height: rem(56),
         maxHeight: rem(56),
         minHeight: rem(56),
-        backgroundColor: '#FFFFFF',
+        backgroundColor: theme.white,
         borderTop: `1px solid ${theme.colors.gray[2]}`,
         display: 'flex',
         justifyContent: 'space-around',
@@ -130,8 +139,9 @@ export function AppNavbar() {
         const active = isActive(item.href);
 
         return (
-          <Link
+          <Box
             key={item.href}
+            component={Link}
             href={item.href}
             style={{
               display: 'flex',
@@ -149,13 +159,21 @@ export function AppNavbar() {
               gap: rem(2),
               padding: rem(4),
               boxSizing: 'border-box',
+              transition: 'all 0.2s ease',
+              cursor: 'pointer',
+            }}
+            sx={{
+              '&:active': {
+                backgroundColor: theme.colors.gray[1],
+                transform: 'scale(0.95)',
+              },
             }}
           >
             <Icon size={20} />
             <span style={{ lineHeight: 1 }}>{item.label}</span>
-          </Link>
+          </Box>
         );
       })}
-    </div>
+    </Box>
   );
 }

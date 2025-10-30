@@ -1,11 +1,11 @@
 'use client';
 
 import { Grid, Card, Group, Text, ThemeIcon } from '@mantine/core';
-import { 
-  IconBuilding, 
-  IconClipboardCheck, 
-  IconAlertTriangle, 
-  IconCircleCheck 
+import {
+  IconBuilding,
+  IconClipboardCheck,
+  IconAlertTriangle,
+  IconCircleCheck,
 } from '@tabler/icons-react';
 import { useAppStore } from '@/lib/store/app.store';
 
@@ -14,28 +14,28 @@ const stats = [
     title: 'Active Projects',
     value: '12',
     icon: IconBuilding,
-    color: 'blue',
+    color: 'blue.6', // Construction blue (#2563eb)
     description: 'Currently active construction sites',
   },
   {
     title: 'Completed Inspections',
     value: '847',
     icon: IconClipboardCheck,
-    color: 'green',
+    color: 'green.5', // Success green (#10b981)
     description: 'This month',
   },
   {
     title: 'Pending Actions',
     value: '3',
     icon: IconAlertTriangle,
-    color: 'orange',
+    color: 'orange.6', // Safety orange (#ea580c)
     description: 'Require immediate attention',
   },
   {
     title: 'Compliance Rate',
     value: '98.5%',
     icon: IconCircleCheck,
-    color: 'teal',
+    color: 'blue.5', // Info blue (#3b82f6)
     description: 'Overall compliance score',
   },
 ];
@@ -50,10 +50,10 @@ export function DashboardStats() {
           <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
             <Group justify="space-between" mb="xs">
               <div>
-                <Text size="xs" tt="uppercase" fw={700} c="dimmed">
+                <Text size="xs" tt="uppercase" fw={700} c="gray.6">
                   {stat.title}
                 </Text>
-                <Text size="xl" fw={700} c="dark.8">
+                <Text size="xl" fw={700} c="gray.9">
                   {stat.value}
                 </Text>
               </div>
@@ -61,10 +61,10 @@ export function DashboardStats() {
                 <stat.icon size={24} stroke={1.5} />
               </ThemeIcon>
             </Group>
-            <Text size="xs" c="dimmed">
+            <Text size="xs" c="gray.6">
               {stat.description}
             </Text>
-            
+
             {/* Show offline indicator if applicable */}
             {appState.networkStatus === 'offline' && (
               <Text size="xs" c="orange" mt="xs" fw={500}>

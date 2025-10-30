@@ -1,4 +1,4 @@
-import { MantineThemeOverride } from '@mantine/core';
+import { MantineThemeOverride, MantineTheme } from '@mantine/core';
 
 /**
  * BrAve Forms Theme Configuration
@@ -9,8 +9,6 @@ import { MantineThemeOverride } from '@mantine/core';
  * - Safety-oriented color palette (blue/orange)
  */
 export const theme: MantineThemeOverride = {
-  colorScheme: 'light',
-
   colors: {
     // Construction Blue (Primary)
     blue: [
@@ -51,7 +49,7 @@ export const theme: MantineThemeOverride = {
   headings: {
     fontFamily:
       'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
-    fontWeight: 600,
+    fontWeight: '600',
     sizes: {
       h1: { fontSize: '2rem', lineHeight: '2.5rem' },
       h2: { fontSize: '1.5rem', lineHeight: '2rem' },
@@ -63,11 +61,21 @@ export const theme: MantineThemeOverride = {
   },
 
   spacing: {
-    xs: '0.5rem', // 8px
-    sm: '0.75rem', // 12px
-    md: '1rem', // 16px
-    lg: '1.5rem', // 24px
-    xl: '2rem', // 32px
+    xxs: '0.25rem', // 4px - ultra compact (mobile)
+    xs: '0.5rem', // 8px - compact
+    sm: '0.75rem', // 12px - standard small
+    md: '1rem', // 16px - standard
+    lg: '1.5rem', // 24px - large
+    xl: '2rem', // 32px - extra large
+  },
+
+  fontSizes: {
+    xxs: '0.625rem', // 10px - tiny labels/group headers
+    xs: '0.75rem', // 12px - small text
+    sm: '0.875rem', // 14px - body text (PRIMARY)
+    md: '1rem', // 16px - larger body
+    lg: '1.125rem', // 18px - subheadings
+    xl: '1.25rem', // 20px - page titles
   },
 
   breakpoints: {
@@ -192,6 +200,51 @@ export const theme: MantineThemeOverride = {
           backgroundColor: '#ffffff',
           borderRight: '1px solid #e5e7eb',
           padding: '1rem',
+        },
+      },
+    },
+
+    NavLink: {
+      styles: (theme: MantineTheme) => ({
+        root: {
+          fontSize: '0.875rem', // 14px
+          '&:hover': {
+            backgroundColor: theme.colors.gray[1],
+          },
+        },
+      }),
+    },
+
+    Card: {
+      defaultProps: {
+        padding: 'md',
+        radius: 'md',
+        withBorder: true,
+      },
+      styles: {
+        root: {
+          backgroundColor: '#ffffff',
+        },
+      },
+    },
+
+    Menu: {
+      styles: (theme: MantineTheme) => ({
+        dropdown: {
+          border: `1px solid ${theme.colors.gray[2]}`,
+        },
+        item: {
+          fontSize: '0.875rem', // 14px
+          padding: '0.5rem 0.75rem',
+        },
+      }),
+    },
+
+    Badge: {
+      styles: {
+        root: {
+          fontSize: '0.75rem', // 12px
+          fontWeight: 500,
         },
       },
     },

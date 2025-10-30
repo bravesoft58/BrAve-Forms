@@ -160,17 +160,18 @@ export function AppHeader({
 
   return (
     <Group
-      h={48}
-      px={isMobile ? rem(8) : 'md'}
+      h={64}
+      px={isMobile ? rem(12) : rem(16)}
       py={0}
       justify="space-between"
       style={{
         backgroundColor: theme.white,
         borderBottom: `1px solid ${theme.colors.gray[2]}`,
-        height: rem(48),
-        maxHeight: rem(48),
-        minHeight: rem(48),
+        height: rem(64),
+        maxHeight: rem(64),
+        minHeight: rem(64),
         boxSizing: 'border-box',
+        boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
       }}
     >
       {/* Left Section: Hamburger (mobile) + Logo */}
@@ -179,7 +180,7 @@ export function AppHeader({
           <ActionIcon
             variant="subtle"
             color="gray"
-            size={40}
+            size={48}
             onClick={toggleMobileMenu}
             aria-label="Toggle navigation menu"
           >
@@ -220,9 +221,9 @@ export function AppHeader({
           {/* Brand name - hidden on very small mobile */}
           {!isMobile && (
             <Text
-              fw={500}
-              c={theme.colors.blue[6]}
-              style={{ userSelect: 'none', fontSize: rem(13), lineHeight: 1 }}
+              fw={600}
+              c={theme.colors.blue[7]}
+              style={{ userSelect: 'none', fontSize: rem(16), lineHeight: 1 }}
             >
               BrAve Forms
             </Text>
@@ -244,24 +245,24 @@ export function AppHeader({
             }}
             onBlur={() => setSearchExpanded(false)}
             autoFocus
-            size="xs"
+            size="sm"
             rightSection={
               <ActionIcon variant="subtle" onClick={handleSearch} size="xs">
-                <IconSearch size={14} />
+                <IconSearch size={16} />
               </ActionIcon>
             }
-            style={{ width: rem(200) }}
+            style={{ width: rem(280) }}
           />
         ) : (
           <Tooltip label="Search" position="bottom">
             <ActionIcon
               variant="subtle"
               color="gray"
-              size={40}
+              size={48}
               onClick={() => setSearchExpanded(true)}
               aria-label="Search"
             >
-              <IconSearch size={16} />
+              <IconSearch size={18} />
             </ActionIcon>
           </Tooltip>
         )}
@@ -270,22 +271,22 @@ export function AppHeader({
         <Tooltip label={syncLabel} position="bottom">
           <ActionIcon
             variant="subtle"
-            size={40}
+            size={48}
             style={{ color: syncColor }}
             aria-label={syncLabel}
           >
-            <SyncIcon size={16} />
+            <SyncIcon size={18} />
           </ActionIcon>
         </Tooltip>
 
         {/* User Menu */}
         <Menu width={200} position="bottom-end" shadow="md" offset={4}>
           <Menu.Target>
-            <ActionIcon variant="subtle" size={40} radius="xl" aria-label="User menu">
+            <ActionIcon variant="subtle" size={48} radius="xl" aria-label="User menu">
               {user.avatar ? (
-                <Avatar src={user.avatar} size={24} radius="xl" />
+                <Avatar src={user.avatar} size={28} radius="xl" />
               ) : (
-                <Avatar color="blue" size={24} radius="xl">
+                <Avatar color="blue" size={28} radius="xl">
                   {getUserInitials(user.name)}
                 </Avatar>
               )}
@@ -305,28 +306,28 @@ export function AppHeader({
             <Menu.Divider />
 
             <Menu.Item
-              leftSection={<IconUser size={12} />}
+              leftSection={<IconUser size={16} />}
               component={Link}
               href="/settings/profile"
               style={{
-                fontSize: rem(11),
-                minHeight: rem(28),
-                height: rem(28),
-                padding: `${rem(4)} ${rem(8)}`,
+                fontSize: rem(13),
+                minHeight: rem(32),
+                height: rem(32),
+                padding: `${rem(6)} ${rem(10)}`,
               }}
             >
               Profile
             </Menu.Item>
 
             <Menu.Item
-              leftSection={<IconSettings size={12} />}
+              leftSection={<IconSettings size={16} />}
               component={Link}
               href="/settings"
               style={{
-                fontSize: rem(11),
-                minHeight: rem(28),
-                height: rem(28),
-                padding: `${rem(4)} ${rem(8)}`,
+                fontSize: rem(13),
+                minHeight: rem(32),
+                height: rem(32),
+                padding: `${rem(6)} ${rem(10)}`,
               }}
             >
               Settings
@@ -336,15 +337,15 @@ export function AppHeader({
 
             <Menu.Item
               color="red"
-              leftSection={<IconLogout size={12} />}
+              leftSection={<IconLogout size={16} />}
               onClick={() => {
                 // TODO: Implement sign out in Sprint 4 with Clerk
               }}
               style={{
-                fontSize: rem(11),
-                minHeight: rem(28),
-                height: rem(28),
-                padding: `${rem(4)} ${rem(8)}`,
+                fontSize: rem(13),
+                minHeight: rem(32),
+                height: rem(32),
+                padding: `${rem(6)} ${rem(10)}`,
               }}
             >
               Sign Out
