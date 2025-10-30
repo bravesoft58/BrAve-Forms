@@ -12,12 +12,12 @@ Create Dashboard home page - entry point of application with welcome message, we
 
 ## Acceptance Criteria
 
-- [ ] Welcome message with user name
-- [ ] Weather alerts widget (if rain >= 0.25")
-- [ ] Pending tasks list (inspections due today)
-- [ ] Quick actions (New Form, View Projects)
-- [ ] Recent activity feed (last 5 submissions)
-- [ ] Responsive grid layout
+- [x] Welcome message with user name
+- [x] Weather alerts widget (if rain >= 0.25")
+- [x] Pending tasks list (inspections due today)
+- [x] Quick actions (New Form, View Projects)
+- [x] Recent activity feed (last 5 submissions)
+- [x] Responsive grid layout
 
 ## Implementation
 
@@ -72,12 +72,15 @@ describe('Dashboard Page', () => {
 
 ## Definition of Done
 
-- [ ] Dashboard renders correctly
-- [ ] All widgets functional
-- [ ] Tests passing
-- [ ] Ready for ISSUE-085
+- [x] Dashboard renders correctly
+- [x] All widgets functional
+- [x] Tests passing (34/34)
+- [x] Ready for ISSUE-085
 
 ---
 
-**Issue Status:** Not Started
+**Issue Status:** COMPLETE
 **Created:** 2025-10-23
+**Completed:** 2025-10-30
+**Git Commit:** dafc105
+**Evidence:** docs/sprints/sprint3/evidence/ISSUE-084/
