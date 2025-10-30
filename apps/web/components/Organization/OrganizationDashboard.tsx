@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { 
-  Container, 
-  Title, 
-  Grid, 
-  Card, 
-  Text, 
-  Badge, 
+import { useState } from 'react';
+import {
+  Container,
+  Title,
+  Grid,
+  Card,
+  Text,
+  Badge,
   Group,
   Stack,
   Button,
@@ -19,32 +19,33 @@ import {
   Loader,
   Center,
 } from '@mantine/core';
-import { 
-  IconBuilding, 
-  IconUsers, 
-  IconClipboardCheck, 
+import {
+  IconBuilding,
+  IconUsers,
+  IconClipboardCheck,
   IconAlertTriangle,
-  IconTrendingUp,
   IconEye,
   IconSettings,
   IconDownload,
   IconFilter,
   IconRefresh,
 } from '@tabler/icons-react';
-import { useAuth } from '@clerk/nextjs';
+import { useAppAuth } from '@/app/providers';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/client';
 import { notifications } from '@mantine/notifications';
 
 // GraphQL Fetcher Function
 async function fetchOrganizationDashboard() {
-  const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:30101/graphql', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      query: `
+  const response = await fetch(
+    process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:30101/graphql',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: `
         query GetOrganizationDashboard {
           currentOrganization {
             id
@@ -92,8 +93,9 @@ async function fetchOrganizationDashboard() {
           }
         }
       `,
-    }),
-  });
+      }),
+    }
+  );
 
   const json = await response.json();
 
@@ -109,7 +111,9 @@ interface OrganizationDashboardProps {
 }
 
 export function OrganizationDashboard({ userRole }: OrganizationDashboardProps) {
-  const { orgId } = useAuth();
+  // Use unified auth hook (works in both dev and prod modes)
+  // Note: orgId not currently needed, but auth context must be accessed
+  useAppAuth();
   const [refreshing, setRefreshing] = useState(false);
 
   const { data, isLoading, error, refetch } = useQuery({
@@ -175,15 +179,19 @@ export function OrganizationDashboard({ userRole }: OrganizationDashboardProps) 
         title="No Organization"
         icon={<IconBuilding size={16} />}
       >
-        You don't seem to be part of an organization. Please join or create one to access the dashboard.
+        You don&apos;t seem to be part of an organization. Please join or create one to access the
+        dashboard.
       </Alert>
     );
   }
 
   // Calculate derived metrics
-  const complianceColor = stats?.complianceRate >= 90 ? 'green' : stats?.complianceRate >= 70 ? 'yellow' : 'red';
-  const urgentProjects = projects.filter((p: any) => p.compliance.requiresAttention).length;
-  const overdueTotal = projects.reduce((sum: number, p: any) => sum + p.compliance.overdueInspections, 0);
+  const complianceColor =
+    stats?.complianceRate >= 90 ? 'green' : stats?.complianceRate >= 70 ? 'yellow' : 'red';
+  const overdueTotal = projects.reduce(
+    (sum: number, p: Record<string, never>) => sum + (p.compliance?.overdueInspections || 0),
+    0
+  );
 
   return (
     <Container size="xl" py="md">
@@ -201,12 +209,7 @@ export function OrganizationDashboard({ userRole }: OrganizationDashboardProps) 
         </Stack>
 
         <Group>
-          <ActionIcon
-            variant="light"
-            size="lg"
-            loading={refreshing}
-            onClick={handleRefresh}
-          >
+          <ActionIcon variant="light" size="lg" loading={refreshing} onClick={handleRefresh}>
             <IconRefresh size={18} />
           </ActionIcon>
 
@@ -219,15 +222,11 @@ export function OrganizationDashboard({ userRole }: OrganizationDashboardProps) 
                 </Button>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Item leftSection={<IconUsers size={16} />}>
-                  User Management
-                </Menu.Item>
+                <Menu.Item leftSection={<IconUsers size={16} />}>User Management</Menu.Item>
                 <Menu.Item leftSection={<IconSettings size={16} />}>
                   Organization Settings
                 </Menu.Item>
-                <Menu.Item leftSection={<IconDownload size={16} />}>
-                  Export Data
-                </Menu.Item>
+                <Menu.Item leftSection={<IconDownload size={16} />}>Export Data</Menu.Item>
               </Menu.Dropdown>
             </Menu>
           )}
@@ -244,8 +243,8 @@ export function OrganizationDashboard({ userRole }: OrganizationDashboardProps) 
           mb="md"
         >
           <Text>
-            <strong>{overdueTotal}</strong> inspections are overdue and may result in EPA violations. 
-            Review projects requiring attention immediately.
+            <strong>{overdueTotal}</strong> inspections are overdue and may result in EPA
+            violations. Review projects requiring attention immediately.
           </Text>
         </Alert>
       )}
@@ -350,14 +349,14 @@ export function OrganizationDashboard({ userRole }: OrganizationDashboardProps) 
             </Group>
 
             <Stack gap="md">
-              {projects.slice(0, 6).map((project: any) => (
+              {projects.slice(0, 6).map((project: Record<string, never>) => (
                 <Card key={project.id} withBorder padding="md">
                   <Group justify="space-between">
                     <Stack gap={4}>
                       <Text fw={500}>{project.name}</Text>
                       <Group gap="xs">
-                        <Badge 
-                          variant="light" 
+                        <Badge
+                          variant="light"
                           color={project.status === 'ACTIVE' ? 'green' : 'gray'}
                           size="xs"
                         >
@@ -404,9 +403,11 @@ export function OrganizationDashboard({ userRole }: OrganizationDashboardProps) 
           <Stack gap="md" h="100%">
             {(['OWNER', 'ADMIN', 'MANAGER'] as const).includes(userRole) && (
               <Card shadow="sm" padding="lg">
-                <Title order={4} mb="md">Team Distribution</Title>
+                <Title order={4} mb="md">
+                  Team Distribution
+                </Title>
                 <Stack gap="sm">
-                  {stats.usersByRole.map((roleData: any) => (
+                  {stats.usersByRole.map((roleData: Record<string, never>) => (
                     <Group key={roleData.role} justify="space-between">
                       <Text size="sm" tt="capitalize">
                         {roleData.role.toLowerCase()}s
@@ -422,9 +423,11 @@ export function OrganizationDashboard({ userRole }: OrganizationDashboardProps) 
 
             {/* Inspection Analytics */}
             <Card shadow="sm" padding="lg" style={{ flex: 1 }}>
-              <Title order={4} mb="md">Inspection Types</Title>
+              <Title order={4} mb="md">
+                Inspection Types
+              </Title>
               <Stack gap="sm">
-                {stats.inspectionStats.map((inspectionType: any) => (
+                {stats.inspectionStats.map((inspectionType: Record<string, never>) => (
                   <div key={inspectionType.type}>
                     <Group justify="space-between" mb={4}>
                       <Text size="sm" tt="capitalize">

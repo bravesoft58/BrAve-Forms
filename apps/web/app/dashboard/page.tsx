@@ -18,7 +18,7 @@ import {
   IconCloudRain,
   IconCamera,
 } from '@tabler/icons-react';
-import { useAuth } from '@clerk/nextjs';
+import { useAppAuth } from '@/app/providers';
 import { OrganizationDashboard } from '@/components/Organization/OrganizationDashboard';
 import { ProjectSelector } from '@/components/Projects/ProjectSelector';
 import { RoleGuard, useRolePermissions, UserRole } from '@/components/Auth/RoleGuard';
@@ -40,6 +40,11 @@ function DashboardContent() {
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined);
 
+  // Use unified auth hook that automatically handles dev/prod modes
+  // MUST be called before any early returns
+  const { orgRole: authOrgRole } = useAppAuth();
+  const orgRole = authOrgRole || 'MEMBER';
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -49,8 +54,6 @@ function DashboardContent() {
     return null;
   }
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { orgRole } = useAuth();
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { getCurrentRole } = useRolePermissions();
 

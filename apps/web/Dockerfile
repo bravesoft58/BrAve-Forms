@@ -39,6 +39,7 @@ COPY packages/types ./packages/types
 # Set build environment variables
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+ENV NEXT_PUBLIC_SKIP_CLERK_AUTH=true
 
 # Build Next.js app with standalone output
 WORKDIR /app/apps/web

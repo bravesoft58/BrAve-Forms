@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useAppAuth } from '@/app/providers';
 import { Alert, Text } from '@mantine/core';
 import { IconShieldX } from '@tabler/icons-react';
 
@@ -42,40 +42,36 @@ function hasRoleAccess(userRole: UserRole, allowedRoles: UserRole[]): boolean {
 
 /**
  * RoleGuard component for construction industry role-based access control
- * 
+ *
  * Usage:
  * <RoleGuard requiredRoles="ADMIN">
  *   <AdminOnlyComponent />
  * </RoleGuard>
- * 
+ *
  * <RoleGuard requiredRoles={["OWNER", "ADMIN"]}>
  *   <ManagementComponent />
  * </RoleGuard>
  */
-export function RoleGuard({ 
-  children, 
-  requiredRoles, 
+export function RoleGuard({
+  children,
+  requiredRoles,
   fallback,
-  orgRole: overrideOrgRole 
+  orgRole: overrideOrgRole,
 }: RoleGuardProps) {
-  const { orgRole: clerkOrgRole } = useAuth();
-  
-  // Use override or Clerk org role
+  // Use unified auth hook (works in both dev and prod modes)
+  const { orgRole: clerkOrgRole } = useAppAuth();
+
+  // Use override or auth org role
   const currentRole = overrideOrgRole || clerkOrgRole;
 
   // If no role is available, deny access
   if (!currentRole) {
     return (
       fallback || (
-        <Alert
-          variant="light"
-          color="red"
-          title="Access Denied"
-          icon={<IconShieldX size={16} />}
-        >
+        <Alert variant="light" color="red" title="Access Denied" icon={<IconShieldX size={16} />}>
           <Text size="sm">
-            You must have an organization role to access this content.
-            Please contact your administrator if you believe this is an error.
+            You must have an organization role to access this content. Please contact your
+            administrator if you believe this is an error.
           </Text>
         </Alert>
       )
@@ -98,8 +94,8 @@ export function RoleGuard({
           icon={<IconShieldX size={16} />}
         >
           <Text size="sm">
-            This content requires {allowedRoles.join(' or ')} permissions.
-            Your current role: {userRole}
+            This content requires {allowedRoles.join(' or ')} permissions. Your current role:{' '}
+            {userRole}
           </Text>
         </Alert>
       )
@@ -113,8 +109,9 @@ export function RoleGuard({
  * Hook to check user permissions in components
  */
 export function useRolePermissions() {
-  const { orgRole } = useAuth();
-  
+  // Use unified auth hook (works in both dev and prod modes)
+  const { orgRole } = useAppAuth();
+
   const checkPermission = (requiredRole: UserRole): boolean => {
     if (!orgRole) return false;
     const userRole = orgRole.toUpperCase() as UserRole;
@@ -147,7 +144,13 @@ export function useRolePermissions() {
 /**
  * Convenience components for common role patterns
  */
-export function OwnerOnly({ children, fallback }: { children: React.ReactNode; fallback?: React.ReactNode }) {
+export function OwnerOnly({
+  children,
+  fallback,
+}: {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}) {
   return (
     <RoleGuard requiredRoles="OWNER" fallback={fallback}>
       {children}
@@ -155,33 +158,60 @@ export function OwnerOnly({ children, fallback }: { children: React.ReactNode; f
   );
 }
 
-export function AdminAccess({ children, fallback }: { children: React.ReactNode; fallback?: React.ReactNode }) {
+export function AdminAccess({
+  children,
+  fallback,
+}: {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}) {
   return (
-    <RoleGuard requiredRoles={["OWNER", "ADMIN"]} fallback={fallback}>
+    <RoleGuard requiredRoles={['OWNER', 'ADMIN']} fallback={fallback}>
       {children}
     </RoleGuard>
   );
 }
 
-export function ManagementAccess({ children, fallback }: { children: React.ReactNode; fallback?: React.ReactNode }) {
+export function ManagementAccess({
+  children,
+  fallback,
+}: {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}) {
   return (
-    <RoleGuard requiredRoles={["OWNER", "ADMIN", "MANAGER"]} fallback={fallback}>
+    <RoleGuard requiredRoles={['OWNER', 'ADMIN', 'MANAGER']} fallback={fallback}>
       {children}
     </RoleGuard>
   );
 }
 
-export function TeamAccess({ children, fallback }: { children: React.ReactNode; fallback?: React.ReactNode }) {
+export function TeamAccess({
+  children,
+  fallback,
+}: {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}) {
   return (
-    <RoleGuard requiredRoles={["OWNER", "ADMIN", "MANAGER", "MEMBER"]} fallback={fallback}>
+    <RoleGuard requiredRoles={['OWNER', 'ADMIN', 'MANAGER', 'MEMBER']} fallback={fallback}>
       {children}
     </RoleGuard>
   );
 }
 
-export function AllRoles({ children, fallback }: { children: React.ReactNode; fallback?: React.ReactNode }) {
+export function AllRoles({
+  children,
+  fallback,
+}: {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}) {
   return (
-    <RoleGuard requiredRoles={["OWNER", "ADMIN", "MANAGER", "MEMBER", "INSPECTOR"]} fallback={fallback}>
+    <RoleGuard
+      requiredRoles={['OWNER', 'ADMIN', 'MANAGER', 'MEMBER', 'INSPECTOR']}
+      fallback={fallback}
+    >
       {children}
     </RoleGuard>
   );

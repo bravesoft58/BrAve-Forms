@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Group,
   Text,
@@ -32,9 +32,8 @@ import {
   IconSearch,
   IconFilter,
   IconBuilding,
-  IconUsers,
 } from '@tabler/icons-react';
-import { useAuth } from '@clerk/nextjs';
+import { useAppAuth } from '@/app/providers';
 import { useQuery } from '@tanstack/react-query';
 import { fetchProjects } from '@/lib/api/projects';
 import { notifications } from '@mantine/notifications';
@@ -56,16 +55,21 @@ export function ProjectSelector({
   userRole,
   onProjectSelect,
   selectedProjectId,
-  showCreateButton = true
+  showCreateButton = true,
 }: ProjectSelectorProps) {
-  const { orgId } = useAuth();
+  // Use unified auth hook (works in both dev and prod modes)
+  const { orgId } = useAppAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>('');
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<any>(null);
+  const [editingProject, setEditingProject] = useState<Record<string, never> | null>(null);
 
   // Fetch projects using TanStack Query
-  const { data: projectsData, isPending, error, refetch } = useQuery({
+  const {
+    data: projectsData,
+    isPending,
+    error,
+  } = useQuery({
     queryKey: ['projects', orgId],
     queryFn: async () => {
       if (!orgId) return [];
@@ -96,7 +100,7 @@ export function ProjectSelector({
     },
   });
 
-  const handleCreateProject = async (values: any) => {
+  const handleCreateProject = async (_values: Record<string, never>) => {
     notifications.show({
       title: 'Feature Temporarily Unavailable',
       message: 'Project creation will be restored in next issue',
@@ -104,7 +108,7 @@ export function ProjectSelector({
     });
   };
 
-  const handleUpdateProject = async (values: any) => {
+  const handleUpdateProject = async (_values: Record<string, never>) => {
     notifications.show({
       title: 'Feature Temporarily Unavailable',
       message: 'Project updates will be restored in next issue',
@@ -112,7 +116,7 @@ export function ProjectSelector({
     });
   };
 
-  const handleDeleteProject = async (projectId: string, projectName: string) => {
+  const handleDeleteProject = async (_projectId: string, _projectName: string) => {
     notifications.show({
       title: 'Feature Temporarily Unavailable',
       message: 'Project deletion will be restored in next issue',
@@ -120,7 +124,7 @@ export function ProjectSelector({
     });
   };
 
-  const openEditModal = (project: any) => {
+  const openEditModal = (project: Record<string, never>) => {
     setEditingProject(project);
     projectForm.setValues({
       name: project.name,
@@ -135,16 +139,18 @@ export function ProjectSelector({
   };
 
   const projects = data?.projects || [];
-  
+
   // Filter projects based on search and status
-  const filteredProjects = projects.filter((project: any) => {
-    const matchesSearch = !searchQuery || 
+  const filteredProjects = projects.filter((project: Record<string, never>) => {
+    const matchesSearch =
+      !searchQuery ||
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (project.permitNumber && project.permitNumber.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+      (project.permitNumber &&
+        project.permitNumber.toLowerCase().includes(searchQuery.toLowerCase()));
+
     const matchesStatus = !statusFilter || statusFilter === '' || project.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -190,7 +196,7 @@ export function ProjectSelector({
               onChange={(e) => setSearchQuery(e.currentTarget.value)}
               style={{ minWidth: 250 }}
             />
-            
+
             <Select
               placeholder="Filter by status"
               leftSection={<IconFilter size={16} />}
@@ -207,10 +213,7 @@ export function ProjectSelector({
           </Group>
 
           {canCreateProjects && showCreateButton && (
-            <Button
-              leftSection={<IconPlus size={16} />}
-              onClick={() => setCreateModalOpen(true)}
-            >
+            <Button leftSection={<IconPlus size={16} />} onClick={() => setCreateModalOpen(true)}>
               New Project
             </Button>
           )}
@@ -218,7 +221,7 @@ export function ProjectSelector({
 
         {/* Project Grid */}
         <Grid>
-          {filteredProjects.map((project: any) => (
+          {filteredProjects.map((project: Record<string, never>) => (
             <Grid.Col key={project.id} span={{ base: 12, md: 6, lg: 4 }}>
               <Card
                 shadow="sm"
@@ -235,10 +238,13 @@ export function ProjectSelector({
                   <Badge
                     variant="light"
                     color={
-                      project.status === 'ACTIVE' ? 'green' :
-                      project.status === 'PLANNING' ? 'blue' :
-                      project.status === 'SUSPENDED' ? 'orange' :
-                      'gray'
+                      project.status === 'ACTIVE'
+                        ? 'green'
+                        : project.status === 'PLANNING'
+                          ? 'blue'
+                          : project.status === 'SUSPENDED'
+                            ? 'orange'
+                            : 'gray'
                     }
                   >
                     {project.status}
@@ -262,7 +268,7 @@ export function ProjectSelector({
                         >
                           View Details
                         </Menu.Item>
-                        
+
                         {canEditProjects && (
                           <Menu.Item
                             leftSection={<IconEdit size={14} />}
@@ -274,7 +280,7 @@ export function ProjectSelector({
                             Edit Project
                           </Menu.Item>
                         )}
-                        
+
                         {canDeleteProjects && (
                           <Menu.Item
                             leftSection={<IconTrash size={14} />}
@@ -326,11 +332,16 @@ export function ProjectSelector({
                   <Text size="sm" fw={500}>
                     Compliance Score
                   </Text>
-                  <Text 
-                    size="sm" 
+                  <Text
+                    size="sm"
                     fw={600}
-                    c={project.compliance.overallScore >= 80 ? 'green' : 
-                      project.compliance.overallScore >= 60 ? 'yellow' : 'red'}
+                    c={
+                      project.compliance.overallScore >= 80
+                        ? 'green'
+                        : project.compliance.overallScore >= 60
+                          ? 'yellow'
+                          : 'red'
+                    }
                   >
                     {Math.round(project.compliance.overallScore)}%
                   </Text>
@@ -369,10 +380,12 @@ export function ProjectSelector({
                 <Stack align="center" gap="md">
                   <IconBuilding size={48} color="#ccc" />
                   <Text size="lg" c="dimmed">
-                    {searchQuery || statusFilter ? 'No projects match your filters' : 'No projects yet'}
+                    {searchQuery || statusFilter
+                      ? 'No projects match your filters'
+                      : 'No projects yet'}
                   </Text>
                   {canCreateProjects && !searchQuery && !statusFilter && (
-                    <Button 
+                    <Button
                       variant="light"
                       leftSection={<IconPlus size={16} />}
                       onClick={() => setCreateModalOpen(true)}
@@ -398,7 +411,11 @@ export function ProjectSelector({
         title={editingProject ? 'Edit Project' : 'Create New Project'}
         size="lg"
       >
-        <form onSubmit={projectForm.onSubmit(editingProject ? handleUpdateProject : handleCreateProject)}>
+        <form
+          onSubmit={projectForm.onSubmit(
+            editingProject ? handleUpdateProject : handleCreateProject
+          )}
+        >
           <Stack gap="md">
             <TextInput
               label="Project Name"
@@ -438,15 +455,8 @@ export function ProjectSelector({
             />
 
             <Group grow>
-              <DateInput
-                label="Start Date"
-                required
-                {...projectForm.getInputProps('startDate')}
-              />
-              <DateInput
-                label="End Date (Optional)"
-                {...projectForm.getInputProps('endDate')}
-              />
+              <DateInput label="Start Date" required {...projectForm.getInputProps('startDate')} />
+              <DateInput label="End Date (Optional)" {...projectForm.getInputProps('endDate')} />
             </Group>
 
             <NumberInput
@@ -470,10 +480,7 @@ export function ProjectSelector({
               >
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
-                loading={creating || updating}
-              >
+              <Button type="submit" loading={creating || updating}>
                 {editingProject ? 'Update' : 'Create'} Project
               </Button>
             </Group>

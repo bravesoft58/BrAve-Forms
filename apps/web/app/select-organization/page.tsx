@@ -1,21 +1,21 @@
-import { OrganizationList } from '@clerk/nextjs';
-import { Container, Title, Text, Stack, Card } from '@mantine/core';
-import { IconBuilding, IconHelmet } from '@tabler/icons-react';
+'use client';
 
-// Force dynamic rendering (requires Clerk authentication at runtime)
+import { Container, Title, Text, Stack, Card, Button } from '@mantine/core';
+import { IconBuilding, IconHelmet } from '@tabler/icons-react';
+import { useRouter } from 'next/navigation';
+
+// Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
 /**
- * Organization Selection Page
- * 
- * This page is shown when users need to:
- * 1. Join an existing construction company
- * 2. Create a new construction company organization
- * 3. Switch between organizations they're already part of
- * 
- * Enforces the CLAUDE.md requirement that personal accounts are disabled.
+ * Organization Selection Page - Simplified for Initial Testing
+ *
+ * TODO: Replace with real Clerk OrganizationList when implementing production auth
+ * For now, this is a placeholder that redirects to dashboard with mock auth
  */
 export default function SelectOrganizationPage() {
+  const router = useRouter();
+
   return (
     <Container size="md" py="xl">
       <Stack gap="xl" align="center">
@@ -23,11 +23,11 @@ export default function SelectOrganizationPage() {
         <Stack gap="md" align="center">
           <IconHelmet size={64} color="#0ea5e9" />
           <Title order={1} ta="center">
-            Select Your Construction Company
+            Development Mode
           </Title>
           <Text size="lg" c="dimmed" ta="center" maw={600}>
-            BrAve Forms requires you to be part of a construction company organization 
-            to manage EPA and OSHA compliance. Choose an existing company or create a new one.
+            Authentication is simplified for initial testing. You are automatically logged in as a
+            test administrator.
           </Text>
         </Stack>
 
@@ -39,73 +39,35 @@ export default function SelectOrganizationPage() {
           withBorder
           style={{ width: '100%', maxWidth: '800px' }}
         >
-          <Stack gap="md">
+          <Stack gap="md" align="center">
             <Title order={3} ta="center">
               <IconBuilding size={24} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-              Construction Companies
+              Test Organization
             </Title>
-            
+
             <Text size="sm" c="dimmed" ta="center">
-              Join an existing company or create a new one to get started with compliance management.
+              Currently logged in as: Admin User (dev-org-123)
             </Text>
 
-            <OrganizationList
-              appearance={{
-                elements: {
-                  organizationListPreviewButton: {
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '12px',
-                    padding: '16px',
-                    marginBottom: '12px',
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    minHeight: '60px',
-                    '&:hover': {
-                      backgroundColor: '#f9fafb',
-                      borderColor: '#0ea5e9',
-                    },
-                  },
-                  organizationListCreateOrganizationButton: {
-                    backgroundColor: '#0ea5e9',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '12px',
-                    padding: '16px 24px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    minHeight: '60px',
-                    '&:hover': {
-                      backgroundColor: '#0284c7',
-                    },
-                  },
-                  card: {
-                    boxShadow: 'none',
-                    border: 'none',
-                  },
-                  pageScrollBox: {
-                    padding: '0',
-                  },
-                },
-                layout: {
-                  shimmer: false,
-                },
-              }}
-              hidePersonal // Enforce organization-only access per CLAUDE.md
-              skipInvitationScreen={false}
-              afterCreateOrganizationUrl="/dashboard"
-              afterSelectOrganizationUrl="/dashboard"
-            />
+            <Button
+              size="lg"
+              onClick={() => router.push('/dashboard')}
+              style={{ minWidth: '200px' }}
+            >
+              Go to Dashboard
+            </Button>
+
+            <Text size="xs" c="dimmed" ta="center" mt="md">
+              Note: Full organization management will be available in production release
+            </Text>
           </Stack>
         </Card>
 
         {/* Footer Information */}
         <Stack gap="sm" align="center">
-          <Text size="sm" c="dimmed" ta="center">
-            Need help? Contact your construction company administrator.
-          </Text>
           <Text size="xs" c="dimmed" ta="center">
-            BrAve Forms helps construction companies maintain EPA and OSHA compliance 
-            with automated inspections and regulatory tracking.
+            BrAve Forms helps construction companies maintain EPA and OSHA compliance with automated
+            inspections and regulatory tracking.
           </Text>
         </Stack>
       </Stack>

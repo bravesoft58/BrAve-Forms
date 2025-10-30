@@ -1,14 +1,9 @@
-import {
-  createTheme,
-  DEFAULT_THEME,
-  mergeMantineTheme,
-  MantineColorsTuple,
-} from '@mantine/core';
+import { createTheme, DEFAULT_THEME, mergeMantineTheme, MantineColorsTuple } from '@mantine/core';
 
 // High-contrast colors optimized for construction site visibility
 const primary: MantineColorsTuple = [
   '#f0f9ff',
-  '#e0f2fe', 
+  '#e0f2fe',
   '#bae6fd',
   '#7dd3fc',
   '#38bdf8',
@@ -77,11 +72,11 @@ export const constructionTheme = createTheme({
 
   // Font sizes optimized for touch interfaces
   fontSizes: {
-    xs: '14rem', // 14px minimum for construction sites
-    sm: '16rem', // 16px base size
-    md: '18rem', // 18px for improved readability
-    lg: '20rem', // 20px for critical information
-    xl: '24rem', // 24px for headers
+    xs: '0.875rem', // 14px minimum for construction sites
+    sm: '1rem', // 16px base size
+    md: '1.125rem', // 18px for improved readability
+    lg: '1.25rem', // 20px for critical information
+    xl: '1.5rem', // 24px for headers
   },
 
   // Line heights for better readability
@@ -98,31 +93,31 @@ export const constructionTheme = createTheme({
     fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
     fontWeight: '700', // Bold for better visibility
     sizes: {
-      h1: { fontSize: '32rem', lineHeight: '1.3' },
-      h2: { fontSize: '28rem', lineHeight: '1.35' },
-      h3: { fontSize: '24rem', lineHeight: '1.4' },
-      h4: { fontSize: '20rem', lineHeight: '1.45' },
-      h5: { fontSize: '18rem', lineHeight: '1.5' },
-      h6: { fontSize: '16rem', lineHeight: '1.5' },
+      h1: { fontSize: '2rem', lineHeight: '1.3' },
+      h2: { fontSize: '1.75rem', lineHeight: '1.35' },
+      h3: { fontSize: '1.5rem', lineHeight: '1.4' },
+      h4: { fontSize: '1.25rem', lineHeight: '1.45' },
+      h5: { fontSize: '1.125rem', lineHeight: '1.5' },
+      h6: { fontSize: '1rem', lineHeight: '1.5' },
     },
   },
 
   // Spacing optimized for touch targets
   spacing: {
-    xs: '8rem',
-    sm: '12rem', 
-    md: '16rem', // Standard touch spacing
-    lg: '24rem', // Large touch spacing
-    xl: '32rem',
+    xs: '0.5rem',
+    sm: '0.75rem',
+    md: '1rem', // Standard touch spacing
+    lg: '1.5rem', // Large touch spacing
+    xl: '2rem',
   },
 
   // Radius for modern but accessible design
   radius: {
-    xs: '4rem',
-    sm: '6rem',
-    md: '8rem',
-    lg: '12rem',
-    xl: '16rem',
+    xs: '0.25rem',
+    sm: '0.375rem',
+    md: '0.5rem',
+    lg: '0.75rem',
+    xl: '1rem',
   },
 
   // Strong shadows for depth perception in sunlight
@@ -144,13 +139,13 @@ export const constructionTheme = createTheme({
           minWidth: '48px',
           fontWeight: '600',
           fontSize: '16px',
-          
+
           // High contrast hover states
           '&:hover': {
             transform: 'translateY(-1px)',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
           },
-          
+
           // Focus states for accessibility
           '&:focus': {
             outline: '3px solid currentColor',
@@ -170,10 +165,10 @@ export const constructionTheme = createTheme({
           minHeight: '48px',
           fontSize: '16px',
           fontWeight: '500',
-          
+
           // High contrast borders
           borderWidth: '2px',
-          
+
           '&:focus': {
             borderWidth: '3px',
           },
@@ -211,7 +206,7 @@ export const constructionTheme = createTheme({
         root: {
           // Strong shadows for card depth
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          
+
           // Larger padding for touch interfaces
           padding: '24px',
         },
@@ -240,7 +235,7 @@ export const constructionTheme = createTheme({
           // Larger notifications for better visibility
           padding: '16px 20px',
           fontSize: '16px',
-          
+
           // Strong borders for definition
           borderWidth: '2px',
           borderStyle: 'solid',

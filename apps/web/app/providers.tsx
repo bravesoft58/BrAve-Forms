@@ -1,11 +1,50 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, createContext, useContext } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { ClerkProvider } from '@clerk/nextjs';
 
 // Local imports
 import { getQueryClient } from '@/lib/query/client';
+
+// Type definition for mock auth context
+interface MockAuthData {
+  userId: string;
+  orgId: string;
+  orgRole: string;
+  orgSlug: string;
+  isLoaded: boolean;
+  isSignedIn: boolean;
+  sessionId: string;
+  getToken?: () => Promise<string>;
+}
+
+// Mock Auth Context for development
+const MockAuthContext = createContext<MockAuthData>({
+  userId: 'dev-user-123',
+  orgId: 'dev-org-123',
+  orgRole: 'ADMIN',
+  orgSlug: 'dev-org',
+  isLoaded: true,
+  isSignedIn: true,
+  sessionId: 'dev-session-123',
+});
+
+// Mock useAuth hook that matches Clerk's API
+export function useMockAuth() {
+  return useContext(MockAuthContext);
+}
+
+/**
+ * Simple auth hook for development and initial testing
+ *
+ * Returns mock authentication data
+ * TODO: Replace with real Clerk authentication for production
+ *
+ * ALL components should import this instead of @clerk/nextjs useAuth
+ */
+export function useAppAuth() {
+  return useMockAuth();
+}
 
 interface AppProvidersProps {
   children: React.ReactNode;
@@ -15,28 +54,25 @@ export function AppProviders({ children }: AppProvidersProps) {
   // Use singleton pattern to ensure query client persists across renders
   const [queryClient] = useState(() => getQueryClient());
 
-  const skipAuth = process.env.NEXT_PUBLIC_SKIP_CLERK_AUTH === 'true';
-  const clerkPubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
-
-  // If auth is skipped, don't wrap in ClerkProvider
-  if (skipAuth) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <AuthenticationProvider>
-          {children}
-        </AuthenticationProvider>
-      </QueryClientProvider>
-    );
-  }
-
+  // Simple mock auth for development and initial customer testing
+  // TODO: Implement real Clerk authentication before production launch
   return (
-    <ClerkProvider publishableKey={clerkPubKey}>
+    <MockAuthContext.Provider
+      value={{
+        userId: 'dev-user-123',
+        orgId: 'dev-org-123',
+        orgRole: 'ADMIN',
+        orgSlug: 'dev-org',
+        isLoaded: true,
+        isSignedIn: true,
+        sessionId: 'dev-session-123',
+        getToken: async () => 'dev-token-123',
+      }}
+    >
       <QueryClientProvider client={queryClient}>
-        <AuthenticationProvider>
-          {children}
-        </AuthenticationProvider>
+        <AuthenticationProvider>{children}</AuthenticationProvider>
       </QueryClientProvider>
-    </ClerkProvider>
+    </MockAuthContext.Provider>
   );
 }
 
