@@ -1,9 +1,7 @@
 'use client';
 
-// Route segment config to prevent prerender errors with auth/runtime-only data
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-export const fetchCache = 'force-no-store';
+// Note: Route segment config (dynamic, revalidate, etc.) cannot be used in Client Components
+// Dynamic rendering is handled by client-side hooks and state
 
 import { useState, useEffect } from 'react';
 import { Container, Title, Tabs, Stack, Group, Text, Badge, Card, Grid } from '@mantine/core';
