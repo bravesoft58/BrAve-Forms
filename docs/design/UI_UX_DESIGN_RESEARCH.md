@@ -603,3 +603,5 @@ Focus: 2px outline (keyboard navigation)
 **Owner:** Development Team
 
 **Remember:** Simplicity wins in construction. Every feature should pass the "glove test" and "sunlight test" before shipping.
+
+for reference i like the design elements in this example https://dribbble.com/shots/26699836-Product-Operations-Dashboard

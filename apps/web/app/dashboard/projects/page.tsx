@@ -4,27 +4,12 @@
 // Dynamic rendering is handled by client-side hooks and state
 
 import { useState } from 'react';
-import {
-  SimpleGrid,
-  Stack,
-  Group,
-  TextInput,
-  SegmentedControl,
-  Button,
-  Paper,
-  Text,
-  Badge,
-  Center,
-} from '@mantine/core';
+import { SimpleGrid, Stack, Group, TextInput, SegmentedControl, Button, Text, Center } from '@mantine/core';
 import { IconSearch, IconPlus, IconFolderOff } from '@tabler/icons-react';
 import { PageContainer } from '@/components/Layout/PageContainer';
 import { Breadcrumbs } from '@/components/Layout/Breadcrumbs';
-import {
-  getMockProjects,
-  filterProjectsByStatus,
-  searchProjects,
-  type MockProject,
-} from '@/lib/mock-data/projects';
+import { ProjectCard } from '@/components/projects/ProjectCard';
+import { getMockProjects, filterProjectsByStatus, searchProjects } from '@/lib/mock-data/projects';
 
 /**
  * Projects List Page - Sprint 3 ISSUE-085
@@ -101,76 +86,6 @@ export default function ProjectsListPage() {
         )}
       </Stack>
     </PageContainer>
-  );
-}
-
-/**
- * Project Card Component
- *
- * Displays individual project with:
- * - Project name and address
- * - Status badge
- * - Compliance indicators
- *
- * Font sizes: "14px" title, "13px" address, "11px" metadata
- * (Explicit pixel strings to prevent ISSUE-157 font bug)
- */
-function ProjectCard({ project }: { project: MockProject }) {
-  return (
-    <Paper
-      component="a"
-      href={`/dashboard/projects/${project.id}`}
-      p="md"
-      withBorder
-      style={{
-        cursor: 'pointer',
-        transition: 'box-shadow 0.2s',
-        textDecoration: 'none',
-        color: 'inherit',
-      }}
-      className="hover:shadow-md"
-    >
-      <Stack gap="xs">
-        {/* Project Name */}
-        <Group justify="space-between" wrap="nowrap">
-          <Text fw={600} size="14px" lineClamp={1}>
-            {project.name}
-          </Text>
-          {project.isFavorite && (
-            <Text size="16px" style={{ flexShrink: 0 }}>
-              ⭐
-            </Text>
-          )}
-        </Group>
-
-        {/* Address */}
-        <Text size="13px" c="dimmed" lineClamp={1}>
-          {project.address}
-        </Text>
-
-        {/* Status and Compliance */}
-        <Group gap="xs" mt="xs">
-          <Badge size="sm" variant="light" color={project.status === 'ACTIVE' ? 'blue' : 'gray'}>
-            {project.status}
-          </Badge>
-
-          {project.compliance.pendingInspections > 0 && (
-            <Badge
-              size="sm"
-              variant="light"
-              color={project.compliance.requiresAttention ? 'red' : 'yellow'}
-            >
-              {project.compliance.pendingInspections} pending
-            </Badge>
-          )}
-        </Group>
-
-        {/* Start Date */}
-        <Text size="11px" c="dimmed" mt="xs">
-          Started {new Date(project.startDate).toLocaleDateString()}
-        </Text>
-      </Stack>
-    </Paper>
   );
 }
 

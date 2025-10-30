@@ -16,20 +16,13 @@ interface AppLayoutProps {
  * Wraps AppShell with header, navigation, and offline banner components.
  *
  * Structure:
- * - Header: 48px fixed height
+ * - Header: 64px fixed height
  * - Navbar: 280px width (desktop), hidden on mobile
  * - Main: Content area with OfflineBanner at top
  */
 export function AppLayout({ children }: AppLayoutProps) {
   return (
-    <AppShell
-      header={{ height: 48 }}
-      navbar={{
-        width: 280,
-        breakpoint: 'md',
-      }}
-      padding="md"
-    >
+    <AppShell header={{ height: 64 }} navbar={{ width: 280, breakpoint: 'md' }} padding="md">
       <AppShell.Header>
         <AppHeader />
       </AppShell.Header>
@@ -39,10 +32,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       </AppShell.Navbar>
 
       <AppShell.Main>
-        {/* Offline banner shows at top when disconnected */}
         <OfflineBanner />
-
-        {/* Page content */}
         {children}
       </AppShell.Main>
     </AppShell>

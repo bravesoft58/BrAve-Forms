@@ -39,15 +39,7 @@ export function PageContainer({
 
       {/* Page header with title and actions */}
       <Group justify="space-between" align="center">
-        <Title
-          order={2}
-          style={{
-            fontSize: rem(16),
-            fontWeight: 600,
-            lineHeight: 1.3,
-            margin: 0,
-          }}
-        >
+        <Title order={1}>
           {title}
         </Title>
 

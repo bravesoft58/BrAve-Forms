@@ -17,6 +17,7 @@ export interface MockProject {
   status: 'ACTIVE' | 'ARCHIVED';
   isFavorite: boolean;
   startDate: string;
+  recentRainfall: number; // Inches of rain in last 24 hours (EPA CGP 0.25" threshold)
   compliance: {
     pendingInspections: number;
     requiresAttention: boolean;
@@ -36,6 +37,7 @@ export const getMockProjects = (): MockProject[] => [
     status: 'ACTIVE',
     isFavorite: true,
     startDate: '2025-01-15',
+    recentRainfall: 0.3, // Weather alert triggered (>= 0.25" EPA CGP threshold)
     compliance: {
       pendingInspections: 2,
       requiresAttention: true,
@@ -48,6 +50,7 @@ export const getMockProjects = (): MockProject[] => [
     status: 'ACTIVE',
     isFavorite: false,
     startDate: '2025-02-01',
+    recentRainfall: 0.0, // No rain
     compliance: {
       pendingInspections: 0,
       requiresAttention: false,
@@ -60,6 +63,7 @@ export const getMockProjects = (): MockProject[] => [
     status: 'ARCHIVED',
     isFavorite: false,
     startDate: '2024-06-15',
+    recentRainfall: 0.0, // No rain
     compliance: {
       pendingInspections: 0,
       requiresAttention: false,
@@ -72,6 +76,7 @@ export const getMockProjects = (): MockProject[] => [
     status: 'ACTIVE',
     isFavorite: false,
     startDate: '2025-03-10',
+    recentRainfall: 0.1, // Below threshold (no alert)
     compliance: {
       pendingInspections: 1,
       requiresAttention: false,
@@ -84,6 +89,7 @@ export const getMockProjects = (): MockProject[] => [
     status: 'ACTIVE',
     isFavorite: true,
     startDate: '2025-01-20',
+    recentRainfall: 0.5, // Weather alert triggered (>= 0.25" EPA CGP threshold)
     compliance: {
       pendingInspections: 3,
       requiresAttention: true,
