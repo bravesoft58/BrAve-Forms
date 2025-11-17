@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-custom';
 import { ConfigService } from '@nestjs/config';
 import { verifyToken } from '@clerk/backend';
+import { DEFAULT_ORG_ID, DEFAULT_ORG_SLUG } from '@common/constants';
 
 interface ClerkJWTPayload {
   sub: string;
@@ -79,24 +80,14 @@ export class ClerkStrategy extends PassportStrategy(Strategy, 'clerk') {
         throw new UnauthorizedException('Invalid token');
       }
 
-      // Extract organization context from JWT claims
-      const orgId = verifiedToken.org_id || verifiedToken.o?.id;
-      const orgRole = verifiedToken.org_role || verifiedToken.o?.rol;
-      const orgSlug = verifiedToken.org_slug || verifiedToken.o?.slg;
-      
-      // Validate request headers match JWT claims for security
-      const headerOrgId = req.headers['x-org-id'];
-      if (headerOrgId && headerOrgId !== orgId) {
-        throw new UnauthorizedException('Organization context mismatch between header and token');
-      }
-
-      // Construction company validation - organizations are required per CLAUDE.md
-      if (!orgId) {
-        throw new UnauthorizedException(
-          'Organization context required - user must be part of a construction company. ' +
-          'Personal accounts are disabled for BrAve Forms.'
-        );
-      }
+      // Single-tenant mode: Always use DEFAULT_ORG_ID
+      // Note: Organizations feature disabled in Clerk Dashboard
+      // Multi-tenant migration planned for Sprint 5-6
+      const orgId = DEFAULT_ORG_ID;
+      const orgSlug = DEFAULT_ORG_SLUG;
+      // Extract role from token if available, otherwise default to 'member'
+      // Note: org_role and o.rol claims may not exist (orgs disabled in Clerk)
+      const orgRole = verifiedToken.org_role || verifiedToken.o?.rol || 'member';
 
       // Validate organization role for access control
       const validRoles = ['admin', 'owner', 'manager', 'member', 'inspector'];

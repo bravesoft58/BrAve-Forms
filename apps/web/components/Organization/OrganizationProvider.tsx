@@ -261,11 +261,7 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
           </Alert>
 
           <Text size="xs" c="dimmed" ta="center">
-            Contact your construction company administrator or{' '}
-            <a href="/select-organization" style={{ color: '#0ea5e9' }}>
-              select an organization
-            </a>{' '}
-            to continue.
+            Contact your construction company administrator to continue.
           </Text>
         </Stack>
       </Center>

@@ -1,6 +1,7 @@
 import { Injectable, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GqlExecutionContext } from '@nestjs/graphql';
+import { DEFAULT_ORG_ID } from '@common/constants';
 
 @Injectable()
 export class ClerkAuthGuard extends AuthGuard('clerk') {
@@ -10,7 +11,7 @@ export class ClerkAuthGuard extends AuthGuard('clerk') {
     // Dev single-tenant override: inject fixed user/org when enabled
     const devSingleTenant = process.env.DEV_SINGLE_TENANT === 'true';
     if (devSingleTenant && request) {
-      const devOrgId = process.env.DEV_ORG_ID || 'system';
+      const devOrgId = process.env.DEV_ORG_ID || DEFAULT_ORG_ID;
       const devUserId = process.env.DEV_USER_ID || 'dev-user';
       const devOrgRole = process.env.DEV_ORG_ROLE || 'ADMIN';
 
@@ -22,7 +23,15 @@ export class ClerkAuthGuard extends AuthGuard('clerk') {
       return true;
     }
 
-    return (await super.canActivate(context)) as boolean;
+    const result = await super.canActivate(context);
+    
+    // Single-tenant mode: Always ensure DEFAULT_ORG_ID is set
+    // Note: Organizations disabled in Clerk Dashboard, orgId hard-coded
+    if (request?.user) {
+      request.user.orgId = DEFAULT_ORG_ID;
+    }
+
+    return result as boolean;
   }
   getRequest(context: ExecutionContext) {
     const ctx = GqlExecutionContext.create(context);
