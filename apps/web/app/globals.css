@@ -487,3 +487,159 @@ th {
   border: 2px solid var(--color-danger);
   animation: pulse 2s ease-in-out infinite;
 }
+
+/* Mobile Form Filling Optimizations (ISSUE-099) */
+.mobile-optimized {
+  /* Large touch targets for glove use */
+  --touch-target-size: 48px;
+}
+
+.mobile-optimized button,
+.mobile-optimized input,
+.mobile-optimized select,
+.mobile-optimized textarea {
+  min-height: var(--touch-target-size);
+  font-size: 16px; /* Prevent iOS zoom on input focus */
+}
+
+.mobile-optimized input[type='text'],
+.mobile-optimized input[type='number'],
+.mobile-optimized input[type='email'],
+.mobile-optimized input[type='tel'],
+.mobile-optimized input[type='date'],
+.mobile-optimized input[type='time'],
+.mobile-optimized textarea,
+.mobile-optimized select {
+  padding: 12px 16px;
+  border: 2px solid var(--color-border-medium);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  width: 100%;
+}
+
+.mobile-optimized input:focus,
+.mobile-optimized textarea:focus,
+.mobile-optimized select:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* High contrast for sunlight visibility */
+.mobile-optimized {
+  --text-color: #1a202c;
+  --background-color: #ffffff;
+  --border-color: #2d3748;
+  color: var(--text-color);
+}
+
+.mobile-optimized label {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+  display: block;
+  font-size: var(--font-size-sm);
+}
+
+/* Remove hover states on touch devices */
+@media (hover: none) {
+  .mobile-optimized button:hover {
+    background-color: inherit;
+  }
+
+  .mobile-optimized button:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease-in-out;
+  }
+}
+
+/* Mobile-specific form section styling */
+@media (max-width: 768px) {
+  .mobile-optimized {
+    padding: 0;
+  }
+
+  .mobile-optimized .form-section {
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  /* Larger touch targets on small screens */
+  .mobile-optimized button {
+    min-height: 56px;
+    padding: var(--space-4) var(--space-6);
+    font-size: var(--font-size-md);
+  }
+
+  /* Stack form elements vertically on mobile */
+  .mobile-optimized .form-row {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+}
+
+/* Photo capture button styling */
+.mobile-optimized .photo-capture-button {
+  min-height: var(--touch-target-size);
+  min-width: var(--touch-target-size);
+  background-color: var(--color-primary);
+  color: var(--color-text-light);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  padding: var(--space-4) var(--space-6);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.mobile-optimized .photo-capture-button:active {
+  background-color: var(--color-primary-dark);
+  transform: scale(0.98);
+}
+
+/* Signature pad styling */
+.mobile-optimized .signature-pad {
+  min-height: 200px;
+  border: 2px solid var(--color-border-medium);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-primary);
+  touch-action: none;
+}
+
+/* GPS location button */
+.mobile-optimized .gps-button {
+  min-height: var(--touch-target-size);
+  background-color: var(--color-info);
+  color: var(--color-text-light);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  padding: var(--space-3) var(--space-5);
+}
+
+/* Form submission buttons */
+.mobile-optimized .form-submit-button {
+  min-height: 56px;
+  width: 100%;
+  background-color: var(--color-success);
+  color: var(--color-text-light);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  padding: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.mobile-optimized .form-draft-button {
+  min-height: var(--touch-target-size);
+  width: 100%;
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-border-medium);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  padding: var(--space-3);
+  margin-top: var(--space-3);
+}
