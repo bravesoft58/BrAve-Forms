@@ -97,7 +97,7 @@ export default function FormFillPage() {
   }
 
   return (
-    <div className="mobile-optimized min-h-screen bg-gray-50">
+    <main className="mobile-optimized min-h-screen bg-gray-50" role="main">
       <Container size="md" py="md">
         <Stack gap="lg">
           <div>
@@ -120,6 +120,6 @@ export default function FormFillPage() {
           </div>
         </Stack>
       </Container>
-    </div>
+    </main>
   );
 }

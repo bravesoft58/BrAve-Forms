@@ -42,10 +42,11 @@ describe('FormFillPage', () => {
     expect(forms.length).toBeGreaterThan(0);
   });
 
-  it('should apply mobile-optimized class to container', () => {
+  it('should use semantic main element with mobile-optimized class', () => {
     const { container } = render(<FormFillPage />);
 
-    const mobileOptimized = container.querySelector('.mobile-optimized');
-    expect(mobileOptimized).toBeInTheDocument();
+    const mainElement = container.querySelector('main.mobile-optimized');
+    expect(mainElement).toBeInTheDocument();
+    expect(mainElement).toHaveAttribute('role', 'main');
   });
 });
