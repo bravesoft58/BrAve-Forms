@@ -10,7 +10,21 @@ import { notifications } from '@mantine/notifications';
 export default function FormFillPage() {
   const params = useParams();
   const router = useRouter();
-  const templateId = params.templateId as string;
+
+  // Validate templateId parameter
+  const templateId = params.templateId;
+  if (typeof templateId !== 'string' || !templateId) {
+    return (
+      <Container size="md" py="xl">
+        <Stack gap="md">
+          <Title order={1} size="h2">Invalid Request</Title>
+          <Text size="14px" c="dimmed">
+            Template ID is missing or invalid.
+          </Text>
+        </Stack>
+      </Container>
+    );
+  }
 
   // For now, use mock data (will integrate GraphQL in later issue)
   const templates = getMockFormTemplates();
@@ -50,9 +64,20 @@ export default function FormFillPage() {
       // Navigate to submissions list
       router.push('/dashboard/forms');
     } catch (error) {
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Unknown error occurred';
+
+      // eslint-disable-next-line no-console
+      console.error('Form submission failed:', {
+        templateId,
+        error: errorMessage,
+        timestamp: new Date().toISOString(),
+      });
+
       notifications.show({
-        title: 'Error',
-        message: 'Failed to submit form',
+        title: 'Submission Failed',
+        message: 'Unable to submit form. Please check your connection and try again.',
         color: 'red',
       });
     }

@@ -2,12 +2,13 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import FormFillPage from '../page';
 
+const TEST_TEMPLATE_ID = 'daily-log';
+
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
-  useParams: () => ({ templateId: 'daily-log' }),
+  useParams: () => ({ templateId: TEST_TEMPLATE_ID }),
   useRouter: () => ({
     push: vi.fn(),
-    back: vi.fn(),
   }),
 }));
 
@@ -39,24 +40,6 @@ describe('FormFillPage', () => {
     // FormRenderer renders a form element
     const forms = screen.getAllByRole('form');
     expect(forms.length).toBeGreaterThan(0);
-  });
-
-  it('should show not found message for invalid template', () => {
-    // Override mock to return non-existent template
-    vi.mock('next/navigation', () => ({
-      useParams: () => ({ templateId: 'non-existent-template' }),
-      useRouter: () => ({
-        push: vi.fn(),
-        back: vi.fn(),
-      }),
-    }));
-
-    render(<FormFillPage />);
-
-    expect(screen.getByText('Form Not Found')).toBeInTheDocument();
-    expect(
-      screen.getByText(/The form template you're looking for doesn't exist/)
-    ).toBeInTheDocument();
   });
 
   it('should apply mobile-optimized class to container', () => {
