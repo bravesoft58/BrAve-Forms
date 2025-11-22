@@ -635,3 +635,369 @@ th {
   padding: var(--space-3);
   margin-top: var(--space-3);
 }
+
+/* Desktop form filling styles (ISSUE-100) */
+.desktop-view {
+  padding: 24px;
+  background-color: #f7fafc;
+}
+
+.desktop-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1024px;
+  margin: 0 auto 16px;
+  padding: 12px 24px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-shortcuts {
+  display: flex;
+  gap: 16px;
+}
+
+.shortcut-hint {
+  font-size: 14px;
+  color: #718096;
+  padding: 4px 8px;
+  background-color: #edf2f7;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+}
+
+.print-button {
+  padding: 8px 16px;
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.print-button:hover {
+  background-color: #3182ce;
+}
+
+/* Desktop form optimizations */
+.desktop-view input[type='text'],
+.desktop-view input[type='number'],
+.desktop-view textarea {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.desktop-view button {
+  min-height: 36px;
+  min-width: 80px;
+}
+
+/* Print styles */
+@media print {
+  .desktop-toolbar,
+  .print-button,
+  .shortcut-hint {
+    display: none;
+  }
+
+  .desktop-view {
+    padding: 0;
+    background-color: white;
+  }
+
+  .form-section {
+    page-break-inside: avoid;
+  }
+}
+
+/* Two-column layout for desktop */
+@media (min-width: 1024px) {
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .form-field.full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Comprehensive print styles for submission detail pages */
+@media print {
+  /* Hide all navigation, buttons, and interactive elements */
+  header,
+  nav,
+  .mantine-AppShell-header,
+  .mantine-AppShell-navbar,
+  .mantine-AppShell-aside,
+  .mantine-Notifications-root,
+  button,
+  .no-print,
+  [role="navigation"],
+  .back-button,
+  .print-button {
+    display: none !important;
+  }
+
+  /* Show only the main content area */
+  body {
+    margin: 0;
+    padding: 20px;
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+  }
+
+  main,
+  .mantine-AppShell-main {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Submission header styling */
+  h1, h2, h3 {
+    color: black !important;
+    page-break-after: avoid;
+    margin-top: 8pt;
+    margin-bottom: 6pt;
+  }
+
+  h1 {
+    font-size: 18pt;
+    font-weight: bold;
+    border-bottom: 2pt solid black;
+    padding-bottom: 4pt;
+  }
+
+  h2 {
+    font-size: 14pt;
+    font-weight: bold;
+  }
+
+  h3 {
+    font-size: 12pt;
+    font-weight: bold;
+  }
+
+  /* Status badge styling for print */
+  .mantine-Badge-root,
+  [data-badge],
+  .status-badge {
+    border: 1px solid black !important;
+    padding: 2pt 6pt !important;
+    border-radius: 3pt !important;
+    font-weight: bold !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Metadata section styling */
+  .submission-metadata,
+  .mantine-Paper-root {
+    border: 1pt solid #ccc !important;
+    padding: 8pt !important;
+    margin-bottom: 12pt !important;
+    background: white !important;
+    page-break-inside: avoid;
+  }
+
+  /* Form sections styling */
+  .form-section,
+  .mantine-Stack-root {
+    margin-bottom: 16pt;
+    page-break-inside: avoid;
+  }
+
+  .form-section + .form-section {
+    margin-top: 12pt;
+    padding-top: 12pt;
+    border-top: 1pt solid #ddd;
+  }
+
+  /* Field label and value styling */
+  .field-label {
+    font-weight: bold;
+    margin-bottom: 4pt;
+    color: #333 !important;
+  }
+
+  .field-value {
+    margin-bottom: 12pt;
+    color: black !important;
+  }
+
+  /* Photo and signature image styling */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid;
+    border: 1pt solid #ccc;
+    padding: 4pt;
+    margin: 8pt 0;
+  }
+
+  .photo-image,
+  .signature-image {
+    max-width: 400px !important;
+    display: block;
+    margin: 8pt 0;
+  }
+
+  /* Table styling for list views */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16pt;
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  th, td {
+    border: 1pt solid #ccc !important;
+    padding: 6pt !important;
+    text-align: left;
+    color: black !important;
+  }
+
+  th {
+    background: #f5f5f5 !important;
+    font-weight: bold;
+  }
+
+  /* Ensure text is readable */
+  p, span, div, label {
+    color: black !important;
+  }
+
+  /* Remove shadows and backgrounds */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Paper/card backgrounds */
+  .mantine-Paper-root,
+  .mantine-Card-root {
+    box-shadow: none !important;
+    border: 1pt solid #ddd !important;
+  }
+
+  /* Grid layouts for print */
+  .mantine-SimpleGrid-root,
+  .mantine-Grid-root {
+    display: block !important;
+  }
+
+  .mantine-SimpleGrid-root > *,
+  .mantine-Grid-col {
+    page-break-inside: avoid;
+    margin-bottom: 12pt;
+  }
+
+  /* Print-specific utilities */
+  .print-only {
+    display: block !important;
+  }
+
+  .screen-only {
+    display: none !important;
+  }
+
+  /* Page breaks */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+
+  .page-break-avoid {
+    page-break-inside: avoid;
+  }
+
+  /* Submission detail specific */
+  .submission-header {
+    margin-bottom: 16pt;
+    padding-bottom: 8pt;
+    border-bottom: 2pt solid black;
+  }
+
+  .submission-actions {
+    display: none !important;
+  }
+
+  /* Form data display */
+  .form-data-section {
+    margin-bottom: 16pt;
+  }
+
+  .form-data-section h2 {
+    background: #f0f0f0 !important;
+    padding: 6pt;
+    margin-bottom: 8pt;
+  }
+
+  .form-field-row {
+    margin-bottom: 8pt;
+    padding-left: 12pt;
+  }
+
+  /* GPS coordinates and metadata */
+  .gps-coordinates,
+  .timestamp-info {
+    font-size: 9pt;
+    color: #666 !important;
+    font-family: monospace;
+  }
+
+  /* Compliance-specific styling */
+  .compliance-section {
+    border: 2pt solid black !important;
+    padding: 12pt !important;
+    margin: 16pt 0 !important;
+  }
+
+  .compliance-critical {
+    background: #ffebee !important;
+    border: 2pt solid #c62828 !important;
+  }
+
+  /* Footer for printed pages */
+  @page {
+    margin: 1cm;
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+    }
+  }
+
+  /* Ensure proper orphans and widows */
+  p, li {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Links should show URL in print */
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    font-style: italic;
+  }
+}

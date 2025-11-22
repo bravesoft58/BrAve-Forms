@@ -64,15 +64,16 @@ export function FormRenderer({
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   // Auto-save draft functionality
-  const { saveDraft, loadDraft, clearDraft } = useFormDraft(
-    template.id,
-    formValues,
-    (draftValues) => {
-      // Load draft into form
-      reset(draftValues);
-      console.log('Draft loaded into form');
-    }
-  );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const {
+    saveDraft,
+    loadDraft: _loadDraft,
+    clearDraft,
+  } = useFormDraft(template.id, formValues, (draftValues) => {
+    // Load draft into form
+    reset(draftValues);
+    console.log('Draft loaded into form');
+  });
 
   // Save draft with status update wrapper
   const saveDraftWithStatus = React.useCallback(async () => {
@@ -144,7 +145,9 @@ export function FormRenderer({
 
           // Compute value for computed fields
           const computedValue =
-            field.type === 'computed' ? evaluateComputedField(field, formValues, userName) : undefined;
+            field.type === 'computed'
+              ? evaluateComputedField(field, formValues, userName)
+              : undefined;
 
           const error = errors[field.id] as FieldError | undefined;
 
@@ -244,7 +247,7 @@ export function FormRenderer({
                 <PhotoField
                   key={field.id}
                   field={field}
-                  register={register}
+                  control={control}
                   error={error}
                   disabled={readOnly}
                 />
@@ -254,6 +257,7 @@ export function FormRenderer({
                 <SignatureField
                   key={field.id}
                   field={field}
+                  control={control}
                   error={error}
                   disabled={readOnly}
                 />
@@ -270,12 +274,7 @@ export function FormRenderer({
               );
             case 'repeater':
               return (
-                <RepeaterField
-                  key={field.id}
-                  field={field}
-                  error={error}
-                  disabled={readOnly}
-                />
+                <RepeaterField key={field.id} field={field} error={error} disabled={readOnly} />
               );
             case 'file':
               return (
@@ -521,4 +520,3 @@ function generateNumberSchema(field: FormField): z.ZodTypeAny {
 
   return schema;
 }
-

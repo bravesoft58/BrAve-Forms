@@ -1,0 +1,19 @@
+No projects matched the filters "e:\BrAve Forms" in "E:\BrAve Forms"
+
+> @brave-forms/web@1.0.0 test E:\BrAve Forms\apps\web
+> vitest "app/submissions/__tests__/page.test.tsx"
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+[7m[1m[34m DEV [39m[22m[27m [34mv1.6.1[39m [90mE:/BrAve Forms/apps/web[39m
+
+ [32m✓[39m app/submissions/__tests__/page.test.tsx [2m ([22m[2m22 tests[22m[2m)[22m[33m 2763[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m22 passed[39m[22m[90m (22)[39m
+[2m   Start at [22m 14:35:55
+[2m   Duration [22m 4.29s[2m (transform 71ms, setup 70ms, collect 669ms, tests 2.76s, environment 462ms, prepare 140ms)[22m
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
