@@ -2,16 +2,20 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 import { notifications } from '@mantine/notifications';
 import { createSubmission, CreateSubmissionInput } from '@/lib/api/submissions';
 import { useNetworkStatus } from './useNetworkStatus';
 
 /**
  * Hook for form submission with offline queue support
+ *
+ * @security Requires Clerk authentication - automatically gets JWT token
  */
 export function useSubmitForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { getToken } = useAuth();
   const { isOnline } = useNetworkStatus();
 
   const mutation = useMutation({
@@ -23,7 +27,8 @@ export function useSubmitForm() {
       }
 
       // Submit immediately if online
-      const response = await createSubmission(input);
+      const token = await getToken();
+      const response = await createSubmission(input, token);
       return response;
     },
     onSuccess: (data, variables) => {
@@ -48,7 +53,7 @@ export function useSubmitForm() {
         }
       }
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       notifications.show({
         title: 'Submission Failed',
         message: error.message || 'Please try again',

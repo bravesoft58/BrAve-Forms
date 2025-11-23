@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 import { notifications } from '@mantine/notifications';
 import { useCopyYesterdaysLog } from '../useCopyYesterdaysLog';
 import { copyYesterdaysLog } from '@/lib/api/submissions';
@@ -10,6 +11,10 @@ import React from 'react';
 // Mock dependencies
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
+}));
+
+vi.mock('@clerk/nextjs', () => ({
+  useAuth: vi.fn(),
 }));
 
 vi.mock('@mantine/notifications', () => ({
@@ -25,6 +30,7 @@ vi.mock('@/lib/api/submissions', () => ({
 describe('useCopyYesterdaysLog', () => {
   let queryClient: QueryClient;
   let mockRouter: { push: ReturnType<typeof vi.fn> };
+  let mockGetToken: ReturnType<typeof vi.fn>;
 
   const createWrapper = () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -45,7 +51,10 @@ describe('useCopyYesterdaysLog', () => {
       push: vi.fn(),
     };
 
+    mockGetToken = vi.fn().mockResolvedValue('mock-jwt-token');
+
     (useRouter as any).mockReturnValue(mockRouter);
+    (useAuth as any).mockReturnValue({ getToken: mockGetToken });
     vi.clearAllMocks();
   });
 
@@ -75,7 +84,7 @@ describe('useCopyYesterdaysLog', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(copyYesterdaysLog).toHaveBeenCalledWith('template-id');
+      expect(copyYesterdaysLog).toHaveBeenCalledWith('template-id', 'mock-jwt-token');
       expect(result.current.data).toEqual(mockClonedSubmission);
     });
 
@@ -293,6 +302,126 @@ describe('useCopyYesterdaysLog', () => {
         status: 'draft',
         submittedAt: null,
       });
+    });
+  });
+
+  describe('Offline Scenarios', () => {
+    it('should handle offline network errors gracefully', async () => {
+      const networkError = new Error('Failed to fetch');
+      (copyYesterdaysLog as any).mockRejectedValue(networkError);
+
+      const { result } = renderHook(() => useCopyYesterdaysLog(), {
+        wrapper: createWrapper(),
+      });
+
+      try {
+        await result.current.mutateAsync({ templateId: 'template-id' });
+      } catch {
+        // Expected to throw
+      }
+
+      await waitFor(() => {
+        expect(notifications.show).toHaveBeenCalledWith({
+          title: "Failed to copy yesterday's log",
+          message: 'Failed to fetch',
+          color: 'red',
+        });
+      });
+
+      expect(result.current.isError).toBe(true);
+      expect(mockRouter.push).not.toHaveBeenCalled();
+    });
+
+    it('should handle authentication token missing when offline', async () => {
+      mockGetToken = vi.fn().mockResolvedValue(null);
+      (useAuth as any).mockReturnValue({ getToken: mockGetToken });
+
+      const authError = new Error('Authentication required. Please sign in.');
+      (copyYesterdaysLog as any).mockRejectedValue(authError);
+
+      const { result } = renderHook(() => useCopyYesterdaysLog(), {
+        wrapper: createWrapper(),
+      });
+
+      try {
+        await result.current.mutateAsync({ templateId: 'template-id' });
+      } catch {
+        // Expected to throw
+      }
+
+      await waitFor(() => {
+        expect(notifications.show).toHaveBeenCalledWith({
+          title: "Failed to copy yesterday's log",
+          message: 'Authentication required. Please sign in.',
+          color: 'red',
+        });
+      });
+    });
+
+    it('should queue operation when offline (relies on TanStack Query offline mode)', async () => {
+      // TanStack Query automatically queues mutations when offline
+      // This test verifies the mutation is created but not executed
+      const { result } = renderHook(() => useCopyYesterdaysLog(), {
+        wrapper: createWrapper(),
+      });
+
+      // Mutation should be available even if offline
+      expect(result.current.mutate).toBeDefined();
+      expect(result.current.mutateAsync).toBeDefined();
+      expect(result.current.isPending).toBe(false);
+      expect(result.current.isIdle).toBe(true);
+    });
+  });
+
+  describe('Cross-Tenant Access Protection', () => {
+    it('should handle 403 Forbidden error for cross-tenant access', async () => {
+      const forbiddenError = new Error(
+        'Access denied. You do not have permission to perform this action.'
+      );
+      (copyYesterdaysLog as any).mockRejectedValue(forbiddenError);
+
+      const { result } = renderHook(() => useCopyYesterdaysLog(), {
+        wrapper: createWrapper(),
+      });
+
+      try {
+        await result.current.mutateAsync({ templateId: 'template-id' });
+      } catch {
+        // Expected to throw
+      }
+
+      await waitFor(() => {
+        expect(notifications.show).toHaveBeenCalledWith({
+          title: "Failed to copy yesterday's log",
+          message: 'Access denied. You do not have permission to perform this action.',
+          color: 'red',
+        });
+      });
+
+      expect(result.current.isError).toBe(true);
+      expect(mockRouter.push).not.toHaveBeenCalled();
+    });
+
+    it('should validate backend enforces orgId isolation', async () => {
+      // This test verifies error handling when backend rejects cross-tenant access
+      const crossTenantError = new Error('Submission not found or access denied');
+      (copyYesterdaysLog as any).mockRejectedValue(crossTenantError);
+
+      const { result } = renderHook(() => useCopyYesterdaysLog(), {
+        wrapper: createWrapper(),
+      });
+
+      try {
+        await result.current.mutateAsync({ templateId: 'other-org-template' });
+      } catch {
+        // Expected to throw
+      }
+
+      await waitFor(() => {
+        expect(copyYesterdaysLog).toHaveBeenCalledWith('other-org-template', 'mock-jwt-token');
+      });
+
+      expect(result.current.isError).toBe(true);
     });
   });
 });

@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 import { notifications } from '@mantine/notifications';
 import { copyYesterdaysLog } from '@/lib/api/submissions';
 
@@ -12,14 +13,19 @@ interface CopyYesterdaysLogInput {
 /**
  * Hook for copying yesterday's submission log
  * Clones the most recent submission from yesterday and redirects to fill page
+ *
+ * @security Requires Clerk authentication - automatically gets JWT token
+ * @throws {Error} If user not authenticated
  */
 export function useCopyYesterdaysLog() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { getToken } = useAuth();
 
   const mutation = useMutation({
     mutationFn: async ({ templateId }: CopyYesterdaysLogInput) => {
-      const response = await copyYesterdaysLog(templateId);
+      const token = await getToken();
+      const response = await copyYesterdaysLog(templateId, token);
       return response;
     },
     onSuccess: (data) => {
@@ -35,7 +41,7 @@ export function useCopyYesterdaysLog() {
       // Redirect to fill page with draft ID
       router.push(`/dashboard/forms/${data.templateId}/fill?draftId=${data.id}`);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       const errorMessage = error.message?.toLowerCase() || '';
       if (errorMessage.includes('not found') || errorMessage.includes('no submission found')) {
         notifications.show({

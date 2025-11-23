@@ -99,6 +99,8 @@ export default function SubmissionsPage() {
                 disabled={copyYesterdaysLog.isPending}
                 color="green"
                 variant="light"
+                size="md"
+                style={{ minHeight: '44px', minWidth: '44px' }}
               >
                 {copyYesterdaysLog.isPending ? 'Copying...' : "Copy Yesterday's Log"}
               </Button>
