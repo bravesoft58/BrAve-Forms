@@ -9,7 +9,7 @@ import { IconPhoto } from '@tabler/icons-react';
  * Shows photos associated with this project.
  * This will be fully implemented in Sprint 5.
  */
-export function ProjectPhotosTab({ projectId }: { projectId: string }) {
+export function ProjectPhotosTab({ projectId: _projectId }: { projectId: string }) {
   return (
     <Stack gap="md" data-testid="photos-tab-content">
       <Center py="xl">
@@ -26,4 +26,3 @@ export function ProjectPhotosTab({ projectId }: { projectId: string }) {
     </Stack>
   );
 }
-

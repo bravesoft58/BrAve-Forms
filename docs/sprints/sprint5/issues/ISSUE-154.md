@@ -1,133 +1,99 @@
-# ISSUE-154: Form Version History (3h)
+# ISSUE-154: Conditional Logic Builder (5h)
 
-**Priority:** P2
+**Priority:** P1
 **Phase:** Phase 5 - Form Builder
-**Estimated Hours:** 3
-**Dependencies:** ISSUE-152
+**Estimated Hours:** 5
+**Dependencies:** ISSUE-159
 **Sprint:** Sprint 5
 
 ---
 
 ## Objective
 
-Create a form version history system allowing form builders to track changes, compare versions, and restore previous versions of forms.
+Create a visual conditional logic builder allowing form creators to show/hide fields based on other field values, implementing EPA-compliant conditional requirements for construction forms.
 
 ## Tasks
 
-- [ ] Create FormVersionHistory component
-- [ ] Implement auto-save versioning (every 5 minutes)
-- [ ] Create version comparison view (diff viewer)
-- [ ] Implement version restore functionality
-- [ ] Add version metadata (timestamp, user, change summary)
-- [ ] Create version labels/tags
-- [ ] Implement version deletion with confirmation
-- [ ] Add unit tests for versioning logic
+- [ ] Create ConditionalLogicBuilder component
+- [ ] Create condition rule editor (if field X equals/contains Y, then show/hide field Z)
+- [ ] Implement condition types (equals, not equals, contains, greater than, less than)
+- [ ] Support multiple conditions with AND/OR logic
+- [ ] Create condition preview and testing interface
+- [ ] Implement condition validation (prevent circular dependencies)
+- [ ] Add visual indicators for conditional fields
+- [ ] Sync conditional logic with Valtio store
+- [ ] Add unit tests for conditional logic evaluation
 
 ## Technical Details
 
 **Libraries/Dependencies:**
 
-- IndexedDB (version storage)
 - Valtio (form builder state)
-- Mantine components (Timeline, Card, Modal, Button)
-- diff library (version comparison)
+- React Hook Form + Zod (condition form validation)
+- Mantine components (Select, Switch, Button, Card)
+- expr-eval (condition expression evaluation)
 
 **Code Example:**
 
 ```typescript
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Stack, Timeline, Card, Text, Button, Group, Badge, Modal } from '@mantine/core';
-import { IconClock, IconCheck, IconRestore, IconTrash } from '@tabler/icons-react';
+import { useState } from 'react';
+import { Stack, Group, Select, Button, Card, Text, ActionIcon, Badge, Switch } from '@mantine/core';
+import { IconPlus, IconTrash, IconEye, IconEyeOff } from '@tabler/icons-react';
 import { useSnapshot } from 'valtio';
-import { formBuilderStore, loadVersion, saveVersion } from './store';
-import { diffLines } from 'diff';
+import { formBuilderStore, updateField } from './store';
+import { Parser } from 'expr-eval';
 
-export interface FormVersion {
+export interface Condition {
   id: string;
-  formId: string;
-  timestamp: number;
-  userId: string;
-  userName: string;
-  changeSummary: string;
-  label?: string;
-  fields: FormField[];
+  fieldId: string; // Source field ID
+  operator: 'equals' | 'not_equals' | 'contains' | 'greater_than' | 'less_than' | 'is_empty' | 'is_not_empty';
+  value: string | number | boolean;
 }
 
-// Form Version History Component
-export function FormVersionHistory({ formId }: { formId: string }) {
-  const [versions, setVersions] = useState<FormVersion[]>([]);
-  const [compareVersion, setCompareVersion] = useState<FormVersion | null>(null);
+export interface ConditionalRule {
+  id: string;
+  targetFieldId: string; // Field to show/hide
+  action: 'show' | 'hide';
+  logic: 'AND' | 'OR';
+  conditions: Condition[];
+}
 
-  useEffect(() => {
-    loadVersions();
+// Conditional Logic Builder Component
+export function ConditionalLogicBuilder({ fieldId }: { fieldId: string }) {
+  const snap = useSnapshot(formBuilderStore);
+  const field = snap.fields.find(f => f.id === fieldId);
 
-    // Auto-save every 5 minutes
-    const interval = setInterval(() => {
-      autoSaveVersion();
-    }, 5 * 60 * 1000);
+  if (!field) return null;
 
-    return () => clearInterval(interval);
-  }, [formId]);
+  const [rules, setRules] = useState<ConditionalRule[]>(field.conditionalRules || []);
 
-  const loadVersions = async () => {
-    const db = await openDB('braveforms', 1);
-    const storedVersions = await db.getAll('formVersions');
-    setVersions(storedVersions.filter(v => v.formId === formId));
-  };
-
-  const autoSaveVersion = async () => {
-    const snap = formBuilderStore;
-    const newVersion: FormVersion = {
-      id: `version-${Date.now()}`,
-      formId,
-      timestamp: Date.now(),
-      userId: 'current-user', // From Clerk
-      userName: 'John Doe', // From Clerk
-      changeSummary: 'Auto-saved',
-      fields: snap.fields,
+  const addRule = () => {
+    const newRule: ConditionalRule = {
+      id: `rule-${Date.now()}`,
+      targetFieldId: fieldId,
+      action: 'show',
+      logic: 'AND',
+      conditions: [],
     };
-
-    const db = await openDB('braveforms', 1);
-    await db.add('formVersions', newVersion);
-    await loadVersions();
+    const updatedRules = [...rules, newRule];
+    setRules(updatedRules);
+    updateField(fieldId, { conditionalRules: updatedRules });
   };
 
-  const saveVersionWithLabel = async () => {
-    const label = prompt('Version label (e.g., "v1.0 - Ready for production"):');
-    if (!label) return;
-
-    const snap = formBuilderStore;
-    const newVersion: FormVersion = {
-      id: `version-${Date.now()}`,
-      formId,
-      timestamp: Date.now(),
-      userId: 'current-user',
-      userName: 'John Doe',
-      changeSummary: 'Manual save',
-      label,
-      fields: snap.fields,
-    };
-
-    const db = await openDB('braveforms', 1);
-    await db.add('formVersions', newVersion);
-    await loadVersions();
+  const removeRule = (ruleId: string) => {
+    const updatedRules = rules.filter(r => r.id !== ruleId);
+    setRules(updatedRules);
+    updateField(fieldId, { conditionalRules: updatedRules });
   };
 
-  const restoreVersion = async (version: FormVersion) => {
-    if (confirm(`Restore version from ${new Date(version.timestamp).toLocaleString()}?`)) {
-      loadVersion(version.fields);
-      alert('Version restored!');
-    }
-  };
-
-  const deleteVersion = async (versionId: string) => {
-    if (confirm('Delete this version? This cannot be undone.')) {
-      const db = await openDB('braveforms', 1);
-      await db.delete('formVersions', versionId);
-      await loadVersions();
-    }
+  const updateRule = (ruleId: string, updates: Partial<ConditionalRule>) => {
+    const updatedRules = rules.map(r =>
+      r.id === ruleId ? { ...r, ...updates } : r
+    );
+    setRules(updatedRules);
+    updateField(fieldId, { conditionalRules: updatedRules });
   };
 
   return (
@@ -135,204 +101,365 @@ export function FormVersionHistory({ formId }: { formId: string }) {
       <Stack gap="md">
         <Group justify="space-between">
           <div>
-            <Text size="lg" fw={600}>Version History</Text>
-            <Text size="xs" c="dimmed">{versions.length} versions saved</Text>
+            <Text size="sm" fw={600}>Conditional Logic</Text>
+            <Text size="xs" c="dimmed">Show or hide this field based on other fields</Text>
           </div>
-
-          <Button size="xs" onClick={saveVersionWithLabel}>
-            Save Version
-          </Button>
         </Group>
 
-        {versions.length === 0 ? (
-          <Text size="sm" c="dimmed" ta="center" py="xl">
-            No versions saved yet
-          </Text>
+        {rules.length === 0 ? (
+          <Card withBorder padding="md" ta="center" style={{ borderStyle: 'dashed' }}>
+            <Stack align="center" gap="xs">
+              <Text size="sm" c="dimmed">No conditional rules</Text>
+              <Text size="xs" c="dimmed">
+                Add rules to show/hide this field dynamically
+              </Text>
+            </Stack>
+          </Card>
         ) : (
-          <Timeline active={0} bulletSize={24} lineWidth={2}>
-            {versions.map((version, index) => (
-              <Timeline.Item
-                key={version.id}
-                bullet={index === 0 ? <IconCheck size={12} /> : <IconClock size={12} />}
-                title={
-                  <Group gap="xs">
-                    <Text size="sm" fw={500}>
-                      {new Date(version.timestamp).toLocaleString()}
-                    </Text>
-                    {version.label && (
-                      <Badge size="sm" variant="light">{version.label}</Badge>
-                    )}
-                    {index === 0 && (
-                      <Badge size="sm" color="green">Current</Badge>
-                    )}
-                  </Group>
-                }
-              >
-                <Stack gap="xs">
-                  <Text size="xs" c="dimmed">
-                    by {version.userName} • {version.changeSummary}
-                  </Text>
-
-                  <Text size="xs" c="dimmed">
-                    {version.fields.length} fields
-                  </Text>
-
-                  <Group gap="xs">
-                    <Button
-                      size="xs"
-                      variant="subtle"
-                      onClick={() => setCompareVersion(version)}
-                    >
-                      Compare
-                    </Button>
-
-                    {index > 0 && (
-                      <>
-                        <Button
-                          size="xs"
-                          variant="light"
-                          leftSection={<IconRestore size={14} />}
-                          onClick={() => restoreVersion(version)}
-                        >
-                          Restore
-                        </Button>
-
-                        <Button
-                          size="xs"
-                          variant="subtle"
-                          color="red"
-                          leftSection={<IconTrash size={14} />}
-                          onClick={() => deleteVersion(version.id)}
-                        >
-                          Delete
-                        </Button>
-                      </>
-                    )}
-                  </Group>
-                </Stack>
-              </Timeline.Item>
+          <Stack gap="sm">
+            {rules.map(rule => (
+              <ConditionalRuleEditor
+                key={rule.id}
+                rule={rule}
+                onUpdate={(updates) => updateRule(rule.id, updates)}
+                onRemove={() => removeRule(rule.id)}
+              />
             ))}
-          </Timeline>
+          </Stack>
         )}
 
-        {/* Version Comparison Modal */}
-        <Modal
-          opened={!!compareVersion}
-          onClose={() => setCompareVersion(null)}
-          title="Version Comparison"
-          size="xl"
+        <Button
+          variant="light"
+          leftSection={<IconPlus size={16} />}
+          onClick={addRule}
         >
-          {compareVersion && (
-            <VersionComparison
-              version1={versions[0]} // Current version
-              version2={compareVersion}
-            />
-          )}
-        </Modal>
+          Add Conditional Rule
+        </Button>
       </Stack>
     </Card>
   );
 }
 
-// Version Comparison Component
-function VersionComparison({ version1, version2 }: { version1: FormVersion, version2: FormVersion }) {
-  const currentFields = JSON.stringify(version1.fields, null, 2);
-  const previousFields = JSON.stringify(version2.fields, null, 2);
+// Conditional Rule Editor
+function ConditionalRuleEditor({
+  rule,
+  onUpdate,
+  onRemove,
+}: {
+  rule: ConditionalRule;
+  onUpdate: (updates: Partial<ConditionalRule>) => void;
+  onRemove: () => void;
+}) {
+  const snap = useSnapshot(formBuilderStore);
 
-  const differences = diffLines(previousFields, currentFields);
+  const availableFields = snap.fields
+    .filter(f => f.id !== rule.targetFieldId)
+    .map(f => ({ value: f.id, label: f.label }));
+
+  const addCondition = () => {
+    const newCondition: Condition = {
+      id: `cond-${Date.now()}`,
+      fieldId: '',
+      operator: 'equals',
+      value: '',
+    };
+    onUpdate({ conditions: [...rule.conditions, newCondition] });
+  };
+
+  const updateCondition = (conditionId: string, updates: Partial<Condition>) => {
+    const updatedConditions = rule.conditions.map(c =>
+      c.id === conditionId ? { ...c, ...updates } : c
+    );
+    onUpdate({ conditions: updatedConditions });
+  };
+
+  const removeCondition = (conditionId: string) => {
+    const updatedConditions = rule.conditions.filter(c => c.id !== conditionId);
+    onUpdate({ conditions: updatedConditions });
+  };
 
   return (
-    <Stack gap="md">
-      <Group justify="space-between">
-        <div>
-          <Text size="sm" fw={500}>Current Version</Text>
-          <Text size="xs" c="dimmed">{new Date(version1.timestamp).toLocaleString()}</Text>
-        </div>
-        <div>
-          <Text size="sm" fw={500}>Previous Version</Text>
-          <Text size="xs" c="dimmed">{new Date(version2.timestamp).toLocaleString()}</Text>
-        </div>
-      </Group>
+    <Card withBorder padding="sm">
+      <Stack gap="sm">
+        <Group justify="space-between">
+          <Group gap="xs">
+            <Badge color={rule.action === 'show' ? 'green' : 'orange'}>
+              {rule.action === 'show' ? <IconEye size={12} /> : <IconEyeOff size={12} />}
+              {rule.action === 'show' ? 'Show' : 'Hide'}
+            </Badge>
+            <Text size="xs" c="dimmed">when conditions match</Text>
+          </Group>
 
-      <Card withBorder padding="md" style={{ fontFamily: 'monospace', fontSize: 12 }}>
-        {differences.map((part, index) => {
-          const color = part.added ? 'green' : part.removed ? 'red' : 'gray';
-          const bgColor = part.added ? '#e6ffe6' : part.removed ? '#ffe6e6' : 'transparent';
+          <Group gap="xs">
+            <Select
+              size="xs"
+              value={rule.action}
+              onChange={(value) => onUpdate({ action: value as 'show' | 'hide' })}
+              data={[
+                { value: 'show', label: 'Show field' },
+                { value: 'hide', label: 'Hide field' },
+              ]}
+            />
 
-          return (
-            <div
-              key={index}
-              style={{
-                color,
-                backgroundColor: bgColor,
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-all',
-              }}
+            <ActionIcon
+              variant="subtle"
+              color="red"
+              onClick={onRemove}
+              aria-label="Remove rule"
             >
-              {part.value}
-            </div>
-          );
-        })}
-      </Card>
+              <IconTrash size={16} />
+            </ActionIcon>
+          </Group>
+        </Group>
 
-      <Text size="xs" c="dimmed">
-        <span style={{ color: 'green' }}>Green</span> = Added,{' '}
-        <span style={{ color: 'red' }}>Red</span> = Removed
-      </Text>
-    </Stack>
+        {rule.conditions.length > 0 && (
+          <Select
+            size="xs"
+            label="Combine conditions with"
+            value={rule.logic}
+            onChange={(value) => onUpdate({ logic: value as 'AND' | 'OR' })}
+            data={[
+              { value: 'AND', label: 'AND (all conditions must match)' },
+              { value: 'OR', label: 'OR (any condition can match)' },
+            ]}
+          />
+        )}
+
+        <Stack gap="xs">
+          {rule.conditions.map((condition, index) => (
+            <ConditionEditor
+              key={condition.id}
+              condition={condition}
+              availableFields={availableFields}
+              showLogic={index > 0}
+              logic={rule.logic}
+              onUpdate={(updates) => updateCondition(condition.id, updates)}
+              onRemove={() => removeCondition(condition.id)}
+            />
+          ))}
+        </Stack>
+
+        <Button
+          variant="subtle"
+          size="xs"
+          leftSection={<IconPlus size={14} />}
+          onClick={addCondition}
+        >
+          Add Condition
+        </Button>
+      </Stack>
+    </Card>
   );
+}
+
+// Individual Condition Editor
+function ConditionEditor({
+  condition,
+  availableFields,
+  showLogic,
+  logic,
+  onUpdate,
+  onRemove,
+}: {
+  condition: Condition;
+  availableFields: { value: string; label: string }[];
+  showLogic: boolean;
+  logic: 'AND' | 'OR';
+  onUpdate: (updates: Partial<Condition>) => void;
+  onRemove: () => void;
+}) {
+  const snap = useSnapshot(formBuilderStore);
+  const selectedField = snap.fields.find(f => f.id === condition.fieldId);
+
+  const operatorOptions = [
+    { value: 'equals', label: 'equals' },
+    { value: 'not_equals', label: 'does not equal' },
+    { value: 'contains', label: 'contains' },
+    { value: 'greater_than', label: 'is greater than' },
+    { value: 'less_than', label: 'is less than' },
+    { value: 'is_empty', label: 'is empty' },
+    { value: 'is_not_empty', label: 'is not empty' },
+  ];
+
+  return (
+    <Card withBorder padding="xs">
+      <Stack gap="xs">
+        {showLogic && (
+          <Badge size="xs" variant="light" color={logic === 'AND' ? 'blue' : 'orange'}>
+            {logic}
+          </Badge>
+        )}
+
+        <Group gap="xs" wrap="nowrap">
+          <Select
+            placeholder="Select field"
+            size="xs"
+            style={{ flex: 1 }}
+            data={availableFields}
+            value={condition.fieldId}
+            onChange={(value) => onUpdate({ fieldId: value || '' })}
+          />
+
+          <Select
+            size="xs"
+            style={{ flex: 1 }}
+            data={operatorOptions}
+            value={condition.operator}
+            onChange={(value) => onUpdate({ operator: value as Condition['operator'] })}
+          />
+
+          {!['is_empty', 'is_not_empty'].includes(condition.operator) && (
+            <>
+              {selectedField?.type === 'dropdown' || selectedField?.type === 'radio' ? (
+                <Select
+                  size="xs"
+                  style={{ flex: 1 }}
+                  placeholder="Select value"
+                  data={selectedField.options?.map(opt => ({ value: opt.value, label: opt.label })) || []}
+                  value={condition.value?.toString()}
+                  onChange={(value) => onUpdate({ value: value || '' })}
+                />
+              ) : (
+                <TextInput
+                  size="xs"
+                  style={{ flex: 1 }}
+                  placeholder="Value"
+                  value={condition.value?.toString() || ''}
+                  onChange={(e) => onUpdate({ value: e.target.value })}
+                />
+              )}
+            </>
+          )}
+
+          <ActionIcon
+            variant="subtle"
+            color="red"
+            onClick={onRemove}
+            aria-label="Remove condition"
+          >
+            <IconTrash size={14} />
+          </ActionIcon>
+        </Group>
+      </Stack>
+    </Card>
+  );
+}
+
+// Evaluate conditional logic
+export function evaluateConditionalLogic(
+  rule: ConditionalRule,
+  formValues: Record<string, any>
+): boolean {
+  if (rule.conditions.length === 0) return true;
+
+  const results = rule.conditions.map(condition => {
+    const fieldValue = formValues[condition.fieldId];
+
+    switch (condition.operator) {
+      case 'equals':
+        return fieldValue === condition.value;
+      case 'not_equals':
+        return fieldValue !== condition.value;
+      case 'contains':
+        return fieldValue?.toString().includes(condition.value?.toString());
+      case 'greater_than':
+        return Number(fieldValue) > Number(condition.value);
+      case 'less_than':
+        return Number(fieldValue) < Number(condition.value);
+      case 'is_empty':
+        return !fieldValue || fieldValue === '';
+      case 'is_not_empty':
+        return !!fieldValue && fieldValue !== '';
+      default:
+        return false;
+    }
+  });
+
+  return rule.logic === 'AND'
+    ? results.every(r => r === true)
+    : results.some(r => r === true);
+}
+
+// Detect circular dependencies
+export function detectCircularDependencies(fields: FormField[]): string[] {
+  const errors: string[] = [];
+
+  fields.forEach(field => {
+    const visited = new Set<string>();
+    const checkDependencies = (fieldId: string) => {
+      if (visited.has(fieldId)) {
+        errors.push(`Circular dependency detected involving field: ${field.label}`);
+        return;
+      }
+
+      visited.add(fieldId);
+
+      const currentField = fields.find(f => f.id === fieldId);
+      currentField?.conditionalRules?.forEach(rule => {
+        rule.conditions.forEach(condition => {
+          checkDependencies(condition.fieldId);
+        });
+      });
+    };
+
+    checkDependencies(field.id);
+  });
+
+  return errors;
 }
 ```
 
 ## Acceptance Criteria
 
-- [ ] Version history displays all saved versions
-- [ ] Auto-save creates version every 5 minutes
-- [ ] Manual save with label functional
-- [ ] Version comparison shows diff
-- [ ] Restore version loads fields into canvas
-- [ ] Delete version working with confirmation
-- [ ] Version metadata displayed (timestamp, user, summary)
-- [ ] Current version highlighted
+- [ ] Conditional logic builder displays for each field
+- [ ] Add/edit/delete conditional rules working
+- [ ] Condition operators support equals, not equals, contains, greater/less than, empty checks
+- [ ] Multiple conditions with AND/OR logic functional
+- [ ] Visual indicators for conditional fields
+- [ ] Condition preview shows expected behavior
+- [ ] Circular dependency detection prevents invalid configs
+- [ ] Real-time updates to Valtio store
+- [ ] Conditional logic evaluates correctly in form preview
 
 ## Testing Requirements
 
 **Unit Tests:**
 
-- Test version save
-- Test version restore
-- Test version delete
-- Test version comparison
+- Test condition evaluation logic
+- Test circular dependency detection
+- Test AND/OR logic combinations
+- Test all operator types
 
 **Integration Tests:**
 
-- Test auto-save interval
-- Test IndexedDB storage
-- Test version load to canvas
+- Test conditional logic with form preview
+- Test complex multi-condition rules
+- Test Valtio store updates
 
 **Manual Testing:**
 
-- Wait 5 minutes to test auto-save
-- Save version with label
-- Compare two versions
-- Restore previous version
-- Delete old version
+- Create show/hide rules for various field types
+- Test multiple conditions with AND logic
+- Test multiple conditions with OR logic
+- Verify circular dependency prevention
+- Test conditional logic in form preview
 
 ## Evidence Requirements
 
-- [ ] Screenshot: Version history timeline
-- [ ] Screenshot: Version comparison diff
-- [ ] Screenshot: Restore version confirmation
-- [ ] Test Results: Versioning tests (>80% coverage)
+- [ ] Screenshot: Conditional logic builder UI
+- [ ] Screenshot: Multiple conditions with AND/OR logic
+- [ ] Screenshot: Condition preview
+- [ ] Video: Conditional logic in action (form preview)
+- [ ] Test Results: Conditional logic tests (>80% coverage)
 
 ## Success Criteria
 
-Form version history is complete when:
+Conditional logic builder is complete when:
 
-- Auto-save working every 5 minutes
-- Manual save with labels functional
-- Version comparison shows changes
-- Restore version working
+- All condition types working
+- AND/OR logic functional
+- Circular dependency detection working
+- Form preview reflects conditional logic
 - All tests passing
 
 ---

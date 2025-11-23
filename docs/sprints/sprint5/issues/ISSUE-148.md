@@ -1,508 +1,384 @@
-# ISSUE-148: Field Properties Panel (5h)
+# ISSUE-148: Accessibility & Keyboard Navigation (4h)
 
-**Priority:** P0
-**Phase:** Phase 5 - Form Builder
-**Estimated Hours:** 5
-**Dependencies:** ISSUE-147
+**Priority:** P1
+**Phase:** Phase 4 - Polish & Testing
+**Estimated Hours:** 4
+**Dependencies:** Phase 1, 2, 3 complete
 **Sprint:** Sprint 5
 
 ---
 
 ## Objective
 
-Create a comprehensive field properties panel allowing form builders to configure field settings, validation rules, options, and advanced properties for each field type.
+Implement comprehensive accessibility features and keyboard navigation for all Sprint 5 features to ensure WCAG 2.1 AA compliance and support field workers using assistive technologies.
 
 ## Tasks
 
-- [ ] Create FieldPropertiesPanel component
-- [ ] Create property editors for common properties (label, description, required, placeholder)
-- [ ] Create type-specific property editors (dropdown options, number min/max, file types)
-- [ ] Create validation rule editors (required, min/max length, pattern, custom)
-- [ ] Implement conditional property visibility based on field type
-- [ ] Add real-time property updates with Valtio
-- [ ] Create property reset to defaults button
-- [ ] Add property validation and error handling
-- [ ] Add unit tests for properties panel
+- [ ] Add ARIA labels to all interactive elements
+- [ ] Implement keyboard navigation for photo gallery
+- [ ] Implement keyboard navigation for sync queue
+- [ ] Implement keyboard navigation for settings forms
+- [ ] Add focus visible styles for all focusable elements
+- [ ] Implement skip links for main content areas
+- [ ] Add screen reader announcements for async operations
+- [ ] Test with screen readers (NVDA, JAWS, VoiceOver)
+- [ ] Run axe accessibility audit and fix all issues
+- [ ] Add unit tests for keyboard navigation
 
 ## Technical Details
 
 **Libraries/Dependencies:**
 
-- React Hook Form + Zod (property form validation)
-- Valtio (form builder state)
-- Mantine Form components (TextInput, NumberInput, Switch, MultiSelect)
-- @tabler/icons-react (property icons)
+- @mantine/hooks (useFocusTrap, useFocusWithin)
+- axe-core (accessibility testing)
+- @axe-core/react (runtime accessibility checks)
+- React ARIA (advanced accessibility patterns)
 
 **Code Example:**
 
 ```typescript
 'use client';
 
-import { useEffect } from 'react';
-import { useForm, zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import {
-  Stack,
-  TextInput,
-  Textarea,
-  NumberInput,
-  Switch,
-  Select,
-  MultiSelect,
-  Button,
-  Accordion,
-  Group,
-  Text,
-  Divider,
-  ActionIcon,
-} from '@mantine/core';
-import { IconPlus, IconTrash, IconRefresh } from '@tabler/icons-react';
-import { useSnapshot } from 'valtio';
-import { formBuilderStore, updateField } from './store';
-import type { FormField } from './types';
+import { useRef, useEffect } from 'react';
+import { useFocusTrap, useFocusWithin, useHotkeys } from '@mantine/hooks';
+import { VisuallyHidden } from '@mantine/core';
 
-// Property schema based on field type
-const basePropertySchema = z.object({
-  label: z.string().min(1, 'Label required'),
-  description: z.string().optional(),
-  required: z.boolean(),
-  placeholder: z.string().optional(),
-});
-
-const textPropertySchema = basePropertySchema.extend({
-  minLength: z.number().min(0).optional(),
-  maxLength: z.number().min(1).optional(),
-  pattern: z.string().optional(),
-  defaultValue: z.string().optional(),
-});
-
-const numberPropertySchema = basePropertySchema.extend({
-  min: z.number().optional(),
-  max: z.number().optional(),
-  step: z.number().min(0).optional(),
-  defaultValue: z.number().optional(),
-});
-
-const selectionPropertySchema = basePropertySchema.extend({
-  options: z.array(z.object({
-    label: z.string().min(1, 'Option label required'),
-    value: z.string().min(1, 'Option value required'),
-  })).min(1, 'At least one option required'),
-  defaultValue: z.string().optional(),
-});
-
-// Field Properties Panel
-export function FieldPropertiesPanel() {
-  const snap = useSnapshot(formBuilderStore);
-  const selectedField = snap.fields.find(f => f.id === snap.selectedFieldId);
-
-  if (!selectedField) {
-    return (
-      <Card withBorder padding="xl" ta="center">
-        <Stack align="center" gap="xs">
-          <IconSettings size={48} color="gray" />
-          <Text size="sm" c="dimmed">Select a field to edit properties</Text>
-        </Stack>
-      </Card>
-    );
-  }
-
+// Skip Links Component
+export function SkipLinks() {
   return (
-    <Card withBorder padding="md">
-      <Stack gap="md">
-        <Group justify="space-between">
-          <div>
-            <Text size="lg" fw={600}>Field Properties</Text>
-            <Text size="xs" c="dimmed">{selectedField.type} field</Text>
-          </div>
-          <ActionIcon
-            variant="subtle"
-            onClick={() => resetFieldProperties(selectedField.id)}
-            aria-label="Reset to defaults"
-          >
-            <IconRefresh size={16} />
-          </ActionIcon>
-        </Group>
+    <div className="skip-links">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+      <a href="#navigation" className="skip-link">
+        Skip to navigation
+      </a>
 
-        <Divider />
-
-        <Accordion variant="separated" defaultValue={['basic', 'validation']}>
-          <Accordion.Item value="basic">
-            <Accordion.Control>Basic Properties</Accordion.Control>
-            <Accordion.Panel>
-              <BasicPropertiesEditor field={selectedField} />
-            </Accordion.Panel>
-          </Accordion.Item>
-
-          <Accordion.Item value="validation">
-            <Accordion.Control>Validation Rules</Accordion.Control>
-            <Accordion.Panel>
-              <ValidationRulesEditor field={selectedField} />
-            </Accordion.Panel>
-          </Accordion.Item>
-
-          {['dropdown', 'radio', 'checkbox', 'multiselect'].includes(selectedField.type) && (
-            <Accordion.Item value="options">
-              <Accordion.Control>Options</Accordion.Control>
-              <Accordion.Panel>
-                <OptionsEditor field={selectedField} />
-              </Accordion.Panel>
-            </Accordion.Item>
-          )}
-
-          {selectedField.type === 'calculated' && (
-            <Accordion.Item value="calculation">
-              <Accordion.Control>Calculation Formula</Accordion.Control>
-              <Accordion.Panel>
-                <CalculationEditor field={selectedField} />
-              </Accordion.Panel>
-            </Accordion.Item>
-          )}
-
-          <Accordion.Item value="advanced">
-            <Accordion.Control>Advanced Settings</Accordion.Control>
-            <Accordion.Panel>
-              <AdvancedPropertiesEditor field={selectedField} />
-            </Accordion.Panel>
-          </Accordion.Item>
-        </Accordion>
-      </Stack>
-    </Card>
+      <style jsx>{`
+        .skip-link {
+          position: absolute;
+          top: -40px;
+          left: 0;
+          background: var(--mantine-color-blue-6);
+          color: white;
+          padding: 8px;
+          z-index: 100;
+        }
+        .skip-link:focus {
+          top: 0;
+        }
+      `}</style>
+    </div>
   );
 }
 
-// Basic Properties Editor
-function BasicPropertiesEditor({ field }: { field: FormField }) {
+// Photo Gallery with Keyboard Navigation
+export function PhotoGallery({ photos }: { photos: Photo[] }) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  // Arrow key navigation
+  useHotkeys([
+    ['ArrowRight', () => setSelectedIndex(i => Math.min(i + 1, photos.length - 1))],
+    ['ArrowLeft', () => setSelectedIndex(i => Math.max(i - 1, 0))],
+    ['Enter', () => setLightboxOpen(true)],
+    ['Escape', () => setLightboxOpen(false)],
+  ]);
+
+  return (
+    <div role="region" aria-label="Photo gallery">
+      <VisuallyHidden>
+        <div aria-live="polite" aria-atomic="true">
+          Viewing photo {selectedIndex + 1} of {photos.length}
+        </div>
+      </VisuallyHidden>
+
+      <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }}>
+        {photos.map((photo, index) => (
+          <Card
+            key={photo.id}
+            withBorder
+            tabIndex={0}
+            role="button"
+            aria-label={`Photo ${index + 1}: ${photo.description}`}
+            data-selected={index === selectedIndex}
+            onClick={() => {
+              setSelectedIndex(index);
+              setLightboxOpen(true);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setLightboxOpen(true);
+              }
+            }}
+            style={{
+              outline: index === selectedIndex ? '2px solid var(--mantine-color-blue-6)' : 'none',
+              outlineOffset: '2px',
+            }}
+          >
+            <img src={photo.url} alt={photo.description} />
+          </Card>
+        ))}
+      </SimpleGrid>
+
+      <Lightbox
+        open={lightboxOpen}
+        close={() => setLightboxOpen(false)}
+        index={selectedIndex}
+        slides={photos}
+      />
+    </div>
+  );
+}
+
+// Modal with Focus Trap
+export function AccessibleModal({ opened, onClose, children }: ModalProps) {
+  const focusTrapRef = useFocusTrap(opened);
+
+  return (
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      ref={focusTrapRef}
+      closeOnEscape
+      aria-labelledby="modal-title"
+      aria-describedby="modal-description"
+    >
+      <h2 id="modal-title">Modal Title</h2>
+      <div id="modal-description">{children}</div>
+    </Modal>
+  );
+}
+
+// Form with Accessible Error Messages
+export function AccessibleForm() {
   const form = useForm({
-    resolver: zodResolver(basePropertySchema),
-    defaultValues: {
-      label: field.label,
-      description: field.description || '',
-      required: field.required,
-      placeholder: field.placeholder || '',
-    },
+    resolver: zodResolver(schema),
   });
 
-  useEffect(() => {
-    const subscription = form.watch((values) => {
-      updateField(field.id, values as Partial<FormField>);
-    });
-    return () => subscription.unsubscribe();
-  }, [field.id, form]);
-
-  return (
-    <Stack gap="sm">
-      <TextInput
-        label="Field Label"
-        placeholder="e.g., Inspector Name"
-        {...form.register('label')}
-        error={form.formState.errors.label?.message}
-      />
-
-      <Textarea
-        label="Description"
-        placeholder="Help text for field workers"
-        minRows={2}
-        {...form.register('description')}
-      />
-
-      <TextInput
-        label="Placeholder"
-        placeholder="e.g., Enter your name"
-        {...form.register('placeholder')}
-      />
-
-      <Switch
-        label="Required field"
-        description="Field workers must fill this field"
-        {...form.register('required')}
-      />
-    </Stack>
-  );
-}
-
-// Validation Rules Editor
-function ValidationRulesEditor({ field }: { field: FormField }) {
-  const form = useForm({
-    defaultValues: {
-      minLength: field.validation?.minLength,
-      maxLength: field.validation?.maxLength,
-      min: field.validation?.min,
-      max: field.validation?.max,
-      pattern: field.validation?.pattern,
-    },
-  });
+  const errorAnnouncement = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const subscription = form.watch((values) => {
-      updateField(field.id, {
-        validation: { ...field.validation, ...values },
-      });
-    });
-    return () => subscription.unsubscribe();
-  }, [field.id, form]);
+    // Announce errors to screen readers
+    if (Object.keys(form.formState.errors).length > 0) {
+      const errorCount = Object.keys(form.formState.errors).length;
+      errorAnnouncement.current!.textContent =
+        `Form has ${errorCount} validation ${errorCount === 1 ? 'error' : 'errors'}`;
+    }
+  }, [form.formState.errors]);
 
   return (
-    <Stack gap="sm">
-      {['text', 'textarea'].includes(field.type) && (
-        <>
-          <NumberInput
-            label="Minimum Length"
-            placeholder="No minimum"
-            min={0}
-            {...form.register('minLength')}
-          />
-          <NumberInput
-            label="Maximum Length"
-            placeholder="No maximum"
-            min={1}
-            {...form.register('maxLength')}
-          />
-          <TextInput
-            label="Pattern (Regex)"
-            placeholder="e.g., ^[A-Z]{3}-[0-9]{4}$"
-            description="Advanced: Regular expression for validation"
-            {...form.register('pattern')}
-          />
-        </>
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      <VisuallyHidden>
+        <div ref={errorAnnouncement} role="alert" aria-live="assertive" />
+      </VisuallyHidden>
+
+      <TextInput
+        label="First Name"
+        {...form.register('firstName')}
+        error={form.formState.errors.firstName?.message}
+        aria-invalid={!!form.formState.errors.firstName}
+        aria-describedby={form.formState.errors.firstName ? 'firstName-error' : undefined}
+      />
+      {form.formState.errors.firstName && (
+        <Text id="firstName-error" size="sm" c="red" role="alert">
+          {form.formState.errors.firstName.message}
+        </Text>
       )}
 
-      {field.type === 'number' && (
-        <>
-          <NumberInput
-            label="Minimum Value"
-            placeholder="No minimum"
-            {...form.register('min')}
-          />
-          <NumberInput
-            label="Maximum Value"
-            placeholder="No maximum"
-            {...form.register('max')}
-          />
-          <NumberInput
-            label="Step"
-            placeholder="1"
-            min={0}
-            step={0.1}
-            {...form.register('step')}
-          />
-        </>
-      )}
-
-      {field.type === 'photo' && (
-        <>
-          <NumberInput
-            label="Max File Size (MB)"
-            placeholder="10"
-            min={1}
-            max={100}
-            {...form.register('maxFileSize')}
-          />
-          <NumberInput
-            label="Max Photos"
-            placeholder="5"
-            min={1}
-            max={50}
-            {...form.register('maxCount')}
-          />
-        </>
-      )}
-    </Stack>
-  );
-}
-
-// Options Editor (for dropdown, radio, checkbox, multiselect)
-function OptionsEditor({ field }: { field: FormField }) {
-  const [options, setOptions] = useState(field.options || []);
-
-  const addOption = () => {
-    const newOption = { label: '', value: `option-${Date.now()}` };
-    const updatedOptions = [...options, newOption];
-    setOptions(updatedOptions);
-    updateField(field.id, { options: updatedOptions });
-  };
-
-  const updateOption = (index: number, updates: Partial<typeof options[0]>) => {
-    const updatedOptions = options.map((opt, i) =>
-      i === index ? { ...opt, ...updates } : opt
-    );
-    setOptions(updatedOptions);
-    updateField(field.id, { options: updatedOptions });
-  };
-
-  const removeOption = (index: number) => {
-    const updatedOptions = options.filter((_, i) => i !== index);
-    setOptions(updatedOptions);
-    updateField(field.id, { options: updatedOptions });
-  };
-
-  return (
-    <Stack gap="sm">
-      {options.map((option, index) => (
-        <Group key={index} gap="xs" wrap="nowrap">
-          <TextInput
-            placeholder="Option label"
-            value={option.label}
-            onChange={(e) => updateOption(index, { label: e.target.value })}
-            style={{ flex: 1 }}
-          />
-          <TextInput
-            placeholder="Value"
-            value={option.value}
-            onChange={(e) => updateOption(index, { value: e.target.value })}
-            style={{ flex: 1 }}
-          />
-          <ActionIcon
-            color="red"
-            variant="subtle"
-            onClick={() => removeOption(index)}
-            aria-label="Remove option"
-          >
-            <IconTrash size={16} />
-          </ActionIcon>
-        </Group>
-      ))}
-
-      <Button
-        variant="light"
-        leftSection={<IconPlus size={16} />}
-        onClick={addOption}
-      >
-        Add Option
+      <Button type="submit" aria-label="Submit form">
+        Submit
       </Button>
-    </Stack>
+    </form>
   );
 }
 
-// Calculation Editor (for calculated fields)
-function CalculationEditor({ field }: { field: FormField }) {
-  const snap = useSnapshot(formBuilderStore);
-
-  const availableFields = snap.fields
-    .filter(f => f.type === 'number' && f.id !== field.id)
-    .map(f => ({ value: f.id, label: f.label }));
-
+// Sync Queue with Accessible Table
+export function SyncQueueTable({ items }: { items: SyncQueueItem[] }) {
   return (
-    <Stack gap="sm">
-      <Textarea
-        label="Formula"
-        placeholder="e.g., SUM(field1, field2)"
-        description="Use SUM, AVG, MIN, MAX, ROUND functions"
-        value={field.calculation?.formula || ''}
-        onChange={(e) => updateField(field.id, {
-          calculation: { formula: e.target.value },
-        })}
-        minRows={3}
-      />
+    <div role="region" aria-label="Sync queue" aria-live="polite">
+      <VisuallyHidden>
+        <div aria-live="polite" aria-atomic="true">
+          {items.length} {items.length === 1 ? 'item' : 'items'} in sync queue
+        </div>
+      </VisuallyHidden>
 
-      <MultiSelect
-        label="Referenced Fields"
-        placeholder="Select fields used in formula"
-        data={availableFields}
-        value={field.calculation?.referencedFields || []}
-        onChange={(values) => updateField(field.id, {
-          calculation: { ...field.calculation, referencedFields: values },
-        })}
-      />
-    </Stack>
+      <table role="table" aria-label="Sync queue items">
+        <thead>
+          <tr>
+            <th scope="col">Type</th>
+            <th scope="col">Status</th>
+            <th scope="col">Priority</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map(item => (
+            <tr key={item.id}>
+              <td>{item.type}</td>
+              <td>
+                <span
+                  role="status"
+                  aria-label={`Status: ${item.status}`}
+                >
+                  {item.status}
+                </span>
+              </td>
+              <td>{item.priority}</td>
+              <td>
+                <Button
+                  size="xs"
+                  aria-label={`Retry ${item.type}`}
+                  onClick={() => retrySync(item.id)}
+                >
+                  Retry
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
-// Advanced Properties Editor
-function AdvancedPropertiesEditor({ field }: { field: FormField }) {
+// Loading State Announcements
+export function AsyncOperationAnnouncement({ status }: { status: 'loading' | 'success' | 'error' }) {
   return (
-    <Stack gap="sm">
-      <Switch
-        label="Read-only"
-        description="Field cannot be edited by field workers"
-        checked={field.readOnly || false}
-        onChange={(e) => updateField(field.id, { readOnly: e.currentTarget.checked })}
-      />
-
-      <Switch
-        label="Hidden"
-        description="Field is hidden but value is submitted"
-        checked={field.hidden || false}
-        onChange={(e) => updateField(field.id, { hidden: e.currentTarget.checked })}
-      />
-
-      <TextInput
-        label="CSS Class"
-        placeholder="custom-field-class"
-        description="Custom styling class name"
-        value={field.className || ''}
-        onChange={(e) => updateField(field.id, { className: e.target.value })}
-      />
-    </Stack>
+    <VisuallyHidden>
+      <div role="status" aria-live="polite" aria-atomic="true">
+        {status === 'loading' && 'Loading...'}
+        {status === 'success' && 'Operation completed successfully'}
+        {status === 'error' && 'Operation failed. Please try again.'}
+      </div>
+    </VisuallyHidden>
   );
 }
 
-// Reset field properties to defaults
-function resetFieldProperties(fieldId: string) {
-  if (confirm('Reset field to default properties?')) {
-    updateField(fieldId, {
-      label: 'New Field',
-      description: '',
-      required: false,
-      placeholder: '',
-      validation: {},
-      options: [],
+// Focus Visible Styles (global CSS)
+const focusVisibleStyles = `
+  /* Remove default outline */
+  *:focus {
+    outline: none;
+  }
+
+  /* Add custom focus visible outline */
+  *:focus-visible {
+    outline: 2px solid var(--mantine-color-blue-6);
+    outline-offset: 2px;
+  }
+
+  /* Button focus visible */
+  button:focus-visible {
+    outline: 2px solid var(--mantine-color-blue-6);
+    outline-offset: 2px;
+  }
+
+  /* Link focus visible */
+  a:focus-visible {
+    outline: 2px solid var(--mantine-color-blue-6);
+    outline-offset: 2px;
+  }
+
+  /* Input focus visible */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--mantine-color-blue-6);
+    outline-offset: -2px;
+  }
+`;
+
+// Accessibility Testing Helper
+export function runAccessibilityAudit() {
+  if (process.env.NODE_ENV === 'development') {
+    import('@axe-core/react').then(axe => {
+      axe.default(React, ReactDOM, 1000);
     });
   }
+}
+
+// Keyboard Shortcuts Help Modal
+export function KeyboardShortcutsHelp() {
+  const shortcuts = [
+    { key: 'Arrow Left/Right', description: 'Navigate photos' },
+    { key: 'Enter', description: 'Open selected photo' },
+    { key: 'Escape', description: 'Close lightbox' },
+    { key: 'Tab', description: 'Navigate between elements' },
+    { key: 'Shift + Tab', description: 'Navigate backwards' },
+    { key: '/', description: 'Focus search input' },
+  ];
+
+  return (
+    <Modal opened={true} onClose={() => {}}>
+      <Stack>
+        <Text size="lg" fw={600}>Keyboard Shortcuts</Text>
+        {shortcuts.map(shortcut => (
+          <Group key={shortcut.key} justify="space-between">
+            <kbd style={{ padding: '4px 8px', background: '#f0f0f0', borderRadius: '4px' }}>
+              {shortcut.key}
+            </kbd>
+            <Text size="sm">{shortcut.description}</Text>
+          </Group>
+        ))}
+      </Stack>
+    </Modal>
+  );
 }
 ```
 
 ## Acceptance Criteria
 
-- [ ] Properties panel displays when field selected
-- [ ] Basic properties editor working (label, description, required, placeholder)
-- [ ] Validation rules editor shows type-specific rules
-- [ ] Options editor allows add/edit/delete options (dropdown, radio, etc.)
-- [ ] Calculation editor for calculated fields functional
-- [ ] Advanced settings editor working (read-only, hidden, CSS class)
-- [ ] Real-time updates to Valtio store
-- [ ] Reset to defaults button working
-- [ ] Property validation with error messages
+- [ ] All interactive elements have ARIA labels
+- [ ] Keyboard navigation works for all features
+- [ ] Focus visible styles applied to all focusable elements
+- [ ] Skip links functional
+- [ ] Screen reader announcements for async operations
+- [ ] axe accessibility audit passes with 0 violations
+- [ ] Tested with NVDA/JAWS/VoiceOver screen readers
+- [ ] WCAG 2.1 AA compliant
+- [ ] Keyboard shortcuts help modal available
 
 ## Testing Requirements
 
 **Unit Tests:**
 
-- Test property form validation
-- Test update field in Valtio store
-- Test options add/edit/delete
-- Test reset to defaults
+- Test keyboard navigation handlers
+- Test ARIA label generation
+- Test focus trap in modals
 
 **Integration Tests:**
 
-- Test property panel with different field types
-- Test real-time updates to canvas preview
-- Test validation error handling
+- Run axe-core accessibility tests
+- Test screen reader announcements
+- Test skip links navigation
 
 **Manual Testing:**
 
-- Edit properties for all 15 field types
-- Test validation rules for text/number fields
-- Add/remove options for dropdown/radio fields
-- Test calculation formula editor
-- Verify reset to defaults
+- Navigate entire app using only keyboard
+- Test with NVDA screen reader (Windows)
+- Test with JAWS screen reader (Windows)
+- Test with VoiceOver screen reader (macOS/iOS)
+- Verify all interactive elements reachable
+- Verify all form errors announced
 
 ## Evidence Requirements
 
-- [ ] Screenshot: Properties panel for text field
-- [ ] Screenshot: Validation rules editor
-- [ ] Screenshot: Options editor with multiple options
-- [ ] Screenshot: Calculation formula editor
-- [ ] Test Results: Properties panel tests (>80% coverage)
+- [ ] Screenshot: axe DevTools audit with 0 violations
+- [ ] Screenshot: Focus visible styles demonstration
+- [ ] Video: Keyboard navigation walkthrough
+- [ ] Video: Screen reader walkthrough (NVDA/VoiceOver)
+- [ ] Test Results: Accessibility tests (>80% coverage)
 
 ## Success Criteria
 
-Field properties panel is complete when:
+Accessibility is complete when:
 
-- All property editors functional
-- Type-specific properties show correctly
-- Real-time updates working
-- Validation rules editable
+- axe audit passes with 0 violations
+- All features keyboard navigable
+- Screen reader compatible
+- WCAG 2.1 AA compliant
 - All tests passing
 
 ---

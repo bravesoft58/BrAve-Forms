@@ -1,267 +1,465 @@
-# ISSUE-129: Sync Status Dashboard (4h)
+# ISSUE-129: Photo Lightbox Viewer (3h)
 
-**Sprint:** Sprint 5 | **Phase:** 2 - Offline Experience UI | **Priority:** P0
-**Time:** 4 hours | **Complexity:** Medium
+**Sprint:** Sprint 5 | **Phase:** 1 - Photo Gallery | **Priority:** P0
+**Time:** 3 hours | **Complexity:** Medium
 **Created:** 2025-10-23
-**Dependencies:** Phase 1 complete
+**Dependencies:** ISSUE-128 (Photo Gallery Grid View)
 **Status:** READY FOR IMPLEMENTATION
 
 ## What You'll Do
 
-Create sync status dashboard displaying current sync state, last sync timestamp, next auto-sync time, sync statistics, storage usage, and 30-day offline countdown.
+Integrate Yet Another React Lightbox for full-size photo viewing with zoom, navigation, EXIF metadata display, and download/share capabilities.
 
 ## Prerequisites
 
-- [ ] Phase 1 complete (Photo Gallery functional)
-- [ ] IndexedDB storage working
-- [ ] Offline sync engine implemented (Sprint 1)
+- [ ] ISSUE-128 complete (Photo gallery grid view)
+- [ ] Yet Another React Lightbox installed
+- [ ] Photos accessible via grid view
 - [ ] Code editor open to apps/web directory
+
+## Libraries/Dependencies
+
+**Yet Another React Lightbox:**
+
+- **Version:** ^3.0.0
+- **License:** MIT (open source)
+- **Why:** Recommended by Mantine community, React 19/18 compatible, actively maintained
+- **Alternatives Rejected:** react-image-lightbox (deprecated, no longer supported)
+- **Install:**
+  ```bash
+  pnpm add yet-another-react-lightbox
+  ```
 
 ## Step-by-Step Instructions
 
-### Step 1: Create SyncStatusDashboard Component (120 min)
+### Step 1: Install Yet Another React Lightbox (10 min)
 
-Create `apps/web/app/sync/status/page.tsx`:
+```bash
+cd apps/web
+pnpm add yet-another-react-lightbox
+
+# Optional plugins
+pnpm add yet-another-react-lightbox@^3.0.0
+```
+
+Verify installation:
+
+```bash
+grep "yet-another-react-lightbox" package.json
+```
+
+### Step 2: Create PhotoLightbox Component (90 min)
+
+Create `apps/web/components/photos/photo-lightbox.tsx`:
 
 ```typescript
 'use client';
 
-import { PageContainer } from '@/components/layout/page-container';
-import { Stack, Grid, Card, Text, Progress, Badge, Group } from '@mantine/core';
-import { IconCloud, IconDatabase, IconClock, IconAlertCircle } from '@tabler/icons-react';
-import { useSyncStatus } from '@/hooks/use-sync-status';
+import Lightbox from 'yet-another-react-lightbox';
+import Zoom from 'yet-another-react-lightbox/plugins/zoom';
+import 'yet-another-react-lightbox/styles.css';
+import { Photo } from '@braveforms/types';
+import { Stack, Text, Group, Badge } from '@mantine/core';
 
-export default function SyncStatusPage() {
-  const { status, lastSync, nextSync, stats, storage } = useSyncStatus();
+interface PhotoLightboxProps {
+  photos: Photo[];
+  index: number;
+  open: boolean;
+  onClose: () => void;
+}
 
-  const offlineDaysRemaining = calculateOfflineDaysRemaining(lastSync);
+export function PhotoLightbox({ photos, index, open, onClose }: PhotoLightboxProps) {
+  const slides = photos.map((photo) => ({
+    src: photo.url,
+    alt: photo.description || 'Photo',
+    width: photo.metadata?.width || 1920,
+    height: photo.metadata?.height || 1080,
+  }));
+
+  const renderSlideCaption = (photo: Photo) => (
+    <Stack gap="xs" p="md" bg="dark.8" style={{ opacity: 0.9 }}>
+      <Group justify="space-between">
+        <Text size="sm" fw={500}>
+          {photo.description || 'No description'}
+        </Text>
+        <Badge>{photo.formName}</Badge>
+      </Group>
+
+      {photo.metadata?.exif && (
+        <Group gap="md">
+          <Text size="xs" c="dimmed">
+            {new Date(photo.metadata.exif.timestamp).toLocaleString()}
+          </Text>
+          {photo.metadata.exif.gps && (
+            <Text size="xs" c="dimmed">
+              GPS: {photo.metadata.exif.gps.latitude.toFixed(6)}, {photo.metadata.exif.gps.longitude.toFixed(6)}
+            </Text>
+          )}
+          {photo.metadata.exif.camera && (
+            <Text size="xs" c="dimmed">
+              {photo.metadata.exif.camera}
+            </Text>
+          )}
+        </Group>
+      )}
+    </Stack>
+  );
 
   return (
-    <PageContainer title="Sync Status">
-      <Stack gap="lg">
-        {/* Current Status */}
-        <Card shadow="sm" padding="lg">
-          <Group justify="space-between">
-            <Group>
-              <IconCloud size={32} />
-              <div>
-                <Text size="sm" c="dimmed">Current Status</Text>
-                <Badge
-                  color={
-                    status === 'synced' ? 'green' :
-                    status === 'syncing' ? 'blue' :
-                    status === 'offline' ? 'yellow' :
-                    'red'
-                  }
-                  size="lg"
-                >
-                  {status.toUpperCase()}
-                </Badge>
-              </div>
-            </Group>
-
-            {offlineDaysRemaining < 7 && (
-              <Badge color="red" leftSection={<IconAlertCircle size={16} />}>
-                {offlineDaysRemaining} days remaining
-              </Badge>
-            )}
-          </Group>
-        </Card>
-
-        {/* Sync Timestamps */}
-        <Grid>
-          <Grid.Col span={6}>
-            <Card shadow="sm" padding="lg">
-              <Group>
-                <IconClock size={24} />
-                <div>
-                  <Text size="sm" c="dimmed">Last Sync</Text>
-                  <Text size="lg" fw={500}>
-                    {lastSync ? new Date(lastSync).toLocaleString() : 'Never'}
-                  </Text>
-                </div>
-              </Group>
-            </Card>
-          </Grid.Col>
-
-          <Grid.Col span={6}>
-            <Card shadow="sm" padding="lg">
-              <Group>
-                <IconClock size={24} />
-                <div>
-                  <Text size="sm" c="dimmed">Next Auto-Sync</Text>
-                  <Text size="lg" fw={500}>
-                    {nextSync ? new Date(nextSync).toLocaleString() : 'N/A'}
-                  </Text>
-                </div>
-              </Group>
-            </Card>
-          </Grid.Col>
-        </Grid>
-
-        {/* Sync Statistics */}
-        <Card shadow="sm" padding="lg">
-          <Stack gap="md">
-            <Text size="lg" fw={500}>Today's Activity</Text>
-            <Grid>
-              <Grid.Col span={4}>
-                <Text size="sm" c="dimmed">Forms Synced</Text>
-                <Text size="xl" fw={700}>{stats.formsSyncedToday}</Text>
-              </Grid.Col>
-              <Grid.Col span={4}>
-                <Text size="sm" c="dimmed">Photos Uploaded</Text>
-                <Text size="xl" fw={700}>{stats.photosUploadedToday}</Text>
-              </Grid.Col>
-              <Grid.Col span={4}>
-                <Text size="sm" c="dimmed">Pending Items</Text>
-                <Text size="xl" fw={700}>{stats.pendingItems}</Text>
-              </Grid.Col>
-            </Grid>
-          </Stack>
-        </Card>
-
-        {/* Storage Usage */}
-        <Card shadow="sm" padding="lg">
-          <Stack gap="md">
-            <Group justify="space-between">
-              <Group>
-                <IconDatabase size={24} />
-                <Text size="lg" fw={500}>Local Storage</Text>
-              </Group>
-              <Text size="sm" c="dimmed">
-                {formatBytes(storage.used)} / {formatBytes(storage.available)}
-              </Text>
-            </Group>
-
-            <Progress
-              value={(storage.used / storage.available) * 100}
-              color={
-                storage.used / storage.available > 0.9 ? 'red' :
-                storage.used / storage.available > 0.7 ? 'yellow' :
-                'green'
-              }
-            />
-
-            <Text size="sm" c="dimmed">
-              30-day offline capacity: {offlineDaysRemaining} days remaining
-            </Text>
-          </Stack>
-        </Card>
-      </Stack>
-    </PageContainer>
+    <Lightbox
+      open={open}
+      close={onClose}
+      slides={slides}
+      index={index}
+      plugins={[Zoom]}
+      zoom={{
+        maxZoomPixelRatio: 3,
+        scrollToZoom: true,
+      }}
+      carousel={{
+        preload: 2,
+      }}
+      controller={{
+        closeOnBackdropClick: true,
+      }}
+      render={{
+        slideFooter: ({ slide }) => {
+          const photo = photos[slides.findIndex((s) => s.src === slide.src)];
+          return photo ? renderSlideCaption(photo) : null;
+        },
+      }}
+    />
   );
 }
-
-function calculateOfflineDaysRemaining(lastSync: Date | null): number {
-  if (!lastSync) return 30;
-  const daysSinceSync = (Date.now() - lastSync.getTime()) / (1000 * 60 * 60 * 24);
-  return Math.max(0, 30 - Math.floor(daysSinceSync));
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
-}
 ```
 
-### Step 2: Create useSyncStatus Hook (60 min)
+### Step 3: Integrate Lightbox with Gallery Grid (45 min)
 
-Create `apps/web/hooks/use-sync-status.ts`:
+Update `apps/web/components/photos/photo-gallery-grid.tsx`:
 
 ```typescript
-import { useQuery } from '@tanstack/react-query';
+'use client';
 
-interface SyncStatus {
-  status: 'synced' | 'syncing' | 'offline' | 'error';
-  lastSync: Date | null;
-  nextSync: Date | null;
-  stats: {
-    formsSyncedToday: number;
-    photosUploadedToday: number;
-    pendingItems: number;
-  };
-  storage: {
-    used: number;
-    available: number;
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { SimpleGrid, Card, Image, Text, Stack, Loader, Center } from '@mantine/core';
+import { useInView } from '@mantine/hooks';
+import { useEffect, useState } from 'react';
+import { Photo } from '@braveforms/types';
+import { PhotoLightbox } from './photo-lightbox';
+
+interface PhotoGalleryGridProps {
+  projectId?: string;
+  filters?: {
+    formType?: string;
+    dateRange?: [Date, Date];
+    userId?: string;
   };
 }
 
-export function useSyncStatus() {
-  return useQuery<SyncStatus>({
-    queryKey: ['sync-status'],
-    queryFn: async () => {
-      // Get IndexedDB storage estimate
-      const estimate = await navigator.storage.estimate();
+export function PhotoGalleryGrid({ projectId, filters }: PhotoGalleryGridProps) {
+  const { ref, inView } = useInView();
+  const [lightboxIndex, setLightboxIndex] = useState(-1);
 
-      // Get sync status from service worker
-      const registration = await navigator.serviceWorker.ready;
-      const syncStatus = await registration.sync.getTags();
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useInfiniteQuery({
+    queryKey: ['photos', projectId, filters],
+    queryFn: async ({ pageParam = 0 }) => {
+      const params = new URLSearchParams({
+        skip: String(pageParam * 20),
+        take: '20',
+        ...(projectId && { projectId }),
+        ...(filters?.formType && { formType: filters.formType }),
+      });
 
-      return {
-        status: navigator.onLine ? 'synced' : 'offline',
-        lastSync: new Date(localStorage.getItem('lastSync') || ''),
-        nextSync: new Date(Date.now() + 15 * 60 * 1000), // 15 min
-        stats: {
-          formsSyncedToday: 12,
-          photosUploadedToday: 45,
-          pendingItems: 3,
-        },
-        storage: {
-          used: estimate.usage || 0,
-          available: estimate.quota || 0,
-        },
-      };
+      const response = await fetch(`/api/photos?${params}`);
+      return response.json();
     },
-    refetchInterval: 30000, // Refetch every 30s
+    getNextPageParam: (lastPage, pages) => {
+      return lastPage.hasMore ? pages.length : undefined;
+    },
+    initialPageParam: 0,
   });
+
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage]);
+
+  if (isLoading) {
+    return (
+      <Center h={400}>
+        <Loader size="lg" />
+      </Center>
+    );
+  }
+
+  const photos = data?.pages.flatMap((page) => page.photos) || [];
+
+  return (
+    <>
+      <Stack gap="lg">
+        <SimpleGrid
+          cols={{ base: 2, sm: 3, md: 4, lg: 6 }}
+          spacing="md"
+        >
+          {photos.map((photo: Photo, index: number) => (
+            <Card
+              key={photo.id}
+              shadow="sm"
+              padding="xs"
+              radius="md"
+              withBorder
+              style={{ cursor: 'pointer' }}
+              onClick={() => setLightboxIndex(index)}
+            >
+              <Card.Section>
+                <Image
+                  src={photo.thumbnailUrl || photo.url}
+                  alt={photo.description || 'Photo'}
+                  height={160}
+                  fit="cover"
+                />
+              </Card.Section>
+
+              <Stack gap={4} mt="xs">
+                <Text size="xs" c="dimmed" truncate>
+                  {new Date(photo.createdAt).toLocaleDateString()}
+                </Text>
+                <Text size="xs" fw={500} truncate>
+                  {photo.formName || 'Unknown Form'}
+                </Text>
+              </Stack>
+            </Card>
+          ))}
+        </SimpleGrid>
+
+        {hasNextPage && (
+          <div ref={ref}>
+            {isFetchingNextPage && (
+              <Center>
+                <Loader size="sm" />
+              </Center>
+            )}
+          </div>
+        )}
+      </Stack>
+
+      <PhotoLightbox
+        photos={photos}
+        index={lightboxIndex}
+        open={lightboxIndex >= 0}
+        onClose={() => setLightboxIndex(-1)}
+      />
+    </>
+  );
 }
 ```
 
-### Step 3: Test Sync Dashboard (60 min)
+### Step 4: Add Download and Share Actions (45 min)
+
+Update `apps/web/components/photos/photo-lightbox.tsx` with toolbar:
+
+```typescript
+import { ActionIcon, Group } from '@mantine/core';
+import { IconDownload, IconShare } from '@tabler/icons-react';
+import Toolbar from 'yet-another-react-lightbox/plugins/toolbar';
+
+// Add to PhotoLightbox component:
+const handleDownload = (photo: Photo) => {
+  const link = document.createElement('a');
+  link.href = photo.url;
+  link.download = `photo-${photo.id}.jpg`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+const handleShare = async (photo: Photo) => {
+  if (navigator.share) {
+    await navigator.share({
+      title: photo.description || 'Photo',
+      url: photo.url,
+    });
+  } else {
+    // Fallback: Copy to clipboard
+    await navigator.clipboard.writeText(photo.url);
+  }
+};
+
+return (
+  <Lightbox
+    open={open}
+    close={onClose}
+    slides={slides}
+    index={index}
+    plugins={[Zoom, Toolbar]}
+    toolbar={{
+      buttons: [
+        <ActionIcon
+          key="download"
+          variant="subtle"
+          onClick={() => handleDownload(photos[index])}
+        >
+          <IconDownload size={20} />
+        </ActionIcon>,
+        <ActionIcon
+          key="share"
+          variant="subtle"
+          onClick={() => handleShare(photos[index])}
+        >
+          <IconShare size={20} />
+        </ActionIcon>,
+      ],
+    }}
+    // ... rest of config
+  />
+);
+```
+
+### Step 5: Test Lightbox Functionality (30 min)
 
 ```bash
 # Restart web container
 kubectl rollout restart deployment/web -n braveforms
 
-# Access sync dashboard
-# Navigate to http://localhost:30102/sync/status
+# Access photo gallery
+# Navigate to http://localhost:30102/photos
 ```
 
 **Verify:**
 
-- [ ] Current sync status displays
-- [ ] Last sync timestamp shows
-- [ ] Next auto-sync countdown works
-- [ ] Sync statistics accurate
-- [ ] Storage meter displays
-- [ ] 30-day countdown shows
-- [ ] Warning appears when <7 days
+- [ ] Clicking photo thumbnail opens lightbox
+- [ ] Lightbox displays full-size photo
+- [ ] Arrow keys navigate left/right (desktop)
+- [ ] Swipe left/right navigates (mobile)
+- [ ] Zoom controls work (scroll to zoom)
+- [ ] EXIF metadata displays in caption
+- [ ] Download button downloads photo
+- [ ] Share button shares or copies URL
+- [ ] ESC key closes lightbox
 
-## TDD Workflow
+## TDD Workflow (MANDATORY)
 
-**Phase 1: Write Tests**
+### Phase 1: Write Tests First (Red Phase)
 
-Create `apps/web/hooks/__tests__/use-sync-status.test.ts`
+Create `apps/web/components/photos/__tests__/photo-lightbox.test.tsx`:
 
-**Phase 2: Pass Tests**
+```typescript
+import { render, screen, fireEvent } from '@testing-library/react';
+import { PhotoLightbox } from '../photo-lightbox';
+
+describe('PhotoLightbox', () => {
+  const mockPhotos = [
+    {
+      id: 'photo-1',
+      url: 'https://example.com/photo1.jpg',
+      description: 'Test photo',
+      formName: 'Daily Log',
+      metadata: {
+        width: 1920,
+        height: 1080,
+        exif: {
+          timestamp: '2025-10-23T12:00:00Z',
+          gps: { latitude: 39.5, longitude: -119.8 },
+          camera: 'iPhone 15 Pro',
+        },
+      },
+    },
+  ];
+
+  it('should open lightbox when triggered', () => {
+    render(
+      <PhotoLightbox
+        photos={mockPhotos}
+        index={0}
+        open={true}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(screen.getByAltText('Test photo')).toBeInTheDocument();
+  });
+
+  it('should display EXIF metadata', () => {
+    render(
+      <PhotoLightbox
+        photos={mockPhotos}
+        index={0}
+        open={true}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText(/GPS:/)).toBeInTheDocument();
+    expect(screen.getByText(/iPhone 15 Pro/)).toBeInTheDocument();
+  });
+
+  it('should close on ESC key', () => {
+    const onClose = jest.fn();
+    render(
+      <PhotoLightbox
+        photos={mockPhotos}
+        index={0}
+        open={true}
+        onClose={onClose}
+      />
+    );
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalled();
+  });
+});
+```
+
+Run tests (should FAIL - red phase):
+
+```bash
+cd apps/web
+pnpm test photo-lightbox
+```
+
+**Screenshot:** Save to `evidence/ISSUE-129/test-results/red-phase.png`
+
+### Phase 2: Implement Code (Green Phase)
+
+Implement all code as shown in Steps 1-4.
+
+Run tests:
+
+```bash
+pnpm test photo-lightbox
+```
+
+**Screenshot:** Save to `evidence/ISSUE-129/test-results/green-phase.png`
 
 ## Files to Create
 
 **Create:**
 
-- apps/web/app/sync/status/page.tsx
-- apps/web/hooks/use-sync-status.ts
-- apps/web/hooks/**tests**/use-sync-status.test.ts
+- apps/web/components/photos/photo-lightbox.tsx
+- apps/web/components/photos/**tests**/photo-lightbox.test.tsx
+
+**Modify:**
+
+- apps/web/components/photos/photo-gallery-grid.tsx (integrate lightbox)
+- apps/web/package.json (add yet-another-react-lightbox dependency)
 
 ## Verification Checklist
 
-- [ ] Sync status dashboard displays
-- [ ] All metrics accurate
-- [ ] Storage meter works
-- [ ] 30-day countdown functional
+- [ ] Yet Another React Lightbox installed
+- [ ] Lightbox opens on thumbnail click
+- [ ] Full-size photos display correctly
+- [ ] Navigation works (arrows, swipe, keyboard)
+- [ ] Zoom functionality works
+- [ ] EXIF metadata displays
+- [ ] Download action works
+- [ ] Share action works
 - [ ] Tests passing (>80% coverage)
 - [ ] Zero emoji, zero AI branding
 
@@ -271,26 +469,63 @@ Create `apps/web/hooks/__tests__/use-sync-status.test.ts`
 
 **Required:**
 
-- test-results/red-phase.png
-- test-results/green-phase.png
-- screenshots/sync-dashboard.png
-- screenshots/storage-warning.png
+- test-results/
+  - red-phase.png (failing tests)
+  - green-phase.png (passing tests)
+  - coverage-report.png (>80%)
+- screenshots/
+  - lightbox-desktop.png (full-size photo with metadata)
+  - lightbox-mobile.png (mobile view with swipe)
+  - zoom-functionality.png (zoomed photo)
+  - download-action.png (download in progress)
+
+## Troubleshooting
+
+**Problem:** Lightbox not opening
+
+- **Cause:** State management issue with lightboxIndex
+- **Solution:** Verify setLightboxIndex(-1) for closed, index >= 0 for open
+
+**Problem:** EXIF metadata not displaying
+
+- **Cause:** Photo metadata missing or null
+- **Solution:** Check backend returns metadata.exif object, add null checks
+
+**Problem:** Zoom not working
+
+- **Cause:** Zoom plugin not imported
+- **Solution:** Import and include Zoom in plugins array
+
+**Problem:** Download fails on mobile
+
+- **Cause:** Browser security restrictions
+- **Solution:** Use blob download method or open in new tab
 
 ## Success Criteria
 
-- [ ] Sync status dashboard functional
-- [ ] All sync metrics display accurately
-- [ ] Performance <500ms load time
+- [ ] Lightbox displays full-size photos
+- [ ] Navigation works (keyboard, swipe, arrows)
+- [ ] Zoom controls functional
+- [ ] EXIF metadata visible
+- [ ] Download action downloads original photo
+- [ ] Share action copies URL or opens native share
+- [ ] Performance <500ms to open lightbox
 - [ ] Tests pass with >80% coverage
 
 ## Time Estimate
 
-**4 hours total:**
+**3 hours total:**
 
-- SyncStatusDashboard component: 120 min
-- useSyncStatus hook: 60 min
-- Testing: 60 min
+- Install library: 10 min
+- Create PhotoLightbox component: 90 min
+- Integrate with gallery grid: 45 min
+- Add download/share actions: 45 min
+- Testing: 30 min
 
 ## Next Issue
 
-**ISSUE-130:** Sync Queue Management (4h)
+**ISSUE-130:** [Next issue title]
+
+- Prerequisites: ISSUE-129 complete (lightbox ready)
+- Uses: MapLibre GL JS (free, open source)
+- Displays: Photo locations on map with clustering

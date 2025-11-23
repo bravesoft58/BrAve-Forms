@@ -6,7 +6,6 @@ import {
   SignedIn,
   SignedOut,
   UserButton,
-  OrganizationSwitcher,
   useAuth,
 } from '@clerk/nextjs';
 import { Group, Button, Text, Stack, Badge } from '@mantine/core';
@@ -72,34 +71,8 @@ function OrganizationContext() {
 
   return (
     <Stack gap="sm" align="flex-end">
-      {/* Organization Switcher - Construction Company Selection */}
+      {/* User Button - Organization switching removed for single-tenant deployment */}
       <Group gap="md" align="center">
-        <OrganizationSwitcher
-          appearance={{
-            elements: {
-              organizationSwitcherTrigger: {
-                padding: '8px 12px',
-                borderRadius: '8px',
-                border: '2px solid #e5e7eb',
-                backgroundColor: '#ffffff',
-                fontSize: '14px',
-                fontWeight: '500',
-                minWidth: '180px',
-                '&:hover': {
-                  backgroundColor: '#f9fafb',
-                  borderColor: '#0ea5e9',
-                },
-              },
-              organizationSwitcherTriggerIcon: {
-                color: '#0ea5e9',
-              },
-            },
-          }}
-          organizationProfileUrl="/settings/organization"
-          createOrganizationUrl="/create-organization"
-          hidePersonal // Enforce organization-only access per CLAUDE.md
-        />
-        
         <UserButton
           appearance={{
             elements: {
@@ -124,7 +97,7 @@ function OrganizationContext() {
         <Group gap="xs" style={{ fontSize: '12px', color: '#6b7280' }}>
           <IconBuilding size={14} />
           <Text size="xs" c="dimmed">
-            Construction Company: {orgSlug}
+            Construction Company: {orgSlug || 'Q&D Construction'}
           </Text>
           {orgRole && (
             <Badge size="xs" variant="light" color="blue">

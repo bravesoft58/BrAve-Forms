@@ -1,384 +1,407 @@
-# ISSUE-152: Form Preview & Testing (3h)
+# ISSUE-152: Form Canvas with Drag & Drop (5h)
 
 **Priority:** P0
 **Phase:** Phase 5 - Form Builder
-**Estimated Hours:** 3
-**Dependencies:** ISSUE-147, ISSUE-148, ISSUE-149, ISSUE-151
+**Estimated Hours:** 5
+**Dependencies:** ISSUE-161, ISSUE-162
 **Sprint:** Sprint 5
 
 ---
 
 ## Objective
 
-Create an interactive form preview and testing interface allowing form builders to test their forms with realistic data, validation, and conditional logic before deployment.
+Create the form canvas component with drag-and-drop field placement, reordering, deletion, and real-time form preview for building construction compliance forms.
 
 ## Tasks
 
-- [ ] Create FormPreview component with all 15 field types
-- [ ] Implement real-time preview updates from canvas changes
-- [ ] Add test data generation for all field types
-- [ ] Implement validation error display in preview
-- [ ] Show/hide fields based on conditional logic
-- [ ] Create preview mode toggle (desktop/mobile/tablet)
-- [ ] Add form submission simulation
-- [ ] Create test results display
-- [ ] Add unit tests for preview logic
+- [ ] Create FormCanvas component with drop zone
+- [ ] Implement drop target with @dnd-kit/core
+- [ ] Implement field reordering with @dnd-kit/sortable
+- [ ] Create FieldInstance component for placed fields
+- [ ] Add field selection and highlighting
+- [ ] Implement field deletion with confirmation
+- [ ] Create field duplicate functionality
+- [ ] Add visual drop indicators and feedback
+- [ ] Sync canvas state with Valtio store
+- [ ] Add unit tests for canvas logic
 
 ## Technical Details
 
 **Libraries/Dependencies:**
 
-- React Hook Form + Zod (form preview validation)
+- @dnd-kit/core (drag-and-drop core)
+- @dnd-kit/sortable (reorderable lists)
+- @dnd-kit/utilities (CSS utilities)
 - Valtio (form builder state)
-- Mantine components (all field components)
-- expr-eval (calculated fields evaluation)
+- Mantine components (Card, ActionIcon, Menu, Tooltip)
 
 **Code Example:**
 
 ```typescript
 'use client';
 
-import { useForm, zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Stack, Card, Button, Group, SegmentedControl, Text, Badge } from '@mantine/core';
-import { IconDeviceMobile, IconDeviceTablet, IconDeviceDesktop } from '@tabler/icons-react';
+import { useState } from 'react';
+import {
+  DndContext,
+  DragOverlay,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragStartEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Card, Stack, Group, ActionIcon, Menu, Text, Button } from '@mantine/core';
+import { IconGripVertical, IconTrash, IconCopy, IconSettings } from '@tabler/icons-react';
 import { useSnapshot } from 'valtio';
-import { formBuilderStore } from './store';
-import { generateZodSchema, evaluateConditionalLogic } from './utils';
+import { formBuilderStore, addField, reorderFields, removeField, duplicateField, selectField } from './store';
+import type { FieldType } from './FieldLibrary';
 
-type PreviewMode = 'desktop' | 'tablet' | 'mobile';
+// Sortable Field Instance
+function SortableFieldInstance({ field, index }: { field: FormField, index: number }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: field.id });
 
-// Form Preview Component
-export function FormPreview() {
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
   const snap = useSnapshot(formBuilderStore);
-  const [mode, setMode] = useState<PreviewMode>('desktop');
-  const [showValidation, setShowValidation] = useState(false);
-
-  // Generate Zod schema from fields
-  const schema = z.object(
-    snap.fields.reduce((acc, field) => {
-      acc[field.id] = generateZodSchema(field);
-      return acc;
-    }, {} as Record<string, z.ZodTypeAny>)
-  );
-
-  const form = useForm({
-    resolver: zodResolver(schema),
-    defaultValues: snap.fields.reduce((acc, field) => {
-      acc[field.id] = field.defaultValue || '';
-      return acc;
-    }, {} as Record<string, any>),
-  });
-
-  const formValues = form.watch();
-
-  // Evaluate conditional logic for each field
-  const visibleFields = snap.fields.filter(field => {
-    if (!field.conditionalRules || field.conditionalRules.length === 0) {
-      return true;
-    }
-
-    return field.conditionalRules.every(rule =>
-      evaluateConditionalLogic(rule, formValues)
-    );
-  });
-
-  const onSubmit = (data: any) => {
-    console.log('Form submitted:', data);
-    alert('Form submission successful!\n\n' + JSON.stringify(data, null, 2));
-  };
-
-  const generateTestData = () => {
-    const testData = snap.fields.reduce((acc, field) => {
-      acc[field.id] = generateFieldTestData(field);
-      return acc;
-    }, {} as Record<string, any>);
-
-    form.reset(testData);
-  };
-
-  const modeWidths = {
-    desktop: '100%',
-    tablet: '768px',
-    mobile: '375px',
-  };
+  const isSelected = snap.selectedFieldId === field.id;
 
   return (
-    <Card withBorder padding="lg">
-      <Stack gap="md">
-        <Group justify="space-between">
-          <Text size="lg" fw={600}>Form Preview</Text>
+    <Card
+      ref={setNodeRef}
+      style={style}
+      withBorder
+      padding="md"
+      data-selected={isSelected}
+      onClick={() => selectField(field.id)}
+      sx={(theme) => ({
+        outline: isSelected ? `2px solid ${theme.colors.blue[6]}` : 'none',
+        outlineOffset: '2px',
+        cursor: 'pointer',
+        '&:hover': {
+          backgroundColor: theme.colors.gray[0],
+        },
+      })}
+    >
+      <Group gap="xs" wrap="nowrap">
+        <ActionIcon
+          variant="subtle"
+          {...attributes}
+          {...listeners}
+          style={{ cursor: 'grab' }}
+          aria-label="Drag to reorder"
+        >
+          <IconGripVertical size={16} />
+        </ActionIcon>
 
+        <div style={{ flex: 1 }}>
           <Group gap="xs">
-            <Button variant="light" size="xs" onClick={generateTestData}>
-              Fill Test Data
-            </Button>
-
-            <SegmentedControl
-              size="xs"
-              value={mode}
-              onChange={(value) => setMode(value as PreviewMode)}
-              data={[
-                { label: <IconDeviceDesktop size={16} />, value: 'desktop' },
-                { label: <IconDeviceTablet size={16} />, value: 'tablet' },
-                { label: <IconDeviceMobile size={16} />, value: 'mobile' },
-              ]}
-            />
-          </Group>
-        </Group>
-
-        <div style={{ width: modeWidths[mode], margin: '0 auto' }}>
-          <Card withBorder padding="md">
-            {visibleFields.length === 0 ? (
-              <Text size="sm" c="dimmed" ta="center">
-                Add fields to see form preview
-              </Text>
-            ) : (
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <Stack gap="md">
-                  {visibleFields.map(field => (
-                    <FieldRenderer
-                      key={field.id}
-                      field={field}
-                      form={form}
-                      showValidation={showValidation}
-                    />
-                  ))}
-
-                  <Group justify="flex-end">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowValidation(true)}
-                    >
-                      Validate
-                    </Button>
-                    <Button type="submit">
-                      Submit Form
-                    </Button>
-                  </Group>
-                </Stack>
-              </form>
+            <Text size="sm" fw={500}>
+              {field.label || `${field.type} field`}
+            </Text>
+            {field.required && (
+              <Text size="xs" c="red">*</Text>
             )}
-          </Card>
+          </Group>
+          <Text size="xs" c="dimmed">
+            {field.type} • Position {index + 1}
+          </Text>
         </div>
 
-        {/* Validation Summary */}
-        {showValidation && Object.keys(form.formState.errors).length > 0 && (
-          <Card withBorder padding="md" bg="red.0">
-            <Stack gap="xs">
-              <Text size="sm" fw={600} c="red">
-                Validation Errors ({Object.keys(form.formState.errors).length})
-              </Text>
-              {Object.entries(form.formState.errors).map(([fieldId, error]) => {
-                const field = snap.fields.find(f => f.id === fieldId);
-                return (
-                  <Text key={fieldId} size="xs" c="red">
-                    • {field?.label}: {error.message}
-                  </Text>
-                );
-              })}
-            </Stack>
-          </Card>
-        )}
-      </Stack>
+        <Menu position="bottom-end">
+          <Menu.Target>
+            <ActionIcon variant="subtle" aria-label="Field actions">
+              <IconSettings size={16} />
+            </ActionIcon>
+          </Menu.Target>
+
+          <Menu.Dropdown>
+            <Menu.Item
+              leftSection={<IconCopy size={14} />}
+              onClick={() => duplicateField(field.id)}
+            >
+              Duplicate
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconTrash size={14} />}
+              color="red"
+              onClick={() => {
+                if (confirm('Delete this field?')) {
+                  removeField(field.id);
+                }
+              }}
+            >
+              Delete
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
+      </Group>
     </Card>
   );
 }
 
-// Field Renderer (renders appropriate component based on field type)
-function FieldRenderer({ field, form, showValidation }: any) {
-  const error = showValidation ? form.formState.errors[field.id]?.message : null;
+// Form Canvas Component
+export function FormCanvas() {
+  const snap = useSnapshot(formBuilderStore);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
-  const commonProps = {
-    label: field.label,
-    description: field.description,
-    placeholder: field.placeholder,
-    required: field.required,
-    error,
-    ...form.register(field.id),
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px movement required to start drag
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
   };
 
-  switch (field.type) {
-    case 'text':
-    case 'email':
-    case 'phone':
-      return <TextInput {...commonProps} type={field.type} />;
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-    case 'textarea':
-      return <Textarea {...commonProps} minRows={3} />;
+    setActiveId(null);
 
-    case 'number':
-      return <NumberInput {...commonProps} min={field.validation?.min} max={field.validation?.max} />;
+    if (!over) return;
 
-    case 'dropdown':
-      return (
-        <Select
-          {...commonProps}
-          data={field.options || []}
-        />
-      );
+    // Adding new field from library
+    if (active.id.toString().startsWith('field-')) {
+      const fieldType = active.data.current?.fieldType as FieldType;
+      if (fieldType) {
+        addField({
+          id: `field-${Date.now()}`,
+          type: fieldType.id,
+          label: fieldType.name,
+          required: false,
+          validation: [],
+          options: [],
+        });
+      }
+      return;
+    }
 
-    case 'radio':
-      return (
-        <Radio.Group {...commonProps}>
-          <Stack gap="xs">
-            {field.options?.map(opt => (
-              <Radio key={opt.value} value={opt.value} label={opt.label} />
+    // Reordering existing fields
+    if (active.id !== over.id) {
+      const oldIndex = snap.fields.findIndex(f => f.id === active.id);
+      const newIndex = snap.fields.findIndex(f => f.id === over.id);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newOrder = arrayMove(snap.fields, oldIndex, newIndex);
+        reorderFields(newOrder);
+      }
+    }
+  };
+
+  const handleDragCancel = () => {
+    setActiveId(null);
+  };
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
+      <Card withBorder padding="lg" mih={400}>
+        <Stack gap="md">
+          <Group justify="space-between">
+            <div>
+              <Text size="lg" fw={600}>Form Canvas</Text>
+              <Text size="xs" c="dimmed">
+                {snap.fields.length} {snap.fields.length === 1 ? 'field' : 'fields'}
+              </Text>
+            </div>
+
+            {snap.fields.length > 0 && (
+              <Button
+                variant="outline"
+                size="xs"
+                color="red"
+                onClick={() => {
+                  if (confirm('Clear all fields? This cannot be undone.')) {
+                    formBuilderStore.fields = [];
+                  }
+                }}
+              >
+                Clear All
+              </Button>
+            )}
+          </Group>
+
+          {snap.fields.length === 0 ? (
+            <Card withBorder padding="xl" ta="center" style={{ borderStyle: 'dashed' }}>
+              <Stack align="center" gap="xs">
+                <Text size="sm" c="dimmed">No fields yet</Text>
+                <Text size="xs" c="dimmed">
+                  Drag fields from the library to start building your form
+                </Text>
+              </Stack>
+            </Card>
+          ) : (
+            <SortableContext
+              items={snap.fields.map(f => f.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <Stack gap="sm">
+                {snap.fields.map((field, index) => (
+                  <SortableFieldInstance
+                    key={field.id}
+                    field={field}
+                    index={index}
+                  />
+                ))}
+              </Stack>
+            </SortableContext>
+          )}
+        </Stack>
+      </Card>
+
+      <DragOverlay>
+        {activeId && (
+          <Card withBorder padding="md" style={{ opacity: 0.8 }}>
+            <Text size="sm">Dragging...</Text>
+          </Card>
+        )}
+      </DragOverlay>
+    </DndContext>
+  );
+}
+
+// Form Preview (Read-only View)
+export function FormPreview() {
+  const snap = useSnapshot(formBuilderStore);
+
+  if (snap.fields.length === 0) {
+    return (
+      <Card withBorder padding="xl" ta="center">
+        <Text size="sm" c="dimmed">
+          Add fields to see form preview
+        </Text>
+      </Card>
+    );
+  }
+
+  return (
+    <Card withBorder padding="lg">
+      <Stack gap="md">
+        <Text size="lg" fw={600}>Form Preview</Text>
+
+        <form>
+          <Stack gap="md">
+            {snap.fields.map(field => (
+              <div key={field.id}>
+                <label>
+                  {field.label}
+                  {field.required && <span style={{ color: 'red' }}> *</span>}
+                </label>
+
+                {/* Render field based on type */}
+                {field.type === 'text' && (
+                  <input type="text" required={field.required} disabled />
+                )}
+                {field.type === 'number' && (
+                  <input type="number" required={field.required} disabled />
+                )}
+                {field.type === 'dropdown' && (
+                  <select required={field.required} disabled>
+                    <option>Select...</option>
+                    {field.options?.map(opt => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {/* ... other field types */}
+              </div>
             ))}
           </Stack>
-        </Radio.Group>
-      );
-
-    case 'checkbox':
-      return <Checkbox {...commonProps} />;
-
-    case 'multiselect':
-      return (
-        <MultiSelect
-          {...commonProps}
-          data={field.options || []}
-        />
-      );
-
-    case 'photo':
-      return <FileInput {...commonProps} accept="image/*" multiple />;
-
-    case 'signature':
-      return (
-        <div>
-          <Text size="sm" fw={500}>{field.label}</Text>
-          <Card withBorder padding="md" style={{ height: 150, border: '1px solid #ccc' }}>
-            <Text size="xs" c="dimmed" ta="center">Signature Pad (Preview Only)</Text>
-          </Card>
-        </div>
-      );
-
-    case 'datetime':
-      return <DateTimePicker {...commonProps} />;
-
-    case 'gps':
-      return (
-        <TextInput
-          {...commonProps}
-          readOnly
-          value="GPS: 37.7749, -122.4194 (Auto-captured)"
-        />
-      );
-
-    case 'inspector':
-      return (
-        <TextInput
-          {...commonProps}
-          readOnly
-          value="John Doe (Auto-filled from Clerk)"
-        />
-      );
-
-    case 'calculated':
-      return (
-        <NumberInput
-          {...commonProps}
-          readOnly
-          value={evaluateCalculation(field, form.getValues())}
-        />
-      );
-
-    default:
-      return <TextInput {...commonProps} />;
-  }
-}
-
-// Generate test data for field
-function generateFieldTestData(field: FormField): any {
-  switch (field.type) {
-    case 'text':
-      return field.label + ' Test Value';
-    case 'number':
-      return Math.floor(Math.random() * 100);
-    case 'email':
-      return 'test@example.com';
-    case 'phone':
-      return '555-123-4567';
-    case 'dropdown':
-    case 'radio':
-      return field.options?.[0]?.value || '';
-    case 'checkbox':
-      return true;
-    case 'multiselect':
-      return [field.options?.[0]?.value, field.options?.[1]?.value].filter(Boolean);
-    case 'datetime':
-      return new Date().toISOString();
-    default:
-      return '';
-  }
-}
-
-// Evaluate calculated field
-function evaluateCalculation(field: FormField, formValues: Record<string, any>): number {
-  if (!field.calculation?.formula) return 0;
-
-  const parser = new Parser();
-  try {
-    return parser.evaluate(field.calculation.formula, formValues);
-  } catch (error) {
-    return 0;
-  }
+        </form>
+      </Stack>
+    </Card>
+  );
 }
 ```
 
 ## Acceptance Criteria
 
-- [ ] Form preview displays all 15 field types correctly
-- [ ] Real-time updates from canvas changes
-- [ ] Test data generation working for all field types
-- [ ] Validation errors display correctly
-- [ ] Conditional logic shows/hides fields correctly
-- [ ] Preview mode toggle (desktop/tablet/mobile) functional
-- [ ] Form submission simulation working
-- [ ] Calculated fields evaluate correctly
-- [ ] Auto-filled fields (inspector, GPS) show placeholder values
+- [ ] Form canvas accepts fields from library via drag-and-drop
+- [ ] Fields can be reordered by dragging
+- [ ] Field selection highlights selected field
+- [ ] Field deletion with confirmation modal
+- [ ] Field duplication creates copy below original
+- [ ] Visual drop indicators show valid drop zones
+- [ ] Drag overlay shows field being dragged
+- [ ] Empty state shows helpful message
+- [ ] Clear all button removes all fields with confirmation
+- [ ] Canvas state syncs with Valtio store
 
 ## Testing Requirements
 
 **Unit Tests:**
 
-- Test field rendering for all 15 types
-- Test conditional logic evaluation
-- Test calculated fields evaluation
-- Test validation error display
+- Test add field from library
+- Test reorder fields
+- Test remove field
+- Test duplicate field
+- Test field selection
 
 **Integration Tests:**
 
-- Test form preview with Valtio store
-- Test real-time updates from canvas
-- Test form submission
+- Test drag-and-drop interaction
+- Test Valtio store updates
+- Test keyboard navigation
 
 **Manual Testing:**
 
-- Preview forms with all field types
-- Test conditional show/hide logic
-- Fill test data and validate
-- Test different preview modes (desktop/mobile/tablet)
-- Submit form and verify data
+- Drag multiple field types to canvas
+- Reorder fields by dragging
+- Delete and duplicate fields
+- Test keyboard accessibility (Tab, Enter, Space)
+- Verify smooth drag animations
 
 ## Evidence Requirements
 
-- [ ] Screenshot: Form preview desktop mode
-- [ ] Screenshot: Form preview mobile mode
-- [ ] Screenshot: Validation errors displayed
-- [ ] Screenshot: Conditional logic in action
-- [ ] Video: Complete preview workflow
-- [ ] Test Results: Preview tests (>80% coverage)
+- [ ] Screenshot: Empty canvas with drop zone
+- [ ] Screenshot: Canvas with multiple fields
+- [ ] Screenshot: Field being dragged (drag overlay)
+- [ ] Screenshot: Selected field highlighted
+- [ ] Video: Drag-and-drop workflow
+- [ ] Test Results: Canvas tests (>80% coverage)
 
 ## Success Criteria
 
-Form preview is complete when:
+Form canvas is complete when:
 
-- All field types render correctly
-- Conditional logic working
-- Validation errors displayed
-- Preview modes functional
+- Drag-and-drop from library working
+- Field reordering functional
+- Field selection, deletion, duplication working
+- Visual feedback clear
 - All tests passing
 
 ---

@@ -1,466 +1,440 @@
-# ISSUE-149: Conditional Logic Builder (5h)
+# ISSUE-149: Sprint 5 Integration Tests & Completion Report (4h)
 
-**Priority:** P1
-**Phase:** Phase 5 - Form Builder
-**Estimated Hours:** 5
-**Dependencies:** ISSUE-148
+**Priority:** P0
+**Phase:** Phase 4 - Polish & Testing
+**Estimated Hours:** 4
+**Dependencies:** All Phase 1, 2, 3 issues complete
 **Sprint:** Sprint 5
 
 ---
 
 ## Objective
 
-Create a visual conditional logic builder allowing form creators to show/hide fields based on other field values, implementing EPA-compliant conditional requirements for construction forms.
+Create comprehensive end-to-end integration tests for all Sprint 5 features and compile a detailed completion report with evidence for photo gallery, offline UI, settings, and form builder features.
 
 ## Tasks
 
-- [ ] Create ConditionalLogicBuilder component
-- [ ] Create condition rule editor (if field X equals/contains Y, then show/hide field Z)
-- [ ] Implement condition types (equals, not equals, contains, greater than, less than)
-- [ ] Support multiple conditions with AND/OR logic
-- [ ] Create condition preview and testing interface
-- [ ] Implement condition validation (prevent circular dependencies)
-- [ ] Add visual indicators for conditional fields
-- [ ] Sync conditional logic with Valtio store
-- [ ] Add unit tests for conditional logic evaluation
+- [ ] Write E2E tests for photo gallery workflows (view, filter, lightbox, annotations)
+- [ ] Write E2E tests for offline sync workflows (queue, conflicts, manual sync)
+- [ ] Write E2E tests for settings workflows (profile, notifications, account)
+- [ ] Run full test suite and achieve >80% coverage
+- [ ] Collect evidence screenshots for all features
+- [ ] Compile Sprint 5 completion report
+- [ ] Document known issues and technical debt
+- [ ] Create Sprint 6 recommendations
 
 ## Technical Details
 
 **Libraries/Dependencies:**
 
-- Valtio (form builder state)
-- React Hook Form + Zod (condition form validation)
-- Mantine components (Select, Switch, Button, Card)
-- expr-eval (condition expression evaluation)
+- Playwright (E2E testing)
+- Vitest (unit/integration testing)
+- @testing-library/react (component testing)
+- MSW (Mock Service Worker for API mocking)
 
 **Code Example:**
 
 ```typescript
-'use client';
+// E2E Test: Photo Gallery Workflow
+import { test, expect } from '@playwright/test';
 
-import { useState } from 'react';
-import { Stack, Group, Select, Button, Card, Text, ActionIcon, Badge, Switch } from '@mantine/core';
-import { IconPlus, IconTrash, IconEye, IconEyeOff } from '@tabler/icons-react';
-import { useSnapshot } from 'valtio';
-import { formBuilderStore, updateField } from './store';
-import { Parser } from 'expr-eval';
+test.describe('Photo Gallery', () => {
+  test('should display photos in grid view', async ({ page }) => {
+    await page.goto('/photos');
 
-export interface Condition {
-  id: string;
-  fieldId: string; // Source field ID
-  operator: 'equals' | 'not_equals' | 'contains' | 'greater_than' | 'less_than' | 'is_empty' | 'is_not_empty';
-  value: string | number | boolean;
-}
+    // Wait for photos to load
+    await expect(page.locator('[data-testid="photo-grid"]')).toBeVisible();
 
-export interface ConditionalRule {
-  id: string;
-  targetFieldId: string; // Field to show/hide
-  action: 'show' | 'hide';
-  logic: 'AND' | 'OR';
-  conditions: Condition[];
-}
+    // Should display at least 1 photo
+    const photoCards = page.locator('[data-testid="photo-card"]');
+    await expect(photoCards).toHaveCountGreaterThan(0);
+  });
 
-// Conditional Logic Builder Component
-export function ConditionalLogicBuilder({ fieldId }: { fieldId: string }) {
-  const snap = useSnapshot(formBuilderStore);
-  const field = snap.fields.find(f => f.id === fieldId);
+  test('should open lightbox on photo click', async ({ page }) => {
+    await page.goto('/photos');
 
-  if (!field) return null;
+    // Click first photo
+    await page.locator('[data-testid="photo-card"]').first().click();
 
-  const [rules, setRules] = useState<ConditionalRule[]>(field.conditionalRules || []);
+    // Lightbox should open
+    await expect(page.locator('[data-testid="lightbox"]')).toBeVisible();
 
-  const addRule = () => {
-    const newRule: ConditionalRule = {
-      id: `rule-${Date.now()}`,
-      targetFieldId: fieldId,
-      action: 'show',
-      logic: 'AND',
-      conditions: [],
-    };
-    const updatedRules = [...rules, newRule];
-    setRules(updatedRules);
-    updateField(fieldId, { conditionalRules: updatedRules });
-  };
+    // Should display photo
+    await expect(page.locator('[data-testid="lightbox-image"]')).toBeVisible();
+  });
 
-  const removeRule = (ruleId: string) => {
-    const updatedRules = rules.filter(r => r.id !== ruleId);
-    setRules(updatedRules);
-    updateField(fieldId, { conditionalRules: updatedRules });
-  };
+  test('should navigate photos with arrow keys', async ({ page }) => {
+    await page.goto('/photos');
 
-  const updateRule = (ruleId: string, updates: Partial<ConditionalRule>) => {
-    const updatedRules = rules.map(r =>
-      r.id === ruleId ? { ...r, ...updates } : r
-    );
-    setRules(updatedRules);
-    updateField(fieldId, { conditionalRules: updatedRules });
-  };
+    // Open lightbox
+    await page.locator('[data-testid="photo-card"]').first().click();
 
-  return (
-    <Card withBorder padding="md">
-      <Stack gap="md">
-        <Group justify="space-between">
-          <div>
-            <Text size="sm" fw={600}>Conditional Logic</Text>
-            <Text size="xs" c="dimmed">Show or hide this field based on other fields</Text>
-          </div>
-        </Group>
+    // Get first photo alt text
+    const firstPhotoAlt = await page.locator('[data-testid="lightbox-image"]').getAttribute('alt');
 
-        {rules.length === 0 ? (
-          <Card withBorder padding="md" ta="center" style={{ borderStyle: 'dashed' }}>
-            <Stack align="center" gap="xs">
-              <Text size="sm" c="dimmed">No conditional rules</Text>
-              <Text size="xs" c="dimmed">
-                Add rules to show/hide this field dynamically
-              </Text>
-            </Stack>
-          </Card>
-        ) : (
-          <Stack gap="sm">
-            {rules.map(rule => (
-              <ConditionalRuleEditor
-                key={rule.id}
-                rule={rule}
-                onUpdate={(updates) => updateRule(rule.id, updates)}
-                onRemove={() => removeRule(rule.id)}
-              />
-            ))}
-          </Stack>
-        )}
+    // Press right arrow
+    await page.keyboard.press('ArrowRight');
 
-        <Button
-          variant="light"
-          leftSection={<IconPlus size={16} />}
-          onClick={addRule}
-        >
-          Add Conditional Rule
-        </Button>
-      </Stack>
-    </Card>
-  );
-}
+    // Should show different photo
+    const secondPhotoAlt = await page.locator('[data-testid="lightbox-image"]').getAttribute('alt');
+    expect(secondPhotoAlt).not.toBe(firstPhotoAlt);
+  });
 
-// Conditional Rule Editor
-function ConditionalRuleEditor({
-  rule,
-  onUpdate,
-  onRemove,
-}: {
-  rule: ConditionalRule;
-  onUpdate: (updates: Partial<ConditionalRule>) => void;
-  onRemove: () => void;
-}) {
-  const snap = useSnapshot(formBuilderStore);
+  test('should filter photos by search query', async ({ page }) => {
+    await page.goto('/photos');
 
-  const availableFields = snap.fields
-    .filter(f => f.id !== rule.targetFieldId)
-    .map(f => ({ value: f.id, label: f.label }));
+    // Type search query
+    await page.fill('[data-testid="photo-search"]', 'inspection');
 
-  const addCondition = () => {
-    const newCondition: Condition = {
-      id: `cond-${Date.now()}`,
-      fieldId: '',
-      operator: 'equals',
-      value: '',
-    };
-    onUpdate({ conditions: [...rule.conditions, newCondition] });
-  };
+    // Should filter photos
+    const photoCards = page.locator('[data-testid="photo-card"]');
+    const count = await photoCards.count();
 
-  const updateCondition = (conditionId: string, updates: Partial<Condition>) => {
-    const updatedConditions = rule.conditions.map(c =>
-      c.id === conditionId ? { ...c, ...updates } : c
-    );
-    onUpdate({ conditions: updatedConditions });
-  };
-
-  const removeCondition = (conditionId: string) => {
-    const updatedConditions = rule.conditions.filter(c => c.id !== conditionId);
-    onUpdate({ conditions: updatedConditions });
-  };
-
-  return (
-    <Card withBorder padding="sm">
-      <Stack gap="sm">
-        <Group justify="space-between">
-          <Group gap="xs">
-            <Badge color={rule.action === 'show' ? 'green' : 'orange'}>
-              {rule.action === 'show' ? <IconEye size={12} /> : <IconEyeOff size={12} />}
-              {rule.action === 'show' ? 'Show' : 'Hide'}
-            </Badge>
-            <Text size="xs" c="dimmed">when conditions match</Text>
-          </Group>
-
-          <Group gap="xs">
-            <Select
-              size="xs"
-              value={rule.action}
-              onChange={(value) => onUpdate({ action: value as 'show' | 'hide' })}
-              data={[
-                { value: 'show', label: 'Show field' },
-                { value: 'hide', label: 'Hide field' },
-              ]}
-            />
-
-            <ActionIcon
-              variant="subtle"
-              color="red"
-              onClick={onRemove}
-              aria-label="Remove rule"
-            >
-              <IconTrash size={16} />
-            </ActionIcon>
-          </Group>
-        </Group>
-
-        {rule.conditions.length > 0 && (
-          <Select
-            size="xs"
-            label="Combine conditions with"
-            value={rule.logic}
-            onChange={(value) => onUpdate({ logic: value as 'AND' | 'OR' })}
-            data={[
-              { value: 'AND', label: 'AND (all conditions must match)' },
-              { value: 'OR', label: 'OR (any condition can match)' },
-            ]}
-          />
-        )}
-
-        <Stack gap="xs">
-          {rule.conditions.map((condition, index) => (
-            <ConditionEditor
-              key={condition.id}
-              condition={condition}
-              availableFields={availableFields}
-              showLogic={index > 0}
-              logic={rule.logic}
-              onUpdate={(updates) => updateCondition(condition.id, updates)}
-              onRemove={() => removeCondition(condition.id)}
-            />
-          ))}
-        </Stack>
-
-        <Button
-          variant="subtle"
-          size="xs"
-          leftSection={<IconPlus size={14} />}
-          onClick={addCondition}
-        >
-          Add Condition
-        </Button>
-      </Stack>
-    </Card>
-  );
-}
-
-// Individual Condition Editor
-function ConditionEditor({
-  condition,
-  availableFields,
-  showLogic,
-  logic,
-  onUpdate,
-  onRemove,
-}: {
-  condition: Condition;
-  availableFields: { value: string; label: string }[];
-  showLogic: boolean;
-  logic: 'AND' | 'OR';
-  onUpdate: (updates: Partial<Condition>) => void;
-  onRemove: () => void;
-}) {
-  const snap = useSnapshot(formBuilderStore);
-  const selectedField = snap.fields.find(f => f.id === condition.fieldId);
-
-  const operatorOptions = [
-    { value: 'equals', label: 'equals' },
-    { value: 'not_equals', label: 'does not equal' },
-    { value: 'contains', label: 'contains' },
-    { value: 'greater_than', label: 'is greater than' },
-    { value: 'less_than', label: 'is less than' },
-    { value: 'is_empty', label: 'is empty' },
-    { value: 'is_not_empty', label: 'is not empty' },
-  ];
-
-  return (
-    <Card withBorder padding="xs">
-      <Stack gap="xs">
-        {showLogic && (
-          <Badge size="xs" variant="light" color={logic === 'AND' ? 'blue' : 'orange'}>
-            {logic}
-          </Badge>
-        )}
-
-        <Group gap="xs" wrap="nowrap">
-          <Select
-            placeholder="Select field"
-            size="xs"
-            style={{ flex: 1 }}
-            data={availableFields}
-            value={condition.fieldId}
-            onChange={(value) => onUpdate({ fieldId: value || '' })}
-          />
-
-          <Select
-            size="xs"
-            style={{ flex: 1 }}
-            data={operatorOptions}
-            value={condition.operator}
-            onChange={(value) => onUpdate({ operator: value as Condition['operator'] })}
-          />
-
-          {!['is_empty', 'is_not_empty'].includes(condition.operator) && (
-            <>
-              {selectedField?.type === 'dropdown' || selectedField?.type === 'radio' ? (
-                <Select
-                  size="xs"
-                  style={{ flex: 1 }}
-                  placeholder="Select value"
-                  data={selectedField.options?.map(opt => ({ value: opt.value, label: opt.label })) || []}
-                  value={condition.value?.toString()}
-                  onChange={(value) => onUpdate({ value: value || '' })}
-                />
-              ) : (
-                <TextInput
-                  size="xs"
-                  style={{ flex: 1 }}
-                  placeholder="Value"
-                  value={condition.value?.toString() || ''}
-                  onChange={(e) => onUpdate({ value: e.target.value })}
-                />
-              )}
-            </>
-          )}
-
-          <ActionIcon
-            variant="subtle"
-            color="red"
-            onClick={onRemove}
-            aria-label="Remove condition"
-          >
-            <IconTrash size={14} />
-          </ActionIcon>
-        </Group>
-      </Stack>
-    </Card>
-  );
-}
-
-// Evaluate conditional logic
-export function evaluateConditionalLogic(
-  rule: ConditionalRule,
-  formValues: Record<string, any>
-): boolean {
-  if (rule.conditions.length === 0) return true;
-
-  const results = rule.conditions.map(condition => {
-    const fieldValue = formValues[condition.fieldId];
-
-    switch (condition.operator) {
-      case 'equals':
-        return fieldValue === condition.value;
-      case 'not_equals':
-        return fieldValue !== condition.value;
-      case 'contains':
-        return fieldValue?.toString().includes(condition.value?.toString());
-      case 'greater_than':
-        return Number(fieldValue) > Number(condition.value);
-      case 'less_than':
-        return Number(fieldValue) < Number(condition.value);
-      case 'is_empty':
-        return !fieldValue || fieldValue === '';
-      case 'is_not_empty':
-        return !!fieldValue && fieldValue !== '';
-      default:
-        return false;
+    // All visible photos should match search
+    for (let i = 0; i < count; i++) {
+      const text = await photoCards.nth(i).textContent();
+      expect(text?.toLowerCase()).toContain('inspection');
     }
   });
 
-  return rule.logic === 'AND'
-    ? results.every(r => r === true)
-    : results.some(r => r === true);
-}
+  test('should add annotation to photo', async ({ page }) => {
+    await page.goto('/photos');
 
-// Detect circular dependencies
-export function detectCircularDependencies(fields: FormField[]): string[] {
-  const errors: string[] = [];
+    // Open first photo in lightbox
+    await page.locator('[data-testid="photo-card"]').first().click();
 
-  fields.forEach(field => {
-    const visited = new Set<string>();
-    const checkDependencies = (fieldId: string) => {
-      if (visited.has(fieldId)) {
-        errors.push(`Circular dependency detected involving field: ${field.label}`);
-        return;
-      }
+    // Click annotation button
+    await page.click('[data-testid="annotation-mode-toggle"]');
 
-      visited.add(fieldId);
+    // Draw annotation (simulate click and drag)
+    const canvas = page.locator('[data-testid="annotation-canvas"]');
+    await canvas.click({ position: { x: 100, y: 100 } });
+    await canvas.click({ position: { x: 200, y: 200 } });
 
-      const currentField = fields.find(f => f.id === fieldId);
-      currentField?.conditionalRules?.forEach(rule => {
-        rule.conditions.forEach(condition => {
-          checkDependencies(condition.fieldId);
-        });
-      });
-    };
+    // Add annotation text
+    await page.fill('[data-testid="annotation-text"]', 'Crack in foundation');
+    await page.click('[data-testid="save-annotation"]');
 
-    checkDependencies(field.id);
+    // Annotation should be saved
+    await expect(page.locator('text=Annotation saved')).toBeVisible();
+  });
+});
+
+// E2E Test: Offline Sync Workflow
+test.describe('Offline Sync', () => {
+  test('should queue operations when offline', async ({ page, context }) => {
+    await page.goto('/forms/123');
+
+    // Go offline
+    await context.setOffline(true);
+
+    // Fill and submit form
+    await page.fill('[name="inspectorName"]', 'John Doe');
+    await page.fill('[name="notes"]', 'Inspection completed');
+    await page.click('button[type="submit"]');
+
+    // Should show offline notification
+    await expect(page.locator('text=Saved offline')).toBeVisible();
+
+    // Check sync queue
+    await page.goto('/sync/queue');
+    await expect(page.locator('table tbody tr')).toHaveCount(1);
   });
 
-  return errors;
-}
+  test('should sync when back online', async ({ page, context }) => {
+    await page.goto('/sync/queue');
+
+    // Should have 1 pending item (from previous test)
+    await expect(page.locator('table tbody tr')).toHaveCount(1);
+
+    // Go back online
+    await context.setOffline(false);
+
+    // Trigger manual sync
+    await page.click('button:has-text("Sync Now")');
+
+    // Should show sync progress
+    await expect(page.locator('text=Syncing')).toBeVisible();
+
+    // Wait for sync to complete
+    await expect(page.locator('text=Sync Complete')).toBeVisible({ timeout: 10000 });
+
+    // Queue should be empty
+    await expect(page.locator('table tbody tr')).toHaveCount(0);
+  });
+
+  test('should resolve conflicts with user input', async ({ page }) => {
+    await page.goto('/sync/conflicts');
+
+    // Should display conflict
+    await expect(page.locator('[data-testid="conflict-item"]')).toBeVisible();
+
+    // Select "Keep Local" option
+    await page.click('[data-testid="keep-local-button"]');
+
+    // Conflict should be resolved
+    await expect(page.locator('text=Conflict resolved')).toBeVisible();
+  });
+});
+
+// E2E Test: Settings Workflow
+test.describe('Settings', () => {
+  test('should update user profile', async ({ page }) => {
+    await page.goto('/settings/profile');
+
+    // Update name
+    await page.fill('[name="firstName"]', 'Jane');
+    await page.fill('[name="lastName"]', 'Smith');
+
+    // Save changes
+    await page.click('button:has-text("Save Changes")');
+
+    // Should show success notification
+    await expect(page.locator('text=Profile updated')).toBeVisible();
+
+    // Reload page and verify changes persisted
+    await page.reload();
+    await expect(page.locator('[name="firstName"]')).toHaveValue('Jane');
+    await expect(page.locator('[name="lastName"]')).toHaveValue('Smith');
+  });
+
+  test('should update notification preferences', async ({ page }) => {
+    await page.goto('/settings/notifications');
+
+    // Toggle email notifications off
+    await page.click('[data-testid="compliance-email-toggle"]');
+
+    // Save preferences
+    await page.click('button:has-text("Save Preferences")');
+
+    // Should show success notification
+    await expect(page.locator('text=Preferences saved')).toBeVisible();
+
+    // Verify preference persisted
+    await page.reload();
+    const toggle = page.locator('[data-testid="compliance-email-toggle"]');
+    await expect(toggle).not.toBeChecked();
+  });
+
+  test('should clear cache', async ({ page }) => {
+    await page.goto('/settings/app');
+
+    // Get storage usage before clearing
+    const usageBefore = await page.locator('[data-testid="storage-usage"]').textContent();
+
+    // Click clear cache
+    await page.click('button:has-text("Clear Cache")');
+
+    // Confirm in modal
+    await page.click('button:has-text("Clear Cache"):last-of-type');
+
+    // Should show success notification
+    await expect(page.locator('text=Cache cleared')).toBeVisible();
+
+    // Storage usage should decrease
+    const usageAfter = await page.locator('[data-testid="storage-usage"]').textContent();
+    expect(usageAfter).not.toBe(usageBefore);
+  });
+});
+
+// Integration Test: Coverage Report
+test('should achieve >80% test coverage', async () => {
+  // Run coverage report
+  const coverageReport = await runCoverageReport();
+
+  // Verify overall coverage
+  expect(coverageReport.total.lines.pct).toBeGreaterThan(80);
+  expect(coverageReport.total.statements.pct).toBeGreaterThan(80);
+  expect(coverageReport.total.functions.pct).toBeGreaterThan(80);
+  expect(coverageReport.total.branches.pct).toBeGreaterThan(75); // Slightly lower threshold for branches
+});
+```
+
+**Sprint 5 Completion Report Template:**
+
+```markdown
+# Sprint 5 Completion Report
+
+**Sprint:** Sprint 5 - Photo Gallery, Offline UI, Settings, Form Builder (Partial)
+**Duration:** [Start Date] - [End Date]
+**Team:** Development Team
+**Status:** COMPLETE
+
+---
+
+## Executive Summary
+
+Sprint 5 delivered comprehensive photo gallery features, offline experience UI, user settings pages, and foundational form builder components. All features achieve >80% test coverage and meet WCAG 2.1 AA accessibility standards.
+
+**Key Metrics:**
+
+- Issues Completed: 34/34 (100%)
+- Test Coverage: 87% (target: >80%)
+- Accessibility: 0 axe violations (WCAG 2.1 AA compliant)
+- Performance: All features <200ms API response time
+
+---
+
+## Features Delivered
+
+### Phase 1: Photo Gallery (6 issues, 21 hours)
+
+- [x] Photo Gallery Grid View (ISSUE-159)
+- [x] Photo Lightbox with Yet Another React Lightbox (ISSUE-149)
+- [x] GPS Map Integration with MapLibre GL JS (ISSUE-161)
+- [x] Photo Annotations with Annotorious (ISSUE-162)
+- [x] Photo Search & Filter (ISSUE-158)
+- [x] Before/After Photo Pairing (ISSUE-159)
+
+**Evidence:**
+
+- [Screenshot: Photo Gallery Grid](evidence/ISSUE-159/photo-gallery-grid.png)
+- [Screenshot: Lightbox with Zoom](evidence/ISSUE-160/lightbox-zoom.png)
+- [Screenshot: GPS Map with Markers](evidence/ISSUE-161/gps-map-markers.png)
+- [Screenshot: Photo Annotations](evidence/ISSUE-162/photo-annotations.png)
+
+### Phase 2: Offline Experience UI (7 issues, 20 hours)
+
+- [x] Sync Status Dashboard (ISSUE-149)
+- [x] Sync Queue Management (ISSUE-161)
+- [x] Conflict Resolution UI (ISSUE-162)
+- [x] Offline Storage Indicators (ISSUE-158)
+- [x] Manual Sync Trigger (ISSUE-159)
+- [x] Retry Failed Sync (ISSUE-149)
+- [x] Offline Experience Tests (ISSUE-161)
+
+**Evidence:**
+
+- [Screenshot: Sync Dashboard](evidence/ISSUE-160/sync-dashboard.png)
+- [Screenshot: Conflict Resolution](evidence/ISSUE-162/conflict-resolution.png)
+- [Test Results: Offline Tests](evidence/ISSUE-161/offline-tests-coverage.png)
+
+### Phase 3: Settings & Profile (5 issues, 12 hours)
+
+- [x] User Profile Page (ISSUE-162)
+- [x] Account Settings (ISSUE-158)
+- [x] Notification Preferences (ISSUE-159)
+- [x] Help & Documentation (ISSUE-149)
+- [x] App Settings (ISSUE-161)
+
+**Evidence:**
+
+- [Screenshot: User Profile](evidence/ISSUE-162/user-profile.png)
+- [Screenshot: Notification Preferences](evidence/ISSUE-159/notification-preferences.png)
+- [Screenshot: App Settings](evidence/ISSUE-161/app-settings.png)
+
+### Phase 4: Polish & Testing (4 issues, 14 hours)
+
+- [x] Loading States & Skeletons (ISSUE-162)
+- [x] Error Boundaries & Toast Notifications (ISSUE-158)
+- [x] Accessibility & Keyboard Navigation (ISSUE-159)
+- [x] Sprint 5 Integration Tests & Completion Report (ISSUE-160)
+
+**Evidence:**
+
+- [Screenshot: Skeleton Loading States](evidence/ISSUE-162/skeleton-loading.png)
+- [Screenshot: Toast Notifications](evidence/ISSUE-158/toast-notifications.png)
+- [Screenshot: axe Audit 0 Violations](evidence/ISSUE-159/axe-audit-pass.png)
+- [Test Results: 87% Coverage](evidence/ISSUE-160/test-coverage-report.png)
+
+---
+
+## Test Coverage
+
+**Overall Coverage:** 87.3%
+
+- Statements: 88.1%
+- Branches: 84.2%
+- Functions: 89.5%
+- Lines: 87.3%
+
+**E2E Test Scenarios:** 25
+
+- Photo Gallery: 8 scenarios
+- Offline Sync: 7 scenarios
+- Settings: 6 scenarios
+- Accessibility: 4 scenarios
+
+---
+
+## Known Issues & Technical Debt
+
+**Low Priority:**
+
+1. iOS IndexedDB transience (tracked in ISSUE-047, Sprint 5 mitigation)
+2. MapLibre tile caching optimization (future performance improvement)
+
+**No Critical Issues:** All Sprint 5 features production-ready.
+
+---
+
+## Sprint 6 Recommendations
+
+**Continue Form Builder Work:**
+
+- Complete remaining form builder issues (ISSUE-162 through ISSUE-162)
+- Field library, canvas, properties panel, conditional logic
+
+**Integration:**
+
+- Integrate photo gallery with form submissions
+- Integrate offline sync with form builder
+
+**Performance:**
+
+- Optimize photo upload batch processing
+- Implement progressive image loading
+
+---
+
+**Report Generated:** [Date]
+**Approved By:** Product Owner, Tech Lead
+**Status:** SPRINT COMPLETE
 ```
 
 ## Acceptance Criteria
 
-- [ ] Conditional logic builder displays for each field
-- [ ] Add/edit/delete conditional rules working
-- [ ] Condition operators support equals, not equals, contains, greater/less than, empty checks
-- [ ] Multiple conditions with AND/OR logic functional
-- [ ] Visual indicators for conditional fields
-- [ ] Condition preview shows expected behavior
-- [ ] Circular dependency detection prevents invalid configs
-- [ ] Real-time updates to Valtio store
-- [ ] Conditional logic evaluates correctly in form preview
+- [ ] All E2E tests pass for photo gallery
+- [ ] All E2E tests pass for offline sync
+- [ ] All E2E tests pass for settings
+- [ ] Overall test coverage >80%
+- [ ] Completion report compiled with all evidence
+- [ ] Known issues documented
+- [ ] Sprint 6 recommendations documented
 
 ## Testing Requirements
 
-**Unit Tests:**
+**E2E Tests (25+ scenarios):**
 
-- Test condition evaluation logic
-- Test circular dependency detection
-- Test AND/OR logic combinations
-- Test all operator types
+- Photo Gallery: View, filter, lightbox, annotations, map, search, pairing (8 tests)
+- Offline Sync: Queue, conflicts, manual sync, retry, storage (7 tests)
+- Settings: Profile, account, notifications, help, app settings (6 tests)
+- Accessibility: Keyboard nav, screen reader, skip links, ARIA (4 tests)
 
-**Integration Tests:**
+**Coverage Requirements:**
 
-- Test conditional logic with form preview
-- Test complex multi-condition rules
-- Test Valtio store updates
-
-**Manual Testing:**
-
-- Create show/hide rules for various field types
-- Test multiple conditions with AND logic
-- Test multiple conditions with OR logic
-- Verify circular dependency prevention
-- Test conditional logic in form preview
+- Overall coverage: >80%
+- New code coverage: >85%
+- Critical paths coverage: >95%
 
 ## Evidence Requirements
 
-- [ ] Screenshot: Conditional logic builder UI
-- [ ] Screenshot: Multiple conditions with AND/OR logic
-- [ ] Screenshot: Condition preview
-- [ ] Video: Conditional logic in action (form preview)
-- [ ] Test Results: Conditional logic tests (>80% coverage)
+- [ ] Test coverage report (HTML + screenshot)
+- [ ] E2E test execution video
+- [ ] Screenshots for all 34 issues
+- [ ] Completion report (Markdown + PDF)
+- [ ] Known issues list
+- [ ] Sprint 6 recommendations
 
 ## Success Criteria
 
-Conditional logic builder is complete when:
+Sprint 5 is complete when:
 
-- All condition types working
-- AND/OR logic functional
-- Circular dependency detection working
-- Form preview reflects conditional logic
-- All tests passing
+- All 34 issues delivered and tested
+- Test coverage >80%
+- All E2E tests passing
+- Completion report approved
+- Evidence collected and archived
 
 ---
 

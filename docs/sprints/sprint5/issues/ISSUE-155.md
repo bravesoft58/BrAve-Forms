@@ -1,390 +1,562 @@
-# ISSUE-155: Form Publishing & Deployment (3h)
+# ISSUE-155: Calculated Fields Editor (10h)
 
-**Priority:** P0
-**Phase:** Phase 5 - Form Builder
-**Estimated Hours:** 3
-**Dependencies:** ISSUE-152, ISSUE-154
-**Sprint:** Sprint 5
+**Sprint:** Sprint 5 | **Phase:** 5 - Form Builder | **Priority:** P0
+**Time:** 10 hours | **Complexity:** Large
+**Created:** 2025-10-23
+**Dependencies:** ISSUE-154 (Conditional Logic Builder)
+**Status:** READY FOR IMPLEMENTATION
 
----
+## What You'll Do
 
-## Objective
+Create calculated fields editor using expr-eval library for formula evaluation with support for basic operators (+, -, \*, /), functions (SUM, AVG, MIN, MAX), field references, live preview, and circular dependency detection.
 
-Create a form publishing and deployment system allowing form builders to publish forms to production, manage deployment status, and configure form settings before deployment.
+## Prerequisites
 
-## Tasks
+- [ ] ISSUE-154 complete (Conditional logic functional)
+- [ ] Form builder architecture ready
+- [ ] Code editor open to apps/web directory
 
-- [ ] Create FormPublishing component
-- [ ] Implement form validation before publish
-- [ ] Create deployment settings (active dates, visibility, permissions)
-- [ ] Implement publish to production workflow
-- [ ] Create unpublish/archive functionality
-- [ ] Add deployment history tracking
-- [ ] Create form activation/deactivation toggle
-- [ ] Add unit tests for publishing logic
+## Libraries/Dependencies
 
-## Technical Details
+**expr-eval:**
 
-**Libraries/Dependencies:**
+- **Version:** ^2.0.2
+- **License:** MIT (simple, permissive, NO copyleft)
+- **Why:** Simpler than mathjs (no LGPL concerns), lighter (5KB vs heavy), more secure (no import/createUnit risks)
+- **Better Than:** mathjs (Apache 2.0 + LGPL-2.1+ copyleft, security concerns with import function)
+- **Install:**
+  ```bash
+  pnpm add expr-eval
+  ```
 
-- GraphQL mutations (publish form)
-- Valtio (form builder state)
-- Mantine components (Modal, DatePicker, Switch, Button)
-- Zod (deployment settings validation)
+**Security Note:** expr-eval is safer for user-generated formulas. mathjs has dangerous functions (import, createUnit) that can alter built-in functionality.
 
-**Code Example:**
+## Step-by-Step Instructions
+
+### Step 1: Install expr-eval (10 min)
+
+```bash
+cd apps/web
+pnpm add expr-eval
+```
+
+Verify installation:
+
+```bash
+grep "expr-eval" package.json
+```
+
+### Step 2: Create CalculatedFieldEditor Component (240 min)
+
+Create `apps/web/components/form-builder/calculated-field-editor.tsx`:
 
 ```typescript
 'use client';
 
-import { useState } from 'react';
-import { Stack, Card, Text, Button, Group, Modal, Switch, DatePicker, Select, Badge } from '@mantine/core';
-import { IconRocket, IconArchive, IconEye, IconEyeOff, IconCheck, IconAlertTriangle } from '@tabler/icons-react';
-import { useSnapshot } from 'valtio';
-import { formBuilderStore } from './store';
-import { useMutation } from '@tanstack/react-query';
+import { Stack, TextInput, Text, Code, Alert, Group, Select, NumberInput } from '@mantine/core';
+import { Parser } from 'expr-eval';
+import { useState, useEffect } from 'react';
+import { Field } from '@braveforms/types';
+import { IconAlertCircle, IconCheck } from '@tabler/icons-react';
 
-export interface DeploymentSettings {
-  startDate?: Date;
-  endDate?: Date;
-  visibility: 'public' | 'internal' | 'private';
-  allowedRoles: string[];
-  requireGPS: boolean;
-  requirePhotos: boolean;
-  maxSubmissionsPerDay?: number;
+interface CalculatedFieldEditorProps {
+  field: Field;
+  allFields: Field[];
+  onChange: (field: Partial<Field>) => void;
 }
 
-// Form Publishing Component
-export function FormPublishing({ formId }: { formId: string }) {
-  const snap = useSnapshot(formBuilderStore);
-  const [publishModalOpen, setPublishModalOpen] = useState(false);
-  const [deploymentSettings, setDeploymentSettings] = useState<DeploymentSettings>({
-    visibility: 'internal',
-    allowedRoles: ['FIELD'],
-    requireGPS: true,
-    requirePhotos: false,
-  });
+export function CalculatedFieldEditor({
+  field,
+  allFields,
+  onChange,
+}: CalculatedFieldEditorProps) {
+  const [formula, setFormula] = useState(field.calculated?.formula || '');
+  const [error, setError] = useState<string | null>(null);
+  const [preview, setPreview] = useState<number | null>(null);
 
-  const publishMutation = useMutation({
-    mutationFn: async (settings: DeploymentSettings) => {
-      return fetch('/api/forms/publish', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          formId,
-          fields: snap.fields,
-          settings,
-        }),
+  const parser = new Parser();
+
+  const validateFormula = (formula: string): boolean => {
+    try {
+      // Sanitize formula (remove dangerous characters)
+      const sanitized = formula.replace(/[^0-9a-zA-Z+\-*/(){},._ ]/g, '');
+
+      // Test parse
+      parser.parse(sanitized);
+
+      // Check field references exist
+      const fieldRefs = formula.match(/\{(\w+)\}/g) || [];
+      const invalidRefs = fieldRefs.filter((ref) => {
+        const fieldName = ref.slice(1, -1);
+        return !allFields.find((f) => f.name === fieldName);
       });
-    },
-    onSuccess: () => {
-      alert('Form published successfully!');
-      setPublishModalOpen(false);
-    },
-    onError: (error) => {
-      alert(`Publish failed: ${error.message}`);
-    },
-  });
 
-  const validationErrors = validateFormBeforePublish(snap.fields);
+      if (invalidRefs.length > 0) {
+        throw new Error(`Unknown fields: ${invalidRefs.join(', ')}`);
+      }
 
-  const canPublish = validationErrors.length === 0;
+      // Check for circular dependencies
+      if (detectCircularDependency(field, allFields, formula)) {
+        throw new Error('Circular dependency detected');
+      }
+
+      setError(null);
+      return true;
+    } catch (err: any) {
+      setError(err.message);
+      return false;
+    }
+  };
+
+  const calculatePreview = (formula: string, fieldValues: Record<string, number>) => {
+    try {
+      // Replace field references {fieldName} with actual field names
+      let expression = formula;
+      const fieldRefs = formula.match(/\{(\w+)\}/g) || [];
+
+      fieldRefs.forEach((ref) => {
+        const fieldName = ref.slice(1, -1);
+        expression = expression.replace(ref, fieldName);
+      });
+
+      // Evaluate using expr-eval
+      const result = parser.evaluate(expression, fieldValues);
+      setPreview(result);
+    } catch (err) {
+      setPreview(null);
+    }
+  };
+
+  const handleFormulaChange = (newFormula: string) => {
+    setFormula(newFormula);
+
+    if (validateFormula(newFormula)) {
+      onChange({
+        ...field,
+        calculated: {
+          formula: newFormula,
+          unit: field.calculated?.unit || 'number',
+        },
+      });
+
+      // Calculate preview with sample values
+      const sampleValues: Record<string, number> = {};
+      allFields.forEach((f) => {
+        if (f.type === 'number') {
+          sampleValues[f.name] = 10; // Sample value
+        }
+      });
+      calculatePreview(newFormula, sampleValues);
+    }
+  };
 
   return (
-    <Card withBorder padding="md">
-      <Stack gap="md">
-        <Group justify="space-between">
-          <div>
-            <Text size="lg" fw={600}>Publishing</Text>
-            <Text size="xs" c="dimmed">Deploy form to production</Text>
-          </div>
+    <Stack gap="md">
+      <TextInput
+        label="Formula"
+        placeholder="SUM({field1}, {field2})"
+        value={formula}
+        onChange={(e) => handleFormulaChange(e.target.value)}
+        error={error}
+        description="Use {fieldName} to reference other fields"
+      />
 
-          <Group gap="xs">
-            <Badge color={snap.publishStatus === 'published' ? 'green' : 'gray'}>
-              {snap.publishStatus || 'Draft'}
-            </Badge>
-          </Group>
-        </Group>
+      {error && (
+        <Alert color="red" icon={<IconAlertCircle size={16} />}>
+          {error}
+        </Alert>
+      )}
 
-        {/* Validation Errors */}
-        {validationErrors.length > 0 && (
-          <Card withBorder padding="md" bg="red.0">
-            <Stack gap="xs">
-              <Group gap="xs">
-                <IconAlertTriangle size={16} color="red" />
-                <Text size="sm" fw={600} c="red">
-                  {validationErrors.length} issues must be fixed before publishing
-                </Text>
-              </Group>
+      {preview !== null && !error && (
+        <Alert color="green" icon={<IconCheck size={16} />}>
+          Preview: {preview}
+        </Alert>
+      )}
 
-              {validationErrors.map((error, index) => (
-                <Text key={index} size="xs" c="red">
-                  • {error}
-                </Text>
-              ))}
-            </Stack>
-          </Card>
-        )}
+      <Select
+        label="Unit"
+        value={field.calculated?.unit || 'number'}
+        onChange={(value) => onChange({
+          ...field,
+          calculated: {
+            ...field.calculated,
+            unit: value || 'number',
+          },
+        })}
+        data={[
+          { value: 'number', label: 'Number' },
+          { value: 'currency', label: 'Currency ($)' },
+          { value: 'percentage', label: 'Percentage (%)' },
+        ]}
+      />
 
-        {/* Publish Button */}
-        <Group>
-          <Button
-            leftSection={<IconRocket size={16} />}
-            onClick={() => setPublishModalOpen(true)}
-            disabled={!canPublish}
-          >
-            {snap.publishStatus === 'published' ? 'Re-publish' : 'Publish to Production'}
-          </Button>
-
-          {snap.publishStatus === 'published' && (
-            <Button
-              variant="outline"
-              leftSection={<IconArchive size={16} />}
-              onClick={() => unpublishForm()}
-            >
-              Unpublish
-            </Button>
-          )}
-        </Group>
-
-        {/* Publishing Settings Modal */}
-        <Modal
-          opened={publishModalOpen}
-          onClose={() => setPublishModalOpen(false)}
-          title="Publish Form to Production"
-          size="lg"
-        >
-          <Stack gap="md">
-            <Card withBorder padding="md" bg="blue.0">
-              <Group gap="xs">
-                <IconCheck size={16} color="blue" />
-                <Text size="sm">
-                  Form is ready to publish. Configure deployment settings below.
-                </Text>
-              </Group>
-            </Card>
-
-            <Select
-              label="Visibility"
-              description="Who can access this form"
-              data={[
-                { value: 'public', label: 'Public (QR inspector portal)' },
-                { value: 'internal', label: 'Internal (company users only)' },
-                { value: 'private', label: 'Private (specific users only)' },
-              ]}
-              value={deploymentSettings.visibility}
-              onChange={(value) =>
-                setDeploymentSettings({ ...deploymentSettings, visibility: value as any })
-              }
-            />
-
-            <MultiSelect
-              label="Allowed Roles"
-              description="Which user roles can submit this form"
-              data={[
-                { value: 'FIELD', label: 'Field User ($39)' },
-                { value: 'OFFICE', label: 'Office User ($19)' },
-                { value: 'INSPECTOR', label: 'Inspector (FREE)' },
-              ]}
-              value={deploymentSettings.allowedRoles}
-              onChange={(values) =>
-                setDeploymentSettings({ ...deploymentSettings, allowedRoles: values })
-              }
-            />
-
-            <Group grow>
-              <DatePicker
-                label="Start Date (Optional)"
-                description="Form available from this date"
-                value={deploymentSettings.startDate}
-                onChange={(date) =>
-                  setDeploymentSettings({ ...deploymentSettings, startDate: date || undefined })
-                }
-              />
-
-              <DatePicker
-                label="End Date (Optional)"
-                description="Form expires after this date"
-                value={deploymentSettings.endDate}
-                onChange={(date) =>
-                  setDeploymentSettings({ ...deploymentSettings, endDate: date || undefined })
-                }
-              />
-            </Group>
-
-            <Stack gap="xs">
-              <Switch
-                label="Require GPS location"
-                description="Enforce GPS capture for compliance"
-                checked={deploymentSettings.requireGPS}
-                onChange={(e) =>
-                  setDeploymentSettings({
-                    ...deploymentSettings,
-                    requireGPS: e.currentTarget.checked,
-                  })
-                }
-              />
-
-              <Switch
-                label="Require photos"
-                description="At least one photo required"
-                checked={deploymentSettings.requirePhotos}
-                onChange={(e) =>
-                  setDeploymentSettings({
-                    ...deploymentSettings,
-                    requirePhotos: e.currentTarget.checked,
-                  })
-                }
-              />
-            </Stack>
-
-            <NumberInput
-              label="Max Submissions Per Day (Optional)"
-              description="Limit submissions per project per day"
-              placeholder="Unlimited"
-              value={deploymentSettings.maxSubmissionsPerDay}
-              onChange={(value) =>
-                setDeploymentSettings({
-                  ...deploymentSettings,
-                  maxSubmissionsPerDay: typeof value === 'number' ? value : undefined,
-                })
-              }
-            />
-
-            <Group justify="flex-end">
-              <Button variant="outline" onClick={() => setPublishModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                leftSection={<IconRocket size={16} />}
-                onClick={() => publishMutation.mutate(deploymentSettings)}
-                loading={publishMutation.isPending}
-              >
-                Publish Now
-              </Button>
-            </Group>
-          </Stack>
-        </Modal>
+      <Stack gap="xs">
+        <Text size="sm" fw={500}>Supported Operators:</Text>
+        <Code block>
+          {`+  (addition)
+-  (subtraction)
+*  (multiplication)
+/  (division)
+() (grouping)`}
+        </Code>
       </Stack>
-    </Card>
+
+      <Stack gap="xs">
+        <Text size="sm" fw={500}>Supported Functions:</Text>
+        <Code block>
+          {`SUM(a, b, c)    - Sum of values
+AVG(a, b, c)    - Average of values
+MIN(a, b, c)    - Minimum value
+MAX(a, b, c)    - Maximum value`}
+        </Code>
+      </Stack>
+
+      <Stack gap="xs">
+        <Text size="sm" fw={500}>Field References:</Text>
+        <Code block>
+          {allFields
+            .filter((f) => f.type === 'number' && f.id !== field.id)
+            .map((f) => `{${f.name}}`).join('\n') || 'No numeric fields available'}
+        </Code>
+      </Stack>
+    </Stack>
   );
 }
 
-// Validate form before publish
-function validateFormBeforePublish(fields: FormField[]): string[] {
-  const errors: string[] = [];
-
-  if (fields.length === 0) {
-    errors.push('Form must have at least one field');
+function detectCircularDependency(
+  field: Field,
+  allFields: Field[],
+  formula: string,
+  visited: Set<string> = new Set()
+): boolean {
+  if (visited.has(field.id)) {
+    return true; // Circular dependency found
   }
 
-  // Check for required compliance fields
-  const hasInspector = fields.some(f => f.type === 'inspector');
-  const hasDate = fields.some(f => f.type === 'datetime');
-  const hasSignature = fields.some(f => f.type === 'signature');
+  visited.add(field.id);
 
-  if (!hasInspector) {
-    errors.push('Form must have an inspector name field (EPA compliance)');
-  }
+  // Extract field references from formula
+  const fieldRefs = formula.match(/\{(\w+)\}/g) || [];
+  const referencedFieldNames = fieldRefs.map((ref) => ref.slice(1, -1));
 
-  if (!hasDate) {
-    errors.push('Form must have a date/time field (EPA compliance)');
-  }
+  for (const fieldName of referencedFieldNames) {
+    const referencedField = allFields.find((f) => f.name === fieldName);
 
-  if (!hasSignature) {
-    errors.push('Form must have a signature field (EPA compliance)');
-  }
-
-  // Check for unlabeled fields
-  fields.forEach((field, index) => {
-    if (!field.label || field.label.trim() === '') {
-      errors.push(`Field ${index + 1} is missing a label`);
-    }
-  });
-
-  // Check for dropdown/radio fields without options
-  fields.forEach(field => {
-    if (['dropdown', 'radio', 'multiselect'].includes(field.type)) {
-      if (!field.options || field.options.length === 0) {
-        errors.push(`Field "${field.label}" must have at least one option`);
+    if (referencedField?.type === 'calculated') {
+      if (detectCircularDependency(
+        referencedField,
+        allFields,
+        referencedField.calculated?.formula || '',
+        new Set(visited)
+      )) {
+        return true;
       }
     }
-  });
+  }
 
-  // Check for circular dependencies in conditional logic
-  const circularErrors = detectCircularDependencies(fields);
-  errors.push(...circularErrors);
-
-  return errors;
+  return false;
 }
+```
 
-// Unpublish form
-async function unpublishForm() {
-  if (confirm('Unpublish this form? It will no longer be available to field workers.')) {
-    await fetch('/api/forms/unpublish', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ formId: 'current-form-id' }),
+### Step 3: Integrate with Properties Panel (60 min)
+
+Update `apps/web/components/form-builder/properties-panel.tsx`:
+
+```typescript
+import { CalculatedFieldEditor } from './calculated-field-editor';
+
+// Add tab for calculated fields
+const tabs = [
+  { value: 'basic', label: 'Basic' },
+  { value: 'validation', label: 'Validation' },
+  { value: 'logic', label: 'Logic' },
+  { value: 'calculations', label: 'Calculations' },
+  { value: 'advanced', label: 'Advanced' },
+];
+
+// Render calculated field editor in calculations tab
+{activeTab === 'calculations' && selectedField && (
+  <CalculatedFieldEditor
+    field={selectedField}
+    allFields={allFormFields}
+    onChange={(updates) => handleFieldUpdate(selectedField.id, updates)}
+  />
+)}
+```
+
+### Step 4: Add Formula Evaluation to FormRenderer (120 min)
+
+Create `apps/web/utils/evaluate-calculated-field.ts`:
+
+```typescript
+import { Parser } from 'expr-eval';
+import { Field } from '@braveforms/types';
+
+export function evaluateCalculatedField(
+  field: Field,
+  formValues: Record<string, any>
+): number | null {
+  if (!field.calculated?.formula) return null;
+
+  try {
+    const parser = new Parser();
+
+    // Replace field references with values
+    let expression = field.calculated.formula;
+    const fieldRefs = expression.match(/\{(\w+)\}/g) || [];
+
+    const values: Record<string, number> = {};
+    fieldRefs.forEach((ref) => {
+      const fieldName = ref.slice(1, -1);
+      const value = formValues[fieldName];
+
+      if (typeof value === 'number') {
+        values[fieldName] = value;
+        expression = expression.replace(ref, fieldName);
+      } else {
+        throw new Error(`Field ${fieldName} has no numeric value`);
+      }
     });
 
-    alert('Form unpublished');
+    // Evaluate expression
+    const result = parser.evaluate(expression, values);
+
+    return typeof result === 'number' ? result : null;
+  } catch (err) {
+    console.error('Error evaluating calculated field:', err);
+    return null;
   }
 }
 ```
 
-## Acceptance Criteria
+Update FormRenderer to use calculated fields:
 
-- [ ] Publish button validates form before publishing
-- [ ] Deployment settings modal displays all options
-- [ ] Visibility settings (public/internal/private) functional
-- [ ] Allowed roles configuration working
-- [ ] Start/end date settings functional
-- [ ] GPS and photo requirements configurable
-- [ ] Publish to production API call working
-- [ ] Unpublish form functional
-- [ ] Validation errors block publishing
+```typescript
+import { evaluateCalculatedField } from '@/utils/evaluate-calculated-field';
 
-## Testing Requirements
+// In FormRenderer component:
+useEffect(() => {
+  // Re-calculate all calculated fields when form values change
+  const calculatedFields = schema.sections
+    .flatMap((s) => s.fields)
+    .filter((f) => f.type === 'calculated');
 
-**Unit Tests:**
+  calculatedFields.forEach((field) => {
+    const result = evaluateCalculatedField(field, formValues);
+    if (result !== null) {
+      setValue(field.name, result);
+    }
+  });
+}, [formValues]);
+```
 
-- Test form validation before publish
-- Test deployment settings validation
-- Test publish mutation
+### Step 5: Test Calculated Fields (120 min)
 
-**Integration Tests:**
+```bash
+# Restart web container
+kubectl rollout restart deployment/web -n braveforms
 
-- Test publish API call
-- Test unpublish API call
-- Test deployment settings persistence
+# Access form builder
+# Navigate to http://localhost:30102/admin/forms/new
+```
 
-**Manual Testing:**
+**Verify:**
 
-- Attempt to publish invalid form (should block)
-- Configure deployment settings
-- Publish valid form to production
-- Unpublish form
-- Verify form appears in production
+- [ ] expr-eval installed
+- [ ] Calculated field editor displays
+- [ ] Formula validation works
+- [ ] Live preview updates
+- [ ] Circular dependency detection works
+- [ ] SUM, AVG, MIN, MAX functions work
+- [ ] Field references resolve correctly
+- [ ] FormRenderer evaluates calculated fields
+
+## TDD Workflow (MANDATORY)
+
+### Phase 1: Write Tests First
+
+Create `apps/web/components/form-builder/__tests__/calculated-field-editor.test.tsx`:
+
+```typescript
+import { render, screen, fireEvent } from '@testing-library/react';
+import { CalculatedFieldEditor } from '../calculated-field-editor';
+
+describe('CalculatedFieldEditor', () => {
+  const mockField = {
+    id: 'calc-1',
+    type: 'calculated',
+    name: 'totalCost',
+    label: 'Total Cost',
+  };
+
+  const mockFields = [
+    { id: 'quantity', type: 'number', name: 'quantity', label: 'Quantity' },
+    { id: 'price', type: 'number', name: 'price', label: 'Price' },
+  ];
+
+  it('should validate formula syntax', () => {
+    const onChange = jest.fn();
+    render(
+      <CalculatedFieldEditor
+        field={mockField}
+        allFields={mockFields}
+        onChange={onChange}
+      />
+    );
+
+    const formulaInput = screen.getByPlaceholderText('SUM({field1}, {field2})');
+    fireEvent.change(formulaInput, { target: { value: 'SUM({quantity}, {price})' } });
+
+    expect(screen.queryByText(/Unknown fields/)).not.toBeInTheDocument();
+  });
+
+  it('should detect circular dependencies', () => {
+    const circularField = {
+      ...mockField,
+      calculated: { formula: '{totalCost}' },
+    };
+
+    render(
+      <CalculatedFieldEditor
+        field={circularField}
+        allFields={[...mockFields, mockField]}
+        onChange={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText(/Circular dependency detected/)).toBeInTheDocument();
+  });
+
+  it('should calculate preview with sample values', () => {
+    render(
+      <CalculatedFieldEditor
+        field={mockField}
+        allFields={mockFields}
+        onChange={jest.fn()}
+      />
+    );
+
+    const formulaInput = screen.getByPlaceholderText('SUM({field1}, {field2})');
+    fireEvent.change(formulaInput, { target: { value: 'SUM({quantity}, {price})' } });
+
+    expect(screen.getByText(/Preview: 20/)).toBeInTheDocument(); // 10 + 10
+  });
+});
+```
+
+Create `apps/web/utils/__tests__/evaluate-calculated-field.test.ts`:
+
+```typescript
+import { evaluateCalculatedField } from '../evaluate-calculated-field';
+
+describe('evaluateCalculatedField', () => {
+  it('should evaluate basic arithmetic', () => {
+    const field = {
+      id: 'calc-1',
+      type: 'calculated',
+      name: 'result',
+      calculated: {
+        formula: '{a} + {b}',
+      },
+    };
+
+    const result = evaluateCalculatedField(field, { a: 5, b: 10 });
+    expect(result).toBe(15);
+  });
+
+  it('should evaluate SUM function', () => {
+    const field = {
+      id: 'calc-1',
+      type: 'calculated',
+      name: 'total',
+      calculated: {
+        formula: 'SUM({a}, {b}, {c})',
+      },
+    };
+
+    const result = evaluateCalculatedField(field, { a: 5, b: 10, c: 15 });
+    expect(result).toBe(30);
+  });
+
+  it('should handle division by zero', () => {
+    const field = {
+      id: 'calc-1',
+      type: 'calculated',
+      name: 'ratio',
+      calculated: {
+        formula: '{a} / {b}',
+      },
+    };
+
+    const result = evaluateCalculatedField(field, { a: 10, b: 0 });
+    expect(result).toBe(Infinity);
+  });
+});
+```
+
+**Screenshot:** `evidence/ISSUE-155/test-results/red-phase.png`
+**Screenshot:** `evidence/ISSUE-155/test-results/green-phase.png`
+
+## Files to Create
+
+**Create:**
+
+- apps/web/components/form-builder/calculated-field-editor.tsx
+- apps/web/utils/evaluate-calculated-field.ts
+- apps/web/components/form-builder/**tests**/calculated-field-editor.test.tsx
+- apps/web/utils/**tests**/evaluate-calculated-field.test.ts
+
+**Modify:**
+
+- apps/web/components/form-builder/properties-panel.tsx (add calculations tab)
+- apps/web/components/form-renderer/form-renderer.tsx (evaluate calculated fields)
+- apps/web/package.json (add expr-eval)
+
+## Verification Checklist
+
+- [ ] expr-eval installed (NOT mathjs)
+- [ ] Calculated field editor functional
+- [ ] Formula validation works
+- [ ] Circular dependency detection works
+- [ ] SUM, AVG, MIN, MAX functions work
+- [ ] Live preview displays
+- [ ] FormRenderer evaluates formulas
+- [ ] Tests passing (>80% coverage)
+- [ ] Zero emoji, zero AI branding
 
 ## Evidence Requirements
 
-- [ ] Screenshot: Publishing page with validation errors
-- [ ] Screenshot: Deployment settings modal
-- [ ] Screenshot: Successfully published form
-- [ ] Test Results: Publishing tests (>80% coverage)
+**Location:** evidence/ISSUE-161/
+
+**Required:**
+
+- test-results/red-phase.png
+- test-results/green-phase.png
+- screenshots/calculated-field-editor.png
+- screenshots/formula-validation.png
+- screenshots/live-preview.png
+- screenshots/circular-dependency-error.png
 
 ## Success Criteria
 
-Form publishing is complete when:
+- [ ] Calculated fields functional using expr-eval
+- [ ] All operators work (+, -, \*, /, ())
+- [ ] All functions work (SUM, AVG, MIN, MAX)
+- [ ] Circular dependency detection prevents infinite loops
+- [ ] Live preview calculates correctly
+- [ ] Performance <200ms formula evaluation
+- [ ] Tests pass with >80% coverage
 
-- Validation blocks invalid forms
-- Deployment settings configurable
-- Publish to production working
-- Unpublish functional
-- All tests passing
+## Time Estimate
 
----
+**10 hours total:**
 
-**Created:** 2025-10-23
-**Last Updated:** 2025-10-23
-**Status:** READY FOR IMPLEMENTATION
+- Install expr-eval: 10 min
+- CalculatedFieldEditor component: 240 min
+- Integrate with properties panel: 60 min
+- FormRenderer evaluation: 120 min
+- Testing: 120 min
+
+## Next Issue
+
+**ISSUE-156:** [Next issue title]

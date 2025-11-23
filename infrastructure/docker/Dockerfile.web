@@ -33,6 +33,10 @@ COPY --from=deps /app/packages ./packages
 # Copy source code
 COPY . .
 
+# Debug: Check what's actually copied
+RUN ls -la apps/web/components/ || echo "Components directory not found"
+RUN find . -path "*/components/projects/*Tab.tsx" 2>/dev/null | head -10 || echo "No Tab files found anywhere"
+
 # Build web app
 RUN pnpm --filter @brave-forms/web build
 

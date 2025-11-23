@@ -1,175 +1,308 @@
-# ISSUE-136: User Profile Page (3h)
+# ISSUE-136: Conflict Resolution UI (6h)
 
 **Priority:** P0
-**Phase:** Phase 3 - Settings & Profile
-**Estimated Hours:** 3
-**Dependencies:** Phase 2 complete
+**Phase:** Phase 2 - Offline Experience UI
+**Estimated Hours:** 6
+**Dependencies:** ISSUE-161
 **Sprint:** Sprint 5
 
 ---
 
 ## Objective
 
-Create a user profile page where field workers can view and edit their personal information, change password, and manage their account.
+Create a conflict resolution interface that detects when local and server versions of data differ and provides users with options to resolve conflicts. This is critical for construction field workers who may edit the same form offline and online.
 
 ## Tasks
 
-- [ ] Create /settings/profile route in Next.js App Router
-- [ ] Fetch user info from Clerk
-- [ ] Display user info (name, email, avatar)
-- [ ] Create edit profile form with React Hook Form + Zod
-- [ ] Implement avatar upload functionality
-- [ ] Create change password form
-- [ ] Add delete account button with confirmation modal
-- [ ] Calculate and display profile completion percentage
-- [ ] Add unit tests for profile update logic
+- [ ] Create /sync/conflicts route in Next.js App Router
+- [ ] Implement conflict detection logic (compare timestamps, hashes)
+- [ ] Design side-by-side comparison modal with Mantine
+- [ ] Highlight field-level differences
+- [ ] Implement resolution options (Keep Local, Keep Server, Merge, Cancel)
+- [ ] Create merge editor for manual field-by-field resolution
+- [ ] Store conflict resolution history (who, when, how)
+- [ ] Add unit tests for conflict detection algorithm
+- [ ] Test with real offline/online conflict scenarios
 
 ## Technical Details
 
 **Libraries/Dependencies:**
 
-- Clerk (user authentication)
-- React Hook Form + Zod (form validation)
-- Mantine Form components
-- Image upload component (avatar)
+- Mantine Modal (conflict comparison)
+- diff library (field-level comparison)
+- TanStack Query v5 (conflict state)
+- IndexedDB (conflict storage)
+
+**Implementation Notes:**
+
+**Conflict Detection:**
+
+```typescript
+interface Conflict {
+  id: string;
+  resourceType: 'form' | 'photo' | 'project';
+  resourceId: string;
+  localVersion: {
+    data: unknown;
+    timestamp: Date;
+    hash: string;
+  };
+  serverVersion: {
+    data: unknown;
+    timestamp: Date;
+    hash: string;
+  };
+  differences: FieldDifference[];
+  status: 'pending' | 'resolved';
+  resolvedBy?: string;
+  resolvedAt?: Date;
+  resolution?: 'local' | 'server' | 'merge';
+}
+
+interface FieldDifference {
+  field: string;
+  localValue: unknown;
+  serverValue: unknown;
+  type: 'added' | 'removed' | 'modified';
+}
+```
+
+**Conflict Detection Algorithm:**
+
+```typescript
+const detectConflicts = (localData: unknown, serverData: unknown): FieldDifference[] => {
+  const localFields = flattenObject(localData);
+  const serverFields = flattenObject(serverData);
+
+  const differences: FieldDifference[] = [];
+
+  // Check all local fields
+  for (const [field, localValue] of Object.entries(localFields)) {
+    const serverValue = serverFields[field];
+
+    if (serverValue === undefined) {
+      differences.push({
+        field,
+        localValue,
+        serverValue: null,
+        type: 'added',
+      });
+    } else if (!deepEqual(localValue, serverValue)) {
+      differences.push({
+        field,
+        localValue,
+        serverValue,
+        type: 'modified',
+      });
+    }
+  }
+
+  // Check for removed fields
+  for (const [field, serverValue] of Object.entries(serverFields)) {
+    if (localFields[field] === undefined) {
+      differences.push({
+        field,
+        localValue: null,
+        serverValue,
+        type: 'removed',
+      });
+    }
+  }
+
+  return differences;
+};
+```
 
 **Code Example:**
 
 ```typescript
 'use client';
 
-import { useUser } from '@clerk/nextjs';
-import { useForm, zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { TextInput, Avatar, Button, Stack, Progress, Text, FileInput } from '@mantine/core';
-import { IconUpload, IconTrash } from '@tabler/icons-react';
+import { Modal, Table, Badge, Button, Group, Stack, Text, Code } from '@mantine/core';
+import { IconCheck, IconX, IconGitMerge } from '@tabler/icons-react';
 
-const profileSchema = z.object({
-  firstName: z.string().min(1, 'First name required'),
-  lastName: z.string().min(1, 'Last name required'),
-  avatar: z.instanceof(File).optional(),
-});
+export function ConflictResolutionModal({ conflict, onResolve, onClose }) {
+  const [selectedResolution, setSelectedResolution] = useState<Record<string, 'local' | 'server'>>({});
 
-export default function ProfilePage() {
-  const { user } = useUser();
-
-  const form = useForm({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-    },
-  });
-
-  const onSubmit = async (data: z.infer<typeof profileSchema>) => {
-    await user?.update({
-      firstName: data.firstName,
-      lastName: data.lastName,
-    });
-
-    if (data.avatar) {
-      await user?.setProfileImage({ file: data.avatar });
-    }
+  const handleKeepLocal = () => {
+    onResolve(conflict.id, 'local');
+    onClose();
   };
 
-  const profileCompletion = calculateCompletion(user);
+  const handleKeepServer = () => {
+    onResolve(conflict.id, 'server');
+    onClose();
+  };
+
+  const handleMerge = () => {
+    const mergedData = {};
+
+    conflict.differences.forEach(diff => {
+      const resolution = selectedResolution[diff.field] || 'server';
+      mergedData[diff.field] = resolution === 'local'
+        ? diff.localValue
+        : diff.serverValue;
+    });
+
+    onResolve(conflict.id, 'merge', mergedData);
+    onClose();
+  };
 
   return (
-    <Stack>
-      <Group justify="space-between">
-        <Text size="xl" fw={600}>Profile</Text>
-        <Group gap="xs">
-          <Progress value={profileCompletion} w={200} />
-          <Text size="sm" c="dimmed">{profileCompletion}% complete</Text>
-        </Group>
-      </Group>
+    <Modal
+      opened
+      onClose={onClose}
+      size="xl"
+      title="Resolve Conflict"
+    >
+      <Stack>
+        <Text size="sm" c="dimmed">
+          Local and server versions differ. Choose how to resolve:
+        </Text>
 
-      <Group>
-        <Avatar src={user?.imageUrl} size={120} radius="xl" />
-        <FileInput
-          placeholder="Upload avatar"
-          leftSection={<IconUpload size={16} />}
-          {...form.register('avatar')}
-        />
-      </Group>
+        <Table>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Field</Table.Th>
+              <Table.Th>Local Value</Table.Th>
+              <Table.Th>Server Value</Table.Th>
+              <Table.Th>Choose</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {conflict.differences.map((diff) => (
+              <Table.Tr key={diff.field}>
+                <Table.Td>
+                  <Code>{diff.field}</Code>
+                </Table.Td>
+                <Table.Td>
+                  <Badge color={diff.type === 'added' ? 'green' : diff.type === 'removed' ? 'red' : 'yellow'}>
+                    {JSON.stringify(diff.localValue)}
+                  </Badge>
+                </Table.Td>
+                <Table.Td>
+                  <Badge color={diff.type === 'added' ? 'red' : diff.type === 'removed' ? 'green' : 'yellow'}>
+                    {JSON.stringify(diff.serverValue)}
+                  </Badge>
+                </Table.Td>
+                <Table.Td>
+                  <Group gap="xs">
+                    <Button
+                      size="xs"
+                      variant={selectedResolution[diff.field] === 'local' ? 'filled' : 'light'}
+                      onClick={() => setSelectedResolution({ ...selectedResolution, [diff.field]: 'local' })}
+                    >
+                      Local
+                    </Button>
+                    <Button
+                      size="xs"
+                      variant={selectedResolution[diff.field] === 'server' ? 'filled' : 'light'}
+                      onClick={() => setSelectedResolution({ ...selectedResolution, [diff.field]: 'server' })}
+                    >
+                      Server
+                    </Button>
+                  </Group>
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
 
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <Stack>
-          <TextInput
-            label="First Name"
-            {...form.register('firstName')}
-            error={form.formState.errors.firstName?.message}
-          />
-          <TextInput
-            label="Last Name"
-            {...form.register('lastName')}
-            error={form.formState.errors.lastName?.message}
-          />
-          <TextInput
-            label="Email"
-            value={user?.emailAddresses[0]?.emailAddress}
-            disabled
-          />
-          <Button type="submit" loading={form.formState.isSubmitting}>
-            Save Changes
+        <Group justify="space-between">
+          <Group>
+            <Button
+              leftSection={<IconCheck size={16} />}
+              onClick={handleKeepLocal}
+            >
+              Keep All Local
+            </Button>
+            <Button
+              leftSection={<IconCheck size={16} />}
+              onClick={handleKeepServer}
+            >
+              Keep All Server
+            </Button>
+            <Button
+              leftSection={<IconGitMerge size={16} />}
+              onClick={handleMerge}
+              variant="light"
+            >
+              Merge Selected
+            </Button>
+          </Group>
+          <Button
+            leftSection={<IconX size={16} />}
+            onClick={onClose}
+            variant="subtle"
+            color="gray"
+          >
+            Cancel
           </Button>
-        </Stack>
-      </form>
-    </Stack>
+        </Group>
+      </Stack>
+    </Modal>
   );
 }
 ```
 
 ## Acceptance Criteria
 
-- [ ] /settings/profile route displays user information
-- [ ] Edit profile form functional with validation
-- [ ] Avatar upload working
-- [ ] Change password redirects to Clerk password change
-- [ ] Delete account button with confirmation modal
-- [ ] Profile completion percentage accurate
-- [ ] Form validation errors display correctly
-- [ ] Success notification on profile update
+- [ ] /sync/conflicts route lists all unresolved conflicts
+- [ ] Clicking conflict opens side-by-side comparison modal
+- [ ] Field-level differences highlighted with badges
+- [ ] "Keep Local" button resolves with local version
+- [ ] "Keep Server" button resolves with server version
+- [ ] "Merge" button allows field-by-field selection
+- [ ] Conflict resolution history stored (who, when, how)
+- [ ] Resolved conflicts removed from list
+- [ ] Empty state shown when no conflicts
 
 ## Testing Requirements
 
 **Unit Tests:**
 
-- Test profile completion calculation
-- Test form validation
-- Test avatar upload
+- Test conflict detection algorithm with various data types
+- Test flattenObject utility
+- Test deepEqual comparison
+- Test merge resolution logic
+- Test conflict history storage
 
 **Integration Tests:**
 
-- Test profile update with Clerk
-- Test password change flow
-- Test delete account flow
+- Test conflict detection on sync
+- Test Keep Local resolution
+- Test Keep Server resolution
+- Test Merge resolution
+- Test conflict history persistence
 
 **Manual Testing:**
 
-- Update profile information
-- Upload new avatar
-- Change password
-- Test delete account flow
-- Verify profile completion updates
+- Create form offline, edit same form online, trigger sync
+- Verify conflict detected
+- Test all resolution options (Local, Server, Merge)
+- Verify resolved conflict no longer appears
+- Check conflict history stored
 
 ## Evidence Requirements
 
-- [ ] Screenshot: Profile page with user info
-- [ ] Screenshot: Edit profile form
-- [ ] Screenshot: Avatar upload
-- [ ] Screenshot: Delete account confirmation
-- [ ] Test Results: Profile update tests (>80% coverage)
+- [ ] Screenshot: Conflict list with multiple conflicts
+- [ ] Screenshot: Side-by-side comparison modal
+- [ ] Screenshot: Field-level differences highlighted
+- [ ] Screenshot: Merge editor with selections
+- [ ] Screenshot: Conflict resolution history
+- [ ] Test Results: Conflict detection tests (>80% coverage)
+- [ ] Performance: Conflict comparison <2s for 100-field forms
 
 ## Success Criteria
 
-User profile page is complete when:
+Conflict resolution UI is complete when:
 
-- All user information displayed
-- Edit functionality working
-- Avatar upload functional
-- Delete account with confirmation
+- All conflicts detected and listed
+- Side-by-side comparison functional
+- All three resolution options working (Local, Server, Merge)
+- Conflict history stored
 - All tests passing
+- Evidence collected and documented
 
 ---
 

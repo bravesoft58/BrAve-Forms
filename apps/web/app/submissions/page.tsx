@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -18,9 +18,11 @@ import {
 } from '@mantine/core';
 import { findAllSubmissions } from '@/lib/api/submissions';
 import { getMockFormTemplates } from '@/lib/mock-data/form-templates';
+import { useCopyYesterdaysLog } from '@/hooks/useCopyYesterdaysLog';
 
 export default function SubmissionsPage() {
   const router = useRouter();
+  const copyYesterdaysLog = useCopyYesterdaysLog();
 
   // Filter state
   const [filters, setFilters] = useState({
@@ -48,8 +50,19 @@ export default function SubmissionsPage() {
 
   const templates = getMockFormTemplates();
 
+  // Find first daily log template for "Copy Yesterday's Log" button
+  const dailyLogTemplate = useMemo(() => {
+    return templates.find((t) => t.category === 'daily-logs') || templates[0];
+  }, [templates]);
+
   const handleFilterChange = (key: string, value: string) => {
     setFilters({ ...filters, [key]: value });
+  };
+
+  const handleCopyYesterday = async () => {
+    if (dailyLogTemplate) {
+      await copyYesterdaysLog.mutateAsync({ templateId: dailyLogTemplate.id });
+    }
   };
 
   const handleClearFilters = () => {
@@ -79,9 +92,21 @@ export default function SubmissionsPage() {
           <Title order={1} size="h2">
             Form Submissions
           </Title>
-          <Button component={Link} href="/dashboard/forms">
-            Fill New Form
-          </Button>
+          <Group gap="sm">
+            {dailyLogTemplate && (
+              <Button
+                onClick={handleCopyYesterday}
+                disabled={copyYesterdaysLog.isPending}
+                color="green"
+                variant="light"
+              >
+                {copyYesterdaysLog.isPending ? 'Copying...' : "Copy Yesterday's Log"}
+              </Button>
+            )}
+            <Button component={Link} href="/dashboard/forms">
+              Fill New Form
+            </Button>
+          </Group>
         </Group>
 
         {/* Filters */}

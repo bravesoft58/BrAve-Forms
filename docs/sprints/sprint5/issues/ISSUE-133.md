@@ -1,203 +1,194 @@
-# ISSUE-133: Manual Sync Trigger (2h)
+# ISSUE-133: Before/After Photo Pairing (2h)
 
-**Priority:** P0
-**Phase:** Phase 2 - Offline Experience UI
-**Estimated Hours:** 2
-**Dependencies:** ISSUE-132
-**Sprint:** Sprint 5
+**Sprint:** Sprint 5 | **Phase:** 1 - Photo Gallery | **Priority:** P1
+**Time:** 2 hours | **Complexity:** Small
+**Created:** 2025-10-23
+**Dependencies:** ISSUE-158 (Photo Search & Filter)
+**Status:** READY FOR IMPLEMENTATION
 
----
+## What You'll Do
 
-## Objective
+Create before/after photo pairing feature with side-by-side comparison and fade slider for progress tracking.
 
-Add a "Sync Now" button in the header that allows field workers to manually trigger synchronization when they regain connectivity, with visual progress feedback.
+## Prerequisites
 
-## Tasks
+- [ ] ISSUE-158 complete (Search and filters functional)
+- [ ] Photo gallery operational
+- [ ] Code editor open to apps/web directory
 
-- [ ] Add "Sync Now" button to app header (next to offline banner)
-- [ ] Create sync progress modal with Mantine
-- [ ] Display sync progress percentage
-- [ ] Add cancel sync button (stop in-progress sync)
-- [ ] Display sync errors with retry option
-- [ ] Show success toast notification on completion
-- [ ] Disable button during sync
-- [ ] Test manual sync with queued operations
+## Step-by-Step Instructions
 
-## Technical Details
+### Step 1: Create BeforeAfterComparison Component (60 min)
 
-**Libraries/Dependencies:**
-
-- Mantine Modal (progress display)
-- Mantine Notifications (success toast)
-- TanStack Query v5 (sync mutation)
-
-**Code Example:**
+Create `apps/web/components/photos/before-after-comparison.tsx`:
 
 ```typescript
 'use client';
 
-import { Button, Modal, Progress, Text, Stack, Alert } from '@mantine/core';
-import { IconRefresh, IconX, IconCheck } from '@tabler/icons-react';
-import { useMutation } from '@tanstack/react-query';
-import { notifications } from '@mantine/notifications';
+import { Group, Stack, Image, Slider, Badge, Card } from '@mantine/core';
 import { useState } from 'react';
+import { Photo } from '@braveforms/types';
 
-export function ManualSyncButton() {
-  const [isOpen, setIsOpen] = useState(false);
+interface BeforeAfterComparisonProps {
+  beforePhoto: Photo;
+  afterPhoto: Photo;
+}
 
-  const syncMutation = useMutation({
-    mutationFn: async (onProgress: (progress: number) => void) => {
-      const queue = await getSyncQueue();
-      let completed = 0;
-
-      for (const item of queue) {
-        await syncItem(item);
-        completed++;
-        onProgress((completed / queue.length) * 100);
-      }
-    },
-    onSuccess: () => {
-      setIsOpen(false);
-      notifications.show({
-        title: 'Sync Complete',
-        message: 'All data synchronized successfully',
-        color: 'green',
-        icon: <IconCheck size={16} />,
-      });
-    },
-    onError: (error) => {
-      notifications.show({
-        title: 'Sync Failed',
-        message: error.message,
-        color: 'red',
-      });
-    },
-  });
-
-  const [progress, setProgress] = useState(0);
-
-  const handleSync = () => {
-    setIsOpen(true);
-    setProgress(0);
-    syncMutation.mutate((p) => setProgress(p));
-  };
-
-  const handleCancel = () => {
-    syncMutation.reset();
-    setIsOpen(false);
-  };
+export function BeforeAfterComparison({
+  beforePhoto,
+  afterPhoto,
+}: BeforeAfterComparisonProps) {
+  const [sliderValue, setSliderValue] = useState(50);
 
   return (
-    <>
-      <Button
-        leftSection={<IconRefresh size={16} />}
-        onClick={handleSync}
-        loading={syncMutation.isPending}
-        variant="light"
-      >
-        Sync Now
-      </Button>
+    <Card shadow="md" padding="lg">
+      <Stack gap="md">
+        {/* Side-by-side view */}
+        <Group grow>
+          <div>
+            <Badge color="blue" mb="xs">Before</Badge>
+            <Image
+              src={beforePhoto.url}
+              alt="Before"
+              height={300}
+            />
+          </div>
+          <div>
+            <Badge color="green" mb="xs">After</Badge>
+            <Image
+              src={afterPhoto.url}
+              alt="After"
+              height={300}
+            />
+          </div>
+        </Group>
 
-      <Modal
-        opened={isOpen}
-        onClose={() => !syncMutation.isPending && setIsOpen(false)}
-        title="Syncing Data"
-        closeOnClickOutside={false}
-      >
-        <Stack>
-          <Progress
-            value={progress}
-            size="lg"
-            animated
+        {/* Fade slider */}
+        <div style={{ position: 'relative', height: 300 }}>
+          <Image
+            src={beforePhoto.url}
+            alt="Before"
+            style={{
+              position: 'absolute',
+              opacity: sliderValue / 100,
+            }}
           />
-          <Text size="sm" c="dimmed" ta="center">
-            {progress.toFixed(0)}% complete
-          </Text>
+          <Image
+            src={afterPhoto.url}
+            alt="After"
+            style={{
+              position: 'absolute',
+              opacity: 1 - sliderValue / 100,
+            }}
+          />
+        </div>
 
-          {syncMutation.isPending && (
-            <Button
-              leftSection={<IconX size={16} />}
-              onClick={handleCancel}
-              variant="subtle"
-              color="red"
-            >
-              Cancel Sync
-            </Button>
-          )}
-
-          {syncMutation.isError && (
-            <Alert color="red" title="Sync Error">
-              {syncMutation.error.message}
-              <Button
-                mt="sm"
-                onClick={handleSync}
-                size="xs"
-              >
-                Retry
-              </Button>
-            </Alert>
-          )}
-        </Stack>
-      </Modal>
-    </>
+        <Slider
+          value={sliderValue}
+          onChange={setSliderValue}
+          label={null}
+          marks={[
+            { value: 0, label: 'After' },
+            { value: 50, label: 'Blend' },
+            { value: 100, label: 'Before' },
+          ]}
+        />
+      </Stack>
+    </Card>
   );
 }
 ```
 
-## Acceptance Criteria
+### Step 2: Add Pairing UI to Photo Gallery (40 min)
 
-- [ ] "Sync Now" button visible in header
-- [ ] Click triggers sync modal
-- [ ] Progress percentage displays during sync
-- [ ] Cancel button stops sync in progress
-- [ ] Success toast shown on completion
-- [ ] Error alert shown with retry option on failure
-- [ ] Button disabled during sync
-- [ ] Modal closes on success
+Update `apps/web/components/photos/photo-gallery-grid.tsx`:
 
-## Testing Requirements
+```typescript
+// Add pairing mode
+const [pairingMode, setPairingMode] = useState(false);
+const [selectedForPairing, setSelectedForPairing] = useState<Photo[]>([]);
 
-**Unit Tests:**
+const handlePhotoSelect = (photo: Photo) => {
+  if (pairingMode) {
+    if (selectedForPairing.length === 0) {
+      setSelectedForPairing([photo]);
+    } else if (selectedForPairing.length === 1) {
+      // Create pairing
+      createPairing(selectedForPairing[0], photo);
+      setSelectedForPairing([]);
+      setPairingMode(false);
+    }
+  }
+};
+```
 
-- Test sync progress calculation
-- Test cancel sync functionality
-- Test error handling
+### Step 3: Create Pairing Filter (20 min)
 
-**Integration Tests:**
+Add to `apps/web/components/photos/photo-filters.tsx`:
 
-- Test manual sync processes all queued items
-- Test sync updates server
-- Test cancel stops sync
-- Test retry after error
+```typescript
+<Checkbox
+  label="Show Only Paired Photos"
+  checked={filters.onlyPaired || false}
+  onChange={(e) => onChange({ ...filters, onlyPaired: e.target.checked })}
+/>
+```
 
-**Manual Testing:**
+## TDD Workflow
 
-- Queue multiple operations offline
-- Click "Sync Now"
-- Verify progress modal appears
-- Test cancel during sync
-- Verify success toast on completion
+**Phase 1: Write Tests First**
+
+Create `apps/web/components/photos/__tests__/before-after-comparison.test.tsx`
+
+**Phase 2: Implement and Pass Tests**
+
+## Files to Create
+
+**Create:**
+
+- apps/web/components/photos/before-after-comparison.tsx
+- apps/web/components/photos/**tests**/before-after-comparison.test.tsx
+
+**Modify:**
+
+- apps/web/components/photos/photo-gallery-grid.tsx
+- apps/web/components/photos/photo-filters.tsx
+
+## Verification Checklist
+
+- [ ] Pairing UI functional
+- [ ] Side-by-side view works
+- [ ] Fade slider works
+- [ ] Filter for paired photos works
+- [ ] Tests passing (>80% coverage)
+- [ ] Zero emoji, zero AI branding
 
 ## Evidence Requirements
 
-- [ ] Screenshot: "Sync Now" button in header
-- [ ] Screenshot: Sync progress modal (0%, 50%, 100%)
-- [ ] Screenshot: Success toast notification
-- [ ] Screenshot: Error alert with retry button
-- [ ] Test Results: Sync functionality tests (>80% coverage)
+**Location:** evidence/ISSUE-159/
+
+**Required:**
+
+- test-results/red-phase.png
+- test-results/green-phase.png
+- screenshots/before-after-comparison.png
+- screenshots/fade-slider.png
 
 ## Success Criteria
 
-Manual sync trigger is complete when:
+- [ ] Before/after pairing functional
+- [ ] Side-by-side comparison displays
+- [ ] Fade slider works smoothly
+- [ ] Tests pass with >80% coverage
 
-- Button triggers sync modal
-- Progress displays accurately
-- Cancel functionality works
-- Success/error notifications shown
-- All tests passing
+## Time Estimate
 
----
+**2 hours total:**
 
-**Created:** 2025-10-23
-**Last Updated:** 2025-10-23
-**Status:** READY FOR IMPLEMENTATION
+- BeforeAfterComparison component: 60 min
+- Pairing UI: 40 min
+- Pairing filter: 20 min
+
+## Next Issue
+
+**ISSUE-134:** [Next issue title]

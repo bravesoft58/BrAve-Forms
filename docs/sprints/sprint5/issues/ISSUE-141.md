@@ -1,265 +1,174 @@
-# ISSUE-141: Loading States & Skeletons (3h)
+# ISSUE-141: User Profile Page (3h)
 
-**Priority:** P1
-**Phase:** Phase 4 - Polish & Testing
+**Priority:** P0
+**Phase:** Phase 3 - Settings & Profile
 **Estimated Hours:** 3
-**Dependencies:** Phase 1, 2, 3 complete
+**Dependencies:** Phase 2 complete
 **Sprint:** Sprint 5
 
 ---
 
 ## Objective
 
-Add professional loading states and skeleton screens to all Sprint 5 features to improve perceived performance and provide visual feedback during data fetching for field workers.
+Create a user profile page where field workers can view and edit their personal information, change password, and manage their account.
 
 ## Tasks
 
-- [ ] Create skeleton components for photo gallery grid
-- [ ] Create skeleton components for map view
-- [ ] Create skeleton components for sync queue table
-- [ ] Create skeleton components for settings forms
-- [ ] Add loading states to all async operations
-- [ ] Implement optimistic updates for form submissions
-- [ ] Add loading spinners to buttons during async actions
-- [ ] Test loading states with simulated slow network
-- [ ] Add unit tests for loading state logic
+- [ ] Create /settings/profile route in Next.js App Router
+- [ ] Fetch user info from Clerk
+- [ ] Display user info (name, email, avatar)
+- [ ] Create edit profile form with React Hook Form + Zod
+- [ ] Implement avatar upload functionality
+- [ ] Create change password form
+- [ ] Add delete account button with confirmation modal
+- [ ] Calculate and display profile completion percentage
+- [ ] Add unit tests for profile update logic
 
 ## Technical Details
 
 **Libraries/Dependencies:**
 
-- Mantine Skeleton component
-- Mantine Loader component
-- React Suspense (for code splitting)
-- TanStack Query (isLoading, isFetching states)
+- Clerk (user authentication)
+- React Hook Form + Zod (form validation)
+- Mantine Form components
+- Image upload component (avatar)
 
 **Code Example:**
 
 ```typescript
 'use client';
 
-import { Skeleton, Card, SimpleGrid, Stack, Group, Loader } from '@mantine/core';
-import { useQuery } from '@tanstack/react-query';
+import { useUser } from '@clerk/nextjs';
+import { useForm, zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { TextInput, Avatar, Button, Stack, Progress, Text, FileInput } from '@mantine/core';
+import { IconUpload, IconTrash } from '@tabler/icons-react';
 
-// Photo Gallery Skeleton
-export function PhotoGallerySkeleton() {
-  return (
-    <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }}>
-      {Array.from({ length: 8 }).map((_, index) => (
-        <Card key={index} withBorder>
-          <Skeleton height={200} radius="md" mb="xs" />
-          <Skeleton height={16} width="70%" mb="xs" />
-          <Skeleton height={12} width="50%" />
-        </Card>
-      ))}
-    </SimpleGrid>
-  );
-}
+const profileSchema = z.object({
+  firstName: z.string().min(1, 'First name required'),
+  lastName: z.string().min(1, 'Last name required'),
+  avatar: z.instanceof(File).optional(),
+});
 
-// Map View Skeleton
-export function MapViewSkeleton() {
-  return (
-    <Card withBorder>
-      <Skeleton height={400} radius="md" />
-    </Card>
-  );
-}
+export default function ProfilePage() {
+  const { user } = useUser();
 
-// Sync Queue Table Skeleton
-export function SyncQueueSkeleton() {
-  return (
-    <Stack gap="xs">
-      {Array.from({ length: 5 }).map((_, index) => (
-        <Card key={index} withBorder padding="md">
-          <Group justify="space-between">
-            <Skeleton height={16} width={200} />
-            <Skeleton height={12} width={100} />
-          </Group>
-        </Card>
-      ))}
-    </Stack>
-  );
-}
-
-// Settings Form Skeleton
-export function SettingsFormSkeleton() {
-  return (
-    <Stack gap="md">
-      {Array.from({ length: 5 }).map((_, index) => (
-        <div key={index}>
-          <Skeleton height={12} width={100} mb="xs" />
-          <Skeleton height={36} radius="sm" />
-        </div>
-      ))}
-      <Skeleton height={36} width={120} radius="sm" />
-    </Stack>
-  );
-}
-
-// Usage in Photo Gallery Component
-export default function PhotoGalleryPage() {
-  const { data: photos, isLoading, isFetching } = useQuery({
-    queryKey: ['photos'],
-    queryFn: fetchPhotos,
-  });
-
-  if (isLoading) {
-    return <PhotoGallerySkeleton />;
-  }
-
-  return (
-    <div>
-      {isFetching && (
-        <Group gap="xs" mb="md">
-          <Loader size="sm" />
-          <Text size="sm" c="dimmed">Refreshing photos...</Text>
-        </Group>
-      )}
-
-      <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }}>
-        {photos?.map(photo => (
-          <PhotoCard key={photo.id} photo={photo} />
-        ))}
-      </SimpleGrid>
-    </div>
-  );
-}
-
-// Optimistic Update Example (Form Submission)
-export function FormSubmissionButton({ formData }: { formData: FormData }) {
-  const queryClient = useQueryClient();
-
-  const mutation = useMutation({
-    mutationFn: submitForm,
-    onMutate: async (newForm) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['forms'] });
-
-      // Snapshot previous value
-      const previousForms = queryClient.getQueryData(['forms']);
-
-      // Optimistically update to new value
-      queryClient.setQueryData(['forms'], (old: Form[]) => [
-        ...old,
-        { ...newForm, id: 'temp-id', status: 'pending' },
-      ]);
-
-      return { previousForms };
-    },
-    onError: (err, newForm, context) => {
-      // Rollback on error
-      queryClient.setQueryData(['forms'], context?.previousForms);
-    },
-    onSettled: () => {
-      // Refetch after mutation
-      queryClient.invalidateQueries({ queryKey: ['forms'] });
+  const form = useForm({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
     },
   });
 
-  return (
-    <Button
-      onClick={() => mutation.mutate(formData)}
-      loading={mutation.isPending}
-      disabled={mutation.isPending}
-    >
-      {mutation.isPending ? 'Submitting...' : 'Submit Form'}
-    </Button>
-  );
-}
+  const onSubmit = async (data: z.infer<typeof profileSchema>) => {
+    await user?.update({
+      firstName: data.firstName,
+      lastName: data.lastName,
+    });
 
-// Button Loading States
-export function ActionButton({ onClick, children }: { onClick: () => Promise<void>, children: React.ReactNode }) {
-  const [loading, setLoading] = useState(false);
-
-  const handleClick = async () => {
-    setLoading(true);
-    try {
-      await onClick();
-    } finally {
-      setLoading(false);
+    if (data.avatar) {
+      await user?.setProfileImage({ file: data.avatar });
     }
   };
 
+  const profileCompletion = calculateCompletion(user);
+
   return (
-    <Button onClick={handleClick} loading={loading}>
-      {children}
-    </Button>
+    <Stack>
+      <Group justify="space-between">
+        <Text size="xl" fw={600}>Profile</Text>
+        <Group gap="xs">
+          <Progress value={profileCompletion} w={200} />
+          <Text size="sm" c="dimmed">{profileCompletion}% complete</Text>
+        </Group>
+      </Group>
+
+      <Group>
+        <Avatar src={user?.imageUrl} size={120} radius="xl" />
+        <FileInput
+          placeholder="Upload avatar"
+          leftSection={<IconUpload size={16} />}
+          {...form.register('avatar')}
+        />
+      </Group>
+
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <Stack>
+          <TextInput
+            label="First Name"
+            {...form.register('firstName')}
+            error={form.formState.errors.firstName?.message}
+          />
+          <TextInput
+            label="Last Name"
+            {...form.register('lastName')}
+            error={form.formState.errors.lastName?.message}
+          />
+          <TextInput
+            label="Email"
+            value={user?.emailAddresses[0]?.emailAddress}
+            disabled
+          />
+          <Button type="submit" loading={form.formState.isSubmitting}>
+            Save Changes
+          </Button>
+        </Stack>
+      </form>
+    </Stack>
   );
 }
-
-// Simulated Slow Network (for testing)
-export async function simulateSlowNetwork<T>(fn: () => Promise<T>, delay = 2000): Promise<T> {
-  await new Promise(resolve => setTimeout(resolve, delay));
-  return fn();
-}
-
-// Usage in tests
-it('should show skeleton while loading photos', async () => {
-  const { container } = render(<PhotoGalleryPage />);
-
-  // Skeleton should be visible initially
-  expect(screen.getAllByTestId('skeleton')).toHaveLength(8);
-
-  // Wait for photos to load
-  await waitFor(() => {
-    expect(screen.queryByTestId('skeleton')).not.toBeInTheDocument();
-  });
-
-  // Photos should be visible
-  expect(screen.getAllByTestId('photo-card')).toHaveLength(10);
-});
 ```
 
 ## Acceptance Criteria
 
-- [ ] All photo gallery views show skeletons while loading
-- [ ] Map view shows skeleton while tiles load
-- [ ] Sync queue shows skeleton during refresh
-- [ ] Settings forms show skeletons while fetching preferences
-- [ ] All buttons show loading spinners during async actions
-- [ ] Optimistic updates applied to form submissions
-- [ ] Loading states work with simulated slow network
-- [ ] No flash of empty content (skeleton appears immediately)
-- [ ] Smooth transitions from skeleton to actual content
+- [ ] /settings/profile route displays user information
+- [ ] Edit profile form functional with validation
+- [ ] Avatar upload working
+- [ ] Change password redirects to Clerk password change
+- [ ] Delete account button with confirmation modal
+- [ ] Profile completion percentage accurate
+- [ ] Form validation errors display correctly
+- [ ] Success notification on profile update
 
 ## Testing Requirements
 
 **Unit Tests:**
 
-- Test skeleton components render correctly
-- Test loading state transitions
-- Test optimistic update rollback on error
+- Test profile completion calculation
+- Test form validation
+- Test avatar upload
 
 **Integration Tests:**
 
-- Test TanStack Query loading states
-- Test button loading spinners
-- Test skeleton → content transitions
+- Test profile update with Clerk
+- Test password change flow
+- Test delete account flow
 
 **Manual Testing:**
 
-- Throttle network to "Slow 3G" in DevTools
-- Verify skeletons appear immediately on load
-- Verify smooth transitions to actual content
-- Test optimistic updates with network failures
+- Update profile information
+- Upload new avatar
+- Change password
+- Test delete account flow
+- Verify profile completion updates
 
 ## Evidence Requirements
 
-- [ ] Screenshot: Photo gallery skeleton
-- [ ] Screenshot: Map view skeleton
-- [ ] Screenshot: Sync queue skeleton
-- [ ] Screenshot: Settings form skeleton
-- [ ] Video: Smooth skeleton → content transition
-- [ ] Test Results: Loading state tests (>80% coverage)
+- [ ] Screenshot: Profile page with user info
+- [ ] Screenshot: Edit profile form
+- [ ] Screenshot: Avatar upload
+- [ ] Screenshot: Delete account confirmation
+- [ ] Test Results: Profile update tests (>80% coverage)
 
 ## Success Criteria
 
-Loading states are complete when:
+User profile page is complete when:
 
-- All features have appropriate skeletons
-- No flash of empty content
-- Smooth transitions to actual content
-- Optimistic updates working
+- All user information displayed
+- Edit functionality working
+- Avatar upload functional
+- Delete account with confirmation
 - All tests passing
 
 ---

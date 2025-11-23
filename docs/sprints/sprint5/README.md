@@ -49,41 +49,41 @@
 
 ### Phase 1: Photo Gallery (6 issues - 100% COMPLETE)
 
-1. **[ISSUE-123](issues/ISSUE-123.md)** - Photo Gallery Grid View (4h)
+1. **[ISSUE-128](issues/ISSUE-128.md)** - Photo Gallery Grid View (4h)
    - Masonry layout, infinite scroll, filtering, responsive design
    - Uses: CSS Grid, TanStack Query infinite scroll
    - File size: 12KB
 
-2. **[ISSUE-124](issues/ISSUE-124.md)** - Photo Lightbox Viewer (3h)
+2. **[ISSUE-129](issues/ISSUE-129.md)** - Photo Lightbox Viewer (3h)
    - Yet Another React Lightbox integration (MIT license)
    - Zoom, navigation, EXIF metadata, download/share
    - File size: 14KB
 
-3. **[ISSUE-125](issues/ISSUE-125.md)** - GPS Map Integration (4h)
+3. **[ISSUE-130](issues/ISSUE-130.md)** - GPS Map Integration (4h)
    - MapLibre GL JS (BSD license, FREE vs $5-20/mo Mapbox)
    - Free tile providers (Stadia Maps, MapTiler, OpenStreetMap)
    - Clustering, offline tiles support
    - File size: 13KB
 
-4. **[ISSUE-126](issues/ISSUE-126.md)** - Photo Annotations (4h)
+4. **[ISSUE-131](issues/ISSUE-131.md)** - Photo Annotations (4h)
    - Annotorious integration (BSD license, actively maintained)
    - Drawing tools (rect, polygon, circle, freehand)
    - Metadata tracking, annotation history
    - File size: 6.7KB
 
-5. **[ISSUE-127](issues/ISSUE-127.md)** - Photo Search & Filter (3h)
+5. **[ISSUE-132](issues/ISSUE-132.md)** - Photo Search & Filter (3h)
    - 6 filter types (description, user, form type, date, GPS, weather)
    - Backend query support, clear filters
    - File size: 8.1KB
 
-6. **[ISSUE-128](issues/ISSUE-128.md)** - Before/After Photo Pairing (2h)
+6. **[ISSUE-133](issues/ISSUE-133.md)** - Before/After Photo Pairing (2h)
    - Side-by-side comparison, fade slider
    - Pairing UI, filter for paired photos
    - File size: 4.6KB
 
 ### Phase 2: Offline Experience UI (1 issue)
 
-7. **[ISSUE-129](issues/ISSUE-129.md)** - Sync Status Dashboard (4h)
+7. **[ISSUE-134](issues/ISSUE-134.md)** - Sync Status Dashboard (4h)
    - Current sync status, last/next sync timestamps
    - Sync statistics, storage usage meter
    - 30-day offline capability countdown
@@ -91,14 +91,14 @@
 
 ### Phase 5: Form Builder (2 critical issues)
 
-8. **[ISSUE-145](issues/ISSUE-145.md)** - Form Builder Architecture Setup (6h)
+8. **[ISSUE-150](issues/ISSUE-150.md)** - Form Builder Architecture Setup (6h)
    - @dnd-kit/core integration (MIT license, 10KB, zero dependencies)
    - Valtio state management with undo/redo (50 snapshots)
    - 3-column layout (palette, canvas, properties)
    - Auto-save every 30 seconds
    - File size: 12KB
 
-9. **[ISSUE-150](issues/ISSUE-150.md)** - Calculated Fields Editor (10h)
+9. **[ISSUE-155](issues/ISSUE-155.md)** - Calculated Fields Editor (10h)
    - expr-eval integration (MIT license, NOT mathjs for security)
    - Operators: +, -, \*, /, ()
    - Functions: SUM, AVG, MIN, MAX
@@ -113,40 +113,39 @@
 
 ### Phase 2: Offline Experience UI (6 remaining)
 
-- [ ] ISSUE-130: Sync Queue Management (4h)
-- [ ] ISSUE-131: Conflict Resolution UI (6h)
-- [ ] ISSUE-132: Offline Storage Indicators (2h)
-- [ ] ISSUE-133: Manual Sync Trigger (2h)
-- [ ] ISSUE-134: Retry Failed Sync (2h)
-- [ ] ISSUE-135: Offline Experience Tests (4h)
+- [ ] ISSUE-135: Sync Queue Management (4h)
+- [ ] ISSUE-136: Conflict Resolution UI (6h)
+- [ ] ISSUE-137: Offline Storage Indicators (2h)
+- [ ] ISSUE-138: Manual Sync Trigger (2h)
+- [ ] ISSUE-139: Retry Failed Sync (2h)
+- [ ] ISSUE-140: Offline Experience Tests (4h)
 
 ### Phase 3: Settings & Profile (5 remaining)
 
-- [ ] ISSUE-136: User Profile Page (3h)
-- [ ] ISSUE-137: Account Settings (3h)
-- [ ] ISSUE-138: Notification Preferences (2h)
-- [ ] ISSUE-139: Help & Documentation (2h)
-- [ ] ISSUE-140: App Settings (2h)
+- [ ] ISSUE-141: User Profile Page (3h)
+- [ ] ISSUE-142: Account Settings (3h)
+- [ ] ISSUE-143: Notification Preferences (2h)
+- [ ] ISSUE-144: Help & Documentation (2h)
+- [ ] ISSUE-145: App Settings (2h)
 
 ### Phase 4: Polish & Testing (4 remaining)
 
-- [ ] ISSUE-141: Loading States Audit (1h)
-- [ ] ISSUE-142: Error Handling Audit (1h)
-- [ ] ISSUE-143: Responsive Design Fixes (1h)
-- [ ] ISSUE-144: Sprint 5 Completion Report (1h)
+- [ ] ISSUE-146: Loading States Audit (1h)
+- [ ] ISSUE-147: Error Handling Audit (1h)
+- [ ] ISSUE-148: Responsive Design Fixes (1h)
+- [ ] ISSUE-149: Sprint 5 Completion Report (1h)
 
 ### Phase 5: Form Builder (10 remaining)
 
-- [ ] ISSUE-146: Field Palette Component (8h)
-- [ ] ISSUE-147: Form Canvas with Drag-Drop (12h)
-- [ ] ISSUE-148: Properties Panel Component (10h)
-- [ ] ISSUE-149: Conditional Logic Builder (12h)
-- [ ] ISSUE-151: Field Settings Tabs (8h)
-- [ ] ISSUE-152: Form Preview Component (8h)
-- [ ] ISSUE-153: Save/Publish Workflow (6h)
-- [ ] ISSUE-154: Undo/Redo History (6h)
-- [ ] ISSUE-155: Form Validation Engine (8h)
-- [ ] ISSUE-156: Form Builder Tests (6h)
+- [ ] ISSUE-151: Field Palette Component (8h)
+- [ ] ISSUE-152: Form Canvas with Drag-Drop (12h)
+- [ ] ISSUE-153: Properties Panel Component (10h)
+- [ ] ISSUE-154: Conditional Logic Builder (12h)
+- [ ] ISSUE-156: Field Settings Tabs (8h)
+- [ ] ISSUE-158: Form Preview Component (8h)
+- [ ] ISSUE-159: Save/Publish Workflow (6h)
+- [ ] ISSUE-160: Undo/Redo History (6h)
+- [ ] ISSUE-161: Form Builder Tests & Polish (6h)
 
 ---
 
@@ -157,7 +156,7 @@ All library choices based on comprehensive research documented in:
 - LIBRARY_REVIEW_SUMMARY.md
 - LIBRARY_MIGRATION_GUIDE.md
 
-### 1. MapLibre GL JS (ISSUE-125)
+### 1. MapLibre GL JS (ISSUE-130)
 
 **Why:** Mapbox GL v2+ changed to proprietary license in December 2020
 **License:** BSD 3-Clause (fully open source)
@@ -165,28 +164,28 @@ All library choices based on comprehensive research documented in:
 **Cost:** FREE (saves $5-20/month vs Mapbox)
 **Offline:** Self-hostable tiles for construction sites
 
-### 2. Annotorious (ISSUE-126)
+### 2. Annotorious (ISSUE-131)
 
 **Why:** react-image-annotate unmaintained for 5 years, no security patches
 **License:** BSD 3-Clause (fully open source)
 **Status:** Actively maintained (Sept 2025 updates)
 **Features:** Full TypeScript support, modern annotation API
 
-### 3. Yet Another React Lightbox (ISSUE-124)
+### 3. Yet Another React Lightbox (ISSUE-129)
 
 **Why:** react-image-lightbox deprecated, no longer supported
 **License:** MIT (fully open source)
 **Compatibility:** React 19, 18, 17, 16.8+
 **Endorsement:** Recommended by Mantine community
 
-### 4. expr-eval (ISSUE-150)
+### 4. expr-eval (ISSUE-155)
 
 **Why:** mathjs has LGPL copyleft concerns + security risks (import/createUnit functions)
 **License:** MIT (simple, permissive, NO copyleft)
 **Size:** 5KB vs mathjs (heavy package)
 **Security:** No dangerous functions
 
-### 5. @dnd-kit/core (ISSUE-145)
+### 5. @dnd-kit/core (ISSUE-150)
 
 **Why:** Best-in-class drag-drop for 2025
 **License:** MIT (fully open source)
@@ -231,7 +230,7 @@ Each created issue includes:
 4. Ensure zero emoji, zero AI branding
 5. Verify library choices match research documents
 
-**Template:** Use ISSUE-123 through ISSUE-150 as examples
+**Template:** Use ISSUE-128 through ISSUE-155 as examples
 
 ### Option 2: Batch Script Generation
 
@@ -284,7 +283,7 @@ Continue creating issues individually in future sessions.
 - 4 Polish issues (audits and testing)
 - 10 Form Builder issues (drag-drop implementation)
 
-**Critical Path:** Form Builder foundation (ISSUE-145) and calculated fields (ISSUE-150) are complete, enabling remaining form builder work.
+**Critical Path:** Form Builder foundation (ISSUE-150) and calculated fields (ISSUE-155) are complete, enabling remaining form builder work.
 
 ---
 

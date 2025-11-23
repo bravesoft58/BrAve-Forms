@@ -1,189 +1,296 @@
-# ISSUE-134: Retry Failed Sync (2h)
+# ISSUE-134: Sync Status Dashboard (4h)
 
-**Priority:** P0
-**Phase:** Phase 2 - Offline Experience UI
-**Estimated Hours:** 2
-**Dependencies:** ISSUE-133
-**Sprint:** Sprint 5
+**Sprint:** Sprint 5 | **Phase:** 2 - Offline Experience UI | **Priority:** P0
+**Time:** 4 hours | **Complexity:** Medium
+**Created:** 2025-10-23
+**Dependencies:** Phase 1 complete
+**Status:** READY FOR IMPLEMENTATION
 
----
+## What You'll Do
 
-## Objective
+Create sync status dashboard displaying current sync state, last sync timestamp, next auto-sync time, sync statistics, storage usage, and 30-day offline countdown.
 
-Implement functionality to identify and retry failed sync operations, giving field workers the ability to resolve sync errors without manual intervention.
+## Prerequisites
 
-## Tasks
+- [ ] Phase 1 complete (Photo Gallery functional)
+- [ ] IndexedDB storage working
+- [ ] Offline sync engine implemented (Sprint 1)
+- [ ] Code editor open to apps/web directory
 
-- [ ] Identify failed sync operations in queue
-- [ ] Display failed items with red badge in sync queue
-- [ ] Add "Retry All Failed" button to sync dashboard
-- [ ] Add retry individual failed item button
-- [ ] Display failure reason (network error, validation error, etc.)
-- [ ] Update failure count on retry attempts
-- [ ] Log failure reasons for debugging
-- [ ] Test with various failure scenarios
+## Step-by-Step Instructions
 
-## Technical Details
+### Step 1: Create SyncStatusDashboard Component (120 min)
 
-**Libraries/Dependencies:**
-
-- Mantine Badge (failure indicators)
-- TanStack Query v5 (retry mutations)
-
-**Implementation Notes:**
-
-**Failure Tracking:**
-
-```typescript
-interface FailedSyncItem extends SyncQueueItem {
-  failureReason: string;
-  failureTimestamp: Date;
-  failureType: 'network' | 'validation' | 'auth' | 'server' | 'unknown';
-}
-
-const classifyFailure = (error: Error): FailureType => {
-  if (error.message.includes('network') || error.message.includes('fetch failed')) {
-    return 'network';
-  }
-  if (error.message.includes('validation') || error.message.includes('invalid')) {
-    return 'validation';
-  }
-  if (error.message.includes('unauthorized') || error.message.includes('forbidden')) {
-    return 'auth';
-  }
-  if (error.message.includes('500') || error.message.includes('server error')) {
-    return 'server';
-  }
-  return 'unknown';
-};
-```
-
-**Code Example:**
+Create `apps/web/app/sync/status/page.tsx`:
 
 ```typescript
 'use client';
 
-import { Button, Badge, Group, Alert, Stack } from '@mantine/core';
-import { IconRefresh, IconAlertCircle } from '@tabler/icons-react';
-import { useMutation } from '@tanstack/react-query';
-import { useSnapshot } from 'valtio';
-import { syncQueueStore } from '@/stores/syncQueue';
+import { PageContainer } from '@/components/layout/page-container';
+import { Stack, Grid, Card, Text, Progress, Badge, Group } from '@mantine/core';
+import { IconCloud, IconDatabase, IconClock, IconAlertCircle } from '@tabler/icons-react';
+import { useSyncStatus } from '@/hooks/use-sync-status';
 
-export function RetryFailedSync() {
-  const { queue } = useSnapshot(syncQueueStore);
+export default function SyncStatusPage() {
+  const { status, lastSync, nextSync, stats, storage } = useSyncStatus();
 
-  const failedItems = queue.filter(item => item.status === 'failed');
-
-  const retryAllMutation = useMutation({
-    mutationFn: async () => {
-      const results = await Promise.allSettled(
-        failedItems.map(item => syncQueueStore.retryItem(item.id))
-      );
-      return results;
-    },
-  });
-
-  if (failedItems.length === 0) {
-    return null;
-  }
+  const offlineDaysRemaining = calculateOfflineDaysRemaining(lastSync);
 
   return (
-    <Stack>
-      <Alert
-        icon={<IconAlertCircle size={16} />}
-        title="Failed Sync Operations"
-        color="red"
-      >
-        {failedItems.length} operation(s) failed to sync.
-      </Alert>
-
-      <Group>
-        <Button
-          leftSection={<IconRefresh size={16} />}
-          onClick={() => retryAllMutation.mutate()}
-          loading={retryAllMutation.isPending}
-          color="red"
-        >
-          Retry All Failed ({failedItems.length})
-        </Button>
-      </Group>
-
-      <Stack gap="xs">
-        {failedItems.map(item => (
-          <Group key={item.id} justify="space-between">
-            <Group gap="xs">
-              <Badge color="red">Failed</Badge>
-              <Text size="sm">{item.type}</Text>
-              <Text size="xs" c="dimmed">{item.failureReason}</Text>
+    <PageContainer title="Sync Status">
+      <Stack gap="lg">
+        {/* Current Status */}
+        <Card shadow="sm" padding="lg">
+          <Group justify="space-between">
+            <Group>
+              <IconCloud size={32} />
+              <div>
+                <Text size="sm" c="dimmed">Current Status</Text>
+                <Badge
+                  color={
+                    status === 'synced' ? 'green' :
+                    status === 'syncing' ? 'blue' :
+                    status === 'offline' ? 'yellow' :
+                    'red'
+                  }
+                  size="lg"
+                >
+                  {status.toUpperCase()}
+                </Badge>
+              </div>
             </Group>
-            <Button
-              size="xs"
-              onClick={() => syncQueueStore.retryItem(item.id)}
-            >
-              Retry
-            </Button>
+
+            {offlineDaysRemaining < 7 && (
+              <Badge color="red" leftSection={<IconAlertCircle size={16} />}>
+                {offlineDaysRemaining} days remaining
+              </Badge>
+            )}
           </Group>
-        ))}
+        </Card>
+
+        {/* Sync Timestamps */}
+        <Grid>
+          <Grid.Col span={6}>
+            <Card shadow="sm" padding="lg">
+              <Group>
+                <IconClock size={24} />
+                <div>
+                  <Text size="sm" c="dimmed">Last Sync</Text>
+                  <Text size="lg" fw={500}>
+                    {lastSync ? new Date(lastSync).toLocaleString() : 'Never'}
+                  </Text>
+                </div>
+              </Group>
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col span={6}>
+            <Card shadow="sm" padding="lg">
+              <Group>
+                <IconClock size={24} />
+                <div>
+                  <Text size="sm" c="dimmed">Next Auto-Sync</Text>
+                  <Text size="lg" fw={500}>
+                    {nextSync ? new Date(nextSync).toLocaleString() : 'N/A'}
+                  </Text>
+                </div>
+              </Group>
+            </Card>
+          </Grid.Col>
+        </Grid>
+
+        {/* Sync Statistics */}
+        <Card shadow="sm" padding="lg">
+          <Stack gap="md">
+            <Text size="lg" fw={500}>Today's Activity</Text>
+            <Grid>
+              <Grid.Col span={4}>
+                <Text size="sm" c="dimmed">Forms Synced</Text>
+                <Text size="xl" fw={700}>{stats.formsSyncedToday}</Text>
+              </Grid.Col>
+              <Grid.Col span={4}>
+                <Text size="sm" c="dimmed">Photos Uploaded</Text>
+                <Text size="xl" fw={700}>{stats.photosUploadedToday}</Text>
+              </Grid.Col>
+              <Grid.Col span={4}>
+                <Text size="sm" c="dimmed">Pending Items</Text>
+                <Text size="xl" fw={700}>{stats.pendingItems}</Text>
+              </Grid.Col>
+            </Grid>
+          </Stack>
+        </Card>
+
+        {/* Storage Usage */}
+        <Card shadow="sm" padding="lg">
+          <Stack gap="md">
+            <Group justify="space-between">
+              <Group>
+                <IconDatabase size={24} />
+                <Text size="lg" fw={500}>Local Storage</Text>
+              </Group>
+              <Text size="sm" c="dimmed">
+                {formatBytes(storage.used)} / {formatBytes(storage.available)}
+              </Text>
+            </Group>
+
+            <Progress
+              value={(storage.used / storage.available) * 100}
+              color={
+                storage.used / storage.available > 0.9 ? 'red' :
+                storage.used / storage.available > 0.7 ? 'yellow' :
+                'green'
+              }
+            />
+
+            <Text size="sm" c="dimmed">
+              30-day offline capacity: {offlineDaysRemaining} days remaining
+            </Text>
+          </Stack>
+        </Card>
       </Stack>
-    </Stack>
+    </PageContainer>
   );
+}
+
+function calculateOfflineDaysRemaining(lastSync: Date | null): number {
+  if (!lastSync) return 30;
+  const daysSinceSync = (Date.now() - lastSync.getTime()) / (1000 * 60 * 60 * 24);
+  return Math.max(0, 30 - Math.floor(daysSinceSync));
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
 }
 ```
 
-## Acceptance Criteria
+### Step 2: Create useSyncStatus Hook (60 min)
 
-- [ ] Failed sync operations identified in queue
-- [ ] Failed items displayed with red badge
-- [ ] "Retry All Failed" button visible when failures exist
-- [ ] Individual retry buttons functional
-- [ ] Failure reason displayed for each failed item
-- [ ] Retry attempt count incremented
-- [ ] Failed items removed from queue on successful retry
-- [ ] Alert shows count of failed operations
+Create `apps/web/hooks/use-sync-status.ts`:
 
-## Testing Requirements
+```typescript
+import { useQuery } from '@tanstack/react-query';
 
-**Unit Tests:**
+interface SyncStatus {
+  status: 'synced' | 'syncing' | 'offline' | 'error';
+  lastSync: Date | null;
+  nextSync: Date | null;
+  stats: {
+    formsSyncedToday: number;
+    photosUploadedToday: number;
+    pendingItems: number;
+  };
+  storage: {
+    used: number;
+    available: number;
+  };
+}
 
-- Test failure classification logic
-- Test retry logic
-- Test failure counting
+export function useSyncStatus() {
+  return useQuery<SyncStatus>({
+    queryKey: ['sync-status'],
+    queryFn: async () => {
+      // Get IndexedDB storage estimate
+      const estimate = await navigator.storage.estimate();
 
-**Integration Tests:**
+      // Get sync status from service worker
+      const registration = await navigator.serviceWorker.ready;
+      const syncStatus = await registration.sync.getTags();
 
-- Test retry updates sync queue
-- Test successful retry removes from failed list
-- Test retry all failed functionality
-- Test failure reason persistence
+      return {
+        status: navigator.onLine ? 'synced' : 'offline',
+        lastSync: new Date(localStorage.getItem('lastSync') || ''),
+        nextSync: new Date(Date.now() + 15 * 60 * 1000), // 15 min
+        stats: {
+          formsSyncedToday: 12,
+          photosUploadedToday: 45,
+          pendingItems: 3,
+        },
+        storage: {
+          used: estimate.usage || 0,
+          available: estimate.quota || 0,
+        },
+      };
+    },
+    refetchInterval: 30000, // Refetch every 30s
+  });
+}
+```
 
-**Manual Testing:**
+### Step 3: Test Sync Dashboard (60 min)
 
-- Simulate network failure during sync
-- Verify failed items flagged
-- Test individual retry
-- Test retry all failed
-- Verify success removes from failed list
+```bash
+# Restart web container
+kubectl rollout restart deployment/web -n braveforms
+
+# Access sync dashboard
+# Navigate to http://localhost:30102/sync/status
+```
+
+**Verify:**
+
+- [ ] Current sync status displays
+- [ ] Last sync timestamp shows
+- [ ] Next auto-sync countdown works
+- [ ] Sync statistics accurate
+- [ ] Storage meter displays
+- [ ] 30-day countdown shows
+- [ ] Warning appears when <7 days
+
+## TDD Workflow
+
+**Phase 1: Write Tests**
+
+Create `apps/web/hooks/__tests__/use-sync-status.test.ts`
+
+**Phase 2: Pass Tests**
+
+## Files to Create
+
+**Create:**
+
+- apps/web/app/sync/status/page.tsx
+- apps/web/hooks/use-sync-status.ts
+- apps/web/hooks/**tests**/use-sync-status.test.ts
+
+## Verification Checklist
+
+- [ ] Sync status dashboard displays
+- [ ] All metrics accurate
+- [ ] Storage meter works
+- [ ] 30-day countdown functional
+- [ ] Tests passing (>80% coverage)
+- [ ] Zero emoji, zero AI branding
 
 ## Evidence Requirements
 
-- [ ] Screenshot: Failed sync items with red badges
-- [ ] Screenshot: "Retry All Failed" button
-- [ ] Screenshot: Individual retry buttons
-- [ ] Screenshot: Failure reasons displayed
-- [ ] Test Results: Retry functionality tests (>80% coverage)
+**Location:** evidence/ISSUE-160/
+
+**Required:**
+
+- test-results/red-phase.png
+- test-results/green-phase.png
+- screenshots/sync-dashboard.png
+- screenshots/storage-warning.png
 
 ## Success Criteria
 
-Retry failed sync is complete when:
+- [ ] Sync status dashboard functional
+- [ ] All sync metrics display accurately
+- [ ] Performance <500ms load time
+- [ ] Tests pass with >80% coverage
 
-- Failed operations identified and flagged
-- Retry all and individual retry functional
-- Failure reasons displayed
-- All tests passing
-- Evidence collected
+## Time Estimate
 
----
+**4 hours total:**
 
-**Created:** 2025-10-23
-**Last Updated:** 2025-10-23
-**Status:** READY FOR IMPLEMENTATION
+- SyncStatusDashboard component: 120 min
+- useSyncStatus hook: 60 min
+- Testing: 60 min
+
+## Next Issue
+
+**ISSUE-135:** [Next issue title]

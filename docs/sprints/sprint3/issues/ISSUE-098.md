@@ -1,9 +1,9 @@
-# ISSUE-084: Auto-Save Draft Functionality
+# ISSUE-098: Auto-Save Draft Functionality
 
 **Sprint:** Sprint 3 | **Phase:** 4 - Dynamic Form Renderer | **Priority:** P1
 **Time:** 1 hour | **Complexity:** Small
 **Created:** 2025-10-23
-**Dependencies:** ISSUE-083 (validation complete)
+**Dependencies:** ISSUE-097 (validation complete)
 
 ## What You'll Do
 

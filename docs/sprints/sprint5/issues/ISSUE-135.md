@@ -1,279 +1,226 @@
-# ISSUE-135: Offline Experience Tests (4h)
+# ISSUE-135: Sync Queue Management (4h)
 
 **Priority:** P0
 **Phase:** Phase 2 - Offline Experience UI
 **Estimated Hours:** 4
-**Dependencies:** ISSUE-134
+**Dependencies:** ISSUE-160
 **Sprint:** Sprint 5
 
 ---
 
 ## Objective
 
-Create comprehensive test suite for all offline experience features to ensure 30-day offline capability works reliably for construction field workers.
+Create a sync queue management interface that displays all pending sync operations with the ability to retry or delete individual items. This gives field workers visibility into what data is queued for synchronization when they regain connectivity.
 
 ## Tasks
 
-- [ ] Write tests for offline detection (network toggle)
-- [ ] Write tests for auto-save to IndexedDB
-- [ ] Write tests for sync queue persistence
-- [ ] Write tests for conflict detection and resolution
-- [ ] Write tests for 30-day storage capacity
-- [ ] Write tests for manual sync trigger
-- [ ] Write tests for retry failed sync
-- [ ] Achieve >80% test coverage for offline features
-- [ ] Create E2E tests with Playwright for offline scenarios
+- [ ] Create /sync/queue route in Next.js App Router
+- [ ] Design queue table component with Mantine Table
+- [ ] Fetch pending operations from IndexedDB sync queue
+- [ ] Display operation metadata (type, timestamp, size, priority)
+- [ ] Implement retry individual operation functionality
+- [ ] Implement delete operation with confirmation modal
+- [ ] Add operation priority sorting (compliance forms first)
+- [ ] Add loading states during operations
+- [ ] Test with real queued data from offline mode
 
 ## Technical Details
 
 **Libraries/Dependencies:**
 
-- Vitest (unit/integration tests)
-- Playwright (E2E offline tests)
-- Mock Service Worker (network mocking)
+- Mantine Table (data grid)
+- TanStack Query v5 (sync queue state)
+- IndexedDB (queue persistence)
+- Valtio (queue state management)
 
-**Test Categories:**
+**Implementation Notes:**
 
-**1. Offline Detection:**
+**Queue Data Structure:**
 
 ```typescript
-describe('Offline Detection', () => {
-  it('detects when network goes offline', async () => {
-    // Simulate online
-    Object.defineProperty(navigator, 'onLine', { value: true });
-    expect(getNetworkStatus()).toBe('online');
-
-    // Simulate offline
-    Object.defineProperty(navigator, 'onLine', { value: false });
-    window.dispatchEvent(new Event('offline'));
-
-    await waitFor(() => {
-      expect(getNetworkStatus()).toBe('offline');
-    });
-  });
-
-  it('shows offline banner when offline', async () => {
-    goOffline();
-    render(<App />);
-
-    expect(screen.getByText(/you are offline/i)).toBeInTheDocument();
-  });
-});
+interface SyncQueueItem {
+  id: string;
+  type: 'form_submission' | 'photo_upload' | 'annotation' | 'form_update';
+  operation: 'create' | 'update' | 'delete';
+  data: unknown;
+  timestamp: Date;
+  size: number; // bytes
+  priority: number; // 1-10, compliance forms = 10
+  retries: number;
+  lastError?: string;
+  status: 'pending' | 'syncing' | 'failed';
+}
 ```
 
-**2. Auto-Save:**
+**Priority Calculation:**
 
 ```typescript
-describe('Auto-Save to IndexedDB', () => {
-  it('auto-saves form data every 30 seconds', async () => {
-    const { result } = renderHook(() => useFormAutoSave());
+const calculatePriority = (item: SyncQueueItem): number => {
+  // Compliance forms (inspections, weather events) = priority 10
+  if (item.type === 'form_submission' && isComplianceForm(item.data)) {
+    return 10;
+  }
 
-    act(() => {
-      result.current.updateField('name', 'John Doe');
-    });
+  // Photos with compliance data = priority 8
+  if (item.type === 'photo_upload' && hasComplianceMetadata(item.data)) {
+    return 8;
+  }
 
-    // Wait for auto-save interval
-    await waitFor(
-      () => {
-        const saved = await getFromIndexedDB('formDraft');
-        expect(saved.name).toBe('John Doe');
-      },
-      { timeout: 31000 }
-    );
-  });
+  // Regular form submissions = priority 5
+  if (item.type === 'form_submission') {
+    return 5;
+  }
 
-  it('restores form data from IndexedDB on reload', async () => {
-    await saveToIndexedDB('formDraft', { name: 'John Doe' });
-
-    const { result } = renderHook(() => useFormAutoSave());
-
-    expect(result.current.formData.name).toBe('John Doe');
-  });
-});
+  // Other operations = priority 3
+  return 3;
+};
 ```
 
-**3. Sync Queue:**
+**Code Example:**
 
 ```typescript
-describe('Sync Queue Persistence', () => {
-  it('persists sync queue to IndexedDB', async () => {
-    const item = {
-      id: '123',
-      type: 'form_submission',
-      data: {
-        /* form data */
-      },
-    };
+'use client';
 
-    await syncQueueStore.addItem(item);
+import { Table, Badge, Button, ActionIcon, Group, Text } from '@mantine/core';
+import { IconRefresh, IconTrash, IconClock } from '@tabler/icons-react';
+import { useSnapshot } from 'valtio';
+import { syncQueueStore } from '@/stores/syncQueue';
 
-    const queue = await getSyncQueueFromIndexedDB();
-    expect(queue).toContainEqual(item);
-  });
+export function SyncQueueTable() {
+  const { queue } = useSnapshot(syncQueueStore);
 
-  it('processes sync queue when back online', async () => {
-    // Add items while offline
-    goOffline();
-    await submitForm({
-      /* data */
-    });
-    await uploadPhoto({
-      /* data */
-    });
+  const sortedQueue = [...queue].sort((a, b) => b.priority - a.priority);
 
-    expect(syncQueueStore.queue).toHaveLength(2);
+  const handleRetry = async (id: string) => {
+    await syncQueueStore.retryItem(id);
+  };
 
-    // Go back online
-    goOnline();
-    await triggerSync();
+  const handleDelete = async (id: string) => {
+    if (confirm('Delete this queued operation? This cannot be undone.')) {
+      await syncQueueStore.deleteItem(id);
+    }
+  };
 
-    await waitFor(() => {
-      expect(syncQueueStore.queue).toHaveLength(0);
-    });
-  });
-});
-```
-
-**4. Conflict Resolution:**
-
-```typescript
-describe('Conflict Detection', () => {
-  it('detects conflicts between local and server versions', () => {
-    const localData = { name: 'John', age: 30 };
-    const serverData = { name: 'John Doe', age: 30 };
-
-    const conflicts = detectConflicts(localData, serverData);
-
-    expect(conflicts).toHaveLength(1);
-    expect(conflicts[0]).toMatchObject({
-      field: 'name',
-      localValue: 'John',
-      serverValue: 'John Doe',
-      type: 'modified',
-    });
-  });
-
-  it('resolves conflicts with Keep Local option', async () => {
-    const conflict = createTestConflict();
-
-    await resolveConflict(conflict.id, 'local');
-
-    const resolved = await getForm(conflict.resourceId);
-    expect(resolved.data).toEqual(conflict.localVersion.data);
-  });
-});
-```
-
-**5. 30-Day Storage:**
-
-```typescript
-describe('30-Day Storage Capacity', () => {
-  it('estimates days remaining correctly', async () => {
-    // Mock storage at 50% capacity
-    mockStorageEstimate({ usage: 50 * 1024 * 1024, quota: 100 * 1024 * 1024 });
-
-    const info = await getStorageInfo();
-
-    expect(info.daysRemaining).toBeCloseTo(15, 1);
-  });
-
-  it('shows warning at 80% capacity', async () => {
-    mockStorageEstimate({ usage: 80 * 1024 * 1024, quota: 100 * 1024 * 1024 });
-
-    render(<StorageIndicators />);
-
-    expect(screen.getByText(/storage warning/i)).toBeInTheDocument();
-  });
-});
-```
-
-**6. E2E Offline Tests (Playwright):**
-
-```typescript
-test.describe('Offline Experience E2E', () => {
-  test('complete offline workflow', async ({ page, context }) => {
-    // Start online, load app
-    await page.goto('/');
-    await expect(page.locator('[data-testid="app-header"]')).toBeVisible();
-
-    // Go offline
-    await context.setOffline(true);
-
-    // Fill form offline
-    await page.goto('/forms/123');
-    await page.fill('[name="inspectorName"]', 'John Doe');
-    await page.fill('[name="notes"]', 'Inspection completed');
-    await page.click('button[type="submit"]');
-
-    // Verify queued
-    await page.goto('/sync/queue');
-    await expect(page.locator('table tbody tr')).toHaveCount(1);
-
-    // Go back online
-    await context.setOffline(false);
-
-    // Trigger sync
-    await page.click('button:has-text("Sync Now")');
-
-    // Verify synced
-    await expect(page.locator('text=Sync Complete')).toBeVisible();
-    await page.goto('/sync/queue');
-    await expect(page.locator('table tbody tr')).toHaveCount(0);
-  });
-});
+  return (
+    <Table>
+      <Table.Thead>
+        <Table.Tr>
+          <Table.Th>Type</Table.Th>
+          <Table.Th>Timestamp</Table.Th>
+          <Table.Th>Size</Table.Th>
+          <Table.Th>Priority</Table.Th>
+          <Table.Th>Status</Table.Th>
+          <Table.Th>Actions</Table.Th>
+        </Table.Tr>
+      </Table.Thead>
+      <Table.Tbody>
+        {sortedQueue.map((item) => (
+          <Table.Tr key={item.id}>
+            <Table.Td>
+              <Badge variant="light">
+                {item.type.replace('_', ' ')}
+              </Badge>
+            </Table.Td>
+            <Table.Td>
+              <Group gap="xs">
+                <IconClock size={16} />
+                <Text size="sm">{formatRelativeTime(item.timestamp)}</Text>
+              </Group>
+            </Table.Td>
+            <Table.Td>{formatBytes(item.size)}</Table.Td>
+            <Table.Td>
+              <Badge color={item.priority >= 8 ? 'red' : 'blue'}>
+                {item.priority}
+              </Badge>
+            </Table.Td>
+            <Table.Td>
+              <Badge color={getStatusColor(item.status)}>
+                {item.status}
+              </Badge>
+            </Table.Td>
+            <Table.Td>
+              <Group gap="xs">
+                <ActionIcon
+                  variant="light"
+                  onClick={() => handleRetry(item.id)}
+                  disabled={item.status === 'syncing'}
+                >
+                  <IconRefresh size={16} />
+                </ActionIcon>
+                <ActionIcon
+                  variant="light"
+                  color="red"
+                  onClick={() => handleDelete(item.id)}
+                  disabled={item.status === 'syncing'}
+                >
+                  <IconTrash size={16} />
+                </ActionIcon>
+              </Group>
+            </Table.Td>
+          </Table.Tr>
+        ))}
+      </Table.Tbody>
+    </Table>
+  );
+}
 ```
 
 ## Acceptance Criteria
 
-- [ ] Offline detection tests passing
-- [ ] Auto-save to IndexedDB tests passing
-- [ ] Sync queue persistence tests passing
-- [ ] Conflict detection tests passing
-- [ ] 30-day storage capacity tests passing
-- [ ] Manual sync trigger tests passing
-- [ ] Retry failed sync tests passing
-- [ ] Test coverage >80% for all offline features
-- [ ] E2E tests cover complete offline workflow
+- [ ] /sync/queue route displays all pending operations
+- [ ] Operations sorted by priority (compliance first)
+- [ ] Each row shows type, timestamp, size, priority, status
+- [ ] Retry button triggers individual operation sync
+- [ ] Delete button removes operation from queue (with confirmation)
+- [ ] Loading states displayed during retry/delete
+- [ ] Empty state shown when no queued operations
+- [ ] Table responsive on mobile devices
 
 ## Testing Requirements
 
-**Unit Tests (15+ tests):**
+**Unit Tests:**
 
-- Offline detection (3 tests)
-- Auto-save (4 tests)
-- Sync queue (4 tests)
-- Conflict resolution (4 tests)
+- Test priority calculation logic
+- Test sorting by priority
+- Test retry operation
+- Test delete operation with confirmation
+- Test formatBytes utility
+- Test formatRelativeTime utility
 
-**Integration Tests (10+ tests):**
+**Integration Tests:**
 
-- Storage indicators (3 tests)
-- Manual sync (3 tests)
-- Retry failed (2 tests)
-- Queue management (2 tests)
+- Test queue updates when operations added/removed
+- Test retry triggers actual sync
+- Test delete removes from IndexedDB
+- Test queue persistence across page reloads
 
-**E2E Tests (3+ scenarios):**
+**Manual Testing:**
 
-- Complete offline workflow
-- Conflict resolution flow
-- Storage cleanup flow
+- Go offline, create form submissions and upload photos
+- Navigate to /sync/queue
+- Verify all operations listed with correct metadata
+- Test retry individual operation
+- Test delete operation
+- Verify priority sorting (compliance forms at top)
 
 ## Evidence Requirements
 
-- [ ] Screenshot: Test coverage report (>80%)
-- [ ] Screenshot: All offline tests passing
-- [ ] Screenshot: E2E test execution video
-- [ ] Test Results: Vitest output showing all tests pass
-- [ ] Test Results: Playwright E2E test report
+- [ ] Screenshot: Sync queue with multiple operations (different types, priorities)
+- [ ] Screenshot: Retry operation in progress
+- [ ] Screenshot: Delete confirmation modal
+- [ ] Screenshot: Empty queue state
+- [ ] Test Results: Unit tests for queue management (>80% coverage)
+- [ ] Performance: Queue load time <500ms for 100 items
 
 ## Success Criteria
 
-Offline experience tests are complete when:
+Sync queue management is complete when:
 
-- All unit tests passing (>25 tests)
-- All integration tests passing (>10 tests)
-- All E2E tests passing (>3 scenarios)
-- Test coverage >80%
+- All pending operations displayed in priority order
+- Retry and delete functionality working
+- All tests passing
 - Evidence collected and documented
+- Mobile responsive design verified
 
 ---
 

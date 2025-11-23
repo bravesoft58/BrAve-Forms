@@ -1,315 +1,409 @@
-# ISSUE-151: Form Validation Rules Editor (3h)
+# ISSUE-151: Field Library Component (4h)
 
-**Priority:** P1
+**Priority:** P0
 **Phase:** Phase 5 - Form Builder
-**Estimated Hours:** 3
-**Dependencies:** ISSUE-148
+**Estimated Hours:** 4
+**Dependencies:** ISSUE-161 (Form Builder Architecture)
 **Sprint:** Sprint 5
 
 ---
 
 ## Objective
 
-Create a comprehensive validation rules editor allowing form builders to configure advanced validation rules, error messages, and EPA-compliant validation for construction forms.
+Create a comprehensive field library component displaying all 15 available field types with drag-to-add functionality for the form builder canvas, optimized for construction forms.
 
 ## Tasks
 
-- [ ] Create ValidationRulesEditor component
-- [ ] Implement validation rule types (required, regex pattern, min/max, custom)
-- [ ] Create custom error message editor
-- [ ] Implement cross-field validation rules
-- [ ] Add EPA-compliant validation templates (inspector name, date, GPS)
-- [ ] Create validation preview and testing interface
-- [ ] Sync validation rules with Valtio store
-- [ ] Add unit tests for validation logic
+- [ ] Create FieldLibrary component with searchable palette
+- [ ] Create FieldTypeCard component for each field type
+- [ ] Implement drag source with @dnd-kit/core
+- [ ] Create field type categories (Input, Selection, Files, Compliance, Advanced)
+- [ ] Add field type icons and descriptions
+- [ ] Implement field search/filter functionality
+- [ ] Create field preview on hover
+- [ ] Add field usage examples tooltip
+- [ ] Add unit tests for field library
 
 ## Technical Details
 
 **Libraries/Dependencies:**
 
-- Zod (schema validation)
-- Valtio (form builder state)
-- Mantine components (TextInput, Textarea, Select)
+- @dnd-kit/core (drag-and-drop)
+- Mantine components (Card, TextInput, Accordion, Tooltip)
+- @tabler/icons-react (field type icons)
+
+**15 Field Types:**
+
+1. **Input Fields:** Text, Number, Email, Phone
+2. **Selection Fields:** Dropdown, Radio, Checkbox, Multi-select
+3. **File Fields:** Photo Upload, Signature Pad, File Upload
+4. **Compliance Fields:** Inspector Name, Date/Time, GPS Location
+5. **Advanced:** Calculated Field
 
 **Code Example:**
 
 ```typescript
 'use client';
 
-import { Stack, TextInput, Textarea, Select, Switch, Card, Text, Button, Group } from '@mantine/core';
-import { z } from 'zod';
-import { useSnapshot } from 'valtio';
-import { formBuilderStore, updateField } from './store';
+import { useState } from 'react';
+import { useDraggable } from '@dnd-kit/core';
+import { Card, Stack, TextInput, Accordion, Group, Text, Tooltip, Badge } from '@mantine/core';
+import {
+  IconTextSize,
+  IconNumbers,
+  IconAt,
+  IconPhone,
+  IconChevronDown,
+  IconCircle,
+  IconSquareCheck,
+  IconPhoto,
+  IconSignature,
+  IconFile,
+  IconUser,
+  IconCalendar,
+  IconMapPin,
+  IconCalculator,
+  IconSearch,
+} from '@tabler/icons-react';
 
-export interface ValidationRule {
+export interface FieldType {
   id: string;
-  type: 'required' | 'pattern' | 'min' | 'max' | 'minLength' | 'maxLength' | 'email' | 'phone' | 'custom';
-  value?: string | number;
-  message: string;
+  name: string;
+  icon: React.ReactNode;
+  category: 'input' | 'selection' | 'files' | 'compliance' | 'advanced';
+  description: string;
+  example: string;
+  validation?: string[];
 }
 
-// Validation Rules Editor
-export function ValidationRulesEditor({ fieldId }: { fieldId: string }) {
-  const snap = useSnapshot(formBuilderStore);
-  const field = snap.fields.find(f => f.id === fieldId);
+const fieldTypes: FieldType[] = [
+  // Input Fields
+  {
+    id: 'text',
+    name: 'Text Input',
+    icon: <IconTextSize size={20} />,
+    category: 'input',
+    description: 'Single-line text input for short answers',
+    example: 'Site address, equipment ID, notes',
+    validation: ['required', 'minLength', 'maxLength', 'pattern'],
+  },
+  {
+    id: 'number',
+    name: 'Number Input',
+    icon: <IconNumbers size={20} />,
+    category: 'input',
+    description: 'Numeric input with min/max constraints',
+    example: 'Temperature, quantity, measurements',
+    validation: ['required', 'min', 'max', 'integer'],
+  },
+  {
+    id: 'email',
+    name: 'Email Input',
+    icon: <IconAt size={20} />,
+    category: 'input',
+    description: 'Email address with validation',
+    example: 'Contact email, notification address',
+    validation: ['required', 'email'],
+  },
+  {
+    id: 'phone',
+    name: 'Phone Input',
+    icon: <IconPhone size={20} />,
+    category: 'input',
+    description: 'Phone number with formatting',
+    example: 'Contact phone, emergency number',
+    validation: ['required', 'phone'],
+  },
 
-  if (!field) return null;
+  // Selection Fields
+  {
+    id: 'dropdown',
+    name: 'Dropdown',
+    icon: <IconChevronDown size={20} />,
+    category: 'selection',
+    description: 'Single selection from dropdown',
+    example: 'Weather condition, inspection type',
+    validation: ['required'],
+  },
+  {
+    id: 'radio',
+    name: 'Radio Buttons',
+    icon: <IconCircle size={20} />,
+    category: 'selection',
+    description: 'Single selection from visible options',
+    example: 'Pass/Fail, Yes/No/NA',
+    validation: ['required'],
+  },
+  {
+    id: 'checkbox',
+    name: 'Checkbox',
+    icon: <IconSquareCheck size={20} />,
+    category: 'selection',
+    description: 'Boolean yes/no selection',
+    example: 'Acknowledgment, compliance confirmation',
+    validation: ['required'],
+  },
+  {
+    id: 'multiselect',
+    name: 'Multi-Select',
+    icon: <IconSquareCheck size={20} />,
+    category: 'selection',
+    description: 'Multiple selections from list',
+    example: 'BMPs installed, deficiencies found',
+    validation: ['required', 'minSelections', 'maxSelections'],
+  },
 
-  const [rules, setRules] = useState<ValidationRule[]>(field.validationRules || []);
+  // File Fields
+  {
+    id: 'photo',
+    name: 'Photo Upload',
+    icon: <IconPhoto size={20} />,
+    category: 'files',
+    description: 'Camera photo with GPS EXIF',
+    example: 'Site photos, deficiency evidence',
+    validation: ['required', 'maxSize', 'maxCount'],
+  },
+  {
+    id: 'signature',
+    name: 'Signature Pad',
+    icon: <IconSignature size={20} />,
+    category: 'files',
+    description: 'Digital signature capture',
+    example: 'Inspector signature, approval',
+    validation: ['required'],
+  },
+  {
+    id: 'file',
+    name: 'File Upload',
+    icon: <IconFile size={20} />,
+    category: 'files',
+    description: 'Document or file attachment',
+    example: 'SWPPP, lab reports, certifications',
+    validation: ['required', 'fileType', 'maxSize'],
+  },
 
-  const addRule = (type: ValidationRule['type']) => {
-    const defaultMessages = {
-      required: 'This field is required',
-      pattern: 'Invalid format',
-      min: 'Value must be at least ${value}',
-      max: 'Value must be at most ${value}',
-      minLength: 'Must be at least ${value} characters',
-      maxLength: 'Must be at most ${value} characters',
-      email: 'Invalid email address',
-      phone: 'Invalid phone number',
-      custom: 'Validation failed',
-    };
+  // Compliance Fields
+  {
+    id: 'inspector',
+    name: 'Inspector Name',
+    icon: <IconUser size={20} />,
+    category: 'compliance',
+    description: 'Auto-filled from Clerk user',
+    example: 'Inspector name for EPA compliance',
+    validation: ['required'],
+  },
+  {
+    id: 'datetime',
+    name: 'Date/Time',
+    icon: <IconCalendar size={20} />,
+    category: 'compliance',
+    description: 'Date and time picker',
+    example: 'Inspection date, incident time',
+    validation: ['required', 'minDate', 'maxDate'],
+  },
+  {
+    id: 'gps',
+    name: 'GPS Location',
+    icon: <IconMapPin size={20} />,
+    category: 'compliance',
+    description: 'Auto-captured GPS coordinates',
+    example: 'Inspection location, deficiency location',
+    validation: ['required', 'accuracy'],
+  },
 
-    const newRule: ValidationRule = {
-      id: `rule-${Date.now()}`,
-      type,
-      message: defaultMessages[type],
-    };
+  // Advanced Fields
+  {
+    id: 'calculated',
+    name: 'Calculated Field',
+    icon: <IconCalculator size={20} />,
+    category: 'advanced',
+    description: 'Computed value from other fields',
+    example: 'Total quantity, area calculation',
+    validation: [],
+  },
+];
 
-    const updatedRules = [...rules, newRule];
-    setRules(updatedRules);
-    updateField(fieldId, { validationRules: updatedRules });
-  };
+// Draggable Field Type Card
+function FieldTypeCard({ fieldType }: { fieldType: FieldType }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `field-${fieldType.id}`,
+    data: { fieldType },
+  });
 
-  const updateRule = (ruleId: string, updates: Partial<ValidationRule>) => {
-    const updatedRules = rules.map(r =>
-      r.id === ruleId ? { ...r, ...updates } : r
-    );
-    setRules(updatedRules);
-    updateField(fieldId, { validationRules: updatedRules });
-  };
+  return (
+    <Card
+      ref={setNodeRef}
+      withBorder
+      padding="sm"
+      style={{
+        cursor: 'grab',
+        opacity: isDragging ? 0.5 : 1,
+        userSelect: 'none',
+      }}
+      {...attributes}
+      {...listeners}
+    >
+      <Group gap="xs" wrap="nowrap">
+        {fieldType.icon}
+        <div style={{ flex: 1 }}>
+          <Group gap="xs">
+            <Text size="sm" fw={500}>{fieldType.name}</Text>
+            {fieldType.validation?.includes('required') && (
+              <Badge size="xs" color="red">Required</Badge>
+            )}
+          </Group>
+          <Text size="xs" c="dimmed" lineClamp={1}>
+            {fieldType.description}
+          </Text>
+        </div>
+      </Group>
 
-  const removeRule = (ruleId: string) => {
-    const updatedRules = rules.filter(r => r.id !== ruleId);
-    setRules(updatedRules);
-    updateField(fieldId, { validationRules: updatedRules });
-  };
+      <Tooltip
+        label={
+          <div>
+            <Text size="xs" fw={500} mb={4}>Example Uses:</Text>
+            <Text size="xs">{fieldType.example}</Text>
+            {fieldType.validation && fieldType.validation.length > 0 && (
+              <>
+                <Text size="xs" fw={500} mt={8} mb={4}>Available Validation:</Text>
+                <Text size="xs">{fieldType.validation.join(', ')}</Text>
+              </>
+            )}
+          </div>
+        }
+        position="right"
+        withArrow
+      >
+        <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }} />
+      </Tooltip>
+    </Card>
+  );
+}
 
-  // EPA Compliance Template
-  const applyEPATemplate = () => {
-    const epaRules: ValidationRule[] = [
-      {
-        id: 'epa-required',
-        type: 'required',
-        message: 'Required for EPA compliance',
-      },
-      {
-        id: 'epa-inspector',
-        type: 'pattern',
-        value: '^[A-Za-z\\s]+ [A-Za-z\\s]+$',
-        message: 'Inspector name must be full name (First Last)',
-      },
-    ];
-    setRules(epaRules);
-    updateField(fieldId, { validationRules: epaRules });
+// Field Library Component
+export function FieldLibrary() {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter fields by search query
+  const filteredFields = fieldTypes.filter(field =>
+    field.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    field.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    field.example.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Group by category
+  const groupedFields = filteredFields.reduce((acc, field) => {
+    if (!acc[field.category]) {
+      acc[field.category] = [];
+    }
+    acc[field.category].push(field);
+    return acc;
+  }, {} as Record<string, FieldType[]>);
+
+  const categoryLabels = {
+    input: 'Input Fields',
+    selection: 'Selection Fields',
+    files: 'File Upload Fields',
+    compliance: 'Compliance Fields',
+    advanced: 'Advanced Fields',
   };
 
   return (
     <Card withBorder padding="md">
       <Stack gap="md">
         <div>
-          <Text size="sm" fw={600}>Validation Rules</Text>
-          <Text size="xs" c="dimmed">Configure validation and error messages</Text>
+          <Text size="lg" fw={600} mb="xs">Field Library</Text>
+          <Text size="xs" c="dimmed">Drag fields to the canvas to build your form</Text>
         </div>
 
-        <Stack gap="sm">
-          {rules.map(rule => (
-            <ValidationRuleEditor
-              key={rule.id}
-              rule={rule}
-              onUpdate={(updates) => updateRule(rule.id, updates)}
-              onRemove={() => removeRule(rule.id)}
-            />
+        <TextInput
+          placeholder="Search fields..."
+          leftSection={<IconSearch size={16} />}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+
+        <Accordion variant="separated" defaultValue="input">
+          {Object.entries(groupedFields).map(([category, fields]) => (
+            <Accordion.Item key={category} value={category}>
+              <Accordion.Control>
+                <Group gap="xs">
+                  <Text size="sm" fw={500}>{categoryLabels[category]}</Text>
+                  <Badge size="sm" variant="light">{fields.length}</Badge>
+                </Group>
+              </Accordion.Control>
+              <Accordion.Panel>
+                <Stack gap="xs">
+                  {fields.map(field => (
+                    <FieldTypeCard key={field.id} fieldType={field} />
+                  ))}
+                </Stack>
+              </Accordion.Panel>
+            </Accordion.Item>
           ))}
-        </Stack>
+        </Accordion>
 
-        <Select
-          placeholder="Add validation rule"
-          data={[
-            { value: 'required', label: 'Required' },
-            { value: 'pattern', label: 'Pattern (Regex)' },
-            { value: 'minLength', label: 'Minimum Length' },
-            { value: 'maxLength', label: 'Maximum Length' },
-            { value: 'min', label: 'Minimum Value' },
-            { value: 'max', label: 'Maximum Value' },
-            { value: 'email', label: 'Email' },
-            { value: 'phone', label: 'Phone' },
-            { value: 'custom', label: 'Custom Validation' },
-          ]}
-          onChange={(value) => value && addRule(value as ValidationRule['type'])}
-        />
-
-        {field.type === 'inspector' && (
-          <Button variant="light" size="xs" onClick={applyEPATemplate}>
-            Apply EPA Compliance Template
-          </Button>
+        {filteredFields.length === 0 && (
+          <Text size="sm" c="dimmed" ta="center" py="xl">
+            No fields match "{searchQuery}"
+          </Text>
         )}
       </Stack>
     </Card>
   );
 }
 
-// Individual Validation Rule Editor
-function ValidationRuleEditor({
-  rule,
-  onUpdate,
-  onRemove,
-}: {
-  rule: ValidationRule;
-  onUpdate: (updates: Partial<ValidationRule>) => void;
-  onRemove: () => void;
-}) {
-  return (
-    <Card withBorder padding="sm">
-      <Stack gap="xs">
-        <Group justify="space-between">
-          <Text size="sm" fw={500}>{rule.type}</Text>
-          <ActionIcon variant="subtle" color="red" onClick={onRemove}>
-            <IconTrash size={14} />
-          </ActionIcon>
-        </Group>
-
-        {['min', 'max', 'minLength', 'maxLength', 'pattern'].includes(rule.type) && (
-          <TextInput
-            label={rule.type === 'pattern' ? 'Regex Pattern' : 'Value'}
-            placeholder={rule.type === 'pattern' ? '^[A-Z]{3}-[0-9]{4}$' : '0'}
-            value={rule.value?.toString() || ''}
-            onChange={(e) => onUpdate({ value: e.target.value })}
-          />
-        )}
-
-        <Textarea
-          label="Error Message"
-          placeholder="Custom error message shown to field workers"
-          value={rule.message}
-          onChange={(e) => onUpdate({ message: e.target.value })}
-          minRows={2}
-        />
-      </Stack>
-    </Card>
-  );
-}
-
-// Generate Zod schema from validation rules
-export function generateZodSchema(field: FormField): z.ZodTypeAny {
-  let schema: z.ZodTypeAny;
-
-  // Base schema by field type
-  switch (field.type) {
-    case 'text':
-    case 'textarea':
-      schema = z.string();
-      break;
-    case 'number':
-      schema = z.number();
-      break;
-    case 'email':
-      schema = z.string().email();
-      break;
-    case 'phone':
-      schema = z.string().regex(/^\d{3}-\d{3}-\d{4}$/);
-      break;
-    default:
-      schema = z.any();
-  }
-
-  // Apply validation rules
-  field.validationRules?.forEach(rule => {
-    switch (rule.type) {
-      case 'required':
-        if (schema instanceof z.ZodString) {
-          schema = schema.min(1, rule.message);
-        }
-        break;
-      case 'pattern':
-        if (schema instanceof z.ZodString && rule.value) {
-          schema = schema.regex(new RegExp(rule.value), rule.message);
-        }
-        break;
-      case 'minLength':
-        if (schema instanceof z.ZodString && typeof rule.value === 'number') {
-          schema = schema.min(rule.value, rule.message);
-        }
-        break;
-      case 'maxLength':
-        if (schema instanceof z.ZodString && typeof rule.value === 'number') {
-          schema = schema.max(rule.value, rule.message);
-        }
-        break;
-      case 'min':
-        if (schema instanceof z.ZodNumber && typeof rule.value === 'number') {
-          schema = schema.min(rule.value, rule.message);
-        }
-        break;
-      case 'max':
-        if (schema instanceof z.ZodNumber && typeof rule.value === 'number') {
-          schema = schema.max(rule.value, rule.message);
-        }
-        break;
-    }
-  });
-
-  return schema;
-}
+export { fieldTypes };
 ```
 
 ## Acceptance Criteria
 
-- [ ] Validation rules editor displays for each field
-- [ ] All validation rule types working (required, pattern, min/max, etc.)
-- [ ] Custom error messages editable
-- [ ] EPA compliance template available for inspector fields
-- [ ] Validation preview shows error messages
-- [ ] Zod schema generation from validation rules functional
-- [ ] Real-time updates to Valtio store
+- [ ] Field library displays all 15 field types
+- [ ] Fields organized into 5 categories (Input, Selection, Files, Compliance, Advanced)
+- [ ] Search functionality filters fields by name/description/example
+- [ ] Each field card shows icon, name, description
+- [ ] Hover tooltip shows example uses and validation options
+- [ ] Drag-to-add functionality working with @dnd-kit
+- [ ] Field cards show "Required" badge if validation available
+- [ ] Smooth drag visual feedback
 
 ## Testing Requirements
 
 **Unit Tests:**
 
-- Test validation rule add/edit/delete
-- Test Zod schema generation
-- Test EPA compliance template
-- Test error message customization
+- Test field library renders all 15 types
+- Test search filter functionality
+- Test category grouping
+- Test drag source setup
 
 **Integration Tests:**
 
-- Test validation in form preview
-- Test Valtio store updates
-- Test cross-field validation
+- Test drag-and-drop to canvas (in ISSUE-158)
+- Test field type metadata
 
 **Manual Testing:**
 
-- Add validation rules to various field types
-- Customize error messages
-- Apply EPA template to inspector field
-- Test validation in form preview
+- Search for various field types
+- Verify all categories expand/collapse
+- Test drag gesture on all field types
+- Verify tooltips display correctly
 
 ## Evidence Requirements
 
-- [ ] Screenshot: Validation rules editor
-- [ ] Screenshot: EPA compliance template
-- [ ] Screenshot: Custom error messages
-- [ ] Test Results: Validation tests (>80% coverage)
+- [ ] Screenshot: Field library with all categories
+- [ ] Screenshot: Search results
+- [ ] Screenshot: Field hover tooltip
+- [ ] Screenshot: Drag gesture visual feedback
+- [ ] Test Results: Field library tests (>80% coverage)
 
 ## Success Criteria
 
-Validation rules editor is complete when:
+Field library is complete when:
 
-- All rule types working
-- Custom error messages functional
-- EPA template applied correctly
-- Validation works in form preview
+- All 15 field types displayed
+- Search and category filtering working
+- Drag-to-add functional
+- Tooltips informative
 - All tests passing
 
 ---

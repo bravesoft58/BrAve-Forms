@@ -1,450 +1,508 @@
-# ISSUE-153: Form Templates Library (4h)
+# ISSUE-153: Field Properties Panel (5h)
 
-**Priority:** P1
+**Priority:** P0
 **Phase:** Phase 5 - Form Builder
-**Estimated Hours:** 4
-**Dependencies:** ISSUE-152
+**Estimated Hours:** 5
+**Dependencies:** ISSUE-158
 **Sprint:** Sprint 5
 
 ---
 
 ## Objective
 
-Create a form templates library with 50+ pre-built EPA/OSHA compliance forms and custom templates, allowing form builders to start from templates instead of building from scratch.
+Create a comprehensive field properties panel allowing form builders to configure field settings, validation rules, options, and advanced properties for each field type.
 
 ## Tasks
 
-- [ ] Create FormTemplatesLibrary component
-- [ ] Create 10 EPA CGP templates (daily inspection, rain event, etc.)
-- [ ] Create 10 OSHA templates (safety inspection, incident report, etc.)
-- [ ] Create 10 general construction templates (daily log, equipment checklist, etc.)
-- [ ] Create template preview functionality
-- [ ] Implement "Use Template" button to load template into canvas
-- [ ] Add template search and filtering
-- [ ] Create custom template saving functionality
-- [ ] Add unit tests for template logic
+- [ ] Create FieldPropertiesPanel component
+- [ ] Create property editors for common properties (label, description, required, placeholder)
+- [ ] Create type-specific property editors (dropdown options, number min/max, file types)
+- [ ] Create validation rule editors (required, min/max length, pattern, custom)
+- [ ] Implement conditional property visibility based on field type
+- [ ] Add real-time property updates with Valtio
+- [ ] Create property reset to defaults button
+- [ ] Add property validation and error handling
+- [ ] Add unit tests for properties panel
 
 ## Technical Details
 
 **Libraries/Dependencies:**
 
+- React Hook Form + Zod (property form validation)
 - Valtio (form builder state)
-- Mantine components (Card, Grid, Badge, TextInput)
-- JSON (template storage format)
+- Mantine Form components (TextInput, NumberInput, Switch, MultiSelect)
+- @tabler/icons-react (property icons)
 
 **Code Example:**
 
 ```typescript
 'use client';
 
-import { useState } from 'react';
-import { SimpleGrid, Card, Stack, Text, Badge, Button, TextInput, Group, Modal } from '@mantine/core';
-import { IconSearch, IconTemplate, IconCheck, IconStar } from '@tabler/icons-react';
-import { formBuilderStore, loadTemplate } from './store';
-import type { FormTemplate } from './types';
+import { useEffect } from 'react';
+import { useForm, zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import {
+  Stack,
+  TextInput,
+  Textarea,
+  NumberInput,
+  Switch,
+  Select,
+  MultiSelect,
+  Button,
+  Accordion,
+  Group,
+  Text,
+  Divider,
+  ActionIcon,
+} from '@mantine/core';
+import { IconPlus, IconTrash, IconRefresh } from '@tabler/icons-react';
+import { useSnapshot } from 'valtio';
+import { formBuilderStore, updateField } from './store';
+import type { FormField } from './types';
 
-// Pre-built EPA Templates
-const epaTemplates: FormTemplate[] = [
-  {
-    id: 'epa-daily-inspection',
-    name: 'EPA CGP Daily Inspection',
-    description: 'Daily construction site inspection per EPA CGP requirements',
-    category: 'EPA Compliance',
-    fields: [
-      {
-        id: 'inspector',
-        type: 'inspector',
-        label: 'Inspector Name',
-        required: true,
-        validation: [{ type: 'required', message: 'Inspector name required for EPA compliance' }],
-      },
-      {
-        id: 'inspection-date',
-        type: 'datetime',
-        label: 'Inspection Date/Time',
-        required: true,
-      },
-      {
-        id: 'gps',
-        type: 'gps',
-        label: 'Inspection Location',
-        required: true,
-      },
-      {
-        id: 'weather',
-        type: 'dropdown',
-        label: 'Weather Condition',
-        required: true,
-        options: [
-          { label: 'Clear', value: 'clear' },
-          { label: 'Cloudy', value: 'cloudy' },
-          { label: 'Raining', value: 'raining' },
-          { label: 'Snow', value: 'snow' },
-        ],
-      },
-      {
-        id: 'rain-24h',
-        type: 'number',
-        label: 'Rain in Last 24 Hours (inches)',
-        required: true,
-        validation: [
-          { type: 'min', value: 0, message: 'Cannot be negative' },
-          { type: 'max', value: 20, message: 'Unrealistic value' },
-        ],
-      },
-      {
-        id: 'rain-trigger',
-        type: 'radio',
-        label: 'Did rain exceed 0.25 inches?',
-        required: true,
-        options: [
-          { label: 'Yes (inspection required)', value: 'yes' },
-          { label: 'No', value: 'no' },
-        ],
-        conditionalRules: [
-          {
-            id: 'rain-condition',
-            targetFieldId: 'rain-trigger',
-            action: 'show',
-            logic: 'AND',
-            conditions: [
-              {
-                id: 'cond-1',
-                fieldId: 'rain-24h',
-                operator: 'greater_than',
-                value: 0.25,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'bmps-inspected',
-        type: 'multiselect',
-        label: 'BMPs Inspected',
-        required: true,
-        options: [
-          { label: 'Silt Fence', value: 'silt-fence' },
-          { label: 'Inlet Protection', value: 'inlet-protection' },
-          { label: 'Stabilized Construction Entrance', value: 'entrance' },
-          { label: 'Sediment Basin', value: 'sediment-basin' },
-          { label: 'Check Dam', value: 'check-dam' },
-        ],
-      },
-      {
-        id: 'deficiencies',
-        type: 'textarea',
-        label: 'Deficiencies Found',
-        required: false,
-        placeholder: 'Describe any deficiencies requiring corrective action',
-      },
-      {
-        id: 'corrective-action',
-        type: 'textarea',
-        label: 'Corrective Action Taken',
-        required: false,
-        conditionalRules: [
-          {
-            id: 'corrective-condition',
-            targetFieldId: 'corrective-action',
-            action: 'show',
-            logic: 'AND',
-            conditions: [
-              {
-                id: 'cond-deficiency',
-                fieldId: 'deficiencies',
-                operator: 'is_not_empty',
-                value: '',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'photos',
-        type: 'photo',
-        label: 'Inspection Photos',
-        required: true,
-        validation: [
-          { type: 'minCount', value: 3, message: 'At least 3 photos required' },
-          { type: 'maxCount', value: 20, message: 'Maximum 20 photos' },
-        ],
-      },
-      {
-        id: 'signature',
-        type: 'signature',
-        label: 'Inspector Signature',
-        required: true,
-      },
-    ],
-  },
-  {
-    id: 'epa-rain-event',
-    name: 'EPA CGP Rain Event Inspection',
-    description: '0.25" rain event inspection within 24 hours',
-    category: 'EPA Compliance',
-    fields: [
-      // ... similar structure for rain event inspection
-    ],
-  },
-  // ... 8 more EPA templates
-];
+// Property schema based on field type
+const basePropertySchema = z.object({
+  label: z.string().min(1, 'Label required'),
+  description: z.string().optional(),
+  required: z.boolean(),
+  placeholder: z.string().optional(),
+});
 
-// OSHA Templates
-const oshaTemplates: FormTemplate[] = [
-  {
-    id: 'osha-safety-inspection',
-    name: 'OSHA Daily Safety Inspection',
-    description: 'Daily safety inspection per OSHA requirements',
-    category: 'OSHA Compliance',
-    fields: [
-      // ... OSHA safety inspection fields
-    ],
-  },
-  // ... 9 more OSHA templates
-];
+const textPropertySchema = basePropertySchema.extend({
+  minLength: z.number().min(0).optional(),
+  maxLength: z.number().min(1).optional(),
+  pattern: z.string().optional(),
+  defaultValue: z.string().optional(),
+});
 
-// General Construction Templates
-const constructionTemplates: FormTemplate[] = [
-  {
-    id: 'daily-log',
-    name: 'Daily Construction Log',
-    description: 'Track daily activities, weather, and progress',
-    category: 'General',
-    fields: [
-      // ... daily log fields
-    ],
-  },
-  // ... 9 more construction templates
-];
+const numberPropertySchema = basePropertySchema.extend({
+  min: z.number().optional(),
+  max: z.number().optional(),
+  step: z.number().min(0).optional(),
+  defaultValue: z.number().optional(),
+});
 
-const allTemplates = [...epaTemplates, ...oshaTemplates, ...constructionTemplates];
+const selectionPropertySchema = basePropertySchema.extend({
+  options: z.array(z.object({
+    label: z.string().min(1, 'Option label required'),
+    value: z.string().min(1, 'Option value required'),
+  })).min(1, 'At least one option required'),
+  defaultValue: z.string().optional(),
+});
 
-// Form Templates Library Component
-export function FormTemplatesLibrary() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [previewTemplate, setPreviewTemplate] = useState<FormTemplate | null>(null);
+// Field Properties Panel
+export function FieldPropertiesPanel() {
+  const snap = useSnapshot(formBuilderStore);
+  const selectedField = snap.fields.find(f => f.id === snap.selectedFieldId);
 
-  const filteredTemplates = allTemplates.filter(template => {
-    const matchesSearch =
-      template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesCategory =
-      !selectedCategory || template.category === selectedCategory;
-
-    return matchesSearch && matchesCategory;
-  });
-
-  const categories = Array.from(new Set(allTemplates.map(t => t.category)));
-
-  const useTemplate = (template: FormTemplate) => {
-    if (confirm(`Load template "${template.name}"? This will replace current form.`)) {
-      loadTemplate(template);
-    }
-  };
+  if (!selectedField) {
+    return (
+      <Card withBorder padding="xl" ta="center">
+        <Stack align="center" gap="xs">
+          <IconSettings size={48} color="gray" />
+          <Text size="sm" c="dimmed">Select a field to edit properties</Text>
+        </Stack>
+      </Card>
+    );
+  }
 
   return (
-    <Stack gap="md">
+    <Card withBorder padding="md">
+      <Stack gap="md">
+        <Group justify="space-between">
+          <div>
+            <Text size="lg" fw={600}>Field Properties</Text>
+            <Text size="xs" c="dimmed">{selectedField.type} field</Text>
+          </div>
+          <ActionIcon
+            variant="subtle"
+            onClick={() => resetFieldProperties(selectedField.id)}
+            aria-label="Reset to defaults"
+          >
+            <IconRefresh size={16} />
+          </ActionIcon>
+        </Group>
+
+        <Divider />
+
+        <Accordion variant="separated" defaultValue={['basic', 'validation']}>
+          <Accordion.Item value="basic">
+            <Accordion.Control>Basic Properties</Accordion.Control>
+            <Accordion.Panel>
+              <BasicPropertiesEditor field={selectedField} />
+            </Accordion.Panel>
+          </Accordion.Item>
+
+          <Accordion.Item value="validation">
+            <Accordion.Control>Validation Rules</Accordion.Control>
+            <Accordion.Panel>
+              <ValidationRulesEditor field={selectedField} />
+            </Accordion.Panel>
+          </Accordion.Item>
+
+          {['dropdown', 'radio', 'checkbox', 'multiselect'].includes(selectedField.type) && (
+            <Accordion.Item value="options">
+              <Accordion.Control>Options</Accordion.Control>
+              <Accordion.Panel>
+                <OptionsEditor field={selectedField} />
+              </Accordion.Panel>
+            </Accordion.Item>
+          )}
+
+          {selectedField.type === 'calculated' && (
+            <Accordion.Item value="calculation">
+              <Accordion.Control>Calculation Formula</Accordion.Control>
+              <Accordion.Panel>
+                <CalculationEditor field={selectedField} />
+              </Accordion.Panel>
+            </Accordion.Item>
+          )}
+
+          <Accordion.Item value="advanced">
+            <Accordion.Control>Advanced Settings</Accordion.Control>
+            <Accordion.Panel>
+              <AdvancedPropertiesEditor field={selectedField} />
+            </Accordion.Panel>
+          </Accordion.Item>
+        </Accordion>
+      </Stack>
+    </Card>
+  );
+}
+
+// Basic Properties Editor
+function BasicPropertiesEditor({ field }: { field: FormField }) {
+  const form = useForm({
+    resolver: zodResolver(basePropertySchema),
+    defaultValues: {
+      label: field.label,
+      description: field.description || '',
+      required: field.required,
+      placeholder: field.placeholder || '',
+    },
+  });
+
+  useEffect(() => {
+    const subscription = form.watch((values) => {
+      updateField(field.id, values as Partial<FormField>);
+    });
+    return () => subscription.unsubscribe();
+  }, [field.id, form]);
+
+  return (
+    <Stack gap="sm">
       <TextInput
-        placeholder="Search templates..."
-        leftSection={<IconSearch size={16} />}
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        label="Field Label"
+        placeholder="e.g., Inspector Name"
+        {...form.register('label')}
+        error={form.formState.errors.label?.message}
       />
 
-      <Group gap="xs">
-        <Button
-          size="xs"
-          variant={!selectedCategory ? 'filled' : 'light'}
-          onClick={() => setSelectedCategory(null)}
-        >
-          All ({allTemplates.length})
-        </Button>
-        {categories.map(category => (
-          <Button
-            key={category}
-            size="xs"
-            variant={selectedCategory === category ? 'filled' : 'light'}
-            onClick={() => setSelectedCategory(category)}
-          >
-            {category} ({allTemplates.filter(t => t.category === category).length})
-          </Button>
-        ))}
-      </Group>
+      <Textarea
+        label="Description"
+        placeholder="Help text for field workers"
+        minRows={2}
+        {...form.register('description')}
+      />
 
-      <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
-        {filteredTemplates.map(template => (
-          <Card key={template.id} withBorder padding="md">
-            <Stack gap="xs">
-              <Group justify="space-between">
-                <IconTemplate size={20} />
-                <Badge size="sm">{template.category}</Badge>
-              </Group>
+      <TextInput
+        label="Placeholder"
+        placeholder="e.g., Enter your name"
+        {...form.register('placeholder')}
+      />
 
-              <div>
-                <Text size="sm" fw={600}>{template.name}</Text>
-                <Text size="xs" c="dimmed" lineClamp={2}>
-                  {template.description}
-                </Text>
-              </div>
-
-              <Group gap="xs" mt="xs">
-                <Text size="xs" c="dimmed">
-                  {template.fields.length} fields
-                </Text>
-              </Group>
-
-              <Group gap="xs">
-                <Button
-                  size="xs"
-                  variant="light"
-                  onClick={() => setPreviewTemplate(template)}
-                >
-                  Preview
-                </Button>
-                <Button
-                  size="xs"
-                  leftSection={<IconCheck size={14} />}
-                  onClick={() => useTemplate(template)}
-                >
-                  Use Template
-                </Button>
-              </Group>
-            </Stack>
-          </Card>
-        ))}
-      </SimpleGrid>
-
-      {filteredTemplates.length === 0 && (
-        <Text size="sm" c="dimmed" ta="center" py="xl">
-          No templates match "{searchQuery}"
-        </Text>
-      )}
-
-      {/* Template Preview Modal */}
-      <Modal
-        opened={!!previewTemplate}
-        onClose={() => setPreviewTemplate(null)}
-        title={previewTemplate?.name}
-        size="lg"
-      >
-        {previewTemplate && (
-          <Stack gap="md">
-            <Text size="sm">{previewTemplate.description}</Text>
-
-            <Card withBorder padding="md" bg="gray.0">
-              <Stack gap="xs">
-                <Text size="sm" fw={600}>Fields ({previewTemplate.fields.length})</Text>
-                {previewTemplate.fields.map(field => (
-                  <Group key={field.id} gap="xs">
-                    <Badge size="xs">{field.type}</Badge>
-                    <Text size="xs">
-                      {field.label}
-                      {field.required && <span style={{ color: 'red' }}> *</span>}
-                    </Text>
-                  </Group>
-                ))}
-              </Stack>
-            </Card>
-
-            <Button onClick={() => useTemplate(previewTemplate)}>
-              Use This Template
-            </Button>
-          </Stack>
-        )}
-      </Modal>
+      <Switch
+        label="Required field"
+        description="Field workers must fill this field"
+        {...form.register('required')}
+      />
     </Stack>
   );
 }
 
-// Save current form as custom template
-export function SaveAsTemplate() {
-  const snap = useSnapshot(formBuilderStore);
+// Validation Rules Editor
+function ValidationRulesEditor({ field }: { field: FormField }) {
+  const form = useForm({
+    defaultValues: {
+      minLength: field.validation?.minLength,
+      maxLength: field.validation?.maxLength,
+      min: field.validation?.min,
+      max: field.validation?.max,
+      pattern: field.validation?.pattern,
+    },
+  });
 
-  const saveTemplate = () => {
-    const templateName = prompt('Template name:');
-    if (!templateName) return;
+  useEffect(() => {
+    const subscription = form.watch((values) => {
+      updateField(field.id, {
+        validation: { ...field.validation, ...values },
+      });
+    });
+    return () => subscription.unsubscribe();
+  }, [field.id, form]);
 
-    const template: FormTemplate = {
-      id: `custom-${Date.now()}`,
-      name: templateName,
-      description: 'Custom template',
-      category: 'Custom',
-      fields: snap.fields,
-    };
+  return (
+    <Stack gap="sm">
+      {['text', 'textarea'].includes(field.type) && (
+        <>
+          <NumberInput
+            label="Minimum Length"
+            placeholder="No minimum"
+            min={0}
+            {...form.register('minLength')}
+          />
+          <NumberInput
+            label="Maximum Length"
+            placeholder="No maximum"
+            min={1}
+            {...form.register('maxLength')}
+          />
+          <TextInput
+            label="Pattern (Regex)"
+            placeholder="e.g., ^[A-Z]{3}-[0-9]{4}$"
+            description="Advanced: Regular expression for validation"
+            {...form.register('pattern')}
+          />
+        </>
+      )}
 
-    // Save to localStorage
-    const savedTemplates = JSON.parse(localStorage.getItem('customTemplates') || '[]');
-    savedTemplates.push(template);
-    localStorage.setItem('customTemplates', JSON.stringify(savedTemplates));
+      {field.type === 'number' && (
+        <>
+          <NumberInput
+            label="Minimum Value"
+            placeholder="No minimum"
+            {...form.register('min')}
+          />
+          <NumberInput
+            label="Maximum Value"
+            placeholder="No maximum"
+            {...form.register('max')}
+          />
+          <NumberInput
+            label="Step"
+            placeholder="1"
+            min={0}
+            step={0.1}
+            {...form.register('step')}
+          />
+        </>
+      )}
 
-    alert('Template saved!');
+      {field.type === 'photo' && (
+        <>
+          <NumberInput
+            label="Max File Size (MB)"
+            placeholder="10"
+            min={1}
+            max={100}
+            {...form.register('maxFileSize')}
+          />
+          <NumberInput
+            label="Max Photos"
+            placeholder="5"
+            min={1}
+            max={50}
+            {...form.register('maxCount')}
+          />
+        </>
+      )}
+    </Stack>
+  );
+}
+
+// Options Editor (for dropdown, radio, checkbox, multiselect)
+function OptionsEditor({ field }: { field: FormField }) {
+  const [options, setOptions] = useState(field.options || []);
+
+  const addOption = () => {
+    const newOption = { label: '', value: `option-${Date.now()}` };
+    const updatedOptions = [...options, newOption];
+    setOptions(updatedOptions);
+    updateField(field.id, { options: updatedOptions });
+  };
+
+  const updateOption = (index: number, updates: Partial<typeof options[0]>) => {
+    const updatedOptions = options.map((opt, i) =>
+      i === index ? { ...opt, ...updates } : opt
+    );
+    setOptions(updatedOptions);
+    updateField(field.id, { options: updatedOptions });
+  };
+
+  const removeOption = (index: number) => {
+    const updatedOptions = options.filter((_, i) => i !== index);
+    setOptions(updatedOptions);
+    updateField(field.id, { options: updatedOptions });
   };
 
   return (
-    <Button
-      variant="light"
-      leftSection={<IconStar size={16} />}
-      onClick={saveTemplate}
-      disabled={snap.fields.length === 0}
-    >
-      Save as Template
-    </Button>
+    <Stack gap="sm">
+      {options.map((option, index) => (
+        <Group key={index} gap="xs" wrap="nowrap">
+          <TextInput
+            placeholder="Option label"
+            value={option.label}
+            onChange={(e) => updateOption(index, { label: e.target.value })}
+            style={{ flex: 1 }}
+          />
+          <TextInput
+            placeholder="Value"
+            value={option.value}
+            onChange={(e) => updateOption(index, { value: e.target.value })}
+            style={{ flex: 1 }}
+          />
+          <ActionIcon
+            color="red"
+            variant="subtle"
+            onClick={() => removeOption(index)}
+            aria-label="Remove option"
+          >
+            <IconTrash size={16} />
+          </ActionIcon>
+        </Group>
+      ))}
+
+      <Button
+        variant="light"
+        leftSection={<IconPlus size={16} />}
+        onClick={addOption}
+      >
+        Add Option
+      </Button>
+    </Stack>
   );
+}
+
+// Calculation Editor (for calculated fields)
+function CalculationEditor({ field }: { field: FormField }) {
+  const snap = useSnapshot(formBuilderStore);
+
+  const availableFields = snap.fields
+    .filter(f => f.type === 'number' && f.id !== field.id)
+    .map(f => ({ value: f.id, label: f.label }));
+
+  return (
+    <Stack gap="sm">
+      <Textarea
+        label="Formula"
+        placeholder="e.g., SUM(field1, field2)"
+        description="Use SUM, AVG, MIN, MAX, ROUND functions"
+        value={field.calculation?.formula || ''}
+        onChange={(e) => updateField(field.id, {
+          calculation: { formula: e.target.value },
+        })}
+        minRows={3}
+      />
+
+      <MultiSelect
+        label="Referenced Fields"
+        placeholder="Select fields used in formula"
+        data={availableFields}
+        value={field.calculation?.referencedFields || []}
+        onChange={(values) => updateField(field.id, {
+          calculation: { ...field.calculation, referencedFields: values },
+        })}
+      />
+    </Stack>
+  );
+}
+
+// Advanced Properties Editor
+function AdvancedPropertiesEditor({ field }: { field: FormField }) {
+  return (
+    <Stack gap="sm">
+      <Switch
+        label="Read-only"
+        description="Field cannot be edited by field workers"
+        checked={field.readOnly || false}
+        onChange={(e) => updateField(field.id, { readOnly: e.currentTarget.checked })}
+      />
+
+      <Switch
+        label="Hidden"
+        description="Field is hidden but value is submitted"
+        checked={field.hidden || false}
+        onChange={(e) => updateField(field.id, { hidden: e.currentTarget.checked })}
+      />
+
+      <TextInput
+        label="CSS Class"
+        placeholder="custom-field-class"
+        description="Custom styling class name"
+        value={field.className || ''}
+        onChange={(e) => updateField(field.id, { className: e.target.value })}
+      />
+    </Stack>
+  );
+}
+
+// Reset field properties to defaults
+function resetFieldProperties(fieldId: string) {
+  if (confirm('Reset field to default properties?')) {
+    updateField(fieldId, {
+      label: 'New Field',
+      description: '',
+      required: false,
+      placeholder: '',
+      validation: {},
+      options: [],
+    });
+  }
 }
 ```
 
 ## Acceptance Criteria
 
-- [ ] Templates library displays 30+ pre-built templates
-- [ ] Templates organized by category (EPA, OSHA, General)
-- [ ] Search and filter functionality working
-- [ ] Template preview shows all fields
-- [ ] "Use Template" loads template into canvas
-- [ ] Custom template saving functional
-- [ ] Templates include proper validation rules
-- [ ] Templates include conditional logic where appropriate
+- [ ] Properties panel displays when field selected
+- [ ] Basic properties editor working (label, description, required, placeholder)
+- [ ] Validation rules editor shows type-specific rules
+- [ ] Options editor allows add/edit/delete options (dropdown, radio, etc.)
+- [ ] Calculation editor for calculated fields functional
+- [ ] Advanced settings editor working (read-only, hidden, CSS class)
+- [ ] Real-time updates to Valtio store
+- [ ] Reset to defaults button working
+- [ ] Property validation with error messages
 
 ## Testing Requirements
 
 **Unit Tests:**
 
-- Test template loading
-- Test template search/filter
-- Test custom template save
+- Test property form validation
+- Test update field in Valtio store
+- Test options add/edit/delete
+- Test reset to defaults
 
 **Integration Tests:**
 
-- Test load template to canvas
-- Test template preview
-- Test Valtio store updates
+- Test property panel with different field types
+- Test real-time updates to canvas preview
+- Test validation error handling
 
 **Manual Testing:**
 
-- Browse all templates
-- Search for specific templates
-- Preview template details
-- Load template into canvas
-- Save custom template
+- Edit properties for all 15 field types
+- Test validation rules for text/number fields
+- Add/remove options for dropdown/radio fields
+- Test calculation formula editor
+- Verify reset to defaults
 
 ## Evidence Requirements
 
-- [ ] Screenshot: Templates library grid
-- [ ] Screenshot: EPA template preview
-- [ ] Screenshot: Template loaded in canvas
-- [ ] Test Results: Templates tests (>80% coverage)
+- [ ] Screenshot: Properties panel for text field
+- [ ] Screenshot: Validation rules editor
+- [ ] Screenshot: Options editor with multiple options
+- [ ] Screenshot: Calculation formula editor
+- [ ] Test Results: Properties panel tests (>80% coverage)
 
 ## Success Criteria
 
-Form templates library is complete when:
+Field properties panel is complete when:
 
-- 30+ templates available
-- Search and filter working
-- Template preview functional
-- Load template working
-- Custom template save working
+- All property editors functional
+- Type-specific properties show correctly
+- Real-time updates working
+- Validation rules editable
 - All tests passing
 
 ---

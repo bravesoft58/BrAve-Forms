@@ -1,407 +1,398 @@
-# ISSUE-147: Form Canvas with Drag & Drop (5h)
+# ISSUE-147: Error Boundaries & Toast Notifications (3h)
 
 **Priority:** P0
-**Phase:** Phase 5 - Form Builder
-**Estimated Hours:** 5
-**Dependencies:** ISSUE-145, ISSUE-146
+**Phase:** Phase 4 - Polish & Testing
+**Estimated Hours:** 3
+**Dependencies:** Phase 1, 2, 3 complete
 **Sprint:** Sprint 5
 
 ---
 
 ## Objective
 
-Create the form canvas component with drag-and-drop field placement, reordering, deletion, and real-time form preview for building construction compliance forms.
+Implement comprehensive error handling with React Error Boundaries and user-friendly toast notifications for all Sprint 5 features to ensure field workers receive clear feedback on errors and successes.
 
 ## Tasks
 
-- [ ] Create FormCanvas component with drop zone
-- [ ] Implement drop target with @dnd-kit/core
-- [ ] Implement field reordering with @dnd-kit/sortable
-- [ ] Create FieldInstance component for placed fields
-- [ ] Add field selection and highlighting
-- [ ] Implement field deletion with confirmation
-- [ ] Create field duplicate functionality
-- [ ] Add visual drop indicators and feedback
-- [ ] Sync canvas state with Valtio store
-- [ ] Add unit tests for canvas logic
+- [ ] Create global error boundary component
+- [ ] Create feature-specific error boundaries (photos, sync, settings)
+- [ ] Implement toast notification system with Mantine
+- [ ] Add error toast notifications for all async failures
+- [ ] Add success toast notifications for all async successes
+- [ ] Create error fallback UI components
+- [ ] Implement error logging to Sentry
+- [ ] Add retry logic for transient errors
+- [ ] Add unit tests for error handling
 
 ## Technical Details
 
 **Libraries/Dependencies:**
 
-- @dnd-kit/core (drag-and-drop core)
-- @dnd-kit/sortable (reorderable lists)
-- @dnd-kit/utilities (CSS utilities)
-- Valtio (form builder state)
-- Mantine components (Card, ActionIcon, Menu, Tooltip)
+- React Error Boundary
+- Mantine Notifications (@mantine/notifications)
+- Sentry (error logging)
+- TanStack Query (error handling)
 
 **Code Example:**
 
 ```typescript
 'use client';
 
-import { useState } from 'react';
-import {
-  DndContext,
-  DragOverlay,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-  DragStartEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { Card, Stack, Group, ActionIcon, Menu, Text, Button } from '@mantine/core';
-import { IconGripVertical, IconTrash, IconCopy, IconSettings } from '@tabler/icons-react';
-import { useSnapshot } from 'valtio';
-import { formBuilderStore, addField, reorderFields, removeField, duplicateField, selectField } from './store';
-import type { FieldType } from './FieldLibrary';
+import { Component, ReactNode } from 'react';
+import { Button, Card, Stack, Text, Group } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
+import { IconAlertTriangle, IconCheck, IconX, IconRefresh } from '@tabler/icons-react';
+import * as Sentry from '@sentry/react';
 
-// Sortable Field Instance
-function SortableFieldInstance({ field, index }: { field: FormField, index: number }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: field.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  const snap = useSnapshot(formBuilderStore);
-  const isSelected = snap.selectedFieldId === field.id;
-
-  return (
-    <Card
-      ref={setNodeRef}
-      style={style}
-      withBorder
-      padding="md"
-      data-selected={isSelected}
-      onClick={() => selectField(field.id)}
-      sx={(theme) => ({
-        outline: isSelected ? `2px solid ${theme.colors.blue[6]}` : 'none',
-        outlineOffset: '2px',
-        cursor: 'pointer',
-        '&:hover': {
-          backgroundColor: theme.colors.gray[0],
-        },
-      })}
-    >
-      <Group gap="xs" wrap="nowrap">
-        <ActionIcon
-          variant="subtle"
-          {...attributes}
-          {...listeners}
-          style={{ cursor: 'grab' }}
-          aria-label="Drag to reorder"
-        >
-          <IconGripVertical size={16} />
-        </ActionIcon>
-
-        <div style={{ flex: 1 }}>
-          <Group gap="xs">
-            <Text size="sm" fw={500}>
-              {field.label || `${field.type} field`}
-            </Text>
-            {field.required && (
-              <Text size="xs" c="red">*</Text>
-            )}
-          </Group>
-          <Text size="xs" c="dimmed">
-            {field.type} • Position {index + 1}
-          </Text>
-        </div>
-
-        <Menu position="bottom-end">
-          <Menu.Target>
-            <ActionIcon variant="subtle" aria-label="Field actions">
-              <IconSettings size={16} />
-            </ActionIcon>
-          </Menu.Target>
-
-          <Menu.Dropdown>
-            <Menu.Item
-              leftSection={<IconCopy size={14} />}
-              onClick={() => duplicateField(field.id)}
-            >
-              Duplicate
-            </Menu.Item>
-            <Menu.Item
-              leftSection={<IconTrash size={14} />}
-              color="red"
-              onClick={() => {
-                if (confirm('Delete this field?')) {
-                  removeField(field.id);
-                }
-              }}
-            >
-              Delete
-            </Menu.Item>
-          </Menu.Dropdown>
-        </Menu>
-      </Group>
-    </Card>
-  );
+// Global Error Boundary
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback?: ReactNode;
 }
 
-// Form Canvas Component
-export function FormCanvas() {
-  const snap = useSnapshot(formBuilderStore);
-  const [activeId, setActiveId] = useState<string | null>(null);
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8, // 8px movement required to start drag
+export class GlobalErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // Log to Sentry
+    Sentry.captureException(error, {
+      contexts: {
+        react: {
+          componentStack: errorInfo.componentStack,
+        },
       },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+    });
 
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
+    console.error('Global error caught:', error, errorInfo);
+  }
+
+  resetError = () => {
+    this.setState({ hasError: false, error: null });
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    setActiveId(null);
-
-    if (!over) return;
-
-    // Adding new field from library
-    if (active.id.toString().startsWith('field-')) {
-      const fieldType = active.data.current?.fieldType as FieldType;
-      if (fieldType) {
-        addField({
-          id: `field-${Date.now()}`,
-          type: fieldType.id,
-          label: fieldType.name,
-          required: false,
-          validation: [],
-          options: [],
-        });
+  render() {
+    if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
       }
-      return;
-    }
 
-    // Reordering existing fields
-    if (active.id !== over.id) {
-      const oldIndex = snap.fields.findIndex(f => f.id === active.id);
-      const newIndex = snap.fields.findIndex(f => f.id === over.id);
-
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newOrder = arrayMove(snap.fields, oldIndex, newIndex);
-        reorderFields(newOrder);
-      }
-    }
-  };
-
-  const handleDragCancel = () => {
-    setActiveId(null);
-  };
-
-  return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      onDragCancel={handleDragCancel}
-    >
-      <Card withBorder padding="lg" mih={400}>
-        <Stack gap="md">
-          <Group justify="space-between">
-            <div>
-              <Text size="lg" fw={600}>Form Canvas</Text>
-              <Text size="xs" c="dimmed">
-                {snap.fields.length} {snap.fields.length === 1 ? 'field' : 'fields'}
-              </Text>
-            </div>
-
-            {snap.fields.length > 0 && (
+      return (
+        <Card withBorder padding="xl" ta="center">
+          <Stack align="center">
+            <IconAlertTriangle size={48} color="red" />
+            <Text size="xl" fw={600}>Something went wrong</Text>
+            <Text size="sm" c="dimmed">
+              {this.state.error?.message || 'An unexpected error occurred'}
+            </Text>
+            <Group>
+              <Button
+                leftSection={<IconRefresh size={16} />}
+                onClick={this.resetError}
+              >
+                Try Again
+              </Button>
               <Button
                 variant="outline"
-                size="xs"
-                color="red"
-                onClick={() => {
-                  if (confirm('Clear all fields? This cannot be undone.')) {
-                    formBuilderStore.fields = [];
-                  }
-                }}
+                onClick={() => window.location.href = '/'}
               >
-                Clear All
+                Go Home
               </Button>
-            )}
-          </Group>
+            </Group>
+          </Stack>
+        </Card>
+      );
+    }
 
-          {snap.fields.length === 0 ? (
-            <Card withBorder padding="xl" ta="center" style={{ borderStyle: 'dashed' }}>
-              <Stack align="center" gap="xs">
-                <Text size="sm" c="dimmed">No fields yet</Text>
-                <Text size="xs" c="dimmed">
-                  Drag fields from the library to start building your form
-                </Text>
-              </Stack>
-            </Card>
-          ) : (
-            <SortableContext
-              items={snap.fields.map(f => f.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <Stack gap="sm">
-                {snap.fields.map((field, index) => (
-                  <SortableFieldInstance
-                    key={field.id}
-                    field={field}
-                    index={index}
-                  />
-                ))}
-              </Stack>
-            </SortableContext>
-          )}
-        </Stack>
-      </Card>
+    return this.props.children;
+  }
+}
 
-      <DragOverlay>
-        {activeId && (
-          <Card withBorder padding="md" style={{ opacity: 0.8 }}>
-            <Text size="sm">Dragging...</Text>
-          </Card>
-        )}
-      </DragOverlay>
-    </DndContext>
+// Feature-Specific Error Boundary (Photos)
+export function PhotosErrorBoundary({ children }: { children: ReactNode }) {
+  return (
+    <GlobalErrorBoundary
+      fallback={
+        <Card withBorder padding="xl" ta="center">
+          <Stack align="center">
+            <IconAlertTriangle size={48} color="orange" />
+            <Text size="lg" fw={600}>Failed to load photos</Text>
+            <Text size="sm" c="dimmed">
+              Check your internet connection and try again
+            </Text>
+            <Button onClick={() => window.location.reload()}>
+              Reload Page
+            </Button>
+          </Stack>
+        </Card>
+      }
+    >
+      {children}
+    </GlobalErrorBoundary>
   );
 }
 
-// Form Preview (Read-only View)
-export function FormPreview() {
-  const snap = useSnapshot(formBuilderStore);
+// Toast Notification Helpers
+export const toast = {
+  success: (message: string, title = 'Success') => {
+    notifications.show({
+      title,
+      message,
+      color: 'green',
+      icon: <IconCheck size={16} />,
+      autoClose: 3000,
+    });
+  },
 
-  if (snap.fields.length === 0) {
+  error: (message: string, title = 'Error') => {
+    notifications.show({
+      title,
+      message,
+      color: 'red',
+      icon: <IconX size={16} />,
+      autoClose: 5000,
+    });
+
+    // Log to Sentry
+    Sentry.captureMessage(`Toast error: ${title} - ${message}`, 'error');
+  },
+
+  info: (message: string, title = 'Info') => {
+    notifications.show({
+      title,
+      message,
+      color: 'blue',
+      icon: <IconAlertTriangle size={16} />,
+      autoClose: 4000,
+    });
+  },
+
+  loading: (message: string, id: string) => {
+    notifications.show({
+      id,
+      message,
+      loading: true,
+      autoClose: false,
+      withCloseButton: false,
+    });
+  },
+
+  update: (id: string, { success, message, title }: { success: boolean, message: string, title?: string }) => {
+    notifications.update({
+      id,
+      title: title || (success ? 'Success' : 'Error'),
+      message,
+      color: success ? 'green' : 'red',
+      icon: success ? <IconCheck size={16} /> : <IconX size={16} />,
+      loading: false,
+      autoClose: 3000,
+    });
+  },
+};
+
+// Usage in async operations
+export async function uploadPhoto(file: File) {
+  const uploadId = 'upload-photo';
+
+  try {
+    toast.loading('Uploading photo...', uploadId);
+
+    const response = await fetch('/api/photos/upload', {
+      method: 'POST',
+      body: file,
+    });
+
+    if (!response.ok) {
+      throw new Error('Upload failed');
+    }
+
+    const photo = await response.json();
+
+    toast.update(uploadId, {
+      success: true,
+      message: 'Photo uploaded successfully',
+    });
+
+    return photo;
+  } catch (error) {
+    toast.update(uploadId, {
+      success: false,
+      message: error.message || 'Failed to upload photo',
+    });
+
+    throw error;
+  }
+}
+
+// TanStack Query Error Handling
+export function PhotoGalleryPage() {
+  const { data: photos, error, refetch } = useQuery({
+    queryKey: ['photos'],
+    queryFn: fetchPhotos,
+    retry: 3, // Retry 3 times for transient errors
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    onError: (error) => {
+      toast.error(
+        'Failed to load photos. Please check your internet connection.',
+        'Error Loading Photos'
+      );
+
+      // Log to Sentry
+      Sentry.captureException(error, {
+        tags: { feature: 'photo-gallery' },
+      });
+    },
+  });
+
+  if (error) {
     return (
       <Card withBorder padding="xl" ta="center">
-        <Text size="sm" c="dimmed">
-          Add fields to see form preview
-        </Text>
+        <Stack align="center">
+          <IconAlertTriangle size={48} color="orange" />
+          <Text size="lg" fw={600}>Failed to load photos</Text>
+          <Text size="sm" c="dimmed">{error.message}</Text>
+          <Button onClick={() => refetch()}>Try Again</Button>
+        </Stack>
       </Card>
     );
   }
 
+  // ... render photos
+}
+
+// Form Submission Error Handling
+export function FormSubmissionButton({ formData }: { formData: FormData }) {
+  const mutation = useMutation({
+    mutationFn: submitForm,
+    onSuccess: () => {
+      toast.success('Form submitted successfully');
+    },
+    onError: (error: Error) => {
+      if (error.message.includes('network')) {
+        toast.error(
+          'No internet connection. Form saved offline and will sync when online.',
+          'Offline Submission'
+        );
+      } else if (error.message.includes('validation')) {
+        toast.error(
+          'Please check your form and fix validation errors.',
+          'Validation Error'
+        );
+      } else {
+        toast.error(
+          error.message || 'Failed to submit form. Please try again.',
+          'Submission Error'
+        );
+      }
+
+      // Log to Sentry
+      Sentry.captureException(error, {
+        tags: { feature: 'form-submission' },
+        extra: { formData },
+      });
+    },
+  });
+
   return (
-    <Card withBorder padding="lg">
-      <Stack gap="md">
-        <Text size="lg" fw={600}>Form Preview</Text>
-
-        <form>
-          <Stack gap="md">
-            {snap.fields.map(field => (
-              <div key={field.id}>
-                <label>
-                  {field.label}
-                  {field.required && <span style={{ color: 'red' }}> *</span>}
-                </label>
-
-                {/* Render field based on type */}
-                {field.type === 'text' && (
-                  <input type="text" required={field.required} disabled />
-                )}
-                {field.type === 'number' && (
-                  <input type="number" required={field.required} disabled />
-                )}
-                {field.type === 'dropdown' && (
-                  <select required={field.required} disabled>
-                    <option>Select...</option>
-                    {field.options?.map(opt => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                {/* ... other field types */}
-              </div>
-            ))}
-          </Stack>
-        </form>
-      </Stack>
-    </Card>
+    <Button onClick={() => mutation.mutate(formData)} loading={mutation.isPending}>
+      Submit Form
+    </Button>
   );
+}
+
+// Retry Logic for Transient Errors
+export async function fetchWithRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3,
+  delay = 1000
+): Promise<T> {
+  let lastError: Error;
+
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error as Error;
+
+      // Don't retry on validation errors (4xx)
+      if (error.response?.status >= 400 && error.response?.status < 500) {
+        throw error;
+      }
+
+      // Wait before retrying (exponential backoff)
+      if (i < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, delay * 2 ** i));
+      }
+    }
+  }
+
+  throw lastError!;
 }
 ```
 
 ## Acceptance Criteria
 
-- [ ] Form canvas accepts fields from library via drag-and-drop
-- [ ] Fields can be reordered by dragging
-- [ ] Field selection highlights selected field
-- [ ] Field deletion with confirmation modal
-- [ ] Field duplication creates copy below original
-- [ ] Visual drop indicators show valid drop zones
-- [ ] Drag overlay shows field being dragged
-- [ ] Empty state shows helpful message
-- [ ] Clear all button removes all fields with confirmation
-- [ ] Canvas state syncs with Valtio store
+- [ ] Global error boundary catches all uncaught errors
+- [ ] Feature-specific error boundaries for photos, sync, settings
+- [ ] Toast notifications show for all async successes
+- [ ] Toast notifications show for all async errors
+- [ ] Error fallback UI provides retry functionality
+- [ ] All errors logged to Sentry with context
+- [ ] Transient errors retry with exponential backoff
+- [ ] Network errors queue operations for offline sync
+- [ ] Validation errors show user-friendly messages
 
 ## Testing Requirements
 
 **Unit Tests:**
 
-- Test add field from library
-- Test reorder fields
-- Test remove field
-- Test duplicate field
-- Test field selection
+- Test error boundary catches errors
+- Test toast notification helpers
+- Test retry logic with exponential backoff
 
 **Integration Tests:**
 
-- Test drag-and-drop interaction
-- Test Valtio store updates
-- Test keyboard navigation
+- Test error boundary fallback UI
+- Test Sentry error logging
+- Test TanStack Query error handling
 
 **Manual Testing:**
 
-- Drag multiple field types to canvas
-- Reorder fields by dragging
-- Delete and duplicate fields
-- Test keyboard accessibility (Tab, Enter, Space)
-- Verify smooth drag animations
+- Simulate network errors (offline mode)
+- Simulate validation errors (invalid form data)
+- Simulate server errors (500 responses)
+- Verify toast notifications display correctly
+- Verify errors logged to Sentry
 
 ## Evidence Requirements
 
-- [ ] Screenshot: Empty canvas with drop zone
-- [ ] Screenshot: Canvas with multiple fields
-- [ ] Screenshot: Field being dragged (drag overlay)
-- [ ] Screenshot: Selected field highlighted
-- [ ] Video: Drag-and-drop workflow
-- [ ] Test Results: Canvas tests (>80% coverage)
+- [ ] Screenshot: Global error boundary fallback
+- [ ] Screenshot: Success toast notification
+- [ ] Screenshot: Error toast notification
+- [ ] Screenshot: Loading toast notification
+- [ ] Screenshot: Sentry error dashboard with logged errors
+- [ ] Test Results: Error handling tests (>80% coverage)
 
 ## Success Criteria
 
-Form canvas is complete when:
+Error handling is complete when:
 
-- Drag-and-drop from library working
-- Field reordering functional
-- Field selection, deletion, duplication working
-- Visual feedback clear
+- All errors caught by error boundaries
+- User-friendly error messages displayed
+- Toast notifications working for all async operations
+- Errors logged to Sentry with context
+- Retry logic working for transient errors
 - All tests passing
 
 ---

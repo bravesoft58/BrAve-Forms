@@ -1,356 +1,341 @@
-# ISSUE-150: Calculated Fields Editor (10h)
+# ISSUE-150: Form Builder Architecture Setup (6h)
 
 **Sprint:** Sprint 5 | **Phase:** 5 - Form Builder | **Priority:** P0
-**Time:** 10 hours | **Complexity:** Large
+**Time:** 6 hours | **Complexity:** Large
 **Created:** 2025-10-23
-**Dependencies:** ISSUE-149 (Conditional Logic Builder)
+**Dependencies:** ISSUE-160 complete (Phase 4 done)
 **Status:** READY FOR IMPLEMENTATION
 
 ## What You'll Do
 
-Create calculated fields editor using expr-eval library for formula evaluation with support for basic operators (+, -, \*, /), functions (SUM, AVG, MIN, MAX), field references, live preview, and circular dependency detection.
+Set up form builder architecture with @dnd-kit/core drag-drop library, Valtio state management, and 3-column layout (palette, canvas, properties).
 
 ## Prerequisites
 
-- [ ] ISSUE-149 complete (Conditional logic functional)
-- [ ] Form builder architecture ready
+- [ ] Phase 4 complete (Polish & Testing done)
+- [ ] @dnd-kit/core installed
+- [ ] Valtio working (already in use)
 - [ ] Code editor open to apps/web directory
 
 ## Libraries/Dependencies
 
-**expr-eval:**
+**@dnd-kit/core:**
 
-- **Version:** ^2.0.2
-- **License:** MIT (simple, permissive, NO copyleft)
-- **Why:** Simpler than mathjs (no LGPL concerns), lighter (5KB vs heavy), more secure (no import/createUnit risks)
-- **Better Than:** mathjs (Apache 2.0 + LGPL-2.1+ copyleft, security concerns with import function)
+- **Version:** ^6.3.1
+- **License:** MIT (open source)
+- **Why:** Best-in-class drag-drop for 2025 (10KB, zero dependencies, accessible, performant)
+- **Better Than:** react-beautiful-dnd (deprecated), react-dnd (complex API)
 - **Install:**
   ```bash
-  pnpm add expr-eval
+  pnpm add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
   ```
-
-**Security Note:** expr-eval is safer for user-generated formulas. mathjs has dangerous functions (import, createUnit) that can alter built-in functionality.
 
 ## Step-by-Step Instructions
 
-### Step 1: Install expr-eval (10 min)
+### Step 1: Install @dnd-kit Libraries (15 min)
 
 ```bash
 cd apps/web
-pnpm add expr-eval
+pnpm add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
 ```
 
 Verify installation:
 
 ```bash
-grep "expr-eval" package.json
+grep "@dnd-kit" package.json
 ```
 
-### Step 2: Create CalculatedFieldEditor Component (240 min)
+### Step 2: Create Form Builder State (Valtio) (120 min)
 
-Create `apps/web/components/form-builder/calculated-field-editor.tsx`:
+Create `apps/web/stores/form-builder-store.ts`:
+
+```typescript
+import { proxy, subscribe } from 'valtio';
+import { Field, FormTemplate } from '@braveforms/types';
+
+interface FormBuilderState {
+  currentForm: Partial<FormTemplate> | null;
+  selectedFieldId: string | null;
+  isDragging: boolean;
+  history: Array<Partial<FormTemplate>>;
+  historyIndex: number;
+}
+
+export const formBuilderStore = proxy<FormBuilderState>({
+  currentForm: null,
+  selectedFieldId: null,
+  isDragging: false,
+  history: [],
+  historyIndex: -1,
+});
+
+export const formBuilderActions = {
+  createForm(name: string, category: string) {
+    const newForm: Partial<FormTemplate> = {
+      name,
+      category,
+      version: '1.0.0',
+      schema: {
+        sections: [
+          {
+            id: 'section-1',
+            title: 'General Information',
+            description: '',
+            fields: [],
+          },
+        ],
+      },
+      createdAt: new Date(),
+    };
+
+    formBuilderStore.currentForm = newForm;
+    formBuilderStore.history = [newForm];
+    formBuilderStore.historyIndex = 0;
+  },
+
+  addField(sectionId: string, field: Field) {
+    if (!formBuilderStore.currentForm?.schema) return;
+
+    const section = formBuilderStore.currentForm.schema.sections.find((s) => s.id === sectionId);
+
+    if (section) {
+      section.fields.push(field);
+      this.saveToHistory();
+    }
+  },
+
+  updateField(fieldId: string, updates: Partial<Field>) {
+    if (!formBuilderStore.currentForm?.schema) return;
+
+    for (const section of formBuilderStore.currentForm.schema.sections) {
+      const field = section.fields.find((f) => f.id === fieldId);
+      if (field) {
+        Object.assign(field, updates);
+        this.saveToHistory();
+        break;
+      }
+    }
+  },
+
+  deleteField(fieldId: string) {
+    if (!formBuilderStore.currentForm?.schema) return;
+
+    for (const section of formBuilderStore.currentForm.schema.sections) {
+      const index = section.fields.findIndex((f) => f.id === fieldId);
+      if (index !== -1) {
+        section.fields.splice(index, 1);
+        this.saveToHistory();
+        break;
+      }
+    }
+  },
+
+  reorderFields(sectionId: string, fromIndex: number, toIndex: number) {
+    if (!formBuilderStore.currentForm?.schema) return;
+
+    const section = formBuilderStore.currentForm.schema.sections.find((s) => s.id === sectionId);
+
+    if (section) {
+      const [field] = section.fields.splice(fromIndex, 1);
+      section.fields.splice(toIndex, 0, field);
+      this.saveToHistory();
+    }
+  },
+
+  selectField(fieldId: string | null) {
+    formBuilderStore.selectedFieldId = fieldId;
+  },
+
+  saveToHistory() {
+    if (!formBuilderStore.currentForm) return;
+
+    // Remove any future history if we're not at the end
+    formBuilderStore.history.splice(formBuilderStore.historyIndex + 1);
+
+    // Add current state to history
+    formBuilderStore.history.push(JSON.parse(JSON.stringify(formBuilderStore.currentForm)));
+
+    // Limit history to 50 snapshots
+    if (formBuilderStore.history.length > 50) {
+      formBuilderStore.history.shift();
+    } else {
+      formBuilderStore.historyIndex++;
+    }
+  },
+
+  undo() {
+    if (formBuilderStore.historyIndex > 0) {
+      formBuilderStore.historyIndex--;
+      formBuilderStore.currentForm = formBuilderStore.history[formBuilderStore.historyIndex];
+    }
+  },
+
+  redo() {
+    if (formBuilderStore.historyIndex < formBuilderStore.history.length - 1) {
+      formBuilderStore.historyIndex++;
+      formBuilderStore.currentForm = formBuilderStore.history[formBuilderStore.historyIndex];
+    }
+  },
+};
+
+// Auto-save to localStorage every 30 seconds
+subscribe(formBuilderStore, () => {
+  if (formBuilderStore.currentForm) {
+    localStorage.setItem('formBuilderDraft', JSON.stringify(formBuilderStore.currentForm));
+  }
+});
+```
+
+### Step 3: Create Form Builder Routes (30 min)
+
+Create `apps/web/app/admin/forms/new/page.tsx`:
 
 ```typescript
 'use client';
 
-import { Stack, TextInput, Text, Code, Alert, Group, Select, NumberInput } from '@mantine/core';
-import { Parser } from 'expr-eval';
-import { useState, useEffect } from 'react';
-import { Field } from '@braveforms/types';
-import { IconAlertCircle, IconCheck } from '@tabler/icons-react';
+import { PageContainer } from '@/components/layout/page-container';
+import { FormBuilderLayout } from '@/components/form-builder/form-builder-layout';
 
-interface CalculatedFieldEditorProps {
-  field: Field;
-  allFields: Field[];
-  onChange: (field: Partial<Field>) => void;
+export default function NewFormPage() {
+  return (
+    <PageContainer title="Create New Form">
+      <FormBuilderLayout />
+    </PageContainer>
+  );
 }
+```
 
-export function CalculatedFieldEditor({
-  field,
-  allFields,
-  onChange,
-}: CalculatedFieldEditorProps) {
-  const [formula, setFormula] = useState(field.calculated?.formula || '');
-  const [error, setError] = useState<string | null>(null);
-  const [preview, setPreview] = useState<number | null>(null);
+Create `apps/web/app/admin/forms/[id]/edit/page.tsx`:
 
-  const parser = new Parser();
+```typescript
+'use client';
 
-  const validateFormula = (formula: string): boolean => {
-    try {
-      // Sanitize formula (remove dangerous characters)
-      const sanitized = formula.replace(/[^0-9a-zA-Z+\-*/(){},._ ]/g, '');
+import { PageContainer } from '@/components/layout/page-container';
+import { FormBuilderLayout } from '@/components/form-builder/form-builder-layout';
+import { useParams } from 'next/navigation';
 
-      // Test parse
-      parser.parse(sanitized);
-
-      // Check field references exist
-      const fieldRefs = formula.match(/\{(\w+)\}/g) || [];
-      const invalidRefs = fieldRefs.filter((ref) => {
-        const fieldName = ref.slice(1, -1);
-        return !allFields.find((f) => f.name === fieldName);
-      });
-
-      if (invalidRefs.length > 0) {
-        throw new Error(`Unknown fields: ${invalidRefs.join(', ')}`);
-      }
-
-      // Check for circular dependencies
-      if (detectCircularDependency(field, allFields, formula)) {
-        throw new Error('Circular dependency detected');
-      }
-
-      setError(null);
-      return true;
-    } catch (err: any) {
-      setError(err.message);
-      return false;
-    }
-  };
-
-  const calculatePreview = (formula: string, fieldValues: Record<string, number>) => {
-    try {
-      // Replace field references {fieldName} with actual field names
-      let expression = formula;
-      const fieldRefs = formula.match(/\{(\w+)\}/g) || [];
-
-      fieldRefs.forEach((ref) => {
-        const fieldName = ref.slice(1, -1);
-        expression = expression.replace(ref, fieldName);
-      });
-
-      // Evaluate using expr-eval
-      const result = parser.evaluate(expression, fieldValues);
-      setPreview(result);
-    } catch (err) {
-      setPreview(null);
-    }
-  };
-
-  const handleFormulaChange = (newFormula: string) => {
-    setFormula(newFormula);
-
-    if (validateFormula(newFormula)) {
-      onChange({
-        ...field,
-        calculated: {
-          formula: newFormula,
-          unit: field.calculated?.unit || 'number',
-        },
-      });
-
-      // Calculate preview with sample values
-      const sampleValues: Record<string, number> = {};
-      allFields.forEach((f) => {
-        if (f.type === 'number') {
-          sampleValues[f.name] = 10; // Sample value
-        }
-      });
-      calculatePreview(newFormula, sampleValues);
-    }
-  };
+export default function EditFormPage() {
+  const { id } = useParams();
 
   return (
-    <Stack gap="md">
-      <TextInput
-        label="Formula"
-        placeholder="SUM({field1}, {field2})"
-        value={formula}
-        onChange={(e) => handleFormulaChange(e.target.value)}
-        error={error}
-        description="Use {fieldName} to reference other fields"
-      />
+    <PageContainer title="Edit Form">
+      <FormBuilderLayout formId={id as string} />
+    </PageContainer>
+  );
+}
+```
 
-      {error && (
-        <Alert color="red" icon={<IconAlertCircle size={16} />}>
-          {error}
-        </Alert>
-      )}
+### Step 4: Create FormBuilderLayout Component (90 min)
 
-      {preview !== null && !error && (
-        <Alert color="green" icon={<IconCheck size={16} />}>
-          Preview: {preview}
-        </Alert>
-      )}
+Create `apps/web/components/form-builder/form-builder-layout.tsx`:
 
-      <Select
-        label="Unit"
-        value={field.calculated?.unit || 'number'}
-        onChange={(value) => onChange({
-          ...field,
-          calculated: {
-            ...field.calculated,
-            unit: value || 'number',
-          },
-        })}
-        data={[
-          { value: 'number', label: 'Number' },
-          { value: 'currency', label: 'Currency ($)' },
-          { value: 'percentage', label: 'Percentage (%)' },
-        ]}
-      />
+```typescript
+'use client';
 
-      <Stack gap="xs">
-        <Text size="sm" fw={500}>Supported Operators:</Text>
-        <Code block>
-          {`+  (addition)
--  (subtraction)
-*  (multiplication)
-/  (division)
-() (grouping)`}
-        </Code>
-      </Stack>
+import { Grid, Stack } from '@mantine/core';
+import { FieldPalette } from './field-palette';
+import { FormCanvas } from './form-canvas';
+import { PropertiesPanel } from './properties-panel';
+import { FormBuilderToolbar } from './form-builder-toolbar';
 
-      <Stack gap="xs">
-        <Text size="sm" fw={500}>Supported Functions:</Text>
-        <Code block>
-          {`SUM(a, b, c)    - Sum of values
-AVG(a, b, c)    - Average of values
-MIN(a, b, c)    - Minimum value
-MAX(a, b, c)    - Maximum value`}
-        </Code>
-      </Stack>
+interface FormBuilderLayoutProps {
+  formId?: string;
+}
 
-      <Stack gap="xs">
-        <Text size="sm" fw={500}>Field References:</Text>
-        <Code block>
-          {allFields
-            .filter((f) => f.type === 'number' && f.id !== field.id)
-            .map((f) => `{${f.name}}`).join('\n') || 'No numeric fields available'}
-        </Code>
-      </Stack>
+export function FormBuilderLayout({ formId }: FormBuilderLayoutProps) {
+  return (
+    <Stack gap="md" style={{ height: 'calc(100vh - 120px)' }}>
+      {/* Toolbar */}
+      <FormBuilderToolbar />
+
+      {/* 3-Column Layout */}
+      <Grid grow gutter="md" style={{ flex: 1, overflow: 'hidden' }}>
+        {/* Left: Field Palette */}
+        <Grid.Col span={3}>
+          <FieldPalette />
+        </Grid.Col>
+
+        {/* Center: Form Canvas */}
+        <Grid.Col span={6}>
+          <FormCanvas />
+        </Grid.Col>
+
+        {/* Right: Properties Panel */}
+        <Grid.Col span={3}>
+          <PropertiesPanel />
+        </Grid.Col>
+      </Grid>
     </Stack>
   );
 }
+```
 
-function detectCircularDependency(
-  field: Field,
-  allFields: Field[],
-  formula: string,
-  visited: Set<string> = new Set()
-): boolean {
-  if (visited.has(field.id)) {
-    return true; // Circular dependency found
-  }
+### Step 5: Create FormBuilderToolbar Component (45 min)
 
-  visited.add(field.id);
+Create `apps/web/components/form-builder/form-builder-toolbar.tsx`:
 
-  // Extract field references from formula
-  const fieldRefs = formula.match(/\{(\w+)\}/g) || [];
-  const referencedFieldNames = fieldRefs.map((ref) => ref.slice(1, -1));
+```typescript
+'use client';
 
-  for (const fieldName of referencedFieldNames) {
-    const referencedField = allFields.find((f) => f.name === fieldName);
+import { Group, Button, ActionIcon, Text } from '@mantine/core';
+import {
+  IconDeviceFloppy,
+  IconEye,
+  IconArrowBack,
+  IconArrowForward,
+} from '@tabler/icons-react';
+import { useSnapshot } from 'valtio';
+import { formBuilderStore, formBuilderActions } from '@/stores/form-builder-store';
 
-    if (referencedField?.type === 'calculated') {
-      if (detectCircularDependency(
-        referencedField,
-        allFields,
-        referencedField.calculated?.formula || '',
-        new Set(visited)
-      )) {
-        return true;
-      }
-    }
-  }
+export function FormBuilderToolbar() {
+  const { currentForm, historyIndex, history } = useSnapshot(formBuilderStore);
 
-  return false;
+  const canUndo = historyIndex > 0;
+  const canRedo = historyIndex < history.length - 1;
+
+  return (
+    <Group justify="space-between" p="md" style={{ borderBottom: '1px solid #e0e0e0' }}>
+      <Group>
+        <ActionIcon
+          variant="subtle"
+          disabled={!canUndo}
+          onClick={() => formBuilderActions.undo()}
+        >
+          <IconArrowBack size={20} />
+        </ActionIcon>
+
+        <ActionIcon
+          variant="subtle"
+          disabled={!canRedo}
+          onClick={() => formBuilderActions.redo()}
+        >
+          <IconArrowForward size={20} />
+        </ActionIcon>
+
+        <Text size="sm" c="dimmed">
+          {currentForm?.name || 'Untitled Form'}
+        </Text>
+      </Group>
+
+      <Group>
+        <Button variant="subtle" leftSection={<IconEye size={16} />}>
+          Preview
+        </Button>
+
+        <Button leftSection={<IconDeviceFloppy size={16} />}>
+          Save Draft
+        </Button>
+
+        <Button variant="filled">
+          Publish
+        </Button>
+      </Group>
+    </Group>
+  );
 }
 ```
 
-### Step 3: Integrate with Properties Panel (60 min)
-
-Update `apps/web/components/form-builder/properties-panel.tsx`:
-
-```typescript
-import { CalculatedFieldEditor } from './calculated-field-editor';
-
-// Add tab for calculated fields
-const tabs = [
-  { value: 'basic', label: 'Basic' },
-  { value: 'validation', label: 'Validation' },
-  { value: 'logic', label: 'Logic' },
-  { value: 'calculations', label: 'Calculations' },
-  { value: 'advanced', label: 'Advanced' },
-];
-
-// Render calculated field editor in calculations tab
-{activeTab === 'calculations' && selectedField && (
-  <CalculatedFieldEditor
-    field={selectedField}
-    allFields={allFormFields}
-    onChange={(updates) => handleFieldUpdate(selectedField.id, updates)}
-  />
-)}
-```
-
-### Step 4: Add Formula Evaluation to FormRenderer (120 min)
-
-Create `apps/web/utils/evaluate-calculated-field.ts`:
-
-```typescript
-import { Parser } from 'expr-eval';
-import { Field } from '@braveforms/types';
-
-export function evaluateCalculatedField(
-  field: Field,
-  formValues: Record<string, any>
-): number | null {
-  if (!field.calculated?.formula) return null;
-
-  try {
-    const parser = new Parser();
-
-    // Replace field references with values
-    let expression = field.calculated.formula;
-    const fieldRefs = expression.match(/\{(\w+)\}/g) || [];
-
-    const values: Record<string, number> = {};
-    fieldRefs.forEach((ref) => {
-      const fieldName = ref.slice(1, -1);
-      const value = formValues[fieldName];
-
-      if (typeof value === 'number') {
-        values[fieldName] = value;
-        expression = expression.replace(ref, fieldName);
-      } else {
-        throw new Error(`Field ${fieldName} has no numeric value`);
-      }
-    });
-
-    // Evaluate expression
-    const result = parser.evaluate(expression, values);
-
-    return typeof result === 'number' ? result : null;
-  } catch (err) {
-    console.error('Error evaluating calculated field:', err);
-    return null;
-  }
-}
-```
-
-Update FormRenderer to use calculated fields:
-
-```typescript
-import { evaluateCalculatedField } from '@/utils/evaluate-calculated-field';
-
-// In FormRenderer component:
-useEffect(() => {
-  // Re-calculate all calculated fields when form values change
-  const calculatedFields = schema.sections
-    .flatMap((s) => s.fields)
-    .filter((f) => f.type === 'calculated');
-
-  calculatedFields.forEach((field) => {
-    const result = evaluateCalculatedField(field, formValues);
-    if (result !== null) {
-      setValue(field.name, result);
-    }
-  });
-}, [formValues]);
-```
-
-### Step 5: Test Calculated Fields (120 min)
+### Step 6: Test Form Builder Architecture (60 min)
 
 ```bash
 # Restart web container
@@ -362,201 +347,111 @@ kubectl rollout restart deployment/web -n braveforms
 
 **Verify:**
 
-- [ ] expr-eval installed
-- [ ] Calculated field editor displays
-- [ ] Formula validation works
-- [ ] Live preview updates
-- [ ] Circular dependency detection works
-- [ ] SUM, AVG, MIN, MAX functions work
-- [ ] Field references resolve correctly
-- [ ] FormRenderer evaluates calculated fields
+- [ ] 3-column layout displays
+- [ ] Valtio store initialized
+- [ ] Toolbar displays with undo/redo buttons
+- [ ] State persists to localStorage
+- [ ] No errors in console
 
-## TDD Workflow (MANDATORY)
+## TDD Workflow
 
-### Phase 1: Write Tests First
+**Phase 1: Write Tests**
 
-Create `apps/web/components/form-builder/__tests__/calculated-field-editor.test.tsx`:
+Create `apps/web/stores/__tests__/form-builder-store.test.ts`:
 
 ```typescript
-import { render, screen, fireEvent } from '@testing-library/react';
-import { CalculatedFieldEditor } from '../calculated-field-editor';
+import { formBuilderStore, formBuilderActions } from '../form-builder-store';
 
-describe('CalculatedFieldEditor', () => {
-  const mockField = {
-    id: 'calc-1',
-    type: 'calculated',
-    name: 'totalCost',
-    label: 'Total Cost',
-  };
-
-  const mockFields = [
-    { id: 'quantity', type: 'number', name: 'quantity', label: 'Quantity' },
-    { id: 'price', type: 'number', name: 'price', label: 'Price' },
-  ];
-
-  it('should validate formula syntax', () => {
-    const onChange = jest.fn();
-    render(
-      <CalculatedFieldEditor
-        field={mockField}
-        allFields={mockFields}
-        onChange={onChange}
-      />
-    );
-
-    const formulaInput = screen.getByPlaceholderText('SUM({field1}, {field2})');
-    fireEvent.change(formulaInput, { target: { value: 'SUM({quantity}, {price})' } });
-
-    expect(screen.queryByText(/Unknown fields/)).not.toBeInTheDocument();
+describe('formBuilderActions', () => {
+  beforeEach(() => {
+    formBuilderActions.createForm('Test Form', 'inspection');
   });
 
-  it('should detect circular dependencies', () => {
-    const circularField = {
-      ...mockField,
-      calculated: { formula: '{totalCost}' },
-    };
-
-    render(
-      <CalculatedFieldEditor
-        field={circularField}
-        allFields={[...mockFields, mockField]}
-        onChange={jest.fn()}
-      />
-    );
-
-    expect(screen.getByText(/Circular dependency detected/)).toBeInTheDocument();
+  it('should create new form', () => {
+    expect(formBuilderStore.currentForm?.name).toBe('Test Form');
   });
 
-  it('should calculate preview with sample values', () => {
-    render(
-      <CalculatedFieldEditor
-        field={mockField}
-        allFields={mockFields}
-        onChange={jest.fn()}
-      />
-    );
+  it('should add field to section', () => {
+    formBuilderActions.addField('section-1', {
+      id: 'field-1',
+      type: 'text',
+      label: 'Test Field',
+    });
 
-    const formulaInput = screen.getByPlaceholderText('SUM({field1}, {field2})');
-    fireEvent.change(formulaInput, { target: { value: 'SUM({quantity}, {price})' } });
+    expect(formBuilderStore.currentForm?.schema?.sections[0].fields).toHaveLength(1);
+  });
 
-    expect(screen.getByText(/Preview: 20/)).toBeInTheDocument(); // 10 + 10
+  it('should support undo/redo', () => {
+    formBuilderActions.addField('section-1', { id: 'field-1', type: 'text', label: 'Test' });
+    formBuilderActions.undo();
+
+    expect(formBuilderStore.currentForm?.schema?.sections[0].fields).toHaveLength(0);
+
+    formBuilderActions.redo();
+    expect(formBuilderStore.currentForm?.schema?.sections[0].fields).toHaveLength(1);
   });
 });
 ```
 
-Create `apps/web/utils/__tests__/evaluate-calculated-field.test.ts`:
-
-```typescript
-import { evaluateCalculatedField } from '../evaluate-calculated-field';
-
-describe('evaluateCalculatedField', () => {
-  it('should evaluate basic arithmetic', () => {
-    const field = {
-      id: 'calc-1',
-      type: 'calculated',
-      name: 'result',
-      calculated: {
-        formula: '{a} + {b}',
-      },
-    };
-
-    const result = evaluateCalculatedField(field, { a: 5, b: 10 });
-    expect(result).toBe(15);
-  });
-
-  it('should evaluate SUM function', () => {
-    const field = {
-      id: 'calc-1',
-      type: 'calculated',
-      name: 'total',
-      calculated: {
-        formula: 'SUM({a}, {b}, {c})',
-      },
-    };
-
-    const result = evaluateCalculatedField(field, { a: 5, b: 10, c: 15 });
-    expect(result).toBe(30);
-  });
-
-  it('should handle division by zero', () => {
-    const field = {
-      id: 'calc-1',
-      type: 'calculated',
-      name: 'ratio',
-      calculated: {
-        formula: '{a} / {b}',
-      },
-    };
-
-    const result = evaluateCalculatedField(field, { a: 10, b: 0 });
-    expect(result).toBe(Infinity);
-  });
-});
-```
-
-**Screenshot:** `evidence/ISSUE-150/test-results/red-phase.png`
-**Screenshot:** `evidence/ISSUE-150/test-results/green-phase.png`
+**Screenshot:** `evidence/ISSUE-161/test-results/red-phase.png`
+**Screenshot:** `evidence/ISSUE-161/test-results/green-phase.png`
 
 ## Files to Create
 
 **Create:**
 
-- apps/web/components/form-builder/calculated-field-editor.tsx
-- apps/web/utils/evaluate-calculated-field.ts
-- apps/web/components/form-builder/**tests**/calculated-field-editor.test.tsx
-- apps/web/utils/**tests**/evaluate-calculated-field.test.ts
+- apps/web/stores/form-builder-store.ts
+- apps/web/app/admin/forms/new/page.tsx
+- apps/web/app/admin/forms/[id]/edit/page.tsx
+- apps/web/components/form-builder/form-builder-layout.tsx
+- apps/web/components/form-builder/form-builder-toolbar.tsx
+- apps/web/stores/**tests**/form-builder-store.test.ts
 
 **Modify:**
 
-- apps/web/components/form-builder/properties-panel.tsx (add calculations tab)
-- apps/web/components/form-renderer/form-renderer.tsx (evaluate calculated fields)
-- apps/web/package.json (add expr-eval)
+- apps/web/package.json (add @dnd-kit dependencies)
 
 ## Verification Checklist
 
-- [ ] expr-eval installed (NOT mathjs)
-- [ ] Calculated field editor functional
-- [ ] Formula validation works
-- [ ] Circular dependency detection works
-- [ ] SUM, AVG, MIN, MAX functions work
-- [ ] Live preview displays
-- [ ] FormRenderer evaluates formulas
+- [ ] @dnd-kit installed
+- [ ] Valtio store created
+- [ ] Form builder routes created
+- [ ] 3-column layout functional
+- [ ] Toolbar with undo/redo works
+- [ ] Auto-save to localStorage works
 - [ ] Tests passing (>80% coverage)
 - [ ] Zero emoji, zero AI branding
 
 ## Evidence Requirements
 
-**Location:** evidence/ISSUE-150/
+**Location:** evidence/ISSUE-161/
 
 **Required:**
 
 - test-results/red-phase.png
 - test-results/green-phase.png
-- screenshots/calculated-field-editor.png
-- screenshots/formula-validation.png
-- screenshots/live-preview.png
-- screenshots/circular-dependency-error.png
+- screenshots/form-builder-layout.png
+- screenshots/toolbar.png
 
 ## Success Criteria
 
-- [ ] Calculated fields functional using expr-eval
-- [ ] All operators work (+, -, \*, /, ())
-- [ ] All functions work (SUM, AVG, MIN, MAX)
-- [ ] Circular dependency detection prevents infinite loops
-- [ ] Live preview calculates correctly
-- [ ] Performance <200ms formula evaluation
+- [ ] Form builder architecture initialized
+- [ ] Valtio state management works
+- [ ] Undo/redo functional (50 snapshots max)
+- [ ] Auto-save every 30 seconds
 - [ ] Tests pass with >80% coverage
 
 ## Time Estimate
 
-**10 hours total:**
+**6 hours total:**
 
-- Install expr-eval: 10 min
-- CalculatedFieldEditor component: 240 min
-- Integrate with properties panel: 60 min
-- FormRenderer evaluation: 120 min
-- Testing: 120 min
+- Install libraries: 15 min
+- Valtio store: 120 min
+- Routes: 30 min
+- Layout component: 90 min
+- Toolbar: 45 min
+- Testing: 60 min
 
 ## Next Issue
 
-**ISSUE-151:** Field Settings Tabs (8h)
+**ISSUE-151:** [Next issue title]

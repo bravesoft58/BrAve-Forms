@@ -38,22 +38,22 @@ export function AppNavbar() {
   const navItems: NavItem[] = [
     {
       label: 'Dashboard',
-      href: '/',
+      href: '/dashboard',
       icon: IconLayoutDashboard,
     },
     {
       label: 'Projects',
-      href: '/projects',
+      href: '/dashboard/projects',
       icon: IconFolder,
     },
     {
       label: 'Forms',
-      href: '/forms',
+      href: '/dashboard/forms',
       icon: IconFiles,
     },
     {
       label: 'Settings',
-      href: '/settings',
+      href: '/dashboard/settings',
       icon: IconSettings,
     },
   ];
@@ -62,8 +62,8 @@ export function AppNavbar() {
    * Check if route is active
    */
   const isActive = (href: string): boolean => {
-    if (href === '/') {
-      return pathname === '/';
+    if (href === '/dashboard') {
+      return pathname === '/dashboard';
     }
     return pathname.startsWith(href);
   };

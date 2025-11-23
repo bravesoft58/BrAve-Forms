@@ -1,13 +1,13 @@
 'use client';
 
 import { Stack, Button, Group } from '@mantine/core';
-import { 
-  IconPlus, 
-  IconClipboard, 
-  IconCamera, 
+import {
+  IconPlus,
+  IconClipboard,
+  IconCamera,
   IconMapPin,
   IconCloud,
-  IconRefresh
+  IconRefresh,
 } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useAppStore, useAppActions } from '@/lib/store/app.store';
@@ -31,19 +31,19 @@ export function QuickActions() {
         size="md"
         fullWidth
         component={Link}
-        href="/inspections/new"
+        href="/dashboard/inspections/new"
         className="construction-button"
       >
         New Inspection
       </Button>
-      
+
       <Button
         leftSection={<IconCamera size={18} />}
         variant="light"
         size="md"
         fullWidth
         component={Link}
-        href="/photos/upload"
+        href="/dashboard/photos/upload"
         className="construction-button"
       >
         Upload Photos
@@ -56,17 +56,17 @@ export function QuickActions() {
           variant="subtle"
           size="sm"
           component={Link}
-          href="/forms"
+          href="/dashboard/forms"
         >
           Forms
         </Button>
-        
+
         <Button
           leftSection={<IconMapPin size={16} />}
           variant="subtle"
           size="sm"
           component={Link}
-          href="/projects"
+          href="/dashboard/projects"
         >
           Projects
         </Button>
@@ -79,11 +79,11 @@ export function QuickActions() {
           variant="subtle"
           size="sm"
           component={Link}
-          href="/weather"
+          href="/dashboard/weather"
         >
           Weather
         </Button>
-        
+
         <Button
           leftSection={<IconRefresh size={16} />}
           variant="subtle"
@@ -92,22 +92,13 @@ export function QuickActions() {
           disabled={appState.networkStatus === 'offline' || appState.syncStatus === 'syncing'}
           loading={appState.syncStatus === 'syncing'}
         >
-          {appState.offlineQueue.length > 0 
-            ? `Sync (${appState.offlineQueue.length})` 
-            : 'Sync'
-          }
+          {appState.offlineQueue.length > 0 ? `Sync (${appState.offlineQueue.length})` : 'Sync'}
         </Button>
       </Group>
 
       {/* Offline Status */}
       {appState.networkStatus === 'offline' && (
-        <Button
-          variant="light"
-          color="orange"
-          size="sm"
-          fullWidth
-          disabled
-        >
+        <Button variant="light" color="orange" size="sm" fullWidth disabled>
           Working Offline - {appState.offlineQueue.length} items queued
         </Button>
       )}

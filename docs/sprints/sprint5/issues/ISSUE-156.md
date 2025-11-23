@@ -1,363 +1,315 @@
-# ISSUE-156: Form Builder Tests & Polish (4h)
+# ISSUE-156: Form Validation Rules Editor (3h)
 
-**Priority:** P0
+**Priority:** P1
 **Phase:** Phase 5 - Form Builder
-**Estimated Hours:** 4
-**Dependencies:** All Phase 5 issues (ISSUE-145 through ISSUE-155)
+**Estimated Hours:** 3
+**Dependencies:** ISSUE-155
 **Sprint:** Sprint 5
 
 ---
 
 ## Objective
 
-Create comprehensive end-to-end tests for the complete form builder workflow and polish the user experience with keyboard shortcuts, tooltips, and performance optimizations.
+Create a comprehensive validation rules editor allowing form builders to configure advanced validation rules, error messages, and EPA-compliant validation for construction forms.
 
 ## Tasks
 
-- [ ] Write E2E tests for complete form building workflow
-- [ ] Write E2E tests for template usage workflow
-- [ ] Write E2E tests for publish workflow
-- [ ] Add keyboard shortcuts (Ctrl+S save, Ctrl+Z undo, Ctrl+Y redo)
-- [ ] Add helpful tooltips throughout form builder
-- [ ] Optimize drag-and-drop performance
-- [ ] Add loading states for all async operations
-- [ ] Create onboarding tour for first-time users
-- [ ] Run full test suite and achieve >80% coverage
+- [ ] Create ValidationRulesEditor component
+- [ ] Implement validation rule types (required, regex pattern, min/max, custom)
+- [ ] Create custom error message editor
+- [ ] Implement cross-field validation rules
+- [ ] Add EPA-compliant validation templates (inspector name, date, GPS)
+- [ ] Create validation preview and testing interface
+- [ ] Sync validation rules with Valtio store
+- [ ] Add unit tests for validation logic
 
 ## Technical Details
 
 **Libraries/Dependencies:**
 
-- Playwright (E2E testing)
-- Vitest (unit testing)
-- @mantine/hooks (useHotkeys for keyboard shortcuts)
-- React Joyride (onboarding tour)
+- Zod (schema validation)
+- Valtio (form builder state)
+- Mantine components (TextInput, Textarea, Select)
 
 **Code Example:**
 
 ```typescript
-// E2E Test: Complete Form Building Workflow
-import { test, expect } from '@playwright/test';
+'use client';
 
-test.describe('Form Builder', () => {
-  test('should build, preview, and publish EPA daily inspection form', async ({ page }) => {
-    await page.goto('/forms/builder/new');
+import { Stack, TextInput, Textarea, Select, Switch, Card, Text, Button, Group } from '@mantine/core';
+import { z } from 'zod';
+import { useSnapshot } from 'valtio';
+import { formBuilderStore, updateField } from './store';
 
-    // Step 1: Drag fields from library to canvas
-    await page.dragAndDrop(
-      '[data-testid="field-inspector"]',
-      '[data-testid="form-canvas"]'
-    );
-    await page.dragAndDrop(
-      '[data-testid="field-datetime"]',
-      '[data-testid="form-canvas"]'
-    );
-    await page.dragAndDrop(
-      '[data-testid="field-gps"]',
-      '[data-testid="form-canvas"]'
-    );
+export interface ValidationRule {
+  id: string;
+  type: 'required' | 'pattern' | 'min' | 'max' | 'minLength' | 'maxLength' | 'email' | 'phone' | 'custom';
+  value?: string | number;
+  message: string;
+}
 
-    // Verify fields added
-    await expect(page.locator('[data-testid="field-instance"]')).toHaveCount(3);
-
-    // Step 2: Configure field properties
-    await page.click('[data-testid="field-instance"]:first-child');
-    await page.fill('[data-testid="field-label"]', 'Inspector Name');
-    await page.click('[data-testid="field-required"]');
-
-    // Step 3: Add conditional logic
-    await page.click('[data-testid="add-conditional-rule"]');
-    await page.selectOption('[data-testid="condition-field"]', 'rain-24h');
-    await page.selectOption('[data-testid="condition-operator"]', 'greater_than');
-    await page.fill('[data-testid="condition-value"]', '0.25');
-
-    // Step 4: Preview form
-    await page.click('button:has-text("Preview")');
-    await expect(page.locator('[data-testid="form-preview"]')).toBeVisible();
-    await expect(page.locator('input[name="inspector"]')).toBeVisible();
-
-    // Step 5: Fill test data
-    await page.click('button:has-text("Fill Test Data")');
-    await expect(page.locator('input[name="inspector"]')).not.toBeEmpty();
-
-    // Step 6: Validate form
-    await page.click('button:has-text("Validate")');
-    await expect(page.locator('text=Validation passed')).toBeVisible();
-
-    // Step 7: Publish form
-    await page.click('button:has-text("Publish")');
-    await page.selectOption('[data-testid="visibility"]', 'internal');
-    await page.click('button:has-text("Publish Now")');
-
-    // Verify published
-    await expect(page.locator('text=Form published successfully')).toBeVisible();
-  });
-
-  test('should load template and customize', async ({ page }) => {
-    await page.goto('/forms/builder/new');
-
-    // Open templates library
-    await page.click('button:has-text("Templates")');
-
-    // Search for EPA template
-    await page.fill('[data-testid="template-search"]', 'EPA Daily');
-    await expect(page.locator('[data-testid="template-card"]')).toHaveCountGreaterThan(0);
-
-    // Use template
-    await page.click('[data-testid="use-template"]');
-    await page.click('button:has-text("Yes, load template")'); // Confirmation
-
-    // Verify template loaded
-    await expect(page.locator('[data-testid="field-instance"]')).toHaveCountGreaterThan(10);
-
-    // Customize template
-    await page.click('[data-testid="field-instance"]:first-child');
-    await page.fill('[data-testid="field-label"]', 'Custom Inspector Name');
-
-    // Save as custom template
-    await page.click('button:has-text("Save as Template")');
-    await page.fill('[data-testid="template-name"]', 'My Custom EPA Form');
-    await page.click('button:has-text("Save")');
-
-    // Verify saved
-    await expect(page.locator('text=Template saved')).toBeVisible();
-  });
-});
-
-// Keyboard Shortcuts
-import { useHotkeys } from '@mantine/hooks';
-
-export function useFormBuilderHotkeys() {
+// Validation Rules Editor
+export function ValidationRulesEditor({ fieldId }: { fieldId: string }) {
   const snap = useSnapshot(formBuilderStore);
+  const field = snap.fields.find(f => f.id === fieldId);
 
-  useHotkeys([
-    ['mod+S', () => saveForm(), { preventDefault: true }],
-    ['mod+Z', () => undo(), { preventDefault: true }],
-    ['mod+Y', () => redo(), { preventDefault: true }],
-    ['mod+P', () => togglePreview(), { preventDefault: true }],
-    ['Delete', () => deleteSelectedField(), { preventDefault: true }],
-    ['mod+D', () => duplicateSelectedField(), { preventDefault: true }],
-    ['Escape', () => deselectField(), { preventDefault: true }],
-  ]);
-}
+  if (!field) return null;
 
-function saveForm() {
-  console.log('Saving form...');
-  // Save logic
-}
+  const [rules, setRules] = useState<ValidationRule[]>(field.validationRules || []);
 
-function undo() {
-  const snap = formBuilderStore;
-  if (snap.history.length > 0) {
-    const previousState = snap.history.pop();
-    formBuilderStore.fields = previousState.fields;
-  }
-}
+  const addRule = (type: ValidationRule['type']) => {
+    const defaultMessages = {
+      required: 'This field is required',
+      pattern: 'Invalid format',
+      min: 'Value must be at least ${value}',
+      max: 'Value must be at most ${value}',
+      minLength: 'Must be at least ${value} characters',
+      maxLength: 'Must be at most ${value} characters',
+      email: 'Invalid email address',
+      phone: 'Invalid phone number',
+      custom: 'Validation failed',
+    };
 
-function redo() {
-  // Redo logic
-}
+    const newRule: ValidationRule = {
+      id: `rule-${Date.now()}`,
+      type,
+      message: defaultMessages[type],
+    };
 
-function togglePreview() {
-  formBuilderStore.previewMode = !formBuilderStore.previewMode;
-}
+    const updatedRules = [...rules, newRule];
+    setRules(updatedRules);
+    updateField(fieldId, { validationRules: updatedRules });
+  };
 
-function deleteSelectedField() {
-  const snap = formBuilderStore;
-  if (snap.selectedFieldId) {
-    removeField(snap.selectedFieldId);
-  }
-}
+  const updateRule = (ruleId: string, updates: Partial<ValidationRule>) => {
+    const updatedRules = rules.map(r =>
+      r.id === ruleId ? { ...r, ...updates } : r
+    );
+    setRules(updatedRules);
+    updateField(fieldId, { validationRules: updatedRules });
+  };
 
-function duplicateSelectedField() {
-  const snap = formBuilderStore;
-  if (snap.selectedFieldId) {
-    duplicateField(snap.selectedFieldId);
-  }
-}
+  const removeRule = (ruleId: string) => {
+    const updatedRules = rules.filter(r => r.id !== ruleId);
+    setRules(updatedRules);
+    updateField(fieldId, { validationRules: updatedRules });
+  };
 
-function deselectField() {
-  formBuilderStore.selectedFieldId = null;
-}
-
-// Onboarding Tour
-import Joyride, { Step } from 'react-joyride';
-
-const tourSteps: Step[] = [
-  {
-    target: '[data-testid="field-library"]',
-    content: 'Drag fields from the library to build your form',
-    disableBeacon: true,
-  },
-  {
-    target: '[data-testid="form-canvas"]',
-    content: 'Drop fields here and reorder them by dragging',
-  },
-  {
-    target: '[data-testid="field-properties"]',
-    content: 'Configure field properties, validation, and conditional logic',
-  },
-  {
-    target: '[data-testid="form-preview"]',
-    content: 'Preview your form before publishing',
-  },
-  {
-    target: '[data-testid="publish-button"]',
-    content: 'When ready, publish your form to production',
-  },
-];
-
-export function FormBuilderOnboarding() {
-  const [runTour, setRunTour] = useState(() => {
-    return !localStorage.getItem('formBuilderTourCompleted');
-  });
-
-  const handleTourEnd = () => {
-    localStorage.setItem('formBuilderTourCompleted', 'true');
-    setRunTour(false);
+  // EPA Compliance Template
+  const applyEPATemplate = () => {
+    const epaRules: ValidationRule[] = [
+      {
+        id: 'epa-required',
+        type: 'required',
+        message: 'Required for EPA compliance',
+      },
+      {
+        id: 'epa-inspector',
+        type: 'pattern',
+        value: '^[A-Za-z\\s]+ [A-Za-z\\s]+$',
+        message: 'Inspector name must be full name (First Last)',
+      },
+    ];
+    setRules(epaRules);
+    updateField(fieldId, { validationRules: epaRules });
   };
 
   return (
-    <Joyride
-      steps={tourSteps}
-      run={runTour}
-      continuous
-      showProgress
-      showSkipButton
-      callback={(data) => {
-        if (data.status === 'finished' || data.status === 'skipped') {
-          handleTourEnd();
-        }
-      }}
-      styles={{
-        options: {
-          primaryColor: '#228be6',
-        },
-      }}
-    />
+    <Card withBorder padding="md">
+      <Stack gap="md">
+        <div>
+          <Text size="sm" fw={600}>Validation Rules</Text>
+          <Text size="xs" c="dimmed">Configure validation and error messages</Text>
+        </div>
+
+        <Stack gap="sm">
+          {rules.map(rule => (
+            <ValidationRuleEditor
+              key={rule.id}
+              rule={rule}
+              onUpdate={(updates) => updateRule(rule.id, updates)}
+              onRemove={() => removeRule(rule.id)}
+            />
+          ))}
+        </Stack>
+
+        <Select
+          placeholder="Add validation rule"
+          data={[
+            { value: 'required', label: 'Required' },
+            { value: 'pattern', label: 'Pattern (Regex)' },
+            { value: 'minLength', label: 'Minimum Length' },
+            { value: 'maxLength', label: 'Maximum Length' },
+            { value: 'min', label: 'Minimum Value' },
+            { value: 'max', label: 'Maximum Value' },
+            { value: 'email', label: 'Email' },
+            { value: 'phone', label: 'Phone' },
+            { value: 'custom', label: 'Custom Validation' },
+          ]}
+          onChange={(value) => value && addRule(value as ValidationRule['type'])}
+        />
+
+        {field.type === 'inspector' && (
+          <Button variant="light" size="xs" onClick={applyEPATemplate}>
+            Apply EPA Compliance Template
+          </Button>
+        )}
+      </Stack>
+    </Card>
   );
 }
 
-// Performance Optimizations
-import { memo, useMemo } from 'react';
+// Individual Validation Rule Editor
+function ValidationRuleEditor({
+  rule,
+  onUpdate,
+  onRemove,
+}: {
+  rule: ValidationRule;
+  onUpdate: (updates: Partial<ValidationRule>) => void;
+  onRemove: () => void;
+}) {
+  return (
+    <Card withBorder padding="sm">
+      <Stack gap="xs">
+        <Group justify="space-between">
+          <Text size="sm" fw={500}>{rule.type}</Text>
+          <ActionIcon variant="subtle" color="red" onClick={onRemove}>
+            <IconTrash size={14} />
+          </ActionIcon>
+        </Group>
 
-// Memoize field instances to prevent unnecessary re-renders
-export const FieldInstance = memo(function FieldInstance({ field }: { field: FormField }) {
-  // Field instance rendering logic
-  return <div>{field.label}</div>;
-});
+        {['min', 'max', 'minLength', 'maxLength', 'pattern'].includes(rule.type) && (
+          <TextInput
+            label={rule.type === 'pattern' ? 'Regex Pattern' : 'Value'}
+            placeholder={rule.type === 'pattern' ? '^[A-Z]{3}-[0-9]{4}$' : '0'}
+            value={rule.value?.toString() || ''}
+            onChange={(e) => onUpdate({ value: e.target.value })}
+          />
+        )}
 
-// Optimize drag-and-drop with virtualization for large forms
-import { useVirtualizer } from '@tanstack/react-virtual';
+        <Textarea
+          label="Error Message"
+          placeholder="Custom error message shown to field workers"
+          value={rule.message}
+          onChange={(e) => onUpdate({ message: e.target.value })}
+          minRows={2}
+        />
+      </Stack>
+    </Card>
+  );
+}
 
-export function VirtualizedFieldList({ fields }: { fields: FormField[] }) {
-  const parentRef = useRef<HTMLDivElement>(null);
+// Generate Zod schema from validation rules
+export function generateZodSchema(field: FormField): z.ZodTypeAny {
+  let schema: z.ZodTypeAny;
 
-  const virtualizer = useVirtualizer({
-    count: fields.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 60, // Average field height
+  // Base schema by field type
+  switch (field.type) {
+    case 'text':
+    case 'textarea':
+      schema = z.string();
+      break;
+    case 'number':
+      schema = z.number();
+      break;
+    case 'email':
+      schema = z.string().email();
+      break;
+    case 'phone':
+      schema = z.string().regex(/^\d{3}-\d{3}-\d{4}$/);
+      break;
+    default:
+      schema = z.any();
+  }
+
+  // Apply validation rules
+  field.validationRules?.forEach(rule => {
+    switch (rule.type) {
+      case 'required':
+        if (schema instanceof z.ZodString) {
+          schema = schema.min(1, rule.message);
+        }
+        break;
+      case 'pattern':
+        if (schema instanceof z.ZodString && rule.value) {
+          schema = schema.regex(new RegExp(rule.value), rule.message);
+        }
+        break;
+      case 'minLength':
+        if (schema instanceof z.ZodString && typeof rule.value === 'number') {
+          schema = schema.min(rule.value, rule.message);
+        }
+        break;
+      case 'maxLength':
+        if (schema instanceof z.ZodString && typeof rule.value === 'number') {
+          schema = schema.max(rule.value, rule.message);
+        }
+        break;
+      case 'min':
+        if (schema instanceof z.ZodNumber && typeof rule.value === 'number') {
+          schema = schema.min(rule.value, rule.message);
+        }
+        break;
+      case 'max':
+        if (schema instanceof z.ZodNumber && typeof rule.value === 'number') {
+          schema = schema.max(rule.value, rule.message);
+        }
+        break;
+    }
   });
 
-  return (
-    <div ref={parentRef} style={{ height: '600px', overflow: 'auto' }}>
-      <div style={{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }}>
-        {virtualizer.getVirtualItems().map((virtualItem) => (
-          <div
-            key={virtualItem.key}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: `${virtualItem.size}px`,
-              transform: `translateY(${virtualItem.start}px)`,
-            }}
-          >
-            <FieldInstance field={fields[virtualItem.index]} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// Tooltips for first-time users
-export function HelpfulTooltips() {
-  return (
-    <>
-      <Tooltip label="Drag fields to canvas to start building" position="right">
-        <div data-testid="field-library">Field Library</div>
-      </Tooltip>
-
-      <Tooltip label="Press Delete to remove selected field" position="top">
-        <div data-testid="delete-field-button">Delete</div>
-      </Tooltip>
-
-      <Tooltip label="Ctrl+S to save, Ctrl+Z to undo" position="bottom">
-        <div data-testid="form-canvas">Canvas</div>
-      </Tooltip>
-    </>
-  );
+  return schema;
 }
 ```
 
 ## Acceptance Criteria
 
-- [ ] E2E tests cover complete form building workflow
-- [ ] E2E tests cover template usage workflow
-- [ ] E2E tests cover publish workflow
-- [ ] Keyboard shortcuts working (Ctrl+S, Ctrl+Z, Ctrl+Y, Delete, Escape)
-- [ ] Tooltips display on hover for all key features
-- [ ] Onboarding tour appears for first-time users
-- [ ] Drag-and-drop performance optimized (no lag with 50+ fields)
-- [ ] Loading states for all async operations
-- [ ] Overall test coverage >80%
+- [ ] Validation rules editor displays for each field
+- [ ] All validation rule types working (required, pattern, min/max, etc.)
+- [ ] Custom error messages editable
+- [ ] EPA compliance template available for inspector fields
+- [ ] Validation preview shows error messages
+- [ ] Zod schema generation from validation rules functional
+- [ ] Real-time updates to Valtio store
 
 ## Testing Requirements
 
-**E2E Tests (10+ scenarios):**
+**Unit Tests:**
 
-- Build form from scratch (drag fields, configure, publish)
-- Use template and customize
-- Add conditional logic
-- Preview and validate form
-- Publish form with settings
-- Restore previous version
-- Save as custom template
-- Keyboard shortcuts
-- Undo/redo workflow
-- Delete and duplicate fields
+- Test validation rule add/edit/delete
+- Test Zod schema generation
+- Test EPA compliance template
+- Test error message customization
 
-**Performance Tests:**
+**Integration Tests:**
 
-- Measure drag-and-drop performance with 100 fields
-- Measure form preview render time
-- Measure publish API response time
+- Test validation in form preview
+- Test Valtio store updates
+- Test cross-field validation
 
-**Accessibility Tests:**
+**Manual Testing:**
 
-- Keyboard navigation for all features
-- Screen reader compatibility
-- Focus visible styles
+- Add validation rules to various field types
+- Customize error messages
+- Apply EPA template to inspector field
+- Test validation in form preview
 
 ## Evidence Requirements
 
-- [ ] Screenshot: Onboarding tour
-- [ ] Screenshot: Keyboard shortcuts in action
-- [ ] Video: Complete E2E workflow (2-3 minutes)
-- [ ] Test Results: Overall coverage >80%
-- [ ] Performance Report: Drag-and-drop <50ms
+- [ ] Screenshot: Validation rules editor
+- [ ] Screenshot: EPA compliance template
+- [ ] Screenshot: Custom error messages
+- [ ] Test Results: Validation tests (>80% coverage)
 
 ## Success Criteria
 
-Form builder tests & polish is complete when:
+Validation rules editor is complete when:
 
-- All E2E tests passing
-- Keyboard shortcuts working
-- Onboarding tour functional
-- Performance optimized
-- Test coverage >80%
+- All rule types working
+- Custom error messages functional
+- EPA template applied correctly
+- Validation works in form preview
 - All tests passing
 
 ---

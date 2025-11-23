@@ -9,7 +9,7 @@ import { IconUsers } from '@tabler/icons-react';
  * Shows team members assigned to this project.
  * This will be fully implemented in Sprint 4.
  */
-export function ProjectTeamTab({ projectId }: { projectId: string }) {
+export function ProjectTeamTab({ projectId: _projectId }: { projectId: string }) {
   return (
     <Stack gap="md" data-testid="team-tab-content">
       <Center py="xl">
@@ -26,4 +26,3 @@ export function ProjectTeamTab({ projectId }: { projectId: string }) {
     </Stack>
   );
 }
-

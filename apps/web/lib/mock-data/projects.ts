@@ -125,3 +125,12 @@ export const searchProjects = (projects: MockProject[], search: string): MockPro
       p.name.toLowerCase().includes(searchLower) || p.address.toLowerCase().includes(searchLower)
   );
 };
+
+/**
+ * Get a single project by ID
+ *
+ * Sprint 4: Replace with real API call
+ */
+export const getMockProjectById = (id: string): MockProject | undefined => {
+  return getMockProjects().find((p) => p.id === id);
+};

@@ -51,7 +51,7 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 
 ### Phase 1: Photo Gallery (6 issues, 20h)
 
-**ISSUE-123: Photo Gallery Grid View (4h)** - P0
+**ISSUE-128: Photo Gallery Grid View (4h)** - P0
 
 - Create /photos and /photos/[projectId] routes
 - Grid layout with masonry/responsive columns
@@ -62,7 +62,7 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Dependencies: Sprint 4 complete
 - Success: Photo gallery displays all project photos in grid
 
-**ISSUE-124: Photo Lightbox Viewer (3h)** - P0
+**ISSUE-129: Photo Lightbox Viewer (3h)** - P0
 
 - Install Yet Another React Lightbox (MIT license, actively maintained)
 - Click photo thumbnail to open lightbox modal
@@ -73,10 +73,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Download original photo button
 - Share photo link button
 - Use responsive images (srcset/sizes for performance)
-- Dependencies: ISSUE-123
+- Dependencies: ISSUE-143
 - Success: Lightbox functional with navigation
 
-**ISSUE-125: GPS Map Integration (4h)** - P0
+**ISSUE-130: GPS Map Integration (4h)** - P0
 
 - Install MapLibre GL JS + react-map-gl (BSD license, open source, free)
 - Map view toggle (grid/map)
@@ -87,10 +87,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Filter map by date range
 - Use free tile provider (Stadia Maps, OpenStreetMap, or self-hosted)
 - Offline support: Self-host tiles for construction sites without connectivity
-- Dependencies: ISSUE-124
+- Dependencies: ISSUE-144
 - Success: GPS map displays photo locations with offline capability
 
-**ISSUE-126: Photo Annotations (4h)** - P1
+**ISSUE-131: Photo Annotations (4h)** - P1
 
 - Install Annotorious (@annotorious/react, BSD license, actively maintained)
 - Annotation toolbar (arrow, text, highlight, drawing shapes)
@@ -100,10 +100,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - View annotation history
 - Delete annotations
 - TypeScript support (full type safety)
-- Dependencies: ISSUE-125
+- Dependencies: ISSUE-135
 - Success: Photo annotations functional with modern library
 
-**ISSUE-127: Photo Search & Filter (3h)** - P0
+**ISSUE-132: Photo Search & Filter (3h)** - P0
 
 - Search by photo description/tags
 - Filter by user (who took photo)
@@ -112,22 +112,22 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Filter by GPS location (within radius)
 - Filter by weather conditions (rain, sun, etc.)
 - Clear all filters button
-- Dependencies: ISSUE-126
+- Dependencies: ISSUE-156
 - Success: Photo search and filters functional
 
-**ISSUE-128: Before/After Photo Pairing (2h)** - P1
+**ISSUE-133: Before/After Photo Pairing (2h)** - P1
 
 - Link two photos as before/after pair
 - Side-by-side comparison view
 - Slider to fade between before/after
 - Tag photos as "before" or "after"
 - Filter to show only paired photos
-- Dependencies: ISSUE-127
+- Dependencies: ISSUE-158
 - Success: Before/after pairing functional
 
 ### Phase 2: Offline Experience UI (7 issues, 24h)
 
-**ISSUE-129: Sync Status Dashboard (4h)** - P0
+**ISSUE-134: Sync Status Dashboard (4h)** - P0
 
 - Create /sync/status route
 - Display current sync status (synced, syncing, offline, error)
@@ -139,7 +139,7 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Dependencies: Phase 1 complete
 - Success: Sync status dashboard displays accurate data
 
-**ISSUE-130: Sync Queue Management (4h)** - P0
+**ISSUE-135: Sync Queue Management (4h)** - P0
 
 - Create /sync/queue route
 - List all pending sync operations (table view)
@@ -149,10 +149,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Show operation priority (compliance forms first)
 - Retry individual operation button
 - Delete queued operation button (with confirmation)
-- Dependencies: ISSUE-129
+- Dependencies: ISSUE-144
 - Success: Sync queue displays all pending operations
 
-**ISSUE-131: Conflict Resolution UI (6h)** - P0
+**ISSUE-136: Conflict Resolution UI (6h)** - P0
 
 - Create /sync/conflicts route
 - Detect conflicts (local vs server version mismatch)
@@ -161,40 +161,40 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Resolution options: Keep Local, Keep Server, Merge, Cancel
 - Merge editor for manual conflict resolution
 - Conflict history log (who resolved, when, how)
-- Dependencies: ISSUE-130
+- Dependencies: ISSUE-135
 - Success: Conflict resolution UI functional
 
-**ISSUE-132: Offline Storage Indicators (2h)** - P0
+**ISSUE-137: Offline Storage Indicators (2h)** - P0
 
 - Storage meter in sync dashboard (used/available)
 - Warning when approaching 30-day capacity
 - Alert when <5 days remaining
 - Storage cleanup suggestions (delete old drafts)
 - Export old data to free space
-- Dependencies: ISSUE-131
+- Dependencies: ISSUE-156
 - Success: Storage indicators accurate
 
-**ISSUE-133: Manual Sync Trigger (2h)** - P0
+**ISSUE-138: Manual Sync Trigger (2h)** - P0
 
 - "Sync Now" button in header (next to offline banner)
 - Sync progress modal with percentage
 - Cancel sync button (stop in-progress sync)
 - Sync error display (with retry option)
 - Success toast notification
-- Dependencies: ISSUE-132
+- Dependencies: ISSUE-158
 - Success: Manual sync trigger functional
 
-**ISSUE-134: Retry Failed Sync (2h)** - P0
+**ISSUE-139: Retry Failed Sync (2h)** - P0
 
 - Identify failed sync operations
 - Display failed items in sync queue (red badge)
 - "Retry All Failed" button
 - Retry individual failed item
 - Show failure reason (network error, validation error, etc.)
-- Dependencies: ISSUE-133
+- Dependencies: ISSUE-143
 - Success: Retry failed sync functional
 
-**ISSUE-135: Offline Experience Tests (4h)** - P0
+**ISSUE-140: Offline Experience Tests (4h)** - P0
 
 - Test offline detection (network toggle)
 - Test auto-save to IndexedDB
@@ -203,12 +203,12 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Test 30-day storage capacity
 - Test manual sync trigger
 - Test retry failed sync
-- Dependencies: ISSUE-134
+- Dependencies: ISSUE-144
 - Success: All offline tests passing
 
 ### Phase 3: Settings & Profile (5 issues, 12h)
 
-**ISSUE-136: User Profile Page (3h)** - P0
+**ISSUE-141: User Profile Page (3h)** - P0
 
 - Create /settings/profile route
 - Display user info (name, email, avatar)
@@ -219,7 +219,7 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Dependencies: Phase 2 complete
 - Success: User profile page functional
 
-**ISSUE-137: Account Settings (3h)** - P0
+**ISSUE-142: Account Settings (3h)** - P0
 
 - Create /settings/account route
 - Email notification preferences (on/off toggles)
@@ -228,10 +228,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Timezone selection
 - Date format preference (MM/DD/YYYY, DD/MM/YYYY)
 - Time format preference (12h, 24h)
-- Dependencies: ISSUE-136
+- Dependencies: ISSUE-156
 - Success: Account settings functional
 
-**ISSUE-138: Notification Preferences (2h)** - P0
+**ISSUE-143: Notification Preferences (2h)** - P0
 
 - Create /settings/notifications route
 - Email notifications toggle (daily summary, form submitted, etc.)
@@ -239,10 +239,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - SMS notifications toggle (critical alerts only)
 - Notification frequency (real-time, hourly, daily)
 - Quiet hours configuration (no notifications 10pm-7am)
-- Dependencies: ISSUE-137
+- Dependencies: ISSUE-158
 - Success: Notification preferences functional
 
-**ISSUE-139: Help & Documentation (2h)** - P0
+**ISSUE-144: Help & Documentation (2h)** - P0
 
 - Create /settings/help route
 - FAQ accordion (common questions)
@@ -251,10 +251,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Contact support form (email support team)
 - Report a bug form (with screenshot upload)
 - Feature request form
-- Dependencies: ISSUE-138
+- Dependencies: ISSUE-143
 - Success: Help page functional
 
-**ISSUE-140: App Settings (2h)** - P0
+**ISSUE-145: App Settings (2h)** - P0
 
 - Create /settings/app route
 - Theme toggle (light/dark mode) - P2 future
@@ -263,12 +263,12 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Offline mode preference (WiFi only, cellular allowed)
 - Cache management (clear cache button)
 - App version display (with update check button)
-- Dependencies: ISSUE-139
+- Dependencies: ISSUE-144
 - Success: App settings functional
 
 ### Phase 4: Polish & Testing (4 issues, 4h)
 
-**ISSUE-141: Loading States Audit (1h)** - P0
+**ISSUE-146: Loading States Audit (1h)** - P0
 
 - Audit all pages for loading skeletons
 - Add LoadingSkeleton to missing pages
@@ -278,17 +278,17 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Dependencies: Phase 3 complete
 - Success: All pages have loading states
 
-**ISSUE-142: Error Handling Audit (1h)** - P0
+**ISSUE-147: Error Handling Audit (1h)** - P0
 
 - Audit all pages for error boundaries
 - Add ErrorBoundary to missing routes
 - Add ErrorAlert for API failures
 - Add inline field validation errors
 - Test error recovery (retry, go back, etc.)
-- Dependencies: ISSUE-141
+- Dependencies: ISSUE-156
 - Success: All pages have error handling
 
-**ISSUE-143: Responsive Design Fixes (1h)** - P0
+**ISSUE-148: Responsive Design Fixes (1h)** - P0
 
 - Test all pages on mobile (375px, 768px, 1024px)
 - Fix layout breaks on small screens
@@ -296,10 +296,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Fix horizontal scroll issues
 - Fix modal overflow on mobile
 - Test on real devices (iOS, Android)
-- Dependencies: ISSUE-142
+- Dependencies: ISSUE-158
 - Success: All pages responsive
 
-**ISSUE-144: Sprint 5 Completion Report (1h)** - P0
+**ISSUE-149: Sprint 5 Completion Report (1h)** - P0
 
 - Gather evidence from all 34 issues
 - Document photo gallery features
@@ -314,7 +314,7 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 
 ### Phase 5: Form Builder (12 issues, 100h)
 
-**ISSUE-145: Form Builder Architecture Setup (6h)** - P0
+**ISSUE-150: Form Builder Architecture Setup (6h)** - P0
 
 - Install @dnd-kit/core drag-drop library
 - Create formBuilderStore with Valtio
@@ -322,10 +322,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Implement formBuilderActions (createForm, addField, updateField, deleteField)
 - Create /admin/forms/new and /admin/forms/[id]/edit routes
 - Set up form builder page layout (3-column: palette, canvas, properties)
-- Dependencies: ISSUE-144 complete
+- Dependencies: ISSUE-160 complete
 - Success: Form builder architecture initialized
 
-**ISSUE-146: Field Palette Component (8h)** - P0
+**ISSUE-151: Field Palette Component (8h)** - P0
 
 - Create FieldPalette sidebar component
 - Display 18 field types (text, number, email, phone, date, time, etc.)
@@ -334,10 +334,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Group fields by category (Basic, Advanced, Specialized)
 - Search/filter palette fields
 - Drag preview with field icon
-- Dependencies: ISSUE-145
+- Dependencies: ISSUE-155
 - Success: Field palette displays all 18 field types, draggable to canvas
 
-**ISSUE-147: Form Canvas with Drag-Drop (12h)** - P0
+**ISSUE-152: Form Canvas with Drag-Drop (12h)** - P0
 
 - Create FormCanvas drop zone component
 - Implement DndContext from @dnd-kit/core
@@ -347,10 +347,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Reorder fields via drag-drop
 - Visual drop indicators (blue line between fields)
 - Empty state with "Drag fields here" message
-- Dependencies: ISSUE-146
+- Dependencies: ISSUE-156
 - Success: Drag fields from palette to canvas, reorder fields
 
-**ISSUE-148: Properties Panel Component (10h)** - P0
+**ISSUE-153: Properties Panel Component (10h)** - P0
 
 - Create PropertiesPanel right sidebar
 - Display selected field properties
@@ -361,10 +361,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Field type display (read-only)
 - Default value input
 - Validation rules section (min/max length, pattern)
-- Dependencies: ISSUE-147
+- Dependencies: ISSUE-158
 - Success: Properties panel displays/edits selected field properties
 
-**ISSUE-149: Conditional Logic Builder (12h)** - P0
+**ISSUE-154: Conditional Logic Builder (12h)** - P0
 
 - Create ConditionalLogicBuilder component in properties panel
 - "Show this field if..." condition builder
@@ -374,10 +374,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Add multiple conditions (AND/OR logic)
 - Condition preview in field card
 - Test conditional logic in preview mode
-- Dependencies: ISSUE-148
+- Dependencies: ISSUE-159
 - Success: Conditional logic functional (fields show/hide based on conditions)
 
-**ISSUE-150: Calculated Fields Editor (10h)** - P0
+**ISSUE-155: Calculated Fields Editor (10h)** - P0
 
 - Install expr-eval (MIT license, 5KB, secure, simple)
 - Create CalculatedFieldEditor component
@@ -389,10 +389,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Live preview of calculated result
 - Unit selection (currency, percentage, number)
 - Security: expr-eval safer than mathjs (no import/createUnit risks)
-- Dependencies: ISSUE-149
+- Dependencies: ISSUE-160
 - Success: Calculated fields functional (auto-compute based on other fields)
 
-**ISSUE-151: Field Settings Tabs (8h)** - P0
+**ISSUE-156: Field Settings Tabs (8h)** - P0
 
 - Create tabbed interface in properties panel
 - Tab 1: Basic (label, placeholder, help text)
@@ -401,10 +401,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Tab 4: Calculations (calculated field editor)
 - Tab 5: Advanced (custom CSS, data binding, API integration)
 - Save settings to formBuilderStore on change
-- Dependencies: ISSUE-150
+- Dependencies: ISSUE-155
 - Success: All field settings accessible via tabs
 
-**ISSUE-152: Form Preview Component (8h)** - P0
+**ISSUE-158: Form Preview Component (8h)** - P0
 
 - Create FormPreview modal component
 - Toggle between mobile (375px) and desktop (1024px) preview
@@ -414,10 +414,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Test calculated fields in preview
 - Close preview button
 - Full-screen preview option
-- Dependencies: ISSUE-151
+- Dependencies: ISSUE-156
 - Success: Form preview displays accurate mobile/desktop rendering
 
-**ISSUE-153: Save/Publish Workflow (6h)** - P0
+**ISSUE-159: Save/Publish Workflow (6h)** - P0
 
 - Implement "Save Draft" button (saves to PostgreSQL as draft)
 - Implement "Publish" button (marks form as active template)
@@ -426,10 +426,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Success toast notifications
 - Auto-save every 30 seconds
 - Publish confirmation modal
-- Dependencies: ISSUE-152
+- Dependencies: ISSUE-158
 - Success: Forms save as drafts and publish as active templates
 
-**ISSUE-154: Undo/Redo History (6h)** - P0
+**ISSUE-160: Undo/Redo History (6h)** - P0
 
 - Implement history array in formBuilderStore
 - Save form state snapshot on every change
@@ -438,10 +438,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - History limit (50 snapshots)
 - History indicator (undo/redo available state)
 - Clear history on publish
-- Dependencies: ISSUE-153
+- Dependencies: ISSUE-159
 - Success: Undo/redo functional for all form builder actions
 
-**ISSUE-155: Form Validation Engine (8h)** - P0
+**ISSUE-161: Form Validation Engine (8h)** - P0
 
 - Validate form before publish (all fields have labels)
 - Detect circular dependencies in calculated fields
@@ -450,10 +450,10 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Validation error display in properties panel
 - Validation summary modal (list all errors)
 - Block publish if validation fails
-- Dependencies: ISSUE-154
+- Dependencies: ISSUE-160
 - Success: Form validation prevents invalid forms from publishing
 
-**ISSUE-156: Form Builder Tests (6h)** - P0
+**ISSUE-161: Form Builder Tests & Polish (6h)** - P0
 
 - Test drag-drop functionality (palette to canvas, reorder)
 - Test field property editing (all 18 field types)
@@ -461,17 +461,18 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Test calculated fields (all operators and functions)
 - Test save/publish workflow
 - Test undo/redo history
+- Test form validation engine
 - Test form validation (detect errors)
 - Test mobile/desktop preview
 - Coverage target: >80%
-- Dependencies: ISSUE-155
+- Dependencies: ISSUE-161 (Form Validation Engine)
 - Success: All form builder tests passing
 
 ## Critical Path
 
 **Week 1 Focus (20h):**
 
-- Phase 1: Photo Gallery (ISSUE-123 through ISSUE-128) - 20h
+- Phase 1: Photo Gallery (ISSUE-128 through ISSUE-133) - 20h
   - Day 1-2: Photo gallery grid + lightbox (7h)
   - Day 3-4: GPS map + annotations (8h)
   - Day 5: Search/filter + before/after pairing (5h)
@@ -531,9 +532,9 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 
 **Must Complete (P0 - 30 issues, 88%):**
 
-- [ ] Photo gallery grid view and lightbox (ISSUE-123, ISSUE-124)
-- [ ] GPS map integration (ISSUE-125)
-- [ ] Photo search and filters (ISSUE-127)
+- [ ] Photo gallery grid view and lightbox (ISSUE-128, ISSUE-129)
+- [ ] GPS map integration (ISSUE-130)
+- [ ] Photo search and filters (ISSUE-132)
 - [ ] Sync status dashboard (ISSUE-129)
 - [ ] Sync queue management (ISSUE-130)
 - [ ] Conflict resolution UI (ISSUE-131)
@@ -564,7 +565,7 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 
 **Should Complete (P1 - 4 issues, 12%):**
 
-- [ ] Photo annotations (ISSUE-126) - nice-to-have for inspectors
+- [ ] Photo annotations (ISSUE-131) - nice-to-have for inspectors
 - [ ] Before/after photo pairing (ISSUE-128) - nice-to-have for progress tracking
 
 **Sprint 5 Readiness:**
@@ -608,10 +609,10 @@ Deferred to Sprint 6+:
 
 **External Dependencies:**
 
-- MapLibre GL JS + react-map-gl (BSD license, free, ISSUE-125)
-- Free map tiles provider: Stadia Maps, OpenStreetMap, or self-hosted (ISSUE-125)
-- Annotorious (@annotorious/react, BSD license, ISSUE-126)
-- Yet Another React Lightbox (MIT license, ISSUE-124)
+- MapLibre GL JS + react-map-gl (BSD license, free, ISSUE-130)
+- Free map tiles provider: Stadia Maps, OpenStreetMap, or self-hosted (ISSUE-130)
+- Annotorious (@annotorious/react, BSD license, ISSUE-131)
+- Yet Another React Lightbox (MIT license, ISSUE-129)
 - expr-eval (MIT license, ISSUE-150)
 - IndexedDB storage API (browser native, already in use, ISSUE-132)
 - @dnd-kit/core drag-drop library (MIT license, ISSUE-145, ISSUE-147)
@@ -746,7 +747,7 @@ Deferred to Sprint 6+:
 
 **Risk: Time Constraints (160h in 7-8 weeks)**
 
-- Mitigation: Mark ISSUE-126 (annotations) and ISSUE-128 (before/after) as P1 (defer if needed)
+- Mitigation: Mark ISSUE-131 (annotations) and ISSUE-133 (before/after) as P1 (defer if needed)
 - Form Builder is P0 (critical for 100% MVP), cannot be deferred
 - Minimum viable: 30 P0 issues (140h) vs all 34 issues (160h)
 - If time pressured: Remove photo annotations and before/after pairing (20h savings)

@@ -150,3 +150,37 @@ export async function findAllSubmissions(params?: {
 
   return json.data.submissions || [];
 }
+
+/**
+ * Copy yesterday's submission log
+ */
+export async function copyYesterdaysLog(templateId: string): Promise<SubmissionResponse> {
+  const endpoint = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:30101/graphql';
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      query: `
+        mutation CopyYesterdaysLog($templateId: ID!) {
+          copyYesterdaysLog(templateId: $templateId) {
+            id
+            templateId
+            data
+            status
+            submittedAt
+          }
+        }
+      `,
+      variables: { templateId },
+    }),
+  });
+
+  const json = await response.json();
+
+  if (json.errors) {
+    throw new Error(json.errors[0]?.message || "Failed to copy yesterday's log");
+  }
+
+  return json.data.copyYesterdaysLog;
+}

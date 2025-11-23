@@ -1,398 +1,237 @@
-# ISSUE-142: Error Boundaries & Toast Notifications (3h)
+# ISSUE-142: Account Settings Page (3h)
 
-**Priority:** P0
-**Phase:** Phase 4 - Polish & Testing
+**Priority:** P1
+**Phase:** Phase 3 - Settings & Profile
 **Estimated Hours:** 3
-**Dependencies:** Phase 1, 2, 3 complete
+**Dependencies:** ISSUE-162
 **Sprint:** Sprint 5
 
 ---
 
 ## Objective
 
-Implement comprehensive error handling with React Error Boundaries and user-friendly toast notifications for all Sprint 5 features to ensure field workers receive clear feedback on errors and successes.
+Create an account settings page for managing email/push notifications, timezone, date/time format preferences, and language settings for field workers.
 
 ## Tasks
 
-- [ ] Create global error boundary component
-- [ ] Create feature-specific error boundaries (photos, sync, settings)
-- [ ] Implement toast notification system with Mantine
-- [ ] Add error toast notifications for all async failures
-- [ ] Add success toast notifications for all async successes
-- [ ] Create error fallback UI components
-- [ ] Implement error logging to Sentry
-- [ ] Add retry logic for transient errors
-- [ ] Add unit tests for error handling
+- [ ] Create /settings/account route in Next.js App Router
+- [ ] Fetch user preferences from backend
+- [ ] Create notification preferences form (email, push, SMS)
+- [ ] Create timezone selector with auto-detection
+- [ ] Create date/time format preferences (12/24 hour, MM/DD vs DD/MM)
+- [ ] Create language selector (English, Spanish)
+- [ ] Implement save preferences with optimistic updates
+- [ ] Add reset to defaults button
+- [ ] Add unit tests for preferences logic
 
 ## Technical Details
 
 **Libraries/Dependencies:**
 
-- React Error Boundary
-- Mantine Notifications (@mantine/notifications)
-- Sentry (error logging)
-- TanStack Query (error handling)
+- Clerk (user preferences via metadata)
+- React Hook Form + Zod (form validation)
+- Mantine Form components
+- Intl API (timezone detection)
 
 **Code Example:**
 
 ```typescript
 'use client';
 
-import { Component, ReactNode } from 'react';
-import { Button, Card, Stack, Text, Group } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
-import { IconAlertTriangle, IconCheck, IconX, IconRefresh } from '@tabler/icons-react';
-import * as Sentry from '@sentry/react';
+import { useUser } from '@clerk/nextjs';
+import { useForm, zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Select, Switch, Button, Stack, Group, Text } from '@mantine/core';
 
-// Global Error Boundary
-interface ErrorBoundaryProps {
-  children: ReactNode;
-  fallback?: ReactNode;
-}
+const accountSettingsSchema = z.object({
+  emailNotifications: z.boolean(),
+  pushNotifications: z.boolean(),
+  smsNotifications: z.boolean(),
+  timezone: z.string(),
+  dateFormat: z.enum(['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD']),
+  timeFormat: z.enum(['12h', '24h']),
+  language: z.enum(['en', 'es']),
+});
 
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error: Error | null;
-}
+export default function AccountSettingsPage() {
+  const { user } = useUser();
 
-export class GlobalErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
+  const form = useForm({
+    resolver: zodResolver(accountSettingsSchema),
+    defaultValues: {
+      emailNotifications: user?.publicMetadata?.emailNotifications ?? true,
+      pushNotifications: user?.publicMetadata?.pushNotifications ?? true,
+      smsNotifications: user?.publicMetadata?.smsNotifications ?? false,
+      timezone: user?.publicMetadata?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+      dateFormat: user?.publicMetadata?.dateFormat ?? 'MM/DD/YYYY',
+      timeFormat: user?.publicMetadata?.timeFormat ?? '12h',
+      language: user?.publicMetadata?.language ?? 'en',
+    },
+  });
 
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Log to Sentry
-    Sentry.captureException(error, {
-      contexts: {
-        react: {
-          componentStack: errorInfo.componentStack,
-        },
+  const onSubmit = async (data: z.infer<typeof accountSettingsSchema>) => {
+    await user?.update({
+      publicMetadata: {
+        ...user.publicMetadata,
+        ...data,
       },
     });
 
-    console.error('Global error caught:', error, errorInfo);
-  }
-
-  resetError = () => {
-    this.setState({ hasError: false, error: null });
+    // Apply settings immediately
+    applyTimezone(data.timezone);
+    applyLanguage(data.language);
   };
 
-  render() {
-    if (this.state.hasError) {
-      if (this.props.fallback) {
-        return this.props.fallback;
-      }
+  const resetToDefaults = () => {
+    form.reset({
+      emailNotifications: true,
+      pushNotifications: true,
+      smsNotifications: false,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      dateFormat: 'MM/DD/YYYY',
+      timeFormat: '12h',
+      language: 'en',
+    });
+  };
 
-      return (
-        <Card withBorder padding="xl" ta="center">
-          <Stack align="center">
-            <IconAlertTriangle size={48} color="red" />
-            <Text size="xl" fw={600}>Something went wrong</Text>
-            <Text size="sm" c="dimmed">
-              {this.state.error?.message || 'An unexpected error occurred'}
-            </Text>
-            <Group>
-              <Button
-                leftSection={<IconRefresh size={16} />}
-                onClick={this.resetError}
-              >
-                Try Again
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => window.location.href = '/'}
-              >
-                Go Home
-              </Button>
-            </Group>
-          </Stack>
-        </Card>
-      );
-    }
-
-    return this.props.children;
-  }
-}
-
-// Feature-Specific Error Boundary (Photos)
-export function PhotosErrorBoundary({ children }: { children: ReactNode }) {
   return (
-    <GlobalErrorBoundary
-      fallback={
-        <Card withBorder padding="xl" ta="center">
-          <Stack align="center">
-            <IconAlertTriangle size={48} color="orange" />
-            <Text size="lg" fw={600}>Failed to load photos</Text>
-            <Text size="sm" c="dimmed">
-              Check your internet connection and try again
-            </Text>
-            <Button onClick={() => window.location.reload()}>
-              Reload Page
+    <Stack>
+      <Text size="xl" fw={600}>Account Settings</Text>
+
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <Stack gap="lg">
+          <div>
+            <Text size="sm" fw={500} mb="xs">Notifications</Text>
+            <Stack gap="xs">
+              <Switch
+                label="Email notifications"
+                {...form.register('emailNotifications')}
+              />
+              <Switch
+                label="Push notifications"
+                {...form.register('pushNotifications')}
+              />
+              <Switch
+                label="SMS notifications"
+                {...form.register('smsNotifications')}
+              />
+            </Stack>
+          </div>
+
+          <Select
+            label="Timezone"
+            data={TIMEZONES}
+            searchable
+            {...form.register('timezone')}
+            error={form.formState.errors.timezone?.message}
+          />
+
+          <Select
+            label="Date Format"
+            data={[
+              { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY (12/31/2025)' },
+              { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY (31/12/2025)' },
+              { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD (2025-12-31)' },
+            ]}
+            {...form.register('dateFormat')}
+            error={form.formState.errors.dateFormat?.message}
+          />
+
+          <Select
+            label="Time Format"
+            data={[
+              { value: '12h', label: '12-hour (2:30 PM)' },
+              { value: '24h', label: '24-hour (14:30)' },
+            ]}
+            {...form.register('timeFormat')}
+            error={form.formState.errors.timeFormat?.message}
+          />
+
+          <Select
+            label="Language"
+            data={[
+              { value: 'en', label: 'English' },
+              { value: 'es', label: 'Español' },
+            ]}
+            {...form.register('language')}
+            error={form.formState.errors.language?.message}
+          />
+
+          <Group>
+            <Button type="submit" loading={form.formState.isSubmitting}>
+              Save Settings
             </Button>
-          </Stack>
-        </Card>
-      }
-    >
-      {children}
-    </GlobalErrorBoundary>
-  );
-}
-
-// Toast Notification Helpers
-export const toast = {
-  success: (message: string, title = 'Success') => {
-    notifications.show({
-      title,
-      message,
-      color: 'green',
-      icon: <IconCheck size={16} />,
-      autoClose: 3000,
-    });
-  },
-
-  error: (message: string, title = 'Error') => {
-    notifications.show({
-      title,
-      message,
-      color: 'red',
-      icon: <IconX size={16} />,
-      autoClose: 5000,
-    });
-
-    // Log to Sentry
-    Sentry.captureMessage(`Toast error: ${title} - ${message}`, 'error');
-  },
-
-  info: (message: string, title = 'Info') => {
-    notifications.show({
-      title,
-      message,
-      color: 'blue',
-      icon: <IconAlertTriangle size={16} />,
-      autoClose: 4000,
-    });
-  },
-
-  loading: (message: string, id: string) => {
-    notifications.show({
-      id,
-      message,
-      loading: true,
-      autoClose: false,
-      withCloseButton: false,
-    });
-  },
-
-  update: (id: string, { success, message, title }: { success: boolean, message: string, title?: string }) => {
-    notifications.update({
-      id,
-      title: title || (success ? 'Success' : 'Error'),
-      message,
-      color: success ? 'green' : 'red',
-      icon: success ? <IconCheck size={16} /> : <IconX size={16} />,
-      loading: false,
-      autoClose: 3000,
-    });
-  },
-};
-
-// Usage in async operations
-export async function uploadPhoto(file: File) {
-  const uploadId = 'upload-photo';
-
-  try {
-    toast.loading('Uploading photo...', uploadId);
-
-    const response = await fetch('/api/photos/upload', {
-      method: 'POST',
-      body: file,
-    });
-
-    if (!response.ok) {
-      throw new Error('Upload failed');
-    }
-
-    const photo = await response.json();
-
-    toast.update(uploadId, {
-      success: true,
-      message: 'Photo uploaded successfully',
-    });
-
-    return photo;
-  } catch (error) {
-    toast.update(uploadId, {
-      success: false,
-      message: error.message || 'Failed to upload photo',
-    });
-
-    throw error;
-  }
-}
-
-// TanStack Query Error Handling
-export function PhotoGalleryPage() {
-  const { data: photos, error, refetch } = useQuery({
-    queryKey: ['photos'],
-    queryFn: fetchPhotos,
-    retry: 3, // Retry 3 times for transient errors
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
-    onError: (error) => {
-      toast.error(
-        'Failed to load photos. Please check your internet connection.',
-        'Error Loading Photos'
-      );
-
-      // Log to Sentry
-      Sentry.captureException(error, {
-        tags: { feature: 'photo-gallery' },
-      });
-    },
-  });
-
-  if (error) {
-    return (
-      <Card withBorder padding="xl" ta="center">
-        <Stack align="center">
-          <IconAlertTriangle size={48} color="orange" />
-          <Text size="lg" fw={600}>Failed to load photos</Text>
-          <Text size="sm" c="dimmed">{error.message}</Text>
-          <Button onClick={() => refetch()}>Try Again</Button>
+            <Button variant="outline" onClick={resetToDefaults}>
+              Reset to Defaults
+            </Button>
+          </Group>
         </Stack>
-      </Card>
-    );
-  }
-
-  // ... render photos
-}
-
-// Form Submission Error Handling
-export function FormSubmissionButton({ formData }: { formData: FormData }) {
-  const mutation = useMutation({
-    mutationFn: submitForm,
-    onSuccess: () => {
-      toast.success('Form submitted successfully');
-    },
-    onError: (error: Error) => {
-      if (error.message.includes('network')) {
-        toast.error(
-          'No internet connection. Form saved offline and will sync when online.',
-          'Offline Submission'
-        );
-      } else if (error.message.includes('validation')) {
-        toast.error(
-          'Please check your form and fix validation errors.',
-          'Validation Error'
-        );
-      } else {
-        toast.error(
-          error.message || 'Failed to submit form. Please try again.',
-          'Submission Error'
-        );
-      }
-
-      // Log to Sentry
-      Sentry.captureException(error, {
-        tags: { feature: 'form-submission' },
-        extra: { formData },
-      });
-    },
-  });
-
-  return (
-    <Button onClick={() => mutation.mutate(formData)} loading={mutation.isPending}>
-      Submit Form
-    </Button>
+      </form>
+    </Stack>
   );
 }
 
-// Retry Logic for Transient Errors
-export async function fetchWithRetry<T>(
-  fn: () => Promise<T>,
-  maxRetries = 3,
-  delay = 1000
-): Promise<T> {
-  let lastError: Error;
-
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      return await fn();
-    } catch (error) {
-      lastError = error as Error;
-
-      // Don't retry on validation errors (4xx)
-      if (error.response?.status >= 400 && error.response?.status < 500) {
-        throw error;
-      }
-
-      // Wait before retrying (exponential backoff)
-      if (i < maxRetries - 1) {
-        await new Promise(resolve => setTimeout(resolve, delay * 2 ** i));
-      }
-    }
-  }
-
-  throw lastError!;
-}
+// Auto-detect timezone on first load
+const TIMEZONES = [
+  'America/New_York',
+  'America/Chicago',
+  'America/Denver',
+  'America/Los_Angeles',
+  'America/Phoenix',
+  'America/Anchorage',
+  'Pacific/Honolulu',
+].map(tz => ({ value: tz, label: tz.replace(/_/g, ' ') }));
 ```
 
 ## Acceptance Criteria
 
-- [ ] Global error boundary catches all uncaught errors
-- [ ] Feature-specific error boundaries for photos, sync, settings
-- [ ] Toast notifications show for all async successes
-- [ ] Toast notifications show for all async errors
-- [ ] Error fallback UI provides retry functionality
-- [ ] All errors logged to Sentry with context
-- [ ] Transient errors retry with exponential backoff
-- [ ] Network errors queue operations for offline sync
-- [ ] Validation errors show user-friendly messages
+- [ ] /settings/account route displays all account settings
+- [ ] Notification preferences toggle correctly
+- [ ] Timezone selector with auto-detection working
+- [ ] Date/time format changes apply immediately
+- [ ] Language selector functional (English, Spanish)
+- [ ] Save settings button updates Clerk metadata
+- [ ] Reset to defaults restores original values
+- [ ] Form validation errors display correctly
+- [ ] Success notification on save
 
 ## Testing Requirements
 
 **Unit Tests:**
 
-- Test error boundary catches errors
-- Test toast notification helpers
-- Test retry logic with exponential backoff
+- Test preferences form validation
+- Test timezone auto-detection
+- Test reset to defaults
 
 **Integration Tests:**
 
-- Test error boundary fallback UI
-- Test Sentry error logging
-- Test TanStack Query error handling
+- Test save preferences with Clerk
+- Test language change propagation
+- Test date/time format application
 
 **Manual Testing:**
 
-- Simulate network errors (offline mode)
-- Simulate validation errors (invalid form data)
-- Simulate server errors (500 responses)
-- Verify toast notifications display correctly
-- Verify errors logged to Sentry
+- Change all notification preferences
+- Test timezone detection accuracy
+- Change date/time formats and verify display
+- Test language switching
 
 ## Evidence Requirements
 
-- [ ] Screenshot: Global error boundary fallback
-- [ ] Screenshot: Success toast notification
-- [ ] Screenshot: Error toast notification
-- [ ] Screenshot: Loading toast notification
-- [ ] Screenshot: Sentry error dashboard with logged errors
-- [ ] Test Results: Error handling tests (>80% coverage)
+- [ ] Screenshot: Account settings page
+- [ ] Screenshot: Notification preferences section
+- [ ] Screenshot: Timezone/format selectors
+- [ ] Screenshot: Success notification on save
+- [ ] Test Results: Preferences tests (>80% coverage)
 
 ## Success Criteria
 
-Error handling is complete when:
+Account settings page is complete when:
 
-- All errors caught by error boundaries
-- User-friendly error messages displayed
-- Toast notifications working for all async operations
-- Errors logged to Sentry with context
-- Retry logic working for transient errors
+- All preferences display and save correctly
+- Timezone auto-detection working
+- Date/time format changes apply immediately
+- Language switching functional
 - All tests passing
 
 ---

@@ -73,11 +73,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
         {/* Status and Compliance Badges */}
         <Group gap="xs" mt="xs">
-          <Badge
-            size="sm"
-            variant="light"
-            color={project.status === 'ACTIVE' ? 'blue' : 'gray'}
-          >
+          <Badge size="sm" variant="light" color={project.status === 'ACTIVE' ? 'blue' : 'gray'}>
             {project.status}
           </Badge>
 

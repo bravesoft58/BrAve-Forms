@@ -1,9 +1,12 @@
-# ISSUE-082: Computed Fields
+# ISSUE-096: Computed Fields
 
 **Sprint:** Sprint 3 | **Phase:** 4 - Dynamic Form Renderer | **Priority:** P1
 **Time:** 2 hours | **Complexity:** Small
 **Created:** 2025-10-23
-**Dependencies:** ISSUE-081 (conditional logic working)
+**Status:** COMPLETE
+**Completed:** 2025-11-17
+**Evidence:** docs/sprints/sprint3/PHASE_4_COMPLETION_REPORT.md
+**Dependencies:** ISSUE-095 (conditional logic working)
 
 ## What You'll Do
 

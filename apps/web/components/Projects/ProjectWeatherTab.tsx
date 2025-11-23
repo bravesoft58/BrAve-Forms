@@ -1,6 +1,6 @@
 'use client';
 
-import { Text, Stack, Center, Badge, Group } from '@mantine/core';
+import { Text, Stack, Center, Badge } from '@mantine/core';
 import { IconCloudRain } from '@tabler/icons-react';
 import { getMockProjectById } from '@/lib/mock-data/projects';
 
@@ -25,16 +25,16 @@ export function ProjectWeatherTab({ projectId }: { projectId: string }) {
           {project && (
             <Stack gap="xs" align="center">
               <Text size="13px" c="dimmed">
-                Recent Rainfall (24h): {project.recentRainfall.toFixed(2)}"
+                Recent Rainfall (24h): {project.recentRainfall.toFixed(2)}&quot;
               </Text>
               {hasWeatherAlert && (
                 <Badge color="orange" size="lg" variant="light">
-                  EPA CGP Alert: Inspection Required (>= 0.25")
+                  EPA CGP Alert: Inspection Required ({'>'}= 0.25&quot;)
                 </Badge>
               )}
               {!hasWeatherAlert && (
                 <Badge color="green" size="lg" variant="light">
-                  No Alert: Below 0.25" threshold
+                  No Alert: Below 0.25&quot; threshold
                 </Badge>
               )}
             </Stack>
@@ -44,4 +44,3 @@ export function ProjectWeatherTab({ projectId }: { projectId: string }) {
     </Stack>
   );
 }
-
