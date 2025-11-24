@@ -1,19 +1,27 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { useAppAuth } from '@/app/providers';
 import { Container, Title, Text, Stack, Button, Group, Badge, Image, Paper } from '@mantine/core';
 import { findSubmissionById } from '@/lib/api/submissions';
+import { UseAsTemplateDialog } from './UseAsTemplateDialog';
 
 export default function SubmissionDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const auth = useAppAuth();
   const submissionId = params.id as string;
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { data: submission, isLoading } = useQuery({
     queryKey: ['submission', submissionId],
-    queryFn: () => findSubmissionById(submissionId),
-    enabled: !!submissionId && !submissionId.startsWith('offline-'),
+    queryFn: async () => {
+      const token = auth.getToken ? await auth.getToken() : 'dev-token-123';
+      return findSubmissionById(submissionId, token);
+    },
+    enabled: !!submissionId && !submissionId.startsWith('offline-') && auth.isLoaded,
   });
 
   if (isLoading) {
@@ -157,10 +165,18 @@ export default function SubmissionDetailPage() {
         {/* Actions */}
         <Group>
           <Button onClick={() => window.print()}>Print</Button>
-          <Button variant="light" onClick={() => router.push(`/submissions/${submissionId}/clone`)}>
+          <Button variant="light" onClick={() => setIsDialogOpen(true)}>
             Use as Template
           </Button>
         </Group>
+
+        {/* Use as Template Dialog */}
+        <UseAsTemplateDialog
+          submissionId={submissionId}
+          templateId={submission.templateId}
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+        />
       </Stack>
     </Container>
   );

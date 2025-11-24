@@ -14,6 +14,13 @@ vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
 }));
 
+vi.mock('@clerk/nextjs', () => ({
+  useAuth: vi.fn(() => ({
+    isLoaded: true,
+    getToken: vi.fn().mockResolvedValue('mock-token'),
+  })),
+}));
+
 vi.mock('@/lib/api/submissions', () => ({
   findSubmissionById: vi.fn(),
 }));
@@ -433,7 +440,7 @@ describe('SubmissionDetailPage', () => {
       });
     });
 
-    it('should navigate to clone page when Use as Template clicked', async () => {
+    it('should open Use as Template dialog when button clicked', async () => {
       const user = userEvent.setup();
       (findSubmissionById as any).mockResolvedValue(mockSubmission);
 
@@ -446,7 +453,11 @@ describe('SubmissionDetailPage', () => {
       const templateButton = screen.getByRole('button', { name: /Use as Template/i });
       await user.click(templateButton);
 
-      expect(mockRouter.push).toHaveBeenCalledWith('/submissions/sub-1/clone');
+      // Dialog should open
+      await waitFor(() => {
+        expect(screen.getByText('Use as Template')).toBeInTheDocument();
+        expect(screen.getByText('Keep All Values')).toBeInTheDocument();
+      });
     });
   });
 

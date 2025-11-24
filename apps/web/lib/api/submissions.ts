@@ -16,8 +16,18 @@ export interface CreateSubmissionInput {
 export interface SubmissionResponse {
   id: string;
   templateId: string;
+  template?: {
+    id?: string;
+    name?: string;
+    version?: number;
+    schema?: Record<string, unknown>;
+  };
   status: string;
   submittedAt?: string;
+  createdBy?: {
+    id?: string;
+    name?: string;
+  };
   data?: Record<string, unknown>;
 }
 
@@ -147,11 +157,11 @@ export async function findAllSubmissions(
     | undefined,
   token: string | null
 ): Promise<SubmissionResponse[]> {
-  const data = await makeAuthenticatedRequest<{ submissions: SubmissionResponse[] }>(
+  const data = await makeAuthenticatedRequest<{ formSubmissions: SubmissionResponse[] }>(
     {
       query: `
-        query GetSubmissions($filter: SubmissionFilter, $search: String, $orderBy: SubmissionOrderBy) {
-          submissions(filter: $filter, search: $search, orderBy: $orderBy) {
+        query GetSubmissions($templateId: String, $status: String) {
+          formSubmissions(templateId: $templateId, status: $status) {
             id
             templateId
             template {
@@ -168,15 +178,66 @@ export async function findAllSubmissions(
         }
       `,
       variables: {
-        filter: params?.filter,
-        search: params?.search,
-        orderBy: params?.orderBy,
+        templateId: params?.filter?.templateId,
+        status: params?.filter?.status,
       },
     },
     token
   );
 
-  return data.submissions || [];
+  return data.formSubmissions || [];
+}
+
+/**
+ * Clone any submission with specified mode
+ *
+ * @param submissionId - Submission ID to clone
+ * @param mode - Clone mode: 'keep_all', 'structure_only', or 'clear_all'
+ * @param token - Clerk JWT token
+ * @returns Promise resolving to cloned submission with DRAFT status
+ * @throws {Error} If submission not found
+ * @throws {Error} If authentication fails (401)
+ * @throws {Error} If cross-tenant access attempted (403)
+ *
+ * @example
+ * const { getToken } = useAuth();
+ * const token = await getToken();
+ * const cloned = await cloneSubmission('sub-123', 'keep_all', token);
+ * // Navigate to: /forms/{templateId}/fill?draftId=${cloned.id}
+ *
+ * @offline Requires network connection (queued when offline, syncs when online)
+ * @security Requires Clerk JWT authentication with valid orgId
+ * @multi-tenancy Backend validates submission belongs to user's organization
+ */
+export async function cloneSubmission(
+  submissionId: string,
+  mode: 'keep_all' | 'structure_only' | 'clear_all',
+  token: string | null
+): Promise<SubmissionResponse> {
+  // Input validation
+  if (!submissionId || typeof submissionId !== 'string' || submissionId.trim() === '') {
+    throw new Error('Invalid submissionId: must be a non-empty string');
+  }
+
+  const data = await makeAuthenticatedRequest<{ cloneSubmission: SubmissionResponse }>(
+    {
+      query: `
+        mutation CloneSubmission($submissionId: ID!, $mode: String!) {
+          cloneSubmission(submissionId: $submissionId, mode: $mode) {
+            id
+            templateId
+            data
+            status
+            submittedAt
+          }
+        }
+      `,
+      variables: { submissionId, mode },
+    },
+    token
+  );
+
+  return data.cloneSubmission;
 }
 
 /**
