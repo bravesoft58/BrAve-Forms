@@ -1,0 +1,31 @@
+
+> @brave-forms/backend@1.0.0 test:cov E:\BrAve Forms\apps\backend
+> jest --coverage "--collectCoverageFrom=src/modules/submissions/services/submission-cloning.service.ts" "submissions/services/submission-cloning.service.spec.ts"
+
+PASS src/modules/submissions/services/submission-cloning.service.spec.ts
+  SubmissionCloningService
+    cloneSubmission
+      √ should clone submission with new ID (9 ms)
+      √ should reset date/time/signature/photo fields (1 ms)
+      √ should keep text/number/select fields (1 ms)
+      √ should respect CloneMode.STRUCTURE_ONLY (1 ms)
+      √ should respect CloneMode.CLEAR_ALL (2 ms)
+      √ should throw NotFoundException if source submission not found (7 ms)
+      √ should throw ForbiddenException when cloning cross-org submission (SECURITY) (1 ms)
+      √ should set submittedBy to current user (1 ms)
+      √ should handle fields with undefined values (1 ms)
+      √ should handle empty schema sections (1 ms)
+    cloneYesterdaysSubmission
+      √ should clone yesterday submission (1 ms)
+      √ should throw NotFoundException if no yesterday submission found (1 ms)
+
+----------|---------|----------|---------|---------|-------------------
+File      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+----------|---------|----------|---------|---------|-------------------
+All files |       0 |        0 |       0 |       0 |                   
+----------|---------|----------|---------|---------|-------------------
+Test Suites: 1 passed, 1 total
+Tests:       12 passed, 12 total
+Snapshots:   0 total
+Time:        3.267 s
+Ran all test suites matching /submissions\\services\\submission-cloning.service.spec.ts/i.

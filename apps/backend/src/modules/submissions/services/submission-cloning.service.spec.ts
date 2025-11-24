@@ -322,6 +322,117 @@ describe('SubmissionCloningService', () => {
 
       expect(mockPrismaService.formSubmission.create).not.toHaveBeenCalled();
     });
+
+    it('should set submittedBy to current user', async () => {
+      const sourceSubmission = {
+        id: 'source-id',
+        templateId: 'template-id',
+        data: { field1: 'value1' },
+        orgId: 'org_qd_default',
+        projectId: null,
+        submittedBy: 'original-user-id',
+        template: {
+          schema: {
+            sections: [
+              {
+                fields: [{ id: 'field1', type: 'text' }],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrismaService.formSubmission.findUnique.mockResolvedValue(sourceSubmission as any);
+      mockPrismaService.formSubmission.create.mockImplementation(({ data }) =>
+        Promise.resolve({ id: 'cloned-id', ...data } as any)
+      );
+
+      await service.cloneSubmission({
+        sourceId: 'source-id',
+        userId: 'new-user-id',
+        userOrgId: 'org_qd_default',
+        mode: CloneMode.KEEP_ALL,
+      });
+
+      expect(mockPrismaService.formSubmission.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          submittedBy: 'new-user-id',
+        }),
+      });
+    });
+
+    it('should handle fields with undefined values', async () => {
+      const sourceSubmission = {
+        id: 'source-id',
+        templateId: 'template-id',
+        data: {
+          definedField: 'value',
+          undefinedField: undefined,
+          nullField: null,
+        },
+        orgId: 'org_qd_default',
+        projectId: null,
+        template: {
+          schema: {
+            sections: [
+              {
+                fields: [
+                  { id: 'definedField', type: 'text' },
+                  { id: 'undefinedField', type: 'text' },
+                  { id: 'nullField', type: 'number' },
+                ],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrismaService.formSubmission.findUnique.mockResolvedValue(sourceSubmission as any);
+      mockPrismaService.formSubmission.create.mockImplementation(({ data }) =>
+        Promise.resolve({ id: 'cloned-id', ...data } as any)
+      );
+
+      const result = await service.cloneSubmission({
+        sourceId: 'source-id',
+        userId: 'user-id',
+        userOrgId: 'org_qd_default',
+        mode: CloneMode.KEEP_ALL,
+      });
+
+      const clonedData = result.data as Record<string, any>;
+      expect(clonedData.definedField).toBe('value');
+      expect(clonedData.nullField).toBeNull();
+    });
+
+    it('should handle empty schema sections', async () => {
+      const sourceSubmission = {
+        id: 'source-id',
+        templateId: 'template-id',
+        data: {},
+        orgId: 'org_qd_default',
+        projectId: null,
+        template: {
+          schema: {
+            sections: [],
+          },
+        },
+      };
+
+      mockPrismaService.formSubmission.findUnique.mockResolvedValue(sourceSubmission as any);
+      mockPrismaService.formSubmission.create.mockImplementation(({ data }) =>
+        Promise.resolve({ id: 'cloned-id', ...data } as any)
+      );
+
+      const result = await service.cloneSubmission({
+        sourceId: 'source-id',
+        userId: 'user-id',
+        userOrgId: 'org_qd_default',
+        mode: CloneMode.KEEP_ALL,
+      });
+
+      expect(result.data).toEqual({});
+      expect(result.status).toBe(FormStatus.DRAFT);
+    });
   });
 
   describe('cloneYesterdaysSubmission', () => {
