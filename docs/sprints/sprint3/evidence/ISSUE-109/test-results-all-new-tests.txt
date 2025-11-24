@@ -1,0 +1,1251 @@
+
+> @brave-forms/web@1.0.0 test E:\BrAve Forms\apps\web
+> vitest "FormRenderer.test.tsx" "TextField.test.tsx" "NumberField.test.tsx" "DateField.test.tsx" "TimeField.test.tsx" "SelectField.test.tsx" "CheckboxField.test.tsx" "TextareaField.test.tsx" "RadioField.test.tsx" "GpsField.test.tsx" "ComputedField.test.tsx"
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+[7m[1m[34m DEV [39m[22m[27m [34mv1.6.1[39m [90mE:/BrAve Forms/apps/web[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/GpsField.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[90m 60[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/DateField.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[90m 49[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/TimeField.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[90m 66[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/NumberField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 80[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/ComputedField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 116[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/RadioField.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[90m 225[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/CheckboxField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 215[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/SelectField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[33m 340[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/TextField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[33m 335[2mms[22m[39m
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould render form title and description[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould render all text fields[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould mark required fields with asterisk[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould submit form with valid data[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:116:24
+    at onSubmitForm [90m(E:\BrAve Forms\apps\web\[39mcomponents\Forms\FormRenderer\FormRenderer.tsx:106:11[90m)[39m
+    at file:///E:/BrAve%20Forms/node_modules/[4mreact-hook-form[24m/dist/index.esm.mjs:2086:23
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to clear draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:116:24
+    at onSubmitForm [90m(E:\BrAve Forms\apps\web\[39mcomponents\Forms\FormRenderer\FormRenderer.tsx:106:11[90m)[39m
+    at file:///E:/BrAve%20Forms/node_modules/[4mreact-hook-form[24m/dist/index.esm.mjs:2086:23
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould show validation error for required field[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould render in read-only mode[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould show/hide fields based on conditional logic[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/TextareaField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[33m 666[2mms[22m[39m
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould show/hide fields based on conditional logic[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould show/hide fields based on conditional logic[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould compute values based on formula[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+ [32m✓[39m components/Forms/FormRenderer/FormRenderer.test.tsx [2m ([22m[2m8 tests[22m[2m)[22m[33m 631[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Errors [27m[22m⎯⎯⎯⎯⎯⎯[39m
+[31m[1m
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.[22m[39m
+
+[31m⎯⎯⎯⎯⎯[1m[7m Uncaught Exception [27m[22m⎯⎯⎯⎯⎯[39m
+[31m[1mTypeError[22m: items[index]?.scrollIntoView is not a function[39m
+[90m [2m❯[22m Timeout._onTimeout ../../../BrAve%20Forms/node_modules/@mantine/core/esm/components/Combobox/use-combobox/use-combobox.mjs:[2m133:25[22m[39m
+[90m [2m❯[22m listOnTimeout node:internal/timers:[2m588:17[22m[39m
+[90m [2m❯[22m processTimers node:internal/timers:[2m523:7[22m[39m
+
+[31mThis error originated in "[1mcomponents/Forms/FormRenderer/FormRenderer.test.tsx[22m" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.[39m
+[31mThe latest test that might've caused the error is "[1mshould show/hide fields based on conditional logic[22m". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.[39m
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
+
+[2m Test Files [22m [1m[32m11 passed[39m[22m[90m (11)[39m
+[2m      Tests [22m [1m[32m44 passed[39m[22m[90m (44)[39m
+[2m     Errors [22m [1m[31m1 error[39m[22m
+[2m   Start at [22m 16:39:10
+[2m   Duration [22m 3.01s[2m (transform 279ms, setup 963ms, collect 11.17s, tests 2.78s, environment 7.19s, prepare 1.48s)[22m
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m package.json[22m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/TimeField.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[90m 66[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/DateField.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[90m 51[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/NumberField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 99[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/GpsField.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[90m 85[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/ComputedField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 159[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/RadioField.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[90m 222[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/CheckboxField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 242[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/SelectField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[33m 340[2mms[22m[39m
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould render form title and description[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould render all text fields[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould mark required fields with asterisk[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould submit form with valid data[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:116:24
+    at onSubmitForm [90m(E:\BrAve Forms\apps\web\[39mcomponents\Forms\FormRenderer\FormRenderer.tsx:106:11[90m)[39m
+    at file:///E:/BrAve%20Forms/node_modules/[4mreact-hook-form[24m/dist/index.esm.mjs:2086:23
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to clear draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:116:24
+    at onSubmitForm [90m(E:\BrAve Forms\apps\web\[39mcomponents\Forms\FormRenderer\FormRenderer.tsx:106:11[90m)[39m
+    at file:///E:/BrAve%20Forms/node_modules/[4mreact-hook-form[24m/dist/index.esm.mjs:2086:23
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/TextField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[33m 372[2mms[22m[39m
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould show validation error for required field[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould render in read-only mode[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould show/hide fields based on conditional logic[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould show/hide fields based on conditional logic[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/TextareaField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[33m 681[2mms[22m[39m
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould show/hide fields based on conditional logic[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+[90mstderr[2m | components/Forms/FormRenderer/FormRenderer.test.tsx[2m > [22m[2mFormRenderer[2m > [22m[2mshould compute values based on formula[22m[39m
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to initialize IndexedDB: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+Failed to load draft: ReferenceError: indexedDB is not defined
+    at Module.openDB [90m(file:///E:/BrAve%20Forms/apps/web/[39mnode_modules/[4midb[24m/build/index.js:168:21[90m)[39m
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:31:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:95:24
+    at [90mE:\BrAve Forms\apps\web\[39mlib\hooks\useFormDraft.ts:131:5
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\[4mreact-dom[24m\cjs\react-dom.development.js:27078:3)
+
+ [32m✓[39m components/Forms/FormRenderer/FormRenderer.test.tsx [2m ([22m[2m8 tests[22m[2m)[22m[33m 626[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Errors [27m[22m⎯⎯⎯⎯⎯⎯[39m
+[31m[1m
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.[22m[39m
+
+[31m⎯⎯⎯⎯⎯[1m[7m Uncaught Exception [27m[22m⎯⎯⎯⎯⎯[39m
+[31m[1mTypeError[22m: items[index]?.scrollIntoView is not a function[39m
+[90m [2m❯[22m Timeout._onTimeout ../../../BrAve%20Forms/node_modules/@mantine/core/esm/components/Combobox/use-combobox/use-combobox.mjs:[2m133:25[22m[39m
+[90m [2m❯[22m listOnTimeout node:internal/timers:[2m588:17[22m[39m
+[90m [2m❯[22m processTimers node:internal/timers:[2m523:7[22m[39m
+
+[31mThis error originated in "[1mcomponents/Forms/FormRenderer/FormRenderer.test.tsx[22m" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.[39m
+[31mThe latest test that might've caused the error is "[1mshould show/hide fields based on conditional logic[22m". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.[39m
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
+
+[2m Test Files [22m [1m[32m11 passed[39m[22m[90m (11)[39m
+[2m      Tests [22m [1m[32m44 passed[39m[22m[90m (44)[39m
+[2m     Errors [22m [1m[31m1 error[39m[22m
+[2m   Start at [22m 16:45:16
+[2m   Duration [22m 15.71s
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m

@@ -1,0 +1,20 @@
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+[7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mE:/BrAve Forms/apps/web[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Error [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+[31m[1mSyntaxError[22m: The requested module 'vitest/node' does not provide an export named 'parseAstAsync'[39m
+[90m [2m❯[22m ModuleJob._instantiate node:internal/modules/esm/module_job:[2m220:21[22m[39m
+[90m [2m❯[22m ModuleJob.run node:internal/modules/esm/module_job:[2m321:5[22m[39m
+[90m [2m❯[22m onImport.tracePromise.__proto__ node:internal/modules/esm/loader:[2m644:26[22m[39m
+[90m [2m❯[22m loadProvider ../../../BrAve%20Forms/node_modules/@vitest/coverage-v8/dist/load-provider-CdgAx3rL.js:[2m4:33[22m[39m
+[90m [2m❯[22m Vitest.initCoverageProvider ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/cli-api.OdDWuB7Y.js:[2m11078:29[22m[39m
+[90m [2m❯[22m Vitest.start ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/cli-api.OdDWuB7Y.js:[2m11092:7[22m[39m
+[90m [2m❯[22m startVitest ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/cli-api.OdDWuB7Y.js:[2m18364:7[22m[39m
+[90m [2m❯[22m start ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/cac.cdAtVkJZ.js:[2m1415:17[22m[39m
+[90m [2m❯[22m CAC.run ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/cac.cdAtVkJZ.js:[2m1395:3[22m[39m
+
+
+
+

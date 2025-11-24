@@ -1,0 +1,925 @@
+
+> @brave-forms/web@1.0.0 test E:\BrAve Forms\apps\web
+> vitest "GpsField.test.tsx" "ComputedField.test.tsx" "PhotoField.test.tsx" "SignatureField.test.tsx"
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+[7m[1m[34m DEV [39m[22m[27m [34mv1.6.1[39m [90mE:/BrAve Forms/apps/web[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/GpsField.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[90m 52[2mms[22m[39m
+ [33m❯[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx [2m ([22m[2m21 tests[22m [2m|[22m [31m21 failed[39m[2m)[22m[90m 55[2mms[22m[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mInitial Rendering[2m > [22mshould render upload button when no photo selected[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mInitial Rendering[2m > [22mshould render label from field prop[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mInitial Rendering[2m > [22mshould show required indicator when field is required[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mInitial Rendering[2m > [22mshould render hidden file input with accept="image/*"[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mFile Upload[2m > [22mshould trigger file input click when Upload Photo button clicked[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mFile Upload[2m > [22mshould accept valid image file and convert to base64[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mFile Upload[2m > [22mshould reject non-image files[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mFile Upload[2m > [22mshould reject files larger than 10MB[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mFile Upload[2m > [22mshould show uploading state during file processing[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mGPS Location Capture[2m > [22mshould capture GPS location when photo uploaded[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mGPS Location Capture[2m > [22mshould display GPS coordinates on photo thumbnail[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mGPS Location Capture[2m > [22mshould handle GPS unavailable gracefully[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mPhoto Management[2m > [22mshould display photo thumbnail after upload[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mPhoto Management[2m > [22mshould show Retake and Delete buttons after photo uploaded[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mPhoto Management[2m > [22mshould allow retaking photo[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mPhoto Management[2m > [22mshould clear photo when Delete button clicked[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mDisabled State[2m > [22mshould disable upload button when disabled prop is true[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mDisabled State[2m > [22mshould disable file input when disabled prop is true[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mDisabled State[2m > [22mshould disable Retake and Delete buttons when disabled prop is true[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mError Handling[2m > [22mshould show error notification on FileReader error[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mError Handling[2m > [22mshould display validation error message when provided[39m
+[31m     → @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mInitial Rendering[2m > [22m[2mshould render upload button when no photo selected[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mInitial Rendering[2m > [22m[2mshould render label from field prop[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mInitial Rendering[2m > [22m[2mshould show required indicator when field is required[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mInitial Rendering[2m > [22m[2mshould render hidden file input with accept="image/*"[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mFile Upload[2m > [22m[2mshould trigger file input click when Upload Photo button clicked[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mFile Upload[2m > [22m[2mshould accept valid image file and convert to base64[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mFile Upload[2m > [22m[2mshould reject non-image files[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mFile Upload[2m > [22m[2mshould reject files larger than 10MB[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mFile Upload[2m > [22m[2mshould show uploading state during file processing[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mGPS Location Capture[2m > [22m[2mshould capture GPS location when photo uploaded[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mGPS Location Capture[2m > [22m[2mshould display GPS coordinates on photo thumbnail[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mGPS Location Capture[2m > [22m[2mshould handle GPS unavailable gracefully[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mPhoto Management[2m > [22m[2mshould display photo thumbnail after upload[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mPhoto Management[2m > [22m[2mshould show Retake and Delete buttons after photo uploaded[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mPhoto Management[2m > [22m[2mshould allow retaking photo[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mPhoto Management[2m > [22m[2mshould clear photo when Delete button clicked[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mDisabled State[2m > [22m[2mshould disable upload button when disabled prop is true[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mDisabled State[2m > [22m[2mshould disable file input when disabled prop is true[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mDisabled State[2m > [22m[2mshould disable Retake and Delete buttons when disabled prop is true[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mError Handling[2m > [22m[2mshould show error notification on FileReader error[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:37:24)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22m[2mPhotoField[2m > [22m[2mError Handling[2m > [22m[2mshould display validation error message when provided[22m[39m
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+    at useMantineTheme (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:12:11)
+    at useProps (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:9:17)
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at renderWithHooks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateForwardRef (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:19245:20)
+    at beginWork (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:21675:16)
+    at HTMLUnknownElement.callCallback (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (E:\BrAve Forms\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+The above error occurred in the <@mantine/core/Stack> component:
+
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at PhotoField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\PhotoField.tsx:16:23)
+    at TestWrapperWithError (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\__tests__\PhotoField.test.tsx:466:45)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/ComputedField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 104[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/PhotoField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 84[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/SignatureField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 102[2mms[22m[39m
+ [33m❯[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx [2m ([22m[2m29 tests[22m [2m|[22m [31m29 failed[39m[2m)[22m[90m 252[2mms[22m[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mInitial Rendering[2m > [22mshould render signature canvas when no signature exists[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mInitial Rendering[2m > [22mshould render label from field prop[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mInitial Rendering[2m > [22mshould show required indicator when field is required[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mInitial Rendering[2m > [22mshould render Clear and Save Signature buttons[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mInitial Rendering[2m > [22mshould render signature line and X marker[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mInitial Rendering[2m > [22mshould disable Clear and Save buttons when signature is empty[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDrawing Functionality[2m > [22mshould initialize canvas with correct dimensions[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDrawing Functionality[2m > [22mshould set drawing style on canvas context[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDrawing Functionality[2m > [22mshould handle mouse drawing events[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDrawing Functionality[2m > [22mshould handle touch drawing events[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDrawing Functionality[2m > [22mshould enable Clear and Save buttons after drawing[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDrawing Functionality[2m > [22mshould not draw when disabled[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mClear Signature[2m > [22mshould clear canvas when Clear button clicked[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mClear Signature[2m > [22mshould re-disable buttons after clearing[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mSave Signature[2m > [22mshould show error notification when saving empty signature[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mSave Signature[2m > [22mshould save signature with timestamp when drawn[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mSave Signature[2m > [22mshould show success notification after saving signature[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mSave Signature[2m > [22mshould embed timestamp in signature image[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mSignature Display After Save[2m > [22mshould display signature image after saving[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mSignature Display After Save[2m > [22mshould hide canvas after saving signature[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mSignature Display After Save[2m > [22mshould show Redo Signature button after saving[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mRedo Signature[2m > [22mshould clear signature and show canvas when Redo clicked[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mRedo Signature[2m > [22mshould hide signature image after redo[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDisabled State[2m > [22mshould disable canvas drawing when disabled prop is true[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDisabled State[2m > [22mshould show not-allowed cursor when disabled[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDisabled State[2m > [22mshould disable Clear button when disabled prop is true[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDisabled State[2m > [22mshould disable Save Signature button when disabled prop is true[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDisabled State[2m > [22mshould disable Redo button when disabled prop is true[39m
+[31m     → Maximum call stack size exceeded[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mError Handling[2m > [22mshould display validation error message when provided[39m
+[31m     → Maximum call stack size exceeded[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 50 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mInitial Rendering[2m > [22mshould render upload button when no photo selected
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mInitial Rendering[2m > [22mshould render label from field prop
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mInitial Rendering[2m > [22mshould show required indicator when field is required
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mInitial Rendering[2m > [22mshould render hidden file input with accept="image/*"
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mFile Upload[2m > [22mshould trigger file input click when Upload Photo button clicked
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mFile Upload[2m > [22mshould accept valid image file and convert to base64
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mFile Upload[2m > [22mshould reject non-image files
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mFile Upload[2m > [22mshould reject files larger than 10MB
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mFile Upload[2m > [22mshould show uploading state during file processing
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mGPS Location Capture[2m > [22mshould capture GPS location when photo uploaded
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mGPS Location Capture[2m > [22mshould display GPS coordinates on photo thumbnail
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mGPS Location Capture[2m > [22mshould handle GPS unavailable gracefully
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mPhoto Management[2m > [22mshould display photo thumbnail after upload
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mPhoto Management[2m > [22mshould show Retake and Delete buttons after photo uploaded
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mPhoto Management[2m > [22mshould allow retaking photo
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mPhoto Management[2m > [22mshould clear photo when Delete button clicked
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mDisabled State[2m > [22mshould disable upload button when disabled prop is true
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mDisabled State[2m > [22mshould disable file input when disabled prop is true
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mDisabled State[2m > [22mshould disable Retake and Delete buttons when disabled prop is true
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mError Handling[2m > [22mshould show error notification on FileReader error
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/PhotoField.test.tsx[2m > [22mPhotoField[2m > [22mError Handling[2m > [22mshould display validation error message when provided
+[31m[1mError[22m: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app[39m
+[90m [2m❯[22m useMantineTheme ../../../BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:[2m12:11[22m[39m
+[90m [2m❯[22m useProps ../../../BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/use-props/use-props.mjs:[2m9:17[22m[39m
+[90m [2m❯[22m ../../../BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:[2m33:17[22m[39m
+[90m [2m❯[22m renderWithHooks ../../node_modules/react-dom/cjs/react-dom.development.js:[2m15486:18[22m[39m
+[90m [2m❯[22m updateForwardRef ../../node_modules/react-dom/cjs/react-dom.development.js:[2m19245:20[22m[39m
+[90m [2m❯[22m beginWork ../../node_modules/react-dom/cjs/react-dom.development.js:[2m21675:16[22m[39m
+[90m [2m❯[22m beginWork$1 ../../node_modules/react-dom/cjs/react-dom.development.js:[2m27465:14[22m[39m
+[90m [2m❯[22m performUnitOfWork ../../node_modules/react-dom/cjs/react-dom.development.js:[2m26599:12[22m[39m
+[90m [2m❯[22m workLoopSync ../../node_modules/react-dom/cjs/react-dom.development.js:[2m26505:5[22m[39m
+[90m [2m❯[22m renderRootSync ../../node_modules/react-dom/cjs/react-dom.development.js:[2m26473:7[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/50]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mInitial Rendering[2m > [22mshould render signature canvas when no signature exists
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mInitial Rendering[2m > [22mshould render label from field prop
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mInitial Rendering[2m > [22mshould show required indicator when field is required
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mInitial Rendering[2m > [22mshould render Clear and Save Signature buttons
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mInitial Rendering[2m > [22mshould render signature line and X marker
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mInitial Rendering[2m > [22mshould disable Clear and Save buttons when signature is empty
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDrawing Functionality[2m > [22mshould initialize canvas with correct dimensions
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDrawing Functionality[2m > [22mshould set drawing style on canvas context
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDrawing Functionality[2m > [22mshould handle mouse drawing events
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDrawing Functionality[2m > [22mshould handle touch drawing events
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDrawing Functionality[2m > [22mshould enable Clear and Save buttons after drawing
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDrawing Functionality[2m > [22mshould not draw when disabled
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mClear Signature[2m > [22mshould clear canvas when Clear button clicked
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mClear Signature[2m > [22mshould re-disable buttons after clearing
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mSave Signature[2m > [22mshould show error notification when saving empty signature
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mSave Signature[2m > [22mshould save signature with timestamp when drawn
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mSave Signature[2m > [22mshould show success notification after saving signature
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mSave Signature[2m > [22mshould embed timestamp in signature image
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mSignature Display After Save[2m > [22mshould display signature image after saving
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mSignature Display After Save[2m > [22mshould hide canvas after saving signature
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mSignature Display After Save[2m > [22mshould show Redo Signature button after saving
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mRedo Signature[2m > [22mshould clear signature and show canvas when Redo clicked
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mRedo Signature[2m > [22mshould hide signature image after redo
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDisabled State[2m > [22mshould disable canvas drawing when disabled prop is true
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDisabled State[2m > [22mshould show not-allowed cursor when disabled
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDisabled State[2m > [22mshould disable Clear button when disabled prop is true
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDisabled State[2m > [22mshould disable Save Signature button when disabled prop is true
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mDisabled State[2m > [22mshould disable Redo button when disabled prop is true
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx[2m > [22mSignatureField[2m > [22mError Handling[2m > [22mshould display validation error message when provided
+[31m[1mRangeError[22m: Maximum call stack size exceeded[39m
+[36m [2m❯[22m Document.<anonymous> components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx:[2m94:7[22m[39m
+    [90m 92| [39m        [35mreturn[39m mockCanvas[33m;[39m
+    [90m 93| [39m      }
+    [90m 94| [39m      [35mreturn[39m document[33m.[39m[34mcreateElement[39m(tagName)[33m;[39m
+    [90m   | [39m      [31m^[39m
+    [90m 95| [39m    })[33m;[39m
+    [90m 96| [39m
+[90m [2m❯[22m Document.<anonymous> components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx:[2m94:23[22m[39m
+[90m [2m❯[22m Document.<anonymous> components/Forms/FormRenderer/Fields/__tests__/SignatureField.test.tsx:[2m94:23[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/50]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[31m50 failed[39m[22m[2m | [22m[1m[32m15 passed[39m[22m[90m (65)[39m
+[2m   Start at [22m 16:34:05
+[2m   Duration [22m 2.13s[2m (transform 178ms, setup 522ms, collect 5.23s, tests 649ms, environment 3.53s, prepare 1.03s)[22m
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+[1;1H[J[33mTest removed...[39m[2m [ components/Forms/FormRenderer/Fields/PhotoField.test.tsx ]
+[22m
+[1;1H[J[33mTest removed...[39m[2m [ components/Forms/FormRenderer/Fields/SignatureField.test.tsx ]
+[22m
+
+[31m⎯⎯⎯⎯[1m[7m Unhandled Rejection [27m[22m⎯⎯⎯⎯⎯[39m
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'logUpdate')[39m
+[90m [2m❯[22m createListRenderer ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/index.-xs08BYx.js:[2m1936:30[22m[39m
+[90m [2m❯[22m DefaultReporter.onTestRemoved ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/index.-xs08BYx.js:[2m2007:5[22m[39m
+[90m [2m❯[22m runNextTicks node:internal/process/task_queues:[2m65:5[22m[39m
+[90m [2m❯[22m listOnTimeout node:internal/timers:[2m549:9[22m[39m
+[90m [2m❯[22m process.processTimers node:internal/timers:[2m523:7[22m[39m
+[90m [2m❯[22m Vitest.report ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/cli-api.OdDWuB7Y.js:[2m11537:5[22m[39m
+
+
+[31m⎯⎯⎯⎯[1m[7m Unhandled Rejection [27m[22m⎯⎯⎯⎯⎯[39m
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'logUpdate')[39m
+[90m [2m❯[22m createListRenderer ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/index.-xs08BYx.js:[2m1936:30[22m[39m
+[90m [2m❯[22m DefaultReporter.onTestRemoved ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/index.-xs08BYx.js:[2m2007:5[22m[39m
+[90m [2m❯[22m runNextTicks node:internal/process/task_queues:[2m65:5[22m[39m
+[90m [2m❯[22m listOnTimeout node:internal/timers:[2m549:9[22m[39m
+[90m [2m❯[22m process.processTimers node:internal/timers:[2m523:7[22m[39m
+[90m [2m❯[22m Vitest.report ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/cli-api.OdDWuB7Y.js:[2m11537:5[22m[39m
+
+
+
+
+E:\BrAve Forms\apps\web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @brave-forms/web@1.0.0 test: `vitest "GpsField.test.tsx" "ComputedField.test.tsx" "PhotoField.test.tsx" "SignatureField.test.tsx"`
+Exit status 1

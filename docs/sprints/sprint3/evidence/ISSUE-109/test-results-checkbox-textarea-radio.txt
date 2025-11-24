@@ -1,0 +1,110 @@
+
+> @brave-forms/web@1.0.0 test E:\BrAve Forms\apps\web
+> vitest "CheckboxField.test.tsx" "TextareaField.test.tsx" "RadioField.test.tsx"
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+[7m[1m[34m DEV [39m[22m[27m [34mv1.6.1[39m [90mE:/BrAve Forms/apps/web[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/RadioField.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[90m 146[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/CheckboxField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 171[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/TextareaField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[33m 601[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m11 passed[39m[22m[90m (11)[39m
+[2m   Start at [22m 16:32:39
+[2m   Duration [22m 2.15s[2m (transform 81ms, setup 217ms, collect 2.00s, tests 918ms, environment 1.56s, prepare 381ms)[22m
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m components/Forms/FormRenderer/Fields/GpsField.test.tsx[22m [34mx1[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/GpsField.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[90m 65[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m   Start at [22m 16:33:23
+[2m   Duration [22m 1.13s
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x1[39m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m components/Forms/FormRenderer/Fields/ComputedField.test.tsx[22m [34mx1[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/ComputedField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 133[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 16:33:25
+[2m   Duration [22m 1.15s
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x1[39m
+[2K[1A[2K[G       [90mrerun x1[39m
+[2K[1A[2K[G       [2m[90mrerun x1[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m components/Forms/FormRenderer/Fields/PhotoField.test.tsx[22m [34mx1[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/PhotoField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 115[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 16:33:49
+[2m   Duration [22m 1.38s
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x1[39m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m components/Forms/FormRenderer/Fields/SignatureField.test.tsx[22m [34mx1[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/SignatureField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 111[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 16:33:52
+[2m   Duration [22m 1.30s
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x1[39m
+[2K[1A[2K[G       [90mrerun x1[39m
+[2K[1A[2K[G       [2m[90mrerun x1[39m[22m
+[2K[1A[2K[G[1;1H[J[33mTest removed...[39m[2m [ components/Forms/FormRenderer/Fields/PhotoField.test.tsx ]
+[22m
+[1;1H[J[33mTest removed...[39m[2m [ components/Forms/FormRenderer/Fields/SignatureField.test.tsx ]
+[22m
+
+[31m⎯⎯⎯⎯[1m[7m Unhandled Rejection [27m[22m⎯⎯⎯⎯⎯[39m
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'logUpdate')[39m
+[90m [2m❯[22m createListRenderer ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/index.-xs08BYx.js:[2m1936:30[22m[39m
+[90m [2m❯[22m DefaultReporter.onTestRemoved ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/index.-xs08BYx.js:[2m2007:5[22m[39m
+[90m [2m❯[22m runNextTicks node:internal/process/task_queues:[2m65:5[22m[39m
+[90m [2m❯[22m listOnTimeout node:internal/timers:[2m549:9[22m[39m
+[90m [2m❯[22m process.processTimers node:internal/timers:[2m523:7[22m[39m
+[90m [2m❯[22m Vitest.report ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/cli-api.OdDWuB7Y.js:[2m11537:5[22m[39m
+
+
+[31m⎯⎯⎯⎯[1m[7m Unhandled Rejection [27m[22m⎯⎯⎯⎯⎯[39m
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'logUpdate')[39m
+[90m [2m❯[22m createListRenderer ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/index.-xs08BYx.js:[2m1936:30[22m[39m
+[90m [2m❯[22m DefaultReporter.onTestRemoved ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/index.-xs08BYx.js:[2m2007:5[22m[39m
+[90m [2m❯[22m runNextTicks node:internal/process/task_queues:[2m65:5[22m[39m
+[90m [2m❯[22m listOnTimeout node:internal/timers:[2m549:9[22m[39m
+[90m [2m❯[22m process.processTimers node:internal/timers:[2m523:7[22m[39m
+[90m [2m❯[22m Vitest.report ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/cli-api.OdDWuB7Y.js:[2m11537:5[22m[39m
+
+
+
+
+E:\BrAve Forms\apps\web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @brave-forms/web@1.0.0 test: `vitest "CheckboxField.test.tsx" "TextareaField.test.tsx" "RadioField.test.tsx"`
+Exit status 1

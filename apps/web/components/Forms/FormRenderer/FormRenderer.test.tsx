@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MantineProvider } from '@mantine/core';
 import { FormRenderer } from './FormRenderer';
@@ -101,16 +102,132 @@ describe('FormRenderer', () => {
 
   it('should render in read-only mode', () => {
     renderWithMantine(
-      <FormRenderer
-        template={mockTemplate}
-        onSubmit={mockOnSubmit}
-        readOnly={true}
-      />
+      <FormRenderer template={mockTemplate} onSubmit={mockOnSubmit} readOnly={true} />
     );
 
     const nameInput = screen.getByLabelText(/Name/i);
     expect(nameInput).toBeDisabled();
     expect(screen.queryByRole('button', { name: /Submit/i })).not.toBeInTheDocument();
   });
-});
 
+  it('should show/hide fields based on conditional logic', async () => {
+    const user = userEvent.setup();
+
+    const conditionalTemplate: FormTemplate = {
+      id: 'template_conditional',
+      title: 'Conditional Form',
+      description: 'Form with conditional fields',
+      version: 1,
+      fields: [
+        {
+          id: 'field_trigger',
+          type: 'select',
+          label: 'Show Details?',
+          options: [
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
+          ],
+          required: true,
+        },
+        {
+          id: 'field_details',
+          type: 'text',
+          label: 'Details Field',
+          required: false,
+          conditional: {
+            showIf: {
+              field: 'field_trigger',
+              operator: 'equals',
+              value: 'yes',
+            },
+          },
+        },
+      ],
+    };
+
+    const { container } = renderWithMantine(
+      <FormRenderer template={conditionalTemplate} onSubmit={mockOnSubmit} />
+    );
+
+    // Details field should be hidden initially (not in DOM)
+    expect(container.querySelector('#field_details')).toBeNull();
+
+    // Select "Yes" in trigger field using userEvent
+    const triggerSelect = container.querySelector('#field_trigger') as HTMLInputElement;
+    expect(triggerSelect).not.toBeNull();
+
+    await user.click(triggerSelect);
+    const yesOption = await screen.findByText('Yes');
+    await user.click(yesOption);
+
+    // Details field should now be visible
+    await waitFor(
+      () => {
+        const detailsField = container.querySelector('#field_details');
+        expect(detailsField).not.toBeNull();
+      },
+      { timeout: 3000 }
+    );
+
+    // Select "No" in trigger field
+    await user.click(triggerSelect);
+    const noOption = await screen.findByText('No');
+    await user.click(noOption);
+
+    // Details field should be hidden again (not in DOM)
+    await waitFor(
+      () => {
+        expect(container.querySelector('#field_details')).toBeNull();
+      },
+      { timeout: 3000 }
+    );
+  });
+
+  it('should compute values based on formula', async () => {
+    const computedTemplate: FormTemplate = {
+      id: 'template_computed',
+      title: 'Computed Form',
+      description: 'Form with computed fields',
+      version: 1,
+      fields: [
+        {
+          id: 'field_text1',
+          type: 'text',
+          label: 'Text Field 1',
+          required: false,
+        },
+        {
+          id: 'field_text2',
+          type: 'text',
+          label: 'Text Field 2',
+          required: false,
+        },
+        {
+          id: 'field_computed',
+          type: 'computed',
+          label: 'Computed Field',
+          required: false,
+          computedValue: '{{currentDate}}',
+        },
+      ],
+    };
+
+    const { container } = renderWithMantine(
+      <FormRenderer template={computedTemplate} onSubmit={mockOnSubmit} />
+    );
+
+    // Verify computed field is rendered
+    const computedField = container.querySelector('#field_computed') as HTMLInputElement;
+    expect(computedField).not.toBeNull();
+
+    // Computed field should have a value (currentDate template variable)
+    await waitFor(
+      () => {
+        expect(computedField.value).toBeTruthy();
+        // Verify it looks like a date (YYYY-MM-DD format)
+        expect(computedField.value).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      },
+      { timeout: 1000 }
+    );
+  });
+});

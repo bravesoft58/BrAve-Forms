@@ -1,0 +1,487 @@
+
+> @brave-forms/web@1.0.0 test E:\BrAve Forms\apps\web
+> vitest "DateField.test.tsx" "TimeField.test.tsx"
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+[7m[1m[34m DEV [39m[22m[27m [34mv1.6.1[39m [90mE:/BrAve Forms/apps/web[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/TimeField.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[90m 42[2mms[22m[39m
+ [32m✓[39m components/Forms/FormRenderer/Fields/DateField.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[90m 42[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 16:28:29
+[2m   Duration [22m 1.45s[2m (transform 99ms, setup 141ms, collect 1.15s, tests 84ms, environment 903ms, prepare 260ms)[22m
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m components/Forms/FormRenderer/Fields/SelectField.test.tsx[22m [34mx1[39m
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22m[2mSelectField[2m > [22m[2mshould render with label and options[22m[39m
+TypeError: control._subscribe is not a function
+    at file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:359:45
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:23189:26)
+    at commitLayoutEffectOnFiber (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:23312:15)
+    at commitLayoutMountEffects_complete (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24727:9)
+    at commitLayoutEffects_begin (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24713:7)
+    at commitLayoutEffects (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24651:3)
+    at commitRootImpl (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26862:5)
+    at commitRoot (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26721:5)
+    at finishConcurrentRender (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26020:9)
+    at performConcurrentWorkOnRoot (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:25848:7)
+TypeError: control._setDisabledField is not a function
+    at file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:527:17
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:27078:3)
+    at flushPassiveEffects (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:27023:14)
+    at performSyncWorkOnRoot (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26115:3)
+    at flushSyncCallbacks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:12042:22)
+The above error occurred in the <Controller> component:
+
+    at Controller (file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:581:37)
+    at div
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/Box/Box.mjs:23:5
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at SelectField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\SelectField.tsx:9:24)
+    at MantineThemeProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:19:3)
+    at MantineProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineProvider.mjs:16:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+The above error occurred in the <Controller> component:
+
+    at Controller (file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:581:37)
+    at div
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/Box/Box.mjs:23:5
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at SelectField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\SelectField.tsx:9:24)
+    at MantineThemeProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:19:3)
+    at MantineProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineProvider.mjs:16:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22m[2mSelectField[2m > [22m[2mshould display placeholder text[22m[39m
+TypeError: control._subscribe is not a function
+    at file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:359:45
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:23189:26)
+    at commitLayoutEffectOnFiber (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:23312:15)
+    at commitLayoutMountEffects_complete (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24727:9)
+    at commitLayoutEffects_begin (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24713:7)
+    at commitLayoutEffects (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24651:3)
+    at commitRootImpl (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26862:5)
+    at commitRoot (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26721:5)
+    at finishConcurrentRender (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26020:9)
+    at performConcurrentWorkOnRoot (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:25848:7)
+TypeError: control._setDisabledField is not a function
+    at file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:527:17
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:27078:3)
+    at flushPassiveEffects (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:27023:14)
+    at performSyncWorkOnRoot (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26115:3)
+    at flushSyncCallbacks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:12042:22)
+The above error occurred in the <Controller> component:
+
+    at Controller (file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:581:37)
+    at div
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/Box/Box.mjs:23:5
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at SelectField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\SelectField.tsx:9:24)
+    at MantineThemeProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:19:3)
+    at MantineProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineProvider.mjs:16:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+The above error occurred in the <Controller> component:
+
+    at Controller (file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:581:37)
+    at div
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/Box/Box.mjs:23:5
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at SelectField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\SelectField.tsx:9:24)
+    at MantineThemeProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:19:3)
+    at MantineProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineProvider.mjs:16:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22m[2mSelectField[2m > [22m[2mshould display error message when validation fails[22m[39m
+TypeError: control._subscribe is not a function
+    at file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:359:45
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:23189:26)
+    at commitLayoutEffectOnFiber (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:23312:15)
+    at commitLayoutMountEffects_complete (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24727:9)
+    at commitLayoutEffects_begin (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24713:7)
+    at commitLayoutEffects (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24651:3)
+    at commitRootImpl (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26862:5)
+    at commitRoot (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26721:5)
+    at finishConcurrentRender (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26020:9)
+    at performConcurrentWorkOnRoot (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:25848:7)
+TypeError: control._setDisabledField is not a function
+    at file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:527:17
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:27078:3)
+    at flushPassiveEffects (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:27023:14)
+    at performSyncWorkOnRoot (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26115:3)
+    at flushSyncCallbacks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:12042:22)
+The above error occurred in the <Controller> component:
+
+    at Controller (file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:581:37)
+    at div
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/Box/Box.mjs:23:5
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at SelectField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\SelectField.tsx:9:24)
+    at MantineThemeProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:19:3)
+    at MantineProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineProvider.mjs:16:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+The above error occurred in the <Controller> component:
+
+    at Controller (file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:581:37)
+    at div
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/Box/Box.mjs:23:5
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at SelectField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\SelectField.tsx:9:24)
+    at MantineThemeProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:19:3)
+    at MantineProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineProvider.mjs:16:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+[90mstderr[2m | components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22m[2mSelectField[2m > [22m[2mshould be disabled when disabled prop is true[22m[39m
+TypeError: control._subscribe is not a function
+    at file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:359:45
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:23189:26)
+    at commitLayoutEffectOnFiber (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:23312:15)
+    at commitLayoutMountEffects_complete (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24727:9)
+    at commitLayoutEffects_begin (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24713:7)
+    at commitLayoutEffects (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24651:3)
+    at commitRootImpl (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26862:5)
+    at commitRoot (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26721:5)
+    at finishConcurrentRender (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26020:9)
+    at performConcurrentWorkOnRoot (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:25848:7)
+TypeError: control._setDisabledField is not a function
+    at file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:527:17
+    at commitHookEffectListMount (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:23189:26)
+    at commitPassiveMountOnFiber (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24970:11)
+    at commitPassiveMountEffects_complete (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24930:9)
+    at commitPassiveMountEffects_begin (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24917:7)
+    at commitPassiveMountEffects (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:24905:3)
+    at flushPassiveEffectsImpl (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:27078:3)
+    at flushPassiveEffects (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:27023:14)
+    at performSyncWorkOnRoot (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:26115:3)
+    at flushSyncCallbacks (E:\BrAve Forms\node_modules\react-dom\cjs\react-dom.development.js:12042:22)
+The above error occurred in the <Controller> component:
+
+    at Controller (file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:581:37)
+    at div
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/Box/Box.mjs:23:5
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at SelectField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\SelectField.tsx:9:24)
+    at MantineThemeProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:19:3)
+    at MantineProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineProvider.mjs:16:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+The above error occurred in the <Controller> component:
+
+    at Controller (file:///E:/BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:581:37)
+    at div
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/Box/Box.mjs:23:5
+    at file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/components/Stack/Stack.mjs:33:17
+    at FieldWrapper (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\FieldWrapper.tsx:6:3)
+    at SelectField (E:\BrAve Forms\apps\web\components\Forms\FormRenderer\Fields\SelectField.tsx:9:24)
+    at MantineThemeProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineThemeProvider/MantineThemeProvider.mjs:19:3)
+    at MantineProvider (file:///E:/BrAve%20Forms/node_modules/@mantine/core/esm/core/MantineProvider/MantineProvider.mjs:16:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+ [33m❯[39m components/Forms/FormRenderer/Fields/SelectField.test.tsx [2m ([22m[2m4 tests[22m [2m|[22m [31m4 failed[39m[2m)[22m[90m 67[2mms[22m[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould render with label and options[39m
+[31m     → control._subscribe is not a function[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould display placeholder text[39m
+[31m     → control._subscribe is not a function[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould display error message when validation fails[39m
+[31m     → control._subscribe is not a function[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould be disabled when disabled prop is true[39m
+[31m     → control._subscribe is not a function[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 4 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould render with label and options
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould display placeholder text
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould display error message when validation fails
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould be disabled when disabled prop is true
+[31m[1mTypeError[22m: control._subscribe is not a function[39m
+[90m [2m❯[22m ../../../BrAve%20Forms/node_modules/react-hook-form/dist/index.esm.mjs:[2m359:45[22m[39m
+[90m [2m❯[22m commitHookEffectListMount ../../node_modules/react-dom/cjs/react-dom.development.js:[2m23189:26[22m[39m
+[90m [2m❯[22m commitLayoutEffectOnFiber ../../node_modules/react-dom/cjs/react-dom.development.js:[2m23312:15[22m[39m
+[90m [2m❯[22m commitLayoutMountEffects_complete ../../node_modules/react-dom/cjs/react-dom.development.js:[2m24727:9[22m[39m
+[90m [2m❯[22m commitLayoutEffects_begin ../../node_modules/react-dom/cjs/react-dom.development.js:[2m24713:7[22m[39m
+[90m [2m❯[22m commitLayoutEffects ../../node_modules/react-dom/cjs/react-dom.development.js:[2m24651:3[22m[39m
+[90m [2m❯[22m commitRootImpl ../../node_modules/react-dom/cjs/react-dom.development.js:[2m26862:5[22m[39m
+[90m [2m❯[22m commitRoot ../../node_modules/react-dom/cjs/react-dom.development.js:[2m26721:5[22m[39m
+[90m [2m❯[22m finishConcurrentRender ../../node_modules/react-dom/cjs/react-dom.development.js:[2m26020:9[22m[39m
+[90m [2m❯[22m performConcurrentWorkOnRoot ../../node_modules/react-dom/cjs/react-dom.development.js:[2m25848:7[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[90m (4)[39m
+[2m   Start at [22m 16:28:59
+[2m   Duration [22m 1.05s
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x1[39m
+[2K[1A[2K[G       [90mrerun x1[39m
+[2K[1A[2K[G       [2m[90mrerun x1[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m components/Forms/FormRenderer/Fields/SelectField.test.tsx[22m [34mx2[39m
+
+ [33m❯[39m components/Forms/FormRenderer/Fields/SelectField.test.tsx [2m ([22m[2m4 tests[22m [2m|[22m [31m4 failed[39m[2m)[22m[90m 3[2mms[22m[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould render with label and options[39m
+[31m     → mockControl is not defined[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould display placeholder text[39m
+[31m     → mockControl is not defined[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould display error message when validation fails[39m
+[31m     → mockControl is not defined[39m
+[31m   [33m❯[31m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould be disabled when disabled prop is true[39m
+[31m     → mockControl is not defined[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 4 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould render with label and options
+[31m[1mReferenceError[22m: mockControl is not defined[39m
+[36m [2m❯[22m components/Forms/FormRenderer/Fields/SelectField.test.tsx:[2m28:63[22m[39m
+    [90m 26| [39m
+    [90m 27| [39m  [34mit[39m([32m'should render with label and options'[39m[33m,[39m () [33m=>[39m {
+    [90m 28| [39m    [34mrenderWithMantine[39m([33m<[39m[33mSelectField[39m [33mfield[39m[33m=[39m[33m{[39mbaseField[33m}[39m [33mcontrol[39m[33m=[39m[33m{[39mmockCont…
+    [90m   | [39m                                                              [31m^[39m
+    [90m 29| [39m
+    [90m 30| [39m    [90m// Verify label is rendered[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould display placeholder text
+[31m[1mReferenceError[22m: mockControl is not defined[39m
+[36m [2m❯[22m components/Forms/FormRenderer/Fields/SelectField.test.tsx:[2m39:63[22m[39m
+    [90m 37| [39m
+    [90m 38| [39m  [34mit[39m([32m'should display placeholder text'[39m[33m,[39m () [33m=>[39m {
+    [90m 39| [39m    [34mrenderWithMantine[39m([33m<[39m[33mSelectField[39m [33mfield[39m[33m=[39m[33m{[39mbaseField[33m}[39m [33mcontrol[39m[33m=[39m[33m{[39mmockCont…
+    [90m   | [39m                                                              [31m^[39m
+    [90m 40| [39m
+    [90m 41| [39m    [90m// Verify placeholder is displayed[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould display error message when validation fails
+[31m[1mReferenceError[22m: mockControl is not defined[39m
+[36m [2m❯[22m components/Forms/FormRenderer/Fields/SelectField.test.tsx:[2m48:63[22m[39m
+    [90m 46| [39m    [35mconst[39m error [33m=[39m { type[33m:[39m [32m'required'[39m[33m,[39m message[33m:[39m [32m'Selection is required'[39m…
+    [90m 47| [39m
+    [90m 48| [39m    [34mrenderWithMantine[39m([33m<[39m[33mSelectField[39m [33mfield[39m[33m=[39m[33m{[39mbaseField[33m}[39m [33mcontrol[39m[33m=[39m[33m{[39mmockCont…
+    [90m   | [39m                                                              [31m^[39m
+    [90m 49| [39m
+    [90m 50| [39m    [90m// Verify error message is displayed[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m components/Forms/FormRenderer/Fields/SelectField.test.tsx[2m > [22mSelectField[2m > [22mshould be disabled when disabled prop is true
+[31m[1mReferenceError[22m: mockControl is not defined[39m
+[36m [2m❯[22m components/Forms/FormRenderer/Fields/SelectField.test.tsx:[2m55:63[22m[39m
+    [90m 53| [39m
+    [90m 54| [39m  [34mit[39m([32m'should be disabled when disabled prop is true'[39m[33m,[39m () [33m=>[39m {
+    [90m 55| [39m    [34mrenderWithMantine[39m([33m<[39m[33mSelectField[39m [33mfield[39m[33m=[39m[33m{[39mbaseField[33m}[39m [33mcontrol[39m[33m=[39m[33m{[39mmockCont…
+    [90m   | [39m                                                              [31m^[39m
+    [90m 56| [39m
+    [90m 57| [39m    [35mconst[39m input [33m=[39m screen[33m.[39m[34mgetByRole[39m([32m'textbox'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[90m (4)[39m
+[2m   Start at [22m 16:29:25
+[2m   Duration [22m 982ms
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x2[39m
+[2K[1A[2K[G       [90mrerun x2[39m
+[2K[1A[2K[G       [2m[90mrerun x2[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m components/Forms/FormRenderer/Fields/SelectField.test.tsx[22m [34mx3[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/SelectField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[33m 406[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 16:29:41
+[2m   Duration [22m 1.33s
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x3[39m
+[2K[1A[2K[G       [90mrerun x3[39m
+[2K[1A[2K[G       [2m[90mrerun x3[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m components/Forms/FormRenderer/Fields/CheckboxField.test.tsx[22m [34mx1[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/CheckboxField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 247[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 16:32:22
+[2m   Duration [22m 1.41s
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x1[39m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m components/Forms/FormRenderer/Fields/TextareaField.test.tsx[22m [34mx1[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/TextareaField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[33m 650[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 16:32:24
+[2m   Duration [22m 1.66s
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x1[39m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m components/Forms/FormRenderer/Fields/RadioField.test.tsx[22m [34mx1[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/RadioField.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[90m 194[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m   Start at [22m 16:32:27
+[2m   Duration [22m 1.15s
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x1[39m
+[2K[1A[2K[G       [90mrerun x1[39m
+[2K[1A[2K[G       [2m[90mrerun x1[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m components/Forms/FormRenderer/Fields/GpsField.test.tsx[22m [34mx1[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/GpsField.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[90m 49[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m   Start at [22m 16:33:23
+[2m   Duration [22m 1.14s
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x1[39m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m components/Forms/FormRenderer/Fields/ComputedField.test.tsx[22m [34mx1[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/ComputedField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 140[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 16:33:25
+[2m   Duration [22m 1.16s
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x1[39m
+[2K[1A[2K[G       [90mrerun x1[39m
+[2K[1A[2K[G       [2m[90mrerun x1[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m components/Forms/FormRenderer/Fields/PhotoField.test.tsx[22m [34mx1[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/PhotoField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 81[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 16:33:49
+[2m   Duration [22m 1.34s
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x1[39m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m components/Forms/FormRenderer/Fields/SignatureField.test.tsx[22m [34mx1[39m
+
+ [32m✓[39m components/Forms/FormRenderer/Fields/SignatureField.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 126[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 16:33:52
+[2m   Duration [22m 1.27s
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x1[39m
+[2K[1A[2K[G       [90mrerun x1[39m
+[2K[1A[2K[G       [2m[90mrerun x1[39m[22m
+[2K[1A[2K[G[1;1H[J[33mTest removed...[39m[2m [ components/Forms/FormRenderer/Fields/PhotoField.test.tsx ]
+[22m
+[1;1H[J[33mTest removed...[39m[2m [ components/Forms/FormRenderer/Fields/SignatureField.test.tsx ]
+[22m
+
+[31m⎯⎯⎯⎯[1m[7m Unhandled Rejection [27m[22m⎯⎯⎯⎯⎯[39m
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'logUpdate')[39m
+[90m [2m❯[22m createListRenderer ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/index.-xs08BYx.js:[2m1936:30[22m[39m
+[90m [2m❯[22m DefaultReporter.onTestRemoved ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/index.-xs08BYx.js:[2m2007:5[22m[39m
+[90m [2m❯[22m runNextTicks node:internal/process/task_queues:[2m65:5[22m[39m
+[90m [2m❯[22m listOnTimeout node:internal/timers:[2m549:9[22m[39m
+[90m [2m❯[22m process.processTimers node:internal/timers:[2m523:7[22m[39m
+[90m [2m❯[22m Vitest.report ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/cli-api.OdDWuB7Y.js:[2m11537:5[22m[39m
+
+
+[31m⎯⎯⎯⎯[1m[7m Unhandled Rejection [27m[22m⎯⎯⎯⎯⎯[39m
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'logUpdate')[39m
+[90m [2m❯[22m createListRenderer ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/index.-xs08BYx.js:[2m1936:30[22m[39m
+[90m [2m❯[22m DefaultReporter.onTestRemoved ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/index.-xs08BYx.js:[2m2007:5[22m[39m
+[90m [2m❯[22m runNextTicks node:internal/process/task_queues:[2m65:5[22m[39m
+[90m [2m❯[22m listOnTimeout node:internal/timers:[2m549:9[22m[39m
+[90m [2m❯[22m process.processTimers node:internal/timers:[2m523:7[22m[39m
+[90m [2m❯[22m Vitest.report ../../../BrAve%20Forms/node_modules/vitest/dist/vendor/cli-api.OdDWuB7Y.js:[2m11537:5[22m[39m
+
+
+
+
+E:\BrAve Forms\apps\web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @brave-forms/web@1.0.0 test: `vitest "DateField.test.tsx" "TimeField.test.tsx"`
+Exit status 1
