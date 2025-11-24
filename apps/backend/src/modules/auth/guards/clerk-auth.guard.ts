@@ -24,10 +24,13 @@ export class ClerkAuthGuard extends AuthGuard('clerk') {
     }
 
     const result = await super.canActivate(context);
-    
-    // Single-tenant mode: Always ensure DEFAULT_ORG_ID is set
-    // Note: Organizations disabled in Clerk Dashboard, orgId hard-coded
-    if (request?.user) {
+
+    // NOTE: The strategy (clerk.strategy.ts) already sets orgId to the database UUID
+    // DO NOT overwrite it here - the strategy handles the correct orgId value
+    // In dev mode: strategy returns '1d1e2121-cfd7-4784-bd5a-d86439c9b793' (database UUID)
+    // In production: strategy extracts orgId from Clerk JWT and maps to database UUID
+    // Only set DEFAULT_ORG_ID if orgId is missing (safety net)
+    if (request?.user && !request.user.orgId) {
       request.user.orgId = DEFAULT_ORG_ID;
     }
 

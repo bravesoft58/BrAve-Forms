@@ -39,98 +39,103 @@ spec:
         tier: api
     spec:
       containers:
-      - name: backend
-        image: braveforms/backend:latest
-        imagePullPolicy: Never
-        ports:
-        - containerPort: 4000
-        readinessProbe:
-          tcpSocket:
-            port: 4000
-          initialDelaySeconds: 10
-          periodSeconds: 5
-        livenessProbe:
-          tcpSocket:
-            port: 4000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        env:
-        - name: NODE_ENV
-          value: "development"
-        - name: NODE_PATH
-          value: "/app/node_modules/.pnpm/node_modules:/app/node_modules"
-        - name: PORT
-          value: "4000"
-        - name: DATABASE_URL
-          value: "postgresql://brave:brave_secure_pass@postgres:5432/brave_forms?schema=public"
-        - name: DATABASE_USER
-          valueFrom:
-            secretKeyRef:
-              name: brave-forms-secrets
-              key: database-user
-        - name: DATABASE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: brave-forms-secrets
-              key: database-password
-        - name: REDIS_URL
-          value: "redis://:$(REDIS_PASSWORD)@redis:6379"
-        - name: REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: brave-forms-secrets
-              key: redis-password
-        - name: CLERK_SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              name: brave-forms-secrets
-              key: clerk-secret-key
-        - name: CLERK_PUBLISHABLE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: brave-forms-secrets
-              key: clerk-publishable-key
-        - name: CLERK_JWT_KEY
-          valueFrom:
-            secretKeyRef:
-              name: brave-forms-secrets
-              key: clerk-jwt-key
-        - name: OPENWEATHER_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: brave-forms-secrets
-              key: openweather-api-key
-        - name: EPA_RAIN_THRESHOLD_INCHES
-          value: "0.25"  # CRITICAL: Must be EXACTLY 0.25
-        - name: INSPECTION_DEADLINE_HOURS
-          value: "24"
-        - name: S3_ENDPOINT
-          value: "http://minio:9000"
-        - name: AWS_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              name: brave-forms-secrets
-              key: minio-access-key
-        - name: AWS_SECRET_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              name: brave-forms-secrets
-              key: minio-secret-key
-        - name: S3_BUCKET_NAME
-          value: "brave-forms-photos"
-        - name: CORS_ORIGIN
-          value: "http://localhost:3000,http://localhost:30002"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "50m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+        - name: backend
+          image: braveforms/backend:json-fix
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 4000
+          readinessProbe:
+            tcpSocket:
+              port: 4000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 4000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          env:
+            - name: NODE_ENV
+              value: 'development'
+            - name: NODE_PATH
+              value: '/app/node_modules/.pnpm/node_modules:/app/node_modules'
+            - name: PORT
+              value: '4000'
+            - name: DATABASE_URL
+              value: 'postgresql://brave:brave_secure_pass@postgres:5432/brave_forms?schema=public'
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: brave-forms-secrets
+                  key: database-user
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: brave-forms-secrets
+                  key: database-password
+            - name: REDIS_URL
+              value: 'redis://:$(REDIS_PASSWORD)@redis:6379'
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: brave-forms-secrets
+                  key: redis-password
+            - name: CLERK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: brave-forms-secrets
+                  key: clerk-secret-key
+            - name: CLERK_PUBLISHABLE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: brave-forms-secrets
+                  key: clerk-publishable-key
+            - name: CLERK_JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: brave-forms-secrets
+                  key: clerk-jwt-key
+            - name: OPENWEATHER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: brave-forms-secrets
+                  key: openweather-api-key
+            - name: EPA_RAIN_THRESHOLD_INCHES
+              value: '0.25' # CRITICAL: Must be EXACTLY 0.25
+            - name: INSPECTION_DEADLINE_HOURS
+              value: '24'
+            - name: S3_ENDPOINT
+              value: 'http://minio:9000'
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: brave-forms-secrets
+                  key: minio-access-key
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: brave-forms-secrets
+                  key: minio-secret-key
+            - name: S3_BUCKET_NAME
+              value: 'brave-forms-photos'
+            - name: CORS_ORIGIN
+              value: 'http://localhost:30102'
+            - name: SKIP_CLERK_AUTH
+              value: 'true'
+            - name: DEBUG
+              value: 'prisma*'
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '50m'
+            limits:
+              memory: '512Mi'
+              cpu: '500m'
       initContainers:
-      - name: wait-for-postgres
-        image: busybox:1.35
-        command: ['sh', '-c', 'until nc -z postgres 5432; do echo waiting for postgres; sleep 2; done;']
-      - name: wait-for-redis
-        image: busybox:1.35
-        command: ['sh', '-c', 'until nc -z redis 6379; do echo waiting for redis; sleep 2; done;']
+        - name: wait-for-postgres
+          image: busybox:1.35
+          command:
+            ['sh', '-c', 'until nc -z postgres 5432; do echo waiting for postgres; sleep 2; done;']
+        - name: wait-for-redis
+          image: busybox:1.35
+          command: ['sh', '-c', 'until nc -z redis 6379; do echo waiting for redis; sleep 2; done;']

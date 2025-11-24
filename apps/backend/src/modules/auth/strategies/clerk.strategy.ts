@@ -29,7 +29,7 @@ export class ClerkStrategy extends PassportStrategy(Strategy, 'clerk') {
 
   constructor(private configService: ConfigService) {
     super();
-    
+
     this.secretKey = this.configService.get<string>('CLERK_SECRET_KEY');
     if (!this.secretKey) {
       throw new Error('CLERK_SECRET_KEY is not configured');
@@ -40,21 +40,21 @@ export class ClerkStrategy extends PassportStrategy(Strategy, 'clerk') {
     // Development mode bypass
     if (process.env.SKIP_CLERK_AUTH === 'true' && process.env.NODE_ENV === 'development') {
       console.warn('[DEV MODE] Clerk authentication bypassed');
-      
+
       return {
         userId: 'dev-user-123',
         email: 'developer@braveforms.test',
         firstName: 'Dev',
         lastName: 'User',
-        orgId: 'dev-org-123',
+        orgId: '1d1e2121-cfd7-4784-bd5a-d86439c9b793', // Database UUID for org_qd_default
         orgRole: 'admin',
         orgSlug: 'dev-construction-co',
         sessionId: 'dev-session-123',
-        
+
         // Additional security context
         issuedAt: Math.floor(Date.now() / 1000),
         expiresAt: Math.floor(Date.now() / 1000) + 3600,
-        
+
         // Compliance audit trail
         authTimestamp: new Date(),
         ipAddress: req.ip || req.connection?.remoteAddress,
@@ -63,19 +63,19 @@ export class ClerkStrategy extends PassportStrategy(Strategy, 'clerk') {
     }
 
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader) {
       throw new UnauthorizedException('No authorization header');
     }
 
     const token = authHeader.replace('Bearer ', '');
-    
+
     try {
       // Use standalone verifyToken function from Clerk SDK v1.34+
-      const verifiedToken = await verifyToken(token, {
+      const verifiedToken = (await verifyToken(token, {
         secretKey: this.secretKey,
-      }) as ClerkJWTPayload;
-      
+      })) as ClerkJWTPayload;
+
       if (!verifiedToken) {
         throw new UnauthorizedException('Invalid token');
       }
@@ -94,7 +94,7 @@ export class ClerkStrategy extends PassportStrategy(Strategy, 'clerk') {
       if (orgRole && !validRoles.includes(orgRole.toLowerCase())) {
         throw new UnauthorizedException(`Invalid organization role: ${orgRole}`);
       }
-      
+
       const user = {
         userId: verifiedToken.sub,
         email: verifiedToken.email,
@@ -104,11 +104,11 @@ export class ClerkStrategy extends PassportStrategy(Strategy, 'clerk') {
         orgRole: orgRole?.toLowerCase() || 'member',
         orgSlug,
         sessionId: verifiedToken.sid,
-        
+
         // Additional security context
         issuedAt: verifiedToken.iat,
         expiresAt: verifiedToken.exp,
-        
+
         // Compliance audit trail
         authTimestamp: new Date(),
         ipAddress: req.ip || req.connection?.remoteAddress,
@@ -116,8 +116,10 @@ export class ClerkStrategy extends PassportStrategy(Strategy, 'clerk') {
       };
 
       // Log successful authentication for audit trail
-      console.log(`Authentication successful: user=${user.userId}, org=${user.orgId}, role=${user.orgRole}`);
-      
+      console.log(
+        `Authentication successful: user=${user.userId}, org=${user.orgId}, role=${user.orgRole}`
+      );
+
       return user;
     } catch (error) {
       // Log failed authentication attempts for security monitoring
@@ -127,7 +129,7 @@ export class ClerkStrategy extends PassportStrategy(Strategy, 'clerk') {
         userAgent: req.headers['user-agent'],
         timestamp: new Date().toISOString(),
       });
-      
+
       throw new UnauthorizedException('Token verification failed');
     }
   }

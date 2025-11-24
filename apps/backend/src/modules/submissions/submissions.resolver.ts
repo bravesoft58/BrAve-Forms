@@ -63,12 +63,12 @@ export class FormSubmissionsResolver {
     return submission;
   }
 
-  @Query(() => String)
+  @Query(() => GraphQLJSON)
   async formSubmission(@Args('id', { type: () => ID }) id: string, @CurrentUser() user: ClerkUser) {
     return this.submissionsService.findOne(id, user.orgId);
   }
 
-  @Query(() => [String])
+  @Query(() => [GraphQLJSON])
   async formSubmissions(
     @Args('templateId', { nullable: true }) templateId?: string,
     @Args('projectId', { nullable: true }) projectId?: string,

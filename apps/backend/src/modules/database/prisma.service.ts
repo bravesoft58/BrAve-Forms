@@ -13,11 +13,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
           url: configService.get<string>('DATABASE_URL'),
         },
       },
-      log: configService.get<string>('NODE_ENV') === 'development' 
-        ? ['query', 'info', 'warn', 'error'] 
-        : ['error'],
+      log:
+        configService.get<string>('NODE_ENV') === 'development'
+          ? ['query', 'info', 'warn', 'error']
+          : ['error'],
     });
-    
+
     this.setupMultiTenantMiddleware();
   }
 
@@ -39,16 +40,22 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   private setupMultiTenantMiddleware() {
     this.$use(async (params, next) => {
       const context = params.args?.[0]?.context;
-      // Extract Clerk org ID from JWT claims (o.id pattern)
-      const orgId = context?.req?.auth?.orgId || 
-                    context?.req?.auth?.claims?.['o.id'] || 
-                    context?.orgId;
+      // Extract orgId from user object attached by Passport (standard NestJS pattern)
+      // Passport attaches validated user to request.user, not request.auth
+      const orgId = context?.req?.user?.orgId || context?.orgId;
 
       if (orgId && this.isMultiTenantModel(params.model)) {
-        if (params.action === 'findMany' || params.action === 'findFirst' || params.action === 'findUnique') {
+        if (
+          params.action === 'findMany' ||
+          params.action === 'findFirst' ||
+          params.action === 'findUnique'
+        ) {
           params.args = params.args || {};
           params.args.where = params.args.where || {};
-          params.args.where.orgId = orgId; // Fixed: use orgId not organizationId
+          // Only set orgId if not already explicitly provided by the service
+          if (!params.args.where.orgId) {
+            params.args.where.orgId = orgId;
+          }
         }
 
         if (params.action === 'create' || params.action === 'createMany') {
@@ -58,11 +65,16 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
             params.args.data.orgId = orgId; // Fixed: use orgId not organizationId
           } else {
             const data = Array.isArray(params.args.data) ? params.args.data : [params.args.data];
-            params.args.data = data.map(item => ({ ...item, orgId })); // Fixed: use orgId
+            params.args.data = data.map((item) => ({ ...item, orgId })); // Fixed: use orgId
           }
         }
 
-        if (params.action === 'update' || params.action === 'updateMany' || params.action === 'delete' || params.action === 'deleteMany') {
+        if (
+          params.action === 'update' ||
+          params.action === 'updateMany' ||
+          params.action === 'delete' ||
+          params.action === 'deleteMany'
+        ) {
           params.args = params.args || {};
           params.args.where = params.args.where || {};
           params.args.where.orgId = orgId; // Fixed: use orgId not organizationId
@@ -77,7 +89,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     // Complete list of models that require organization isolation
     const multiTenantModels = [
       'Project',
-      'Inspection', 
+      'Inspection',
       'Photo',
       'FormTemplate',
       'FormSubmission',

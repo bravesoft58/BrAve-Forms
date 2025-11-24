@@ -1,0 +1,7 @@
+{
+  "query": "mutation CloneSubmission($sourceId: ID!, $mode: CloneMode) { cloneSubmission(sourceId: $sourceId, mode: $mode) { id templateId data status submittedAt } }",
+  "variables": {
+    "sourceId": "a6140c8a-973c-494a-81e6-2e36adf484d2",
+    "mode": "KEEP_ALL"
+  }
+}

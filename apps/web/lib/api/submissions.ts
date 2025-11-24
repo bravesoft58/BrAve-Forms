@@ -103,26 +103,11 @@ export async function findSubmissionById(
     throw new Error('Invalid submission ID: must be a non-empty string');
   }
 
-  const data = await makeAuthenticatedRequest<{ submission: SubmissionResponse }>(
+  const data = await makeAuthenticatedRequest<{ formSubmission: SubmissionResponse }>(
     {
       query: `
         query GetSubmission($id: ID!) {
-          submission(id: $id) {
-            id
-            templateId
-            template {
-              id
-              name
-              schema
-            }
-            data
-            status
-            submittedAt
-            createdBy {
-              id
-              name
-            }
-          }
+          formSubmission(id: $id)
         }
       `,
       variables: { id },
@@ -130,7 +115,8 @@ export async function findSubmissionById(
     token
   );
 
-  return data.submission;
+  // GraphQLJSON returns the full object without needing field selection
+  return data.formSubmission;
 }
 
 /**
@@ -222,8 +208,8 @@ export async function cloneSubmission(
   const data = await makeAuthenticatedRequest<{ cloneSubmission: SubmissionResponse }>(
     {
       query: `
-        mutation CloneSubmission($submissionId: ID!, $mode: String!) {
-          cloneSubmission(submissionId: $submissionId, mode: $mode) {
+        mutation CloneSubmission($sourceId: ID!) {
+          cloneSubmission(sourceId: $sourceId) {
             id
             templateId
             data
@@ -232,10 +218,12 @@ export async function cloneSubmission(
           }
         }
       `,
-      variables: { submissionId, mode },
+      variables: { sourceId: submissionId },
     },
     token
   );
+
+  // TODO: Add mode parameter support - backend expects CloneMode enum but schema doesn't expose it yet
 
   return data.cloneSubmission;
 }

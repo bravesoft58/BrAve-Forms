@@ -60,7 +60,7 @@ export function AppProviders({ children }: AppProvidersProps) {
     <MockAuthContext.Provider
       value={{
         userId: 'dev-user-123',
-        orgId: 'dev-org-123',
+        orgId: '1d1e2121-cfd7-4784-bd5a-d86439c9b793', // Database orgId matching org_qd_default
         orgRole: 'ADMIN',
         orgSlug: 'dev-org',
         isLoaded: true,

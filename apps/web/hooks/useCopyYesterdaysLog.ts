@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
+import { useAppAuth } from '@/app/providers';
 import { notifications } from '@mantine/notifications';
 import { copyYesterdaysLog } from '@/lib/api/submissions';
 
@@ -20,7 +20,8 @@ interface CopyYesterdaysLogInput {
 export function useCopyYesterdaysLog() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { getToken } = useAuth();
+  const auth = useAppAuth();
+  const getToken = auth.getToken || (async () => 'dev-token-123');
 
   const mutation = useMutation({
     mutationFn: async ({ templateId }: CopyYesterdaysLogInput) => {

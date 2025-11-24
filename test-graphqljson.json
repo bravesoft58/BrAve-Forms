@@ -1,0 +1,6 @@
+{
+  "query": "query GetSubmission($id: ID!) { formSubmission(id: $id) }",
+  "variables": {
+    "id": "a6140c8a-973c-494a-81e6-2e36adf484d2"
+  }
+}

@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { useAppAuth } from '@/app/providers';
 import Link from 'next/link';
 import {
   Container,
@@ -15,6 +16,7 @@ import {
   Group,
   Table,
   Badge,
+  Alert,
 } from '@mantine/core';
 import { findAllSubmissions } from '@/lib/api/submissions';
 import { getMockFormTemplates } from '@/lib/mock-data/form-templates';
@@ -22,6 +24,7 @@ import { useCopyYesterdaysLog } from '@/hooks/useCopyYesterdaysLog';
 
 export default function SubmissionsPage() {
   const router = useRouter();
+  const auth = useAppAuth();
   const copyYesterdaysLog = useCopyYesterdaysLog();
 
   // Filter state
@@ -33,19 +36,32 @@ export default function SubmissionsPage() {
     search: '',
   });
 
-  const { data: submissions, isLoading } = useQuery({
+  const {
+    data: submissions,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['submissions', filters],
-    queryFn: () =>
-      findAllSubmissions({
-        filter: {
-          startDate: filters.startDate || undefined,
-          endDate: filters.endDate || undefined,
-          templateId: filters.templateId || undefined,
-          status: filters.status || undefined,
+    queryFn: async () => {
+      if (!auth.isLoaded) {
+        throw new Error('Authentication not loaded');
+      }
+      const token = auth.getToken ? await auth.getToken() : 'dev-token-123';
+      return findAllSubmissions(
+        {
+          filter: {
+            startDate: filters.startDate || undefined,
+            endDate: filters.endDate || undefined,
+            templateId: filters.templateId || undefined,
+            status: filters.status || undefined,
+          },
+          search: filters.search || undefined,
+          orderBy: { submittedAt: 'desc' },
         },
-        search: filters.search || undefined,
-        orderBy: { submittedAt: 'desc' },
-      }),
+        token
+      );
+    },
+    enabled: auth.isLoaded,
   });
 
   const templates = getMockFormTemplates();
@@ -160,10 +176,17 @@ export default function SubmissionsPage() {
           </Button>
         </Stack>
 
+        {/* Error Display */}
+        {error && (
+          <Alert color="red" title="Error loading submissions">
+            {error.message || 'Failed to load submissions. Please try again.'}
+          </Alert>
+        )}
+
         {/* Submissions List */}
         {isLoading ? (
           <Text>Loading submissions...</Text>
-        ) : !submissions || submissions.length === 0 ? (
+        ) : error ? null : !submissions || submissions.length === 0 ? (
           <Stack align="center" gap="md" py="xl">
             <Text size="lg" c="dimmed">
               No submissions found

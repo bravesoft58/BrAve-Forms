@@ -14,6 +14,13 @@ vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
 }));
 
+vi.mock('@clerk/nextjs', () => ({
+  useAuth: vi.fn(() => ({
+    isLoaded: true,
+    getToken: vi.fn().mockResolvedValue('mock-token'),
+  })),
+}));
+
 vi.mock('@/lib/api/submissions', () => ({
   findAllSubmissions: vi.fn(),
 }));
@@ -310,22 +317,25 @@ describe('SubmissionsPage', () => {
       expect(startDateInput).toHaveValue('');
     });
 
-    it('should call findAllSubmissions with filter parameters', async () => {
+    it('should call findAllSubmissions with filter parameters and token', async () => {
       (findAllSubmissions as any).mockResolvedValue(mockSubmissions);
 
       render(<SubmissionsPage />, { wrapper: createWrapper() });
 
       await waitFor(() => {
-        expect(findAllSubmissions).toHaveBeenCalledWith({
-          filter: {
-            startDate: undefined,
-            endDate: undefined,
-            templateId: undefined,
-            status: undefined,
+        expect(findAllSubmissions).toHaveBeenCalledWith(
+          {
+            filter: {
+              startDate: undefined,
+              endDate: undefined,
+              templateId: undefined,
+              status: undefined,
+            },
+            search: undefined,
+            orderBy: { submittedAt: 'desc' },
           },
-          search: undefined,
-          orderBy: { submittedAt: 'desc' },
-        });
+          'mock-token'
+        );
       });
     });
   });
@@ -394,6 +404,36 @@ describe('SubmissionsPage', () => {
 
       await waitFor(() => {
         expect(screen.getByText('N/A')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should display error message when findAllSubmissions fails', async () => {
+      const errorMessage = 'Failed to load submissions';
+      (findAllSubmissions as any).mockRejectedValue(new Error(errorMessage));
+
+      render(<SubmissionsPage />, { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(screen.getByText(/Error loading submissions/i)).toBeInTheDocument();
+        expect(screen.getByText(errorMessage)).toBeInTheDocument();
+      });
+    });
+
+    it('should display error message when authentication fails', async () => {
+      const { useAuth } = await import('@clerk/nextjs');
+      (useAuth as any).mockReturnValue({
+        isLoaded: true,
+        getToken: vi.fn().mockRejectedValue(new Error('Authentication failed')),
+      });
+
+      (findAllSubmissions as any).mockResolvedValue(mockSubmissions);
+
+      render(<SubmissionsPage />, { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(screen.getByText(/Error loading submissions/i)).toBeInTheDocument();
       });
     });
   });

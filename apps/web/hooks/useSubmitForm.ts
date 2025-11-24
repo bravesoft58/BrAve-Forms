@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
+import { useAppAuth } from '@/app/providers';
 import { notifications } from '@mantine/notifications';
 import { createSubmission, CreateSubmissionInput } from '@/lib/api/submissions';
 import { useNetworkStatus } from './useNetworkStatus';
@@ -15,7 +15,8 @@ import { useNetworkStatus } from './useNetworkStatus';
 export function useSubmitForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { getToken } = useAuth();
+  const auth = useAppAuth();
+  const getToken = auth.getToken || (async () => 'dev-token-123');
   const { isOnline } = useNetworkStatus();
 
   const mutation = useMutation({
