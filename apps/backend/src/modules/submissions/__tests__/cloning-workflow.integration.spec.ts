@@ -31,7 +31,6 @@ describe('Cloning Workflow Integration Tests', () => {
       data: {
         id: testTemplateId,
         name: 'Test Cloning Template',
-        slug: `test-cloning-template-${Date.now()}`,
         description: 'Template for cloning integration tests',
         schema: {
           sections: [
@@ -48,7 +47,7 @@ describe('Cloning Workflow Integration Tests', () => {
         },
         version: 1,
         orgId: testOrgId,
-        category: 'TEST',
+        category: 'CUSTOM',
         isActive: true,
         createdBy: testUserId,
       },
@@ -66,7 +65,6 @@ describe('Cloning Workflow Integration Tests', () => {
         },
         status: FormStatus.SUBMITTED,
         orgId: testOrgId,
-        createdBy: testUserId,
         submittedBy: testUserId,
         submittedAt: new Date(),
       },
@@ -163,7 +161,6 @@ describe('Cloning Workflow Integration Tests', () => {
           },
           status: FormStatus.SUBMITTED,
           orgId: testOrgId,
-          createdBy: testUserId,
           submittedBy: testUserId,
           submittedAt: yesterday,
         },

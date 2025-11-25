@@ -61,6 +61,63 @@ services:
     networks:
       - braveforms-network
 
+  # Backend API (NestJS GraphQL)
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: braveforms-backend
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DATABASE_URL: postgresql://brave:brave_secure_pass@postgres:5432/brave_forms?schema=public
+      REDIS_URL: redis://:redis_secure_pass@redis:6379
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin123
+      MINIO_USE_SSL: 'false'
+      MINIO_BUCKET: brave-forms-uploads
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin123
+      AWS_REGION: us-east-1
+      S3_ENDPOINT: http://minio:9000
+      S3_BUCKET_NAME: brave-forms-uploads
+      SKIP_CLERK_AUTH: 'true'
+      CLERK_SECRET_KEY: sk_test_placeholder_for_local_dev
+      CLERK_PUBLISHABLE_KEY: pk_test_placeholder_for_local_dev
+      CORS_ORIGIN: http://localhost:3000
+    ports:
+      - '4000:4000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - braveforms-network
+    restart: unless-stopped
+
+  # Frontend Web (Next.js)
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: braveforms-web
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://localhost:4000/graphql
+      NEXT_PUBLIC_SKIP_CLERK_AUTH: 'true'
+    ports:
+      - '3000:3000'
+    depends_on:
+      - backend
+    networks:
+      - braveforms-network
+    restart: unless-stopped
+
 volumes:
   postgres_data:
     name: braveforms-postgres-data
