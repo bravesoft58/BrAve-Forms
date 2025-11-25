@@ -1,143 +1,75 @@
-# ============================================================================
-# DEPRECATED: This docker-compose configuration is no longer actively used
-# ============================================================================
-#
-# BrAve Forms has migrated to Rancher Desktop with Kubernetes for local development.
-#
-# Why the migration?
-# - Production-like environment using containerd (de facto Kubernetes standard)
-# - Better multi-project isolation via namespaces
-# - Matches production EKS deployment architecture
-# - No Docker Desktop licensing concerns
-# - Faster, lighter weight with k3s
-#
-# New Setup:
-# 1. Install Rancher Desktop: https://rancherdesktop.io
-# 2. Configure: containerd runtime + Kubernetes enabled
-# 3. Deploy: .\scripts\k8s-local-setup.ps1 -Action deploy -BuildImages -CreateSecrets
-#
-# Complete Guide: See RANCHER_DESKTOP_SETUP.md
-#
-# This file is kept for reference only.
-# Migration Date: September 30, 2025
-# ============================================================================
-
-version: '3.8'
+# BrAve Forms - Docker Compose for Local Development
+# Usage: docker compose up -d
+# Then run: pnpm dev (apps connect to containerized services)
 
 services:
   # PostgreSQL Database with TimescaleDB
   postgres:
     image: timescale/timescaledb:latest-pg15
-    container_name: brave-forms-postgres
+    container_name: braveforms-postgres
     environment:
       POSTGRES_DB: brave_forms
-      POSTGRES_USER: brave_user
-      POSTGRES_PASSWORD: brave_pass
+      POSTGRES_USER: brave
+      POSTGRES_PASSWORD: brave_secure_pass
     ports:
-      - "5434:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U brave -d brave_forms']
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
-      - brave-forms-network
+      - braveforms-network
 
   # Redis for BullMQ and caching
   redis:
     image: redis:7-alpine
-    container_name: brave-forms-redis
+    container_name: braveforms-redis
+    command: redis-server --appendonly yes --requirepass redis_secure_pass
     ports:
-      - "6381:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-a', 'redis_secure_pass', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
-      - brave-forms-network
+      - braveforms-network
 
-  # MinIO Object Storage for photos
+  # MinIO Object Storage for photos (S3-compatible)
   minio:
     image: minio/minio:latest
-    container_name: brave-forms-minio
+    container_name: braveforms-minio
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin123
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - '9000:9000' # API
+      - '9001:9001' # Console
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
-      - brave-forms-network
-
-  # Backend API (NestJS GraphQL)
-  backend:
-    build:
-      context: .
-      dockerfile: apps/backend/Dockerfile
-    container_name: brave-forms-backend
-    environment:
-      DATABASE_URL: "postgresql://brave_user:brave_pass@postgres:5432/brave_forms"
-      REDIS_URL: "redis://redis:6379"
-      MINIO_ENDPOINT: "minio"
-      MINIO_PORT: "9000"
-      MINIO_ACCESS_KEY: "minioadmin"
-      MINIO_SECRET_KEY: "minioadmin123"
-      NODE_ENV: development
-      PORT: 3002
-    ports:
-      - "3002:3002"
-    depends_on:
-      - postgres
-      - redis
-      - minio
-    volumes:
-      - ./apps/backend:/app
-      - /app/node_modules
-    networks:
-      - brave-forms-network
-
-  # Frontend Web (Next.js)
-  web:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile
-    container_name: brave-forms-web
-    environment:
-      NEXT_PUBLIC_API_URL: "http://localhost:3002/graphql"
-      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_development"
-      CLERK_SECRET_KEY: "sk_test_development"
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-    volumes:
-      - ./apps/web:/app
-      - /app/node_modules
-      - /app/.next
-    networks:
-      - brave-forms-network
-
-  # Mobile Development Server (Capacitor)
-  mobile:
-    build:
-      context: .
-      dockerfile: apps/mobile/Dockerfile
-    container_name: brave-forms-mobile
-    environment:
-      VITE_API_URL: "http://localhost:3002/graphql"
-    ports:
-      - "5173:5173"
-    depends_on:
-      - backend
-    volumes:
-      - ./apps/mobile:/app
-      - /app/node_modules
-    networks:
-      - brave-forms-network
+      - braveforms-network
 
 volumes:
   postgres_data:
+    name: braveforms-postgres-data
   redis_data:
+    name: braveforms-redis-data
   minio_data:
+    name: braveforms-minio-data
 
 networks:
-  brave-forms-network:
+  braveforms-network:
     driver: bridge
+    name: braveforms-network
