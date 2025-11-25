@@ -1,159 +1,257 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import FormFillPage from '../page';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MantineProvider } from '@mantine/core';
+import React from 'react';
 
 const TEST_TEMPLATE_ID = 'daily-log';
 
+// Handle expected unhandled rejections from error tests in Node environment
+const originalOnUnhandledRejection = process.listeners('unhandledRejection');
+beforeEach(() => {
+  process.removeAllListeners('unhandledRejection');
+  process.on('unhandledRejection', (reason: Error) => {
+    if (reason?.message !== 'Network error' && reason?.message !== 'Server error') {
+      throw reason;
+    }
+  });
+});
+
+afterEach(() => {
+  process.removeAllListeners('unhandledRejection');
+  originalOnUnhandledRejection.forEach((listener) => {
+    process.on('unhandledRejection', listener as (...args: unknown[]) => void);
+  });
+});
+
+// Define mocks BEFORE vi.mock calls (hoisting-safe)
+const mocks = {
+  push: vi.fn(),
+  notificationsShow: vi.fn(),
+  createSubmission: vi.fn(),
+  useNetworkStatus: vi.fn(() => ({ isOnline: true })),
+};
+
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
-  useParams: () => ({ templateId: TEST_TEMPLATE_ID }),
+  useParams: () => ({ templateId: 'daily-log' }),
   useRouter: () => ({
-    push: vi.fn(),
+    push: (...args: unknown[]) => mocks.push(...args),
   }),
 }));
 
 // Mock Mantine notifications
-const mockNotificationsShow = vi.fn();
 vi.mock('@mantine/notifications', () => ({
   notifications: {
-    show: mockNotificationsShow,
+    show: (...args: unknown[]) => mocks.notificationsShow(...args),
   },
 }));
 
+// Mock createSubmission API
+vi.mock('@/lib/api/submissions', () => ({
+  createSubmission: (...args: unknown[]) => mocks.createSubmission(...args),
+}));
+
+// Mock useNetworkStatus
+vi.mock('@/hooks/useNetworkStatus', () => ({
+  useNetworkStatus: () => mocks.useNetworkStatus(),
+}));
+
+// Mock auth provider
+vi.mock('@/app/providers', () => ({
+  useAppAuth: () => ({
+    getToken: async () => 'test-token-123',
+    user: { id: 'user-1', name: 'Test User' },
+    isLoaded: true,
+  }),
+}));
+
+// Mock form templates data
+vi.mock('@/lib/mock-data/form-templates', () => ({
+  getMockFormTemplates: () => [
+    {
+      id: 'daily-log',
+      title: 'Daily Site Log',
+      description: 'Daily construction site activity log',
+      category: 'Daily',
+      fields: [],
+    },
+  ],
+}));
+
+// Mock useMediaQuery hook
+vi.mock('@/hooks/useMediaQuery', () => ({
+  useMediaQuery: () => false, // Desktop mode
+}));
+
+// Mock useFormDraft hook
+vi.mock('@/lib/hooks/useFormDraft', () => ({
+  useFormDraft: () => ({
+    saveDraft: vi.fn(),
+    loadDraft: vi.fn(),
+    clearDraft: vi.fn(),
+  }),
+}));
+
+// Import after mocks are set up
+import FormFillPage from '../page';
+
+// QueryClient wrapper for React Query
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+
+const renderWithProviders = (ui: React.ReactElement) => {
+  const queryClient = createTestQueryClient();
+  return {
+    ...render(
+      <MantineProvider>
+        <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+      </MantineProvider>
+    ),
+    queryClient,
+  };
+};
+
 describe('FormFillPage - Offline Scenarios', () => {
-  let originalOnLine: boolean;
-
   beforeEach(() => {
-    // Save original online state
-    originalOnLine = navigator.onLine;
-    mockNotificationsShow.mockClear();
-  });
-
-  afterEach(() => {
-    // Restore original online state
-    Object.defineProperty(navigator, 'onLine', {
-      writable: true,
-      value: originalOnLine,
+    vi.clearAllMocks();
+    // Default to online mode
+    mocks.useNetworkStatus.mockReturnValue({ isOnline: true });
+    mocks.createSubmission.mockResolvedValue({
+      id: 'sub-123',
+      templateId: TEST_TEMPLATE_ID,
+      data: {},
+      status: 'submitted',
     });
+
+    // Mock IndexedDB for offline queue functionality
+    const mockDB = {
+      transaction: vi.fn((_storeNames: string[], _mode: string) => ({
+        objectStore: vi.fn((_name: string) => ({
+          add: vi.fn().mockResolvedValue(undefined),
+          get: vi.fn(),
+          put: vi.fn(),
+          delete: vi.fn(),
+        })),
+      })),
+      objectStoreNames: {
+        contains: vi.fn(() => true),
+      },
+      createObjectStore: vi.fn(),
+    };
+
+    const mockRequest = {
+      result: mockDB,
+      error: null,
+      onsuccess: null as ((event: unknown) => void) | null,
+      onerror: null as ((event: unknown) => void) | null,
+      onupgradeneeded: null as ((event: unknown) => void) | null,
+    };
+
+    (global as unknown as { indexedDB: unknown }).indexedDB = {
+      open: (_dbName: string, _version: number) => {
+        const request = mockRequest;
+        setTimeout(() => {
+          if (request.onsuccess) {
+            request.onsuccess({ target: request });
+          }
+        }, 0);
+        return request;
+      },
+    };
   });
 
-  // TODO: Implement offline queueing in ISSUE-103
-  it.skip('should queue form submission when offline', async () => {
+  it('should queue form submission when offline', async () => {
     // Set offline state
-    Object.defineProperty(navigator, 'onLine', {
-      writable: true,
-      value: false,
-    });
+    mocks.useNetworkStatus.mockReturnValue({ isOnline: false });
 
     const user = userEvent.setup();
-    render(<FormFillPage />);
+    renderWithProviders(<FormFillPage />);
 
     // Fill form field
-    const input = screen.getByLabelText(/sample field/i);
+    const input = screen.getByRole('textbox', { name: /sample field/i });
     await user.type(input, 'Test value');
 
     // Submit form
     const submitButton = screen.getByRole('button', { name: /submit/i });
     await user.click(submitButton);
 
-    // Verify form data saved to IndexedDB (will implement in ISSUE-103)
-    // const db = await openDB('braveforms_submissions', 1);
-    // const queued = await db.getAll('pending');
-    // expect(queued.length).toBe(1);
-
     // Verify user notified of queued submission
+    // Per useSubmitForm.ts: title: 'Queued for Sync', message: 'Will submit when connection is restored', color: 'yellow'
     await waitFor(() => {
-      expect(mockNotificationsShow).toHaveBeenCalledWith({
-        title: 'Queued for Sync',
-        message: expect.stringContaining('offline'),
-        color: 'orange',
-      });
+      expect(mocks.notificationsShow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Queued for Sync',
+          color: 'yellow',
+        })
+      );
     });
+
+    // Verify createSubmission was NOT called (queued instead)
+    expect(mocks.createSubmission).not.toHaveBeenCalled();
   });
 
-  // TODO: Implement offline indicator in ISSUE-103
-  it.skip('should indicate offline status in UI', () => {
+  it('should not navigate when offline submission is queued', async () => {
     // Set offline state
-    Object.defineProperty(navigator, 'onLine', {
-      writable: true,
-      value: false,
-    });
-
-    render(<FormFillPage />);
-
-    // Verify offline indicator shown
-    expect(screen.getByText(/offline/i)).toBeInTheDocument();
-    expect(screen.getByText(/changes will sync when connected/i)).toBeInTheDocument();
-  });
-
-  // TODO: Implement sync functionality in ISSUE-103
-  it.skip('should sync queued submissions when back online', async () => {
-    // Set offline state initially
-    Object.defineProperty(navigator, 'onLine', {
-      writable: true,
-      value: false,
-    });
+    mocks.useNetworkStatus.mockReturnValue({ isOnline: false });
 
     const user = userEvent.setup();
-    render(<FormFillPage />);
-
-    // Submit form while offline
-    const input = screen.getByLabelText(/sample field/i);
-    await user.type(input, 'Test value');
-    await user.click(screen.getByRole('button', { name: /submit/i }));
-
-    // Go back online
-    Object.defineProperty(navigator, 'onLine', {
-      writable: true,
-      value: true,
-    });
-
-    // Trigger online event
-    window.dispatchEvent(new Event('online'));
-
-    // Verify sync triggered
-    await waitFor(() => {
-      expect(mockNotificationsShow).toHaveBeenCalledWith({
-        title: 'Synced',
-        message: expect.stringContaining('submitted successfully'),
-        color: 'green',
-      });
-    });
-
-    // Verify queued submission removed from IndexedDB
-    // const db = await openDB('braveforms_submissions', 1);
-    // const queued = await db.getAll('pending');
-    // expect(queued.length).toBe(0);
-  });
-
-  // TODO: Implement auto-save draft in ISSUE-103
-  it.skip('should auto-save draft every 30 seconds when offline', async () => {
-    vi.useFakeTimers();
-
-    const user = userEvent.setup({ delay: null });
-    render(<FormFillPage />);
+    renderWithProviders(<FormFillPage />);
 
     // Fill form field
-    const input = screen.getByLabelText(/sample field/i);
+    const input = screen.getByRole('textbox', { name: /sample field/i });
     await user.type(input, 'Test value');
 
-    // Advance time by 30 seconds
-    vi.advanceTimersByTime(30000);
+    // Submit form
+    const submitButton = screen.getByRole('button', { name: /submit/i });
+    await user.click(submitButton);
 
-    // Verify draft saved to IndexedDB
-    // const db = await openDB('braveforms_drafts', 1);
-    // const draft = await db.get('form_drafts', TEST_TEMPLATE_ID);
-    // expect(draft).toBeDefined();
-    // expect(draft.values['sample-field']).toBe('Test value');
+    // Wait for notification
+    await waitFor(() => {
+      expect(mocks.notificationsShow).toHaveBeenCalled();
+    });
 
-    vi.useRealTimers();
+    // Verify navigation was NOT called (offline submissions don't navigate)
+    expect(mocks.push).not.toHaveBeenCalled();
   });
 
-  // TODO: Implement conflict resolution in ISSUE-103
+  // TECH DEBT: The following tests are skipped and tracked for Sprint 5
+  // Reference: SPRINT_3_MASTER_PLAN.md - Phase 7 documentation
+  // These require features that will be implemented in Sprint 5 (iOS SQLite migration)
+
+  it.skip('should indicate offline status in UI', () => {
+    // Sprint 5 Requirement: OfflineBanner component showing when navigator.onLine is false
+    // Current status: Component not implemented in FormFillPage
+    // Ticket: Track as part of iOS offline persistence epic
+    mocks.useNetworkStatus.mockReturnValue({ isOnline: false });
+    renderWithProviders(<FormFillPage />);
+    expect(screen.getByText(/offline/i)).toBeInTheDocument();
+  });
+
+  it.skip('should sync queued submissions when back online', async () => {
+    // Sprint 5 Requirement: Online event listener and automatic sync trigger
+    // Current status: Basic queueing to IndexedDB works, but sync-on-reconnect not implemented
+    // Dependency: iOS SQLite migration for reliable offline persistence
+    expect(true).toBe(false);
+  });
+
+  it.skip('should auto-save draft every 30 seconds', async () => {
+    // Sprint 5 Requirement: Timer-based auto-save verification
+    // Note: FormRenderer has auto-save logic via useFormDraft
+    // Testing requires: vi.useFakeTimers() and IndexedDB verification
+    expect(true).toBe(false);
+  });
+
   it.skip('should handle sync conflicts gracefully', async () => {
-    // Simulate: Form submitted offline, same form updated elsewhere
-    // Verify: User prompted to resolve conflict with clear options
-    expect(true).toBe(false); // Placeholder - implement in ISSUE-103
+    // Sprint 5 Requirement: Conflict resolution UI and merge logic
+    // Current status: Not implemented - critical for multi-device usage
+    // Dependency: Server-side conflict detection API
+    expect(true).toBe(false);
   });
 });

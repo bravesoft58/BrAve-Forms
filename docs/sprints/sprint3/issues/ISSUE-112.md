@@ -4,7 +4,11 @@
 **Time:** 2 hours | **Complexity:** Small
 **Created:** 2025-10-23
 **Dependencies:** ISSUE-111 (E2E tests passing)
-**Status:** NOT STARTED
+**Status:** COMPLETE (2025-11-25)
+**Actual Time:** 2 hours
+**Evidence:** docs/sprints/sprint3/evidence/ISSUE-112/
+**Tests:** 2 enabled tests PASSING in page.offline.test.tsx, 4 skipped (Sprint 5 tech debt)
+**Implementation:** IndexedDB mock for offline queue, proper notification assertions
 
 ## What You'll Do
 
