@@ -22,6 +22,7 @@ import { ProjectPhotosTab } from '@/components/projects/ProjectPhotosTab';
 import { ProjectTeamTab } from '@/components/projects/ProjectTeamTab';
 import { ProjectWeatherTab } from '@/components/projects/ProjectWeatherTab';
 import { ProjectComplianceTab } from '@/components/projects/ProjectComplianceTab';
+import { ProjectQRCode } from '@/components/QRPortal/ProjectQRCode';
 
 /**
  * Project Detail Page - Sprint 3 ISSUE-087
@@ -73,9 +74,12 @@ export default function ProjectDetailPage() {
         />
       }
       actions={
-        <Button variant="light" leftSection={<IconEdit size={16} />} size="md">
-          Edit Project
-        </Button>
+        <Group gap="xs">
+          <ProjectQRCode projectId={projectId} projectName={project.name} />
+          <Button variant="light" leftSection={<IconEdit size={16} />} size="md">
+            Edit Project
+          </Button>
+        </Group>
       }
     >
       <Stack gap="md">
