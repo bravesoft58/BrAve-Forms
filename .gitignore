@@ -146,4 +146,5 @@ storybook-static
 # Rancher Desktop / Kubernetes local files
 RANCHER_PORT_SCAN_RESULTS.md
 *.local.yaml
-secrets-local.yaml
+secrets-local.yaml# Playwright MCP screenshots
+.playwright-mcp/
