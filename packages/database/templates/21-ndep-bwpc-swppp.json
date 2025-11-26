@@ -1,0 +1,1015 @@
+{
+  "name": "NDEP BWPC SWPPP",
+  "description": "Nevada DEP Bureau of Water Pollution Control Stormwater Pollution Prevention Plan per EPA CGP 2022 Part 7.2 and Nevada NAC 445A. Comprehensive plan document covering site operators, stormwater team, erosion/sediment controls, BMPs, inspection procedures, and certifications for construction sites disturbing 1+ acres.",
+  "category": "COMPLIANCE",
+  "version": "1.0.0",
+  "compliance": {
+    "regulation": "EPA CGP 2022 Part 7.2 SWPPP Requirements, Nevada NAC 445A, NVR100000 Construction Stormwater General Permit",
+    "requiredFields": [
+      "project_name",
+      "permit_number",
+      "operator_name",
+      "operator_contact",
+      "swppp_preparer_name",
+      "total_acreage",
+      "project_description",
+      "erosion_controls_description",
+      "sediment_controls_description",
+      "inspection_frequency",
+      "swppp_certification",
+      "operator_signature"
+    ],
+    "agency": "Nevada DEP BWPC"
+  },
+  "schema": {
+    "sections": [
+      {
+        "id": "project_site_information",
+        "title": "Project and Site Information",
+        "description": "General project identification and location information per EPA CGP 7.2.1",
+        "order": 1,
+        "fields": [
+          {
+            "id": "project_name",
+            "type": "text",
+            "label": "Project Name",
+            "required": true,
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "project_address",
+            "type": "textarea",
+            "label": "Project Address / Location",
+            "required": true,
+            "validation": { "maxLength": 500 }
+          },
+          {
+            "id": "city",
+            "type": "text",
+            "label": "City",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "county",
+            "type": "select",
+            "label": "County",
+            "required": true,
+            "options": [
+              { "value": "carson_city", "label": "Carson City" },
+              { "value": "churchill", "label": "Churchill" },
+              { "value": "clark", "label": "Clark" },
+              { "value": "douglas", "label": "Douglas" },
+              { "value": "elko", "label": "Elko" },
+              { "value": "esmeralda", "label": "Esmeralda" },
+              { "value": "eureka", "label": "Eureka" },
+              { "value": "humboldt", "label": "Humboldt" },
+              { "value": "lander", "label": "Lander" },
+              { "value": "lincoln", "label": "Lincoln" },
+              { "value": "lyon", "label": "Lyon" },
+              { "value": "mineral", "label": "Mineral" },
+              { "value": "nye", "label": "Nye" },
+              { "value": "pershing", "label": "Pershing" },
+              { "value": "storey", "label": "Storey" },
+              { "value": "washoe", "label": "Washoe" },
+              { "value": "white_pine", "label": "White Pine" }
+            ]
+          },
+          {
+            "id": "permit_number",
+            "type": "text",
+            "label": "NDEP Permit Number",
+            "required": true,
+            "placeholder": "NVR10XXXX",
+            "helpText": "Nevada Construction Stormwater General Permit tracking number",
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "npdes_tracking_number",
+            "type": "text",
+            "label": "NPDES Tracking Number",
+            "required": false,
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "latitude",
+            "type": "number",
+            "label": "Latitude (Decimal Degrees)",
+            "required": true,
+            "placeholder": "39.5296",
+            "validation": { "min": 35, "max": 42 }
+          },
+          {
+            "id": "longitude",
+            "type": "number",
+            "label": "Longitude (Decimal Degrees)",
+            "required": true,
+            "placeholder": "-119.8138",
+            "validation": { "min": -120, "max": -114 }
+          },
+          {
+            "id": "total_acreage",
+            "type": "number",
+            "label": "Total Project Acreage",
+            "required": true,
+            "helpText": "Total site area in acres",
+            "validation": { "min": 0.01, "max": 10000 }
+          },
+          {
+            "id": "disturbed_acreage",
+            "type": "number",
+            "label": "Disturbed Acreage",
+            "required": true,
+            "helpText": "Land area to be disturbed during construction",
+            "validation": { "min": 0.01, "max": 10000 }
+          },
+          {
+            "id": "project_start_date",
+            "type": "date",
+            "label": "Estimated Project Start Date",
+            "required": true
+          },
+          {
+            "id": "project_end_date",
+            "type": "date",
+            "label": "Estimated Project End Date",
+            "required": true
+          },
+          {
+            "id": "swppp_preparation_date",
+            "type": "date",
+            "label": "SWPPP Preparation Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}"
+          }
+        ]
+      },
+      {
+        "id": "site_operators",
+        "title": "Site Operators",
+        "description": "Owner/operator information per EPA CGP 7.2.1",
+        "order": 2,
+        "fields": [
+          {
+            "id": "operator_name",
+            "type": "text",
+            "label": "Operator/Owner Name",
+            "required": true,
+            "helpText": "Entity with operational control of project",
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "operator_address",
+            "type": "textarea",
+            "label": "Operator Address",
+            "required": true,
+            "validation": { "maxLength": 300 }
+          },
+          {
+            "id": "operator_contact",
+            "type": "text",
+            "label": "Operator Contact Person",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "operator_phone",
+            "type": "tel",
+            "label": "Operator Phone",
+            "required": true,
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "operator_email",
+            "type": "email",
+            "label": "Operator Email",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "general_contractor_name",
+            "type": "text",
+            "label": "General Contractor Name",
+            "required": false,
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "general_contractor_contact",
+            "type": "text",
+            "label": "GC Contact Person",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "general_contractor_phone",
+            "type": "tel",
+            "label": "GC Phone",
+            "required": false,
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "additional_operators",
+            "type": "repeater",
+            "label": "Additional Operators",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 10,
+            "helpText": "Other entities with control over project portions",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "operator_company",
+                  "type": "text",
+                  "label": "Company Name",
+                  "required": true,
+                  "validation": { "maxLength": 200 }
+                },
+                {
+                  "id": "operator_role",
+                  "type": "text",
+                  "label": "Role / Responsibility",
+                  "required": true,
+                  "validation": { "maxLength": 100 }
+                },
+                {
+                  "id": "operator_contact_name",
+                  "type": "text",
+                  "label": "Contact Name",
+                  "required": true,
+                  "validation": { "maxLength": 100 }
+                },
+                {
+                  "id": "operator_contact_phone",
+                  "type": "tel",
+                  "label": "Contact Phone",
+                  "required": true,
+                  "validation": { "maxLength": 20 }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "stormwater_team",
+        "title": "Stormwater Team",
+        "description": "Personnel responsible for SWPPP implementation per EPA CGP 7.2.2",
+        "order": 3,
+        "fields": [
+          {
+            "id": "swppp_administrator",
+            "type": "text",
+            "label": "SWPPP Administrator",
+            "required": true,
+            "helpText": "Person responsible for overall SWPPP implementation",
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "swppp_admin_title",
+            "type": "text",
+            "label": "Administrator Title",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "swppp_admin_phone",
+            "type": "tel",
+            "label": "Administrator Phone",
+            "required": true,
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "swppp_admin_email",
+            "type": "email",
+            "label": "Administrator Email",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "swppp_preparer_name",
+            "type": "text",
+            "label": "SWPPP Preparer Name",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "swppp_preparer_company",
+            "type": "text",
+            "label": "Preparer Company",
+            "required": false,
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "swppp_preparer_qualifications",
+            "type": "textarea",
+            "label": "Preparer Qualifications",
+            "required": true,
+            "helpText": "Certifications, training, and experience",
+            "validation": { "maxLength": 500 }
+          },
+          {
+            "id": "qualified_inspector",
+            "type": "text",
+            "label": "Qualified Inspector Name",
+            "required": true,
+            "helpText": "Person knowledgeable in erosion/sediment control principles per EPA CGP",
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "inspector_qualifications",
+            "type": "textarea",
+            "label": "Inspector Qualifications",
+            "required": true,
+            "helpText": "Training and experience to assess stormwater conditions",
+            "validation": { "maxLength": 500 }
+          },
+          {
+            "id": "team_members",
+            "type": "repeater",
+            "label": "Additional Team Members",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 15,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "team_member_name",
+                  "type": "text",
+                  "label": "Name",
+                  "required": true,
+                  "validation": { "maxLength": 100 }
+                },
+                {
+                  "id": "team_member_title",
+                  "type": "text",
+                  "label": "Title",
+                  "required": true,
+                  "validation": { "maxLength": 100 }
+                },
+                {
+                  "id": "team_member_responsibility",
+                  "type": "text",
+                  "label": "SWPPP Responsibility",
+                  "required": true,
+                  "validation": { "maxLength": 200 }
+                },
+                {
+                  "id": "team_member_phone",
+                  "type": "tel",
+                  "label": "Phone",
+                  "required": true,
+                  "validation": { "maxLength": 20 }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "nature_of_construction",
+        "title": "Nature of Construction Activities",
+        "description": "Project description and activities per EPA CGP 7.2.3",
+        "order": 4,
+        "fields": [
+          {
+            "id": "project_description",
+            "type": "textarea",
+            "label": "Project Description",
+            "required": true,
+            "helpText": "Describe the nature and purpose of the construction project",
+            "validation": { "maxLength": 2000 }
+          },
+          {
+            "id": "project_type",
+            "type": "select",
+            "label": "Project Type",
+            "required": true,
+            "options": [
+              { "value": "residential_single", "label": "Residential - Single Family" },
+              { "value": "residential_multi", "label": "Residential - Multi-Family" },
+              { "value": "commercial", "label": "Commercial" },
+              { "value": "industrial", "label": "Industrial" },
+              { "value": "institutional", "label": "Institutional" },
+              { "value": "roadway_highway", "label": "Roadway/Highway" },
+              { "value": "utility", "label": "Utility Infrastructure" },
+              { "value": "mixed_use", "label": "Mixed Use Development" }
+            ]
+          },
+          {
+            "id": "construction_sequence",
+            "type": "textarea",
+            "label": "Construction Sequence",
+            "required": true,
+            "helpText": "Describe major construction activities and sequence",
+            "validation": { "maxLength": 2000 }
+          },
+          {
+            "id": "soil_types",
+            "type": "textarea",
+            "label": "Soil Types Present",
+            "required": true,
+            "helpText": "Describe soil types and particle sizes expected on site per EPA CGP 7.2.3",
+            "validation": { "maxLength": 1000 }
+          },
+          {
+            "id": "existing_vegetation",
+            "type": "textarea",
+            "label": "Existing Vegetation",
+            "required": false,
+            "helpText": "Describe existing vegetation and areas to be preserved",
+            "validation": { "maxLength": 1000 }
+          },
+          {
+            "id": "previous_site_use",
+            "type": "textarea",
+            "label": "Previous Site Use",
+            "required": false,
+            "helpText": "Historical use of the project site",
+            "validation": { "maxLength": 500 }
+          },
+          {
+            "id": "receiving_waters",
+            "type": "text",
+            "label": "Receiving Waters",
+            "required": true,
+            "helpText": "Name of water body that will receive stormwater discharge",
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "impaired_waters",
+            "type": "checkbox",
+            "label": "Discharge to Impaired Waters (303(d) Listed)",
+            "required": false,
+            "helpText": "Check if receiving waters are 303(d) listed"
+          },
+          {
+            "id": "impairment_type",
+            "type": "select",
+            "label": "Impairment Type",
+            "required": false,
+            "options": [
+              { "value": "sediment", "label": "Sediment" },
+              { "value": "nutrients", "label": "Nutrients" },
+              { "value": "temperature", "label": "Temperature" },
+              { "value": "metals", "label": "Metals" },
+              { "value": "bacteria", "label": "Bacteria" },
+              { "value": "other", "label": "Other" }
+            ],
+            "conditionalDisplay": {
+              "field": "impaired_waters",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "endangered_species_present",
+            "type": "checkbox",
+            "label": "Endangered Species Present",
+            "required": false
+          },
+          {
+            "id": "historic_preservation_required",
+            "type": "checkbox",
+            "label": "Historic Preservation Requirements",
+            "required": false
+          }
+        ]
+      },
+      {
+        "id": "erosion_controls",
+        "title": "Erosion Control Measures",
+        "description": "Erosion prevention BMPs per EPA CGP Part 2.2",
+        "order": 5,
+        "fields": [
+          {
+            "id": "erosion_controls_description",
+            "type": "textarea",
+            "label": "Erosion Control Strategy",
+            "required": true,
+            "helpText": "Overall strategy for preventing erosion on site",
+            "validation": { "maxLength": 2000 }
+          },
+          {
+            "id": "natural_buffers_maintained",
+            "type": "checkbox",
+            "label": "Natural Buffers Maintained (EPA CGP 2.2.1)",
+            "required": false,
+            "helpText": "50-foot buffer from waters of US where feasible"
+          },
+          {
+            "id": "buffer_distance",
+            "type": "number",
+            "label": "Buffer Distance (feet)",
+            "required": false,
+            "validation": { "min": 0, "max": 500 },
+            "conditionalDisplay": {
+              "field": "natural_buffers_maintained",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "stormwater_directed_vegetated",
+            "type": "checkbox",
+            "label": "Stormwater Directed to Vegetated Areas (EPA CGP 2.2.2)",
+            "required": false
+          },
+          {
+            "id": "perimeter_controls_installed",
+            "type": "checkbox",
+            "label": "Perimeter Controls Installed (EPA CGP 2.2.3)",
+            "required": false
+          },
+          {
+            "id": "track_out_controls",
+            "type": "checkbox",
+            "label": "Sediment Track-Out Controls (EPA CGP 2.2.4)",
+            "required": false,
+            "helpText": "Stabilized construction entrance, wheel wash, etc."
+          },
+          {
+            "id": "stockpile_management",
+            "type": "checkbox",
+            "label": "Stockpile Management (EPA CGP 2.2.5)",
+            "required": false
+          },
+          {
+            "id": "dust_controls",
+            "type": "checkbox",
+            "label": "Dust Controls (EPA CGP 2.2.6)",
+            "required": false
+          },
+          {
+            "id": "steep_slope_controls",
+            "type": "checkbox",
+            "label": "Steep Slope Controls (EPA CGP 2.2.7)",
+            "required": false,
+            "helpText": "Controls for slopes steeper than 3:1"
+          },
+          {
+            "id": "erosion_control_bmps",
+            "type": "repeater",
+            "label": "Erosion Control BMPs",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 25,
+            "helpText": "List all erosion control BMPs to be used",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "bmp_type",
+                  "type": "select",
+                  "label": "BMP Type",
+                  "required": true,
+                  "options": [
+                    { "value": "seeding", "label": "Seeding" },
+                    { "value": "sodding", "label": "Sodding" },
+                    { "value": "mulching", "label": "Mulching" },
+                    { "value": "erosion_blankets", "label": "Erosion Control Blankets" },
+                    { "value": "hydromulch", "label": "Hydromulch" },
+                    { "value": "gravel_surface", "label": "Gravel Surface Stabilization" },
+                    { "value": "geotextiles", "label": "Geotextiles/Mats" },
+                    { "value": "compost_blankets", "label": "Compost Blankets" },
+                    { "value": "earth_dikes", "label": "Earth Dikes" },
+                    { "value": "drainage_swales", "label": "Drainage Swales" },
+                    { "value": "terraces", "label": "Terraces" },
+                    { "value": "velocity_dissipation", "label": "Velocity Dissipation Devices" },
+                    { "value": "temporary_seeding", "label": "Temporary Seeding" },
+                    { "value": "permanent_seeding", "label": "Permanent Seeding" },
+                    { "value": "plastic_sheeting", "label": "Plastic Sheeting" },
+                    { "value": "other", "label": "Other" }
+                  ]
+                },
+                {
+                  "id": "bmp_location",
+                  "type": "text",
+                  "label": "Location on Site",
+                  "required": true,
+                  "validation": { "maxLength": 200 }
+                },
+                {
+                  "id": "bmp_design_specs",
+                  "type": "textarea",
+                  "label": "Design Specifications",
+                  "required": true,
+                  "helpText": "Manufacturer specs or engineering design criteria",
+                  "validation": { "maxLength": 500 }
+                },
+                {
+                  "id": "bmp_maintenance",
+                  "type": "textarea",
+                  "label": "Maintenance Requirements",
+                  "required": true,
+                  "validation": { "maxLength": 500 }
+                },
+                {
+                  "id": "bmp_installation_date",
+                  "type": "date",
+                  "label": "Scheduled Installation Date",
+                  "required": false
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "sediment_controls",
+        "title": "Sediment Control Measures",
+        "description": "Sediment control BMPs per EPA CGP Part 2.2",
+        "order": 6,
+        "fields": [
+          {
+            "id": "sediment_controls_description",
+            "type": "textarea",
+            "label": "Sediment Control Strategy",
+            "required": true,
+            "helpText": "Overall strategy for controlling sediment discharge",
+            "validation": { "maxLength": 2000 }
+          },
+          {
+            "id": "sediment_control_bmps",
+            "type": "repeater",
+            "label": "Sediment Control BMPs",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 25,
+            "helpText": "List all sediment control BMPs to be used",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "bmp_type",
+                  "type": "select",
+                  "label": "BMP Type",
+                  "required": true,
+                  "options": [
+                    { "value": "silt_fence", "label": "Silt Fence" },
+                    { "value": "sediment_basin", "label": "Sediment Basin" },
+                    { "value": "sediment_trap", "label": "Sediment Trap" },
+                    { "value": "fiber_rolls", "label": "Fiber Rolls/Wattles" },
+                    { "value": "inlet_protection", "label": "Storm Drain Inlet Protection" },
+                    { "value": "check_dams", "label": "Check Dams" },
+                    { "value": "filter_berms", "label": "Filter Berms" },
+                    { "value": "dewatering_controls", "label": "Dewatering Controls" },
+                    { "value": "turbidity_curtain", "label": "Turbidity Curtain" },
+                    { "value": "filter_bags", "label": "Filter Bags" },
+                    { "value": "sediment_fence", "label": "Reinforced Sediment Fence" },
+                    { "value": "other", "label": "Other" }
+                  ]
+                },
+                {
+                  "id": "bmp_location",
+                  "type": "text",
+                  "label": "Location on Site",
+                  "required": true,
+                  "validation": { "maxLength": 200 }
+                },
+                {
+                  "id": "bmp_design_specs",
+                  "type": "textarea",
+                  "label": "Design Specifications",
+                  "required": true,
+                  "helpText": "Sizing, materials, manufacturer specs",
+                  "validation": { "maxLength": 500 }
+                },
+                {
+                  "id": "bmp_maintenance",
+                  "type": "textarea",
+                  "label": "Maintenance Requirements",
+                  "required": true,
+                  "helpText": "Cleaning, repair, removal criteria",
+                  "validation": { "maxLength": 500 }
+                },
+                {
+                  "id": "bmp_installation_date",
+                  "type": "date",
+                  "label": "Scheduled Installation Date",
+                  "required": false
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "good_housekeeping",
+        "title": "Good Housekeeping Controls",
+        "description": "Pollution prevention and good housekeeping per EPA CGP Part 2.3",
+        "order": 7,
+        "fields": [
+          {
+            "id": "waste_management",
+            "type": "checkbox",
+            "label": "Construction Waste Management Plan",
+            "required": false
+          },
+          {
+            "id": "concrete_washout_designated",
+            "type": "checkbox",
+            "label": "Concrete Washout Area Designated",
+            "required": false
+          },
+          {
+            "id": "concrete_washout_location",
+            "type": "text",
+            "label": "Concrete Washout Location",
+            "required": false,
+            "validation": { "maxLength": 200 },
+            "conditionalDisplay": {
+              "field": "concrete_washout_designated",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "hazmat_storage_compliant",
+            "type": "checkbox",
+            "label": "Hazardous Material Storage Compliant",
+            "required": false
+          },
+          {
+            "id": "fuel_storage_compliant",
+            "type": "checkbox",
+            "label": "Fuel Storage Secondary Containment",
+            "required": false
+          },
+          {
+            "id": "spill_prevention_plan",
+            "type": "checkbox",
+            "label": "Spill Prevention Plan Prepared",
+            "required": false
+          },
+          {
+            "id": "spill_kit_locations",
+            "type": "textarea",
+            "label": "Spill Kit Locations",
+            "required": false,
+            "validation": { "maxLength": 500 }
+          },
+          {
+            "id": "vehicle_maintenance_controls",
+            "type": "checkbox",
+            "label": "Vehicle Maintenance Controls",
+            "required": false,
+            "helpText": "Drip pans, designated maintenance areas"
+          },
+          {
+            "id": "sanitary_waste_management",
+            "type": "checkbox",
+            "label": "Sanitary Waste Properly Managed",
+            "required": false
+          },
+          {
+            "id": "material_staging_protected",
+            "type": "checkbox",
+            "label": "Material Staging Areas Protected",
+            "required": false
+          },
+          {
+            "id": "non_stormwater_discharges",
+            "type": "textarea",
+            "label": "Allowable Non-Stormwater Discharges",
+            "required": false,
+            "helpText": "List any anticipated non-stormwater discharges per EPA CGP 7.2.5",
+            "validation": { "maxLength": 1000 }
+          }
+        ]
+      },
+      {
+        "id": "stabilization_requirements",
+        "title": "Stabilization Requirements",
+        "description": "Temporary and permanent stabilization per EPA CGP Part 2.2.14",
+        "order": 8,
+        "fields": [
+          {
+            "id": "stabilization_deadline_standard",
+            "type": "select",
+            "label": "Stabilization Deadline",
+            "required": true,
+            "helpText": "Deadline to initiate stabilization after cessation of work",
+            "options": [
+              { "value": "14_days", "label": "14 Days (Standard)" },
+              { "value": "7_days", "label": "7 Days (Impaired Waters)" },
+              { "value": "immediate", "label": "Immediate (Per Special Conditions)" }
+            ]
+          },
+          {
+            "id": "temporary_stabilization_methods",
+            "type": "textarea",
+            "label": "Temporary Stabilization Methods",
+            "required": true,
+            "helpText": "Methods for areas inactive 14+ days",
+            "validation": { "maxLength": 1000 }
+          },
+          {
+            "id": "permanent_stabilization_methods",
+            "type": "textarea",
+            "label": "Permanent Stabilization Methods",
+            "required": true,
+            "helpText": "Final stabilization methods and criteria",
+            "validation": { "maxLength": 1000 }
+          },
+          {
+            "id": "vegetative_establishment_criteria",
+            "type": "textarea",
+            "label": "Vegetative Establishment Criteria",
+            "required": true,
+            "helpText": "Criteria for determining successful vegetation establishment",
+            "validation": { "maxLength": 500 }
+          },
+          {
+            "id": "final_stabilization_definition",
+            "type": "textarea",
+            "label": "Final Stabilization Definition",
+            "required": true,
+            "helpText": "Define when final stabilization is achieved for this project",
+            "validation": { "maxLength": 1000 }
+          }
+        ]
+      },
+      {
+        "id": "inspection_procedures",
+        "title": "Inspection and Maintenance Procedures",
+        "description": "Inspection requirements per EPA CGP Part 4 and 7.2.7",
+        "order": 9,
+        "fields": [
+          {
+            "id": "inspection_frequency",
+            "type": "select",
+            "label": "Routine Inspection Frequency",
+            "required": true,
+            "helpText": "Per EPA CGP Part 4.1",
+            "options": [
+              { "value": "7_day", "label": "Every 7 Days" },
+              { "value": "14_day", "label": "Every 14 Days (Qualifying Arid/Semi-Arid)" },
+              { "value": "once_monthly", "label": "Once Per Month (Qualifying Frozen)" }
+            ]
+          },
+          {
+            "id": "rain_event_inspection",
+            "type": "checkbox",
+            "label": "Rain Event Inspections Required",
+            "required": true,
+            "helpText": "Within 24 hours of 0.25 inch or greater rain event"
+          },
+          {
+            "id": "rain_trigger_threshold",
+            "type": "number",
+            "label": "Rain Trigger Threshold (inches)",
+            "required": true,
+            "defaultValue": 0.25,
+            "helpText": "EPA CGP requires inspection after 0.25 inch storm event",
+            "validation": { "min": 0.25, "max": 1.0 }
+          },
+          {
+            "id": "inspection_scope",
+            "type": "textarea",
+            "label": "Inspection Scope",
+            "required": true,
+            "helpText": "Areas and BMPs to be inspected",
+            "validation": { "maxLength": 1500 }
+          },
+          {
+            "id": "inspection_documentation",
+            "type": "textarea",
+            "label": "Inspection Documentation Requirements",
+            "required": true,
+            "helpText": "Required records per EPA CGP Part 4.7",
+            "validation": { "maxLength": 1000 }
+          },
+          {
+            "id": "maintenance_procedures",
+            "type": "textarea",
+            "label": "BMP Maintenance Procedures",
+            "required": true,
+            "helpText": "Routine maintenance procedures for all BMPs",
+            "validation": { "maxLength": 1500 }
+          },
+          {
+            "id": "corrective_action_procedures",
+            "type": "textarea",
+            "label": "Corrective Action Procedures",
+            "required": true,
+            "helpText": "Procedures when deficiencies identified per EPA CGP Part 5",
+            "validation": { "maxLength": 1500 }
+          },
+          {
+            "id": "corrective_action_deadline",
+            "type": "select",
+            "label": "Corrective Action Deadline",
+            "required": true,
+            "options": [
+              { "value": "24_hours", "label": "24 Hours (Safety/Environmental Risk)" },
+              { "value": "7_days", "label": "7 Days (Standard)" },
+              { "value": "14_days", "label": "14 Days (Complex Repairs)" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "swppp_amendments",
+        "title": "SWPPP Amendment Log",
+        "description": "Track all modifications to the SWPPP",
+        "order": 10,
+        "fields": [
+          {
+            "id": "amendments",
+            "type": "repeater",
+            "label": "SWPPP Amendments",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 50,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "amendment_date",
+                  "type": "date",
+                  "label": "Amendment Date",
+                  "required": true
+                },
+                {
+                  "id": "amendment_section",
+                  "type": "text",
+                  "label": "Section Modified",
+                  "required": true,
+                  "validation": { "maxLength": 100 }
+                },
+                {
+                  "id": "amendment_description",
+                  "type": "textarea",
+                  "label": "Description of Change",
+                  "required": true,
+                  "validation": { "maxLength": 1000 }
+                },
+                {
+                  "id": "amendment_reason",
+                  "type": "textarea",
+                  "label": "Reason for Change",
+                  "required": true,
+                  "validation": { "maxLength": 500 }
+                },
+                {
+                  "id": "amendment_by",
+                  "type": "text",
+                  "label": "Amendment Made By",
+                  "required": true,
+                  "validation": { "maxLength": 100 }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "certification_signature",
+        "title": "SWPPP Certification",
+        "description": "Operator certification per EPA CGP Part 7.2.8",
+        "order": 11,
+        "fields": [
+          {
+            "id": "swppp_certification",
+            "type": "checkbox",
+            "label": "I certify under penalty of law that this document and all attachments were prepared under my direction or supervision in accordance with a system designed to assure that qualified personnel properly gathered and evaluated the information submitted. Based on my inquiry of the person or persons who manage the system, or those persons directly responsible for gathering the information, the information submitted is, to the best of my knowledge and belief, true, accurate, and complete. I am aware that there are significant penalties for submitting false information, including the possibility of fine and imprisonment for knowing violations.",
+            "required": true
+          },
+          {
+            "id": "operator_signature",
+            "type": "signature",
+            "label": "Operator Signature",
+            "required": true,
+            "captureTimestamp": true
+          },
+          {
+            "id": "operator_name_printed",
+            "type": "text",
+            "label": "Operator Name (Printed)",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "operator_title",
+            "type": "text",
+            "label": "Operator Title",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "certification_date",
+            "type": "date",
+            "label": "Certification Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}"
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "60-90 minutes",
+    "fieldOptimization": "Comprehensive plan document - recommend desktop completion with mobile review",
+    "industryStandard": "EPA CGP 2022 Part 7.2, Nevada NAC 445A, NVR100000",
+    "targetRole": "SWPPP Administrator, Environmental Compliance Manager, Project Manager",
+    "requiredAttachments": ["Site Map", "BMP Location Map", "Drainage Plan", "Inspection Forms"]
+  }
+}

@@ -1,0 +1,303 @@
+{
+  "name": "NDEP Weekly Stormwater Log",
+  "description": "Nevada DEP weekly stormwater inspection log - 7-day format with daily visual assessments, weather tracking, and BMP maintenance records per Nevada NAC 445A",
+  "category": "COMPLIANCE",
+  "version": "1.0.0",
+  "compliance": {
+    "regulation": "Nevada NAC 445A - Stormwater Discharge Permits",
+    "requiredFields": [
+      "site_name",
+      "permit_number",
+      "week_starting",
+      "week_ending",
+      "inspector_name",
+      "daily_inspections",
+      "weekly_certification_signature"
+    ],
+    "agency": "Nevada DEP"
+  },
+  "schema": {
+    "sections": [
+      {
+        "id": "site_information",
+        "title": "Site Information",
+        "order": 1,
+        "fields": [
+          {
+            "id": "site_name",
+            "type": "text",
+            "label": "Site Name",
+            "required": true,
+            "placeholder": "Project or site name",
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "permit_number",
+            "type": "text",
+            "label": "Permit Number",
+            "required": true,
+            "placeholder": "NEV-XXXXXX",
+            "helpText": "Nevada DEP permit number in NEV-XXXXXX format",
+            "validation": { "maxLength": 50 }
+          },
+          {
+            "id": "week_starting",
+            "type": "date",
+            "label": "Week Starting",
+            "required": true,
+            "helpText": "Monday of inspection week"
+          },
+          {
+            "id": "week_ending",
+            "type": "date",
+            "label": "Week Ending",
+            "required": true,
+            "helpText": "Sunday of inspection week"
+          },
+          {
+            "id": "inspector_name",
+            "type": "text",
+            "label": "Inspector Name",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "inspector_cert",
+            "type": "text",
+            "label": "NDEP Certification Number",
+            "required": false,
+            "placeholder": "NDEP-CSI-XXXXX",
+            "validation": { "maxLength": 50 }
+          },
+          {
+            "id": "project_phase",
+            "type": "select",
+            "label": "Project Phase",
+            "required": true,
+            "options": [
+              { "value": "site_prep", "label": "Site Prep" },
+              { "value": "active_construction", "label": "Active Construction" },
+              { "value": "final_grading", "label": "Final Grading" },
+              { "value": "final_stabilization", "label": "Final Stabilization" }
+            ]
+          },
+          {
+            "id": "total_disturbed_acres",
+            "type": "number",
+            "label": "Total Disturbed Acres",
+            "required": false,
+            "validation": { "min": 0, "max": 10000, "precision": 0.01 }
+          }
+        ]
+      },
+      {
+        "id": "daily_inspections",
+        "title": "Daily Inspections",
+        "description": "Record daily inspection data for each day of the week",
+        "order": 2,
+        "fields": [
+          {
+            "id": "daily_inspections",
+            "type": "repeater",
+            "label": "Daily Inspection Entries",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 7,
+            "helpText": "Add one entry for each day of the inspection week (max 7 days)",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "inspection_date",
+                  "type": "date",
+                  "label": "Inspection Date",
+                  "required": true
+                },
+                {
+                  "id": "day_of_week",
+                  "type": "select",
+                  "label": "Day of Week",
+                  "required": true,
+                  "options": [
+                    { "value": "monday", "label": "Monday" },
+                    { "value": "tuesday", "label": "Tuesday" },
+                    { "value": "wednesday", "label": "Wednesday" },
+                    { "value": "thursday", "label": "Thursday" },
+                    { "value": "friday", "label": "Friday" },
+                    { "value": "saturday", "label": "Saturday" },
+                    { "value": "sunday", "label": "Sunday" }
+                  ]
+                },
+                {
+                  "id": "weather_conditions",
+                  "type": "select",
+                  "label": "Weather Conditions",
+                  "required": true,
+                  "options": [
+                    { "value": "clear", "label": "Clear" },
+                    { "value": "cloudy", "label": "Cloudy" },
+                    { "value": "rain", "label": "Rain" },
+                    { "value": "snow", "label": "Snow" },
+                    { "value": "wind", "label": "Wind" },
+                    { "value": "dust", "label": "Dust" }
+                  ]
+                },
+                {
+                  "id": "precipitation_amount",
+                  "type": "number",
+                  "label": "Precipitation Amount (inches)",
+                  "required": false,
+                  "validation": { "min": 0, "max": 20, "precision": 0.01 },
+                  "helpText": "Total precipitation in inches (2 decimal places)"
+                },
+                {
+                  "id": "visual_assessment_complete",
+                  "type": "checkbox",
+                  "label": "Visual Assessment Complete",
+                  "required": true,
+                  "helpText": "Confirm visual assessment was performed"
+                },
+                {
+                  "id": "bmps_functional",
+                  "type": "checkbox",
+                  "label": "All BMPs Functioning Properly",
+                  "required": false
+                },
+                {
+                  "id": "erosion_observed",
+                  "type": "checkbox",
+                  "label": "Erosion or Sediment Discharge Observed",
+                  "required": false
+                },
+                {
+                  "id": "corrective_actions",
+                  "type": "textarea",
+                  "label": "Corrective Actions Taken",
+                  "required": false,
+                  "validation": { "maxLength": 1000 },
+                  "conditionalDisplay": {
+                    "field": "erosion_observed",
+                    "operator": "equals",
+                    "value": true
+                  },
+                  "helpText": "Describe corrective actions for observed erosion or discharge"
+                },
+                {
+                  "id": "maintenance_performed",
+                  "type": "checkbox",
+                  "label": "Maintenance Performed Today",
+                  "required": false
+                },
+                {
+                  "id": "maintenance_description",
+                  "type": "textarea",
+                  "label": "Maintenance Description",
+                  "required": false,
+                  "validation": { "maxLength": 1000 },
+                  "conditionalDisplay": {
+                    "field": "maintenance_performed",
+                    "operator": "equals",
+                    "value": true
+                  },
+                  "helpText": "Describe maintenance work performed"
+                },
+                {
+                  "id": "next_day_followup_required",
+                  "type": "checkbox",
+                  "label": "Next Day Follow-Up Required",
+                  "required": false
+                },
+                {
+                  "id": "inspector_initials",
+                  "type": "text",
+                  "label": "Inspector Initials",
+                  "required": true,
+                  "validation": { "maxLength": 10 }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "weekly_summary",
+        "title": "Weekly Summary",
+        "order": 3,
+        "fields": [
+          {
+            "id": "total_precipitation_week",
+            "type": "number",
+            "label": "Total Precipitation for Week (inches)",
+            "required": false,
+            "validation": { "min": 0, "max": 50, "precision": 0.01 },
+            "helpText": "Sum of all daily precipitation amounts"
+          },
+          {
+            "id": "storm_events_count",
+            "type": "number",
+            "label": "Number of Storm Events (0.25+ inches)",
+            "required": false,
+            "validation": { "min": 0, "max": 20 },
+            "helpText": "Count of events with 0.25 inches or more rainfall"
+          },
+          {
+            "id": "bmps_repaired_count",
+            "type": "number",
+            "label": "BMPs Repaired This Week",
+            "required": false,
+            "validation": { "min": 0, "max": 100 }
+          },
+          {
+            "id": "new_bmps_installed_count",
+            "type": "number",
+            "label": "New BMPs Installed This Week",
+            "required": false,
+            "validation": { "min": 0, "max": 100 }
+          },
+          {
+            "id": "non_compliance_observed",
+            "type": "checkbox",
+            "label": "Non-Compliance Observed",
+            "required": false
+          },
+          {
+            "id": "non_compliance_description",
+            "type": "textarea",
+            "label": "Non-Compliance Description",
+            "required": false,
+            "validation": { "maxLength": 1500 },
+            "conditionalDisplay": {
+              "field": "non_compliance_observed",
+              "operator": "equals",
+              "value": true
+            },
+            "helpText": "Describe non-compliance issues observed"
+          },
+          {
+            "id": "next_week_planned_work",
+            "type": "textarea",
+            "label": "Next Week Planned Work",
+            "required": false,
+            "validation": { "maxLength": 1000 },
+            "placeholder": "Describe planned construction and BMP activities for next week"
+          },
+          {
+            "id": "weekly_certification_signature",
+            "type": "signature",
+            "label": "Weekly Certification Signature",
+            "required": true,
+            "captureTimestamp": true,
+            "helpText": "I certify that this weekly log accurately represents site conditions and inspections performed"
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "15-20 minutes",
+    "fieldOptimization": "mobile-friendly with large touch targets",
+    "industryStandard": "Nevada DEP Stormwater Program",
+    "targetRole": "SWPPP Inspector, Site Manager"
+  }
+}

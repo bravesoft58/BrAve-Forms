@@ -3,7 +3,11 @@
   "description": "Comprehensive quality control inspection for construction workmanship, materials, and compliance with specifications",
   "category": "QUALITY_CONTROL",
   "version": "1.0.0",
-  "compliance": null,
+  "compliance": {
+    "regulation": "Construction Quality Control Best Practices",
+    "agency": "Internal",
+    "requiredFields": ["date", "inspector_name", "area_inspected", "inspection_findings"]
+  },
   "schema": {
     "sections": [
       {
@@ -387,7 +391,10 @@
             "required": true,
             "options": [
               { "value": "approved", "label": "Approved - Work acceptable" },
-              { "value": "approved_with_conditions", "label": "Approved with Conditions - Minor fixes required" },
+              {
+                "value": "approved_with_conditions",
+                "label": "Approved with Conditions - Minor fixes required"
+              },
               { "value": "rejected", "label": "Rejected - Major rework required" },
               { "value": "on_hold", "label": "On Hold - Pending information/correction" }
             ]

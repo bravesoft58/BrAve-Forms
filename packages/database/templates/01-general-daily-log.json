@@ -3,7 +3,11 @@
   "description": "Comprehensive daily log for construction project documentation - tracks weather, work activities, labor, equipment, materials, and incidents",
   "category": "DAILY_LOG",
   "version": "1.0.0",
-  "compliance": null,
+  "compliance": {
+    "regulation": "General Construction Documentation Best Practices",
+    "agency": "Internal",
+    "requiredFields": ["date", "project_name", "prepared_by", "weather_conditions"]
+  },
   "schema": {
     "sections": [
       {

@@ -1,0 +1,471 @@
+{
+  "name": "Quarterly Visual Assessment",
+  "description": "EPA MSGP quarterly visual assessment of stormwater discharge with photograph documentation requirements and corrective action tracking per 2021 MSGP Part 3.2",
+  "category": "COMPLIANCE",
+  "version": "1.0.0",
+  "compliance": {
+    "regulation": "EPA MSGP (Multi-Sector General Permit) Part 3.2 - Quarterly Visual Assessment",
+    "requiredFields": [
+      "facility_name",
+      "facility_address",
+      "npdes_permit_number",
+      "assessment_quarter",
+      "assessment_date",
+      "assessor_name",
+      "all_discharge_points_assessed",
+      "next_assessment_date",
+      "certification_statement",
+      "certifier_name",
+      "certifier_title",
+      "certifier_signature"
+    ],
+    "agency": "EPA",
+    "frequency": "Quarterly (4x per year)"
+  },
+  "schema": {
+    "sections": [
+      {
+        "id": "facility_information",
+        "title": "Facility Information",
+        "order": 1,
+        "fields": [
+          {
+            "id": "facility_name",
+            "type": "text",
+            "label": "Facility Name",
+            "required": true,
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "facility_address",
+            "type": "text",
+            "label": "Facility Address",
+            "required": true,
+            "validation": { "maxLength": 300 }
+          },
+          {
+            "id": "npdes_permit_number",
+            "type": "text",
+            "label": "NPDES Permit Number",
+            "required": true,
+            "placeholder": "NVR050000",
+            "helpText": "EPA MSGP permit number",
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "sic_code",
+            "type": "text",
+            "label": "SIC Code",
+            "required": false,
+            "helpText": "Standard Industrial Classification code",
+            "validation": { "maxLength": 10 }
+          },
+          {
+            "id": "assessment_quarter",
+            "type": "select",
+            "label": "Assessment Quarter",
+            "required": true,
+            "options": [
+              { "value": "q1", "label": "Q1 (Jan-Mar)" },
+              { "value": "q2", "label": "Q2 (Apr-Jun)" },
+              { "value": "q3", "label": "Q3 (Jul-Sep)" },
+              { "value": "q4", "label": "Q4 (Oct-Dec)" }
+            ]
+          },
+          {
+            "id": "assessment_date",
+            "type": "date",
+            "label": "Assessment Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}"
+          },
+          {
+            "id": "assessor_name",
+            "type": "text",
+            "label": "Assessor Name",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "assessor_title",
+            "type": "text",
+            "label": "Assessor Title",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "weather_conditions",
+            "type": "select",
+            "label": "Weather Conditions",
+            "required": true,
+            "options": [
+              { "value": "clear", "label": "Clear" },
+              { "value": "cloudy", "label": "Cloudy" },
+              { "value": "rain_current", "label": "Rain (Current)" },
+              { "value": "rain_previous_48h", "label": "Rain (Previous 48h)" }
+            ]
+          },
+          {
+            "id": "precipitation_last_48h",
+            "type": "number",
+            "label": "Precipitation Last 48 Hours (inches)",
+            "required": false,
+            "validation": { "min": 0, "max": 20, "precision": 0.01 }
+          }
+        ]
+      },
+      {
+        "id": "discharge_point_assessments",
+        "title": "Discharge Point Assessments",
+        "description": "Visual assessment at each stormwater discharge point per EPA MSGP requirements",
+        "order": 2,
+        "fields": [
+          {
+            "id": "discharge_points",
+            "type": "repeater",
+            "label": "Discharge Points",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 20,
+            "helpText": "Assess each outfall/discharge point at the facility",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "discharge_point_id",
+                  "type": "text",
+                  "label": "Discharge Point ID",
+                  "required": true,
+                  "placeholder": "Outfall 001, 002, etc.",
+                  "validation": { "maxLength": 50 }
+                },
+                {
+                  "id": "discharge_observed",
+                  "type": "checkbox",
+                  "label": "Discharge Observed During Assessment",
+                  "required": false
+                },
+                {
+                  "id": "discharge_flow_estimate",
+                  "type": "select",
+                  "label": "Discharge Flow Estimate",
+                  "required": false,
+                  "options": [
+                    { "value": "trickle", "label": "Trickle" },
+                    { "value": "moderate", "label": "Moderate" },
+                    { "value": "high", "label": "High" }
+                  ],
+                  "conditionalDisplay": {
+                    "field": "discharge_observed",
+                    "operator": "equals",
+                    "value": true
+                  }
+                },
+                {
+                  "id": "color",
+                  "type": "select",
+                  "label": "Color",
+                  "required": false,
+                  "options": [
+                    { "value": "clear", "label": "Clear" },
+                    { "value": "brown", "label": "Brown" },
+                    { "value": "gray", "label": "Gray" },
+                    { "value": "green", "label": "Green" },
+                    { "value": "yellow", "label": "Yellow" },
+                    { "value": "other", "label": "Other" }
+                  ],
+                  "helpText": "Visual color of discharge"
+                },
+                {
+                  "id": "odor",
+                  "type": "select",
+                  "label": "Odor",
+                  "required": false,
+                  "options": [
+                    { "value": "none", "label": "None" },
+                    { "value": "petroleum", "label": "Petroleum" },
+                    { "value": "chemical", "label": "Chemical" },
+                    { "value": "sewage", "label": "Sewage" },
+                    { "value": "other", "label": "Other" }
+                  ]
+                },
+                {
+                  "id": "clarity",
+                  "type": "select",
+                  "label": "Clarity",
+                  "required": false,
+                  "options": [
+                    { "value": "clear", "label": "Clear" },
+                    { "value": "slightly_turbid", "label": "Slightly Turbid" },
+                    { "value": "turbid", "label": "Turbid" },
+                    { "value": "opaque", "label": "Opaque" }
+                  ]
+                },
+                {
+                  "id": "floating_materials",
+                  "type": "checkbox",
+                  "label": "Floating Materials Observed",
+                  "required": false
+                },
+                {
+                  "id": "floating_materials_description",
+                  "type": "textarea",
+                  "label": "Floating Materials Description",
+                  "required": false,
+                  "validation": { "maxLength": 500 },
+                  "conditionalDisplay": {
+                    "field": "floating_materials",
+                    "operator": "equals",
+                    "value": true
+                  }
+                },
+                {
+                  "id": "settled_solids",
+                  "type": "checkbox",
+                  "label": "Settled Solids Observed",
+                  "required": false
+                },
+                {
+                  "id": "settled_solids_description",
+                  "type": "textarea",
+                  "label": "Settled Solids Description",
+                  "required": false,
+                  "validation": { "maxLength": 500 },
+                  "conditionalDisplay": {
+                    "field": "settled_solids",
+                    "operator": "equals",
+                    "value": true
+                  }
+                },
+                {
+                  "id": "foam",
+                  "type": "checkbox",
+                  "label": "Foam or Suds Observed",
+                  "required": false
+                },
+                {
+                  "id": "oil_sheen",
+                  "type": "checkbox",
+                  "label": "Oil Sheen Observed",
+                  "required": false
+                },
+                {
+                  "id": "potential_pollutants",
+                  "type": "textarea",
+                  "label": "Potential Pollutants Identified",
+                  "required": false,
+                  "validation": { "maxLength": 500 },
+                  "placeholder": "Describe any potential pollutants identified"
+                },
+                {
+                  "id": "corrective_action_required",
+                  "type": "checkbox",
+                  "label": "Corrective Action Required",
+                  "required": false
+                },
+                {
+                  "id": "corrective_action_description",
+                  "type": "textarea",
+                  "label": "Corrective Action Description",
+                  "required": false,
+                  "validation": { "maxLength": 1000 },
+                  "conditionalDisplay": {
+                    "field": "corrective_action_required",
+                    "operator": "equals",
+                    "value": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "photograph_documentation",
+        "title": "Photograph Documentation",
+        "description": "EPA MSGP requires minimum 4 photographs per quarterly assessment",
+        "order": 3,
+        "fields": [
+          {
+            "id": "photographs",
+            "type": "repeater",
+            "label": "Assessment Photographs",
+            "required": true,
+            "minItems": 4,
+            "maxItems": 20,
+            "helpText": "Minimum 4 photos required per EPA MSGP quarterly assessment",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "photo_number",
+                  "type": "number",
+                  "label": "Photo Number",
+                  "required": true,
+                  "validation": { "min": 1, "max": 99 }
+                },
+                {
+                  "id": "photo_upload",
+                  "type": "photo",
+                  "label": "Photo",
+                  "required": true,
+                  "helpText": "Upload photo of discharge point or stormwater condition"
+                },
+                {
+                  "id": "photo_description",
+                  "type": "textarea",
+                  "label": "Photo Description",
+                  "required": true,
+                  "validation": { "maxLength": 500 },
+                  "placeholder": "What this photo shows"
+                },
+                {
+                  "id": "discharge_point_depicted",
+                  "type": "text",
+                  "label": "Discharge Point Depicted",
+                  "required": false,
+                  "validation": { "maxLength": 50 },
+                  "placeholder": "Which discharge point this photo documents"
+                },
+                {
+                  "id": "photo_timestamp",
+                  "type": "datetime-local",
+                  "label": "Photo Timestamp",
+                  "required": true,
+                  "helpText": "Auto-populated from EXIF data if available"
+                },
+                {
+                  "id": "photo_gps_lat",
+                  "type": "text",
+                  "label": "GPS Latitude",
+                  "required": false,
+                  "helpText": "Auto-populated from EXIF if available",
+                  "validation": { "maxLength": 20 }
+                },
+                {
+                  "id": "photo_gps_lon",
+                  "type": "text",
+                  "label": "GPS Longitude",
+                  "required": false,
+                  "helpText": "Auto-populated from EXIF if available",
+                  "validation": { "maxLength": 20 }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "overall_assessment_summary",
+        "title": "Overall Assessment Summary",
+        "order": 4,
+        "fields": [
+          {
+            "id": "all_discharge_points_assessed",
+            "type": "checkbox",
+            "label": "All Discharge Points Assessed",
+            "required": true,
+            "helpText": "Confirm all discharge points at facility have been assessed"
+          },
+          {
+            "id": "total_discharge_points_assessed",
+            "type": "number",
+            "label": "Total Discharge Points Assessed",
+            "required": false,
+            "validation": { "min": 1, "max": 100 }
+          },
+          {
+            "id": "discharge_points_with_issues",
+            "type": "number",
+            "label": "Discharge Points With Issues",
+            "required": false,
+            "validation": { "min": 0, "max": 100 },
+            "helpText": "Count of discharge points requiring corrective action"
+          },
+          {
+            "id": "significant_pollutants_observed",
+            "type": "checkbox",
+            "label": "Significant Pollutants Observed",
+            "required": false
+          },
+          {
+            "id": "pollutant_description",
+            "type": "textarea",
+            "label": "Pollutant Description",
+            "required": false,
+            "validation": { "maxLength": 1000 },
+            "conditionalDisplay": {
+              "field": "significant_pollutants_observed",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "corrective_actions_implemented",
+            "type": "textarea",
+            "label": "Corrective Actions Already Implemented",
+            "required": false,
+            "validation": { "maxLength": 1500 }
+          },
+          {
+            "id": "corrective_actions_planned",
+            "type": "textarea",
+            "label": "Corrective Actions Planned",
+            "required": false,
+            "validation": { "maxLength": 1500 }
+          },
+          {
+            "id": "next_assessment_date",
+            "type": "date",
+            "label": "Next Quarterly Assessment Date",
+            "required": true,
+            "helpText": "Schedule next quarterly visual assessment"
+          }
+        ]
+      },
+      {
+        "id": "certification",
+        "title": "Certification",
+        "description": "Certification statement per EPA MSGP requirements",
+        "order": 5,
+        "fields": [
+          {
+            "id": "certification_statement",
+            "type": "checkbox",
+            "label": "I certify under penalty of law that this document and all attachments were prepared under my direction or supervision in accordance with a system designed to assure that qualified personnel properly gathered and evaluated the information submitted",
+            "required": true,
+            "helpText": "Required certification per EPA MSGP"
+          },
+          {
+            "id": "certifier_name",
+            "type": "text",
+            "label": "Certifier Name",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "certifier_title",
+            "type": "text",
+            "label": "Certifier Title",
+            "required": true,
+            "helpText": "Must be authorized signatory per EPA MSGP",
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "certifier_signature",
+            "type": "signature",
+            "label": "Certifier Signature",
+            "required": true,
+            "captureTimestamp": true
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "30-45 minutes",
+    "fieldOptimization": "mobile-friendly with large touch targets",
+    "industryStandard": "EPA MSGP (Multi-Sector General Permit) 2021",
+    "targetRole": "Environmental Compliance Manager, Stormwater Inspector"
+  }
+}

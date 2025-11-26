@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "compliance": {
     "regulation": "ACI 318-19 - Building Code Requirements for Structural Concrete",
+    "agency": "ACI",
     "requiredFields": [
       "date",
       "mix_design",
@@ -629,7 +630,10 @@
             "required": true,
             "options": [
               { "value": "approved", "label": "Approved - Meets ACI standards" },
-              { "value": "approved_with_conditions", "label": "Approved with Conditions - Minor issues noted" },
+              {
+                "value": "approved_with_conditions",
+                "label": "Approved with Conditions - Minor issues noted"
+              },
               { "value": "rejected", "label": "Rejected - Major defects/non-compliance" }
             ]
           },

@@ -1,0 +1,397 @@
+{
+  "name": "NDOT Weekly Stormwater Logs",
+  "description": "Nevada DOT weekly stormwater inspection log for highway projects - includes culvert inspections, traffic impact tracking, and right-of-way BMP verification per NDOT and EPA requirements",
+  "category": "COMPLIANCE",
+  "version": "1.0.0",
+  "compliance": {
+    "regulation": "NDOT Standard Specifications + EPA NPDES Stormwater Program",
+    "requiredFields": [
+      "project_name",
+      "ndot_project_number",
+      "week_starting",
+      "week_ending",
+      "ndot_resident_engineer",
+      "contractor_name",
+      "inspector_name",
+      "daily_inspections",
+      "ndot_inspector_signature"
+    ],
+    "agency": "Nevada DOT"
+  },
+  "schema": {
+    "sections": [
+      {
+        "id": "project_information",
+        "title": "Project Information",
+        "order": 1,
+        "fields": [
+          {
+            "id": "project_name",
+            "type": "text",
+            "label": "Project Name",
+            "required": true,
+            "placeholder": "Highway project name",
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "ndot_project_number",
+            "type": "text",
+            "label": "NDOT Project Number",
+            "required": true,
+            "placeholder": "XXXXX-XX-XXXX",
+            "helpText": "NDOT project number format",
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "route_number",
+            "type": "text",
+            "label": "Route Number",
+            "required": false,
+            "placeholder": "I-580, US-95, SR-447, etc.",
+            "helpText": "Interstate, US Route, or State Route number",
+            "validation": { "maxLength": 50 }
+          },
+          {
+            "id": "mile_post_range",
+            "type": "text",
+            "label": "Mile Post Range",
+            "required": false,
+            "placeholder": "Begin MP - End MP",
+            "helpText": "Project mile post range (e.g., 25.00 - 32.50)",
+            "validation": { "maxLength": 50 }
+          },
+          {
+            "id": "week_starting",
+            "type": "date",
+            "label": "Week Starting",
+            "required": true,
+            "helpText": "Monday of inspection week"
+          },
+          {
+            "id": "week_ending",
+            "type": "date",
+            "label": "Week Ending",
+            "required": true,
+            "helpText": "Sunday of inspection week"
+          },
+          {
+            "id": "ndot_resident_engineer",
+            "type": "text",
+            "label": "NDOT Resident Engineer",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "contractor_name",
+            "type": "text",
+            "label": "Contractor Name",
+            "required": true,
+            "validation": { "maxLength": 150 }
+          },
+          {
+            "id": "inspector_name",
+            "type": "text",
+            "label": "Inspector Name",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "inspector_cert",
+            "type": "text",
+            "label": "NDOT Certification Number",
+            "required": false,
+            "placeholder": "NDOT-HWY-XXXX",
+            "validation": { "maxLength": 50 }
+          }
+        ]
+      },
+      {
+        "id": "daily_inspections",
+        "title": "Daily Highway Inspections",
+        "description": "Record daily inspection data for highway construction activities",
+        "order": 2,
+        "fields": [
+          {
+            "id": "daily_inspections",
+            "type": "repeater",
+            "label": "Daily Inspection Entries",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 7,
+            "helpText": "Add one entry for each inspection day (max 7 days)",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "inspection_date",
+                  "type": "date",
+                  "label": "Inspection Date",
+                  "required": true
+                },
+                {
+                  "id": "day_of_week",
+                  "type": "select",
+                  "label": "Day of Week",
+                  "required": true,
+                  "options": [
+                    { "value": "monday", "label": "Monday" },
+                    { "value": "tuesday", "label": "Tuesday" },
+                    { "value": "wednesday", "label": "Wednesday" },
+                    { "value": "thursday", "label": "Thursday" },
+                    { "value": "friday", "label": "Friday" },
+                    { "value": "saturday", "label": "Saturday" },
+                    { "value": "sunday", "label": "Sunday" }
+                  ]
+                },
+                {
+                  "id": "weather_conditions",
+                  "type": "select",
+                  "label": "Weather Conditions",
+                  "required": true,
+                  "options": [
+                    { "value": "clear", "label": "Clear" },
+                    { "value": "cloudy", "label": "Cloudy" },
+                    { "value": "rain", "label": "Rain" },
+                    { "value": "snow", "label": "Snow" },
+                    { "value": "wind", "label": "Wind" },
+                    { "value": "dust", "label": "Dust" }
+                  ]
+                },
+                {
+                  "id": "precipitation_amount",
+                  "type": "number",
+                  "label": "Precipitation Amount (inches)",
+                  "required": false,
+                  "validation": { "min": 0, "max": 20, "precision": 0.01 }
+                },
+                {
+                  "id": "active_construction",
+                  "type": "checkbox",
+                  "label": "Active Construction Today",
+                  "required": false
+                },
+                {
+                  "id": "traffic_control_functional",
+                  "type": "checkbox",
+                  "label": "Traffic Control Measures Functional",
+                  "required": false
+                },
+                {
+                  "id": "culverts_inspected",
+                  "type": "checkbox",
+                  "label": "Culverts and Drainage Inspected",
+                  "required": false
+                },
+                {
+                  "id": "culvert_findings",
+                  "type": "textarea",
+                  "label": "Culvert Inspection Findings",
+                  "required": false,
+                  "validation": { "maxLength": 1000 },
+                  "conditionalDisplay": {
+                    "field": "culverts_inspected",
+                    "operator": "equals",
+                    "value": true
+                  },
+                  "helpText": "Document culvert conditions, debris, flow status"
+                },
+                {
+                  "id": "row_bmps_functional",
+                  "type": "checkbox",
+                  "label": "Right-of-Way BMPs Functional",
+                  "required": false,
+                  "helpText": "BMPs within highway right-of-way are functioning"
+                },
+                {
+                  "id": "row_bmp_issues",
+                  "type": "textarea",
+                  "label": "ROW BMP Issues",
+                  "required": false,
+                  "validation": { "maxLength": 1000 },
+                  "conditionalDisplay": {
+                    "field": "row_bmps_functional",
+                    "operator": "equals",
+                    "value": false
+                  },
+                  "helpText": "Document issues with right-of-way BMPs"
+                },
+                {
+                  "id": "erosion_observed",
+                  "type": "checkbox",
+                  "label": "Erosion Observed",
+                  "required": false
+                },
+                {
+                  "id": "erosion_location",
+                  "type": "text",
+                  "label": "Erosion Location (Mile Post/Station)",
+                  "required": false,
+                  "validation": { "maxLength": 200 },
+                  "conditionalDisplay": {
+                    "field": "erosion_observed",
+                    "operator": "equals",
+                    "value": true
+                  },
+                  "helpText": "Mile post or station number where erosion observed"
+                },
+                {
+                  "id": "maintenance_performed",
+                  "type": "checkbox",
+                  "label": "Maintenance Performed Today",
+                  "required": false
+                },
+                {
+                  "id": "maintenance_description",
+                  "type": "textarea",
+                  "label": "Maintenance Description",
+                  "required": false,
+                  "validation": { "maxLength": 1000 },
+                  "conditionalDisplay": {
+                    "field": "maintenance_performed",
+                    "operator": "equals",
+                    "value": true
+                  }
+                },
+                {
+                  "id": "traffic_impact",
+                  "type": "select",
+                  "label": "Traffic Impact",
+                  "required": false,
+                  "options": [
+                    { "value": "none", "label": "None" },
+                    { "value": "minor_delay", "label": "Minor Delay" },
+                    { "value": "lane_closure", "label": "Lane Closure" },
+                    { "value": "detour", "label": "Detour" }
+                  ]
+                },
+                {
+                  "id": "inspector_initials",
+                  "type": "text",
+                  "label": "Inspector Initials",
+                  "required": true,
+                  "validation": { "maxLength": 10 }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "weekly_summary",
+        "title": "Weekly Highway Summary",
+        "order": 3,
+        "fields": [
+          {
+            "id": "total_precipitation_week",
+            "type": "number",
+            "label": "Total Precipitation for Week (inches)",
+            "required": false,
+            "validation": { "min": 0, "max": 50, "precision": 0.01 }
+          },
+          {
+            "id": "storm_events_count",
+            "type": "number",
+            "label": "Number of Storm Events (0.25+ inches)",
+            "required": false,
+            "validation": { "min": 0, "max": 20 },
+            "helpText": "Count of events with 0.25 inches or more rainfall"
+          },
+          {
+            "id": "culverts_cleaned_count",
+            "type": "number",
+            "label": "Culverts Cleaned This Week",
+            "required": false,
+            "validation": { "min": 0, "max": 100 }
+          },
+          {
+            "id": "drainage_issues_resolved_count",
+            "type": "number",
+            "label": "Drainage Issues Resolved",
+            "required": false,
+            "validation": { "min": 0, "max": 100 }
+          },
+          {
+            "id": "bmps_repaired_count",
+            "type": "number",
+            "label": "BMPs Repaired This Week",
+            "required": false,
+            "validation": { "min": 0, "max": 100 }
+          },
+          {
+            "id": "new_bmps_installed_count",
+            "type": "number",
+            "label": "New BMPs Installed This Week",
+            "required": false,
+            "validation": { "min": 0, "max": 100 }
+          },
+          {
+            "id": "traffic_delays_count",
+            "type": "number",
+            "label": "Days with Traffic Delays",
+            "required": false,
+            "validation": { "min": 0, "max": 7 }
+          },
+          {
+            "id": "row_violations_observed",
+            "type": "checkbox",
+            "label": "Right-of-Way Violations Observed",
+            "required": false
+          },
+          {
+            "id": "row_violation_description",
+            "type": "textarea",
+            "label": "ROW Violation Description",
+            "required": false,
+            "validation": { "maxLength": 1500 },
+            "conditionalDisplay": {
+              "field": "row_violations_observed",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "environmental_issues",
+            "type": "checkbox",
+            "label": "Environmental Issues Observed",
+            "required": false
+          },
+          {
+            "id": "environmental_issue_description",
+            "type": "textarea",
+            "label": "Environmental Issue Description",
+            "required": false,
+            "validation": { "maxLength": 1500 },
+            "conditionalDisplay": {
+              "field": "environmental_issues",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "next_week_planned_work",
+            "type": "textarea",
+            "label": "Next Week Planned Work",
+            "required": false,
+            "validation": { "maxLength": 1000 },
+            "placeholder": "Describe planned highway construction and BMP activities"
+          },
+          {
+            "id": "ndot_inspector_signature",
+            "type": "signature",
+            "label": "NDOT Inspector Signature",
+            "required": true,
+            "captureTimestamp": true,
+            "helpText": "NDOT inspector verification of weekly inspection log"
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "20-25 minutes",
+    "fieldOptimization": "mobile-friendly with large touch targets",
+    "industryStandard": "Nevada DOT Stormwater Program",
+    "targetRole": "NDOT Inspector, Highway Project Manager"
+  }
+}

@@ -1,0 +1,574 @@
+{
+  "name": "Routine Facility Inspection",
+  "description": "EPA SPCC routine facility inspection checklist for equipment condition assessment, spill prevention verification, housekeeping standards, and material storage compliance per 40 CFR Part 112",
+  "category": "COMPLIANCE",
+  "version": "1.0.0",
+  "compliance": {
+    "regulation": "EPA SPCC (40 CFR Part 112) - Spill Prevention, Control, and Countermeasure",
+    "requiredFields": [
+      "facility_name",
+      "facility_address",
+      "facility_contact",
+      "inspection_date",
+      "inspector_name",
+      "next_inspection_date",
+      "inspector_certification",
+      "inspector_name_cert",
+      "inspector_signature"
+    ],
+    "agency": "EPA"
+  },
+  "schema": {
+    "sections": [
+      {
+        "id": "facility_information",
+        "title": "Facility Information",
+        "order": 1,
+        "fields": [
+          {
+            "id": "facility_name",
+            "type": "text",
+            "label": "Facility Name",
+            "required": true,
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "facility_address",
+            "type": "text",
+            "label": "Facility Address",
+            "required": true,
+            "validation": { "maxLength": 300 }
+          },
+          {
+            "id": "facility_contact",
+            "type": "text",
+            "label": "Facility Contact",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "contact_phone",
+            "type": "tel",
+            "label": "Contact Phone",
+            "required": false,
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "inspection_date",
+            "type": "date",
+            "label": "Inspection Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}"
+          },
+          {
+            "id": "inspection_time",
+            "type": "time",
+            "label": "Inspection Time",
+            "required": false
+          },
+          {
+            "id": "inspector_name",
+            "type": "text",
+            "label": "Inspector Name",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "inspector_title",
+            "type": "text",
+            "label": "Inspector Title",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "inspection_frequency",
+            "type": "select",
+            "label": "Inspection Frequency",
+            "required": true,
+            "options": [
+              { "value": "weekly", "label": "Weekly" },
+              { "value": "monthly", "label": "Monthly" },
+              { "value": "quarterly", "label": "Quarterly" }
+            ],
+            "helpText": "Per EPA SPCC, monthly inspections recommended for most facilities"
+          },
+          {
+            "id": "last_inspection_date",
+            "type": "date",
+            "label": "Last Inspection Date",
+            "required": false
+          }
+        ]
+      },
+      {
+        "id": "equipment_condition_assessment",
+        "title": "Equipment Condition Assessment",
+        "description": "Visual inspection of tanks, pumps, piping, and other equipment per SPCC plan requirements",
+        "order": 2,
+        "fields": [
+          {
+            "id": "equipment_inspections",
+            "type": "repeater",
+            "label": "Equipment Inspections",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 50,
+            "helpText": "Inspect each piece of oil storage and transfer equipment",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "equipment_id",
+                  "type": "text",
+                  "label": "Equipment ID",
+                  "required": true,
+                  "placeholder": "Tank 1, Pump 2, etc.",
+                  "validation": { "maxLength": 50 }
+                },
+                {
+                  "id": "equipment_type",
+                  "type": "select",
+                  "label": "Equipment Type",
+                  "required": true,
+                  "options": [
+                    { "value": "storage_tank", "label": "Storage Tank" },
+                    { "value": "transfer_pump", "label": "Transfer Pump" },
+                    { "value": "piping", "label": "Piping" },
+                    { "value": "valve", "label": "Valve" },
+                    { "value": "loading_rack", "label": "Loading Rack" },
+                    { "value": "other", "label": "Other" }
+                  ]
+                },
+                {
+                  "id": "equipment_location",
+                  "type": "text",
+                  "label": "Equipment Location",
+                  "required": false,
+                  "validation": { "maxLength": 100 }
+                },
+                {
+                  "id": "visual_condition",
+                  "type": "select",
+                  "label": "Visual Condition",
+                  "required": true,
+                  "options": [
+                    { "value": "good", "label": "Good" },
+                    { "value": "fair", "label": "Fair" },
+                    { "value": "poor", "label": "Poor" }
+                  ]
+                },
+                {
+                  "id": "leaks_observed",
+                  "type": "checkbox",
+                  "label": "Leaks Observed",
+                  "required": false
+                },
+                {
+                  "id": "leak_description",
+                  "type": "textarea",
+                  "label": "Leak Description",
+                  "required": false,
+                  "validation": { "maxLength": 500 },
+                  "conditionalDisplay": {
+                    "field": "leaks_observed",
+                    "operator": "equals",
+                    "value": true
+                  }
+                },
+                {
+                  "id": "corrosion_observed",
+                  "type": "checkbox",
+                  "label": "Corrosion Observed",
+                  "required": false
+                },
+                {
+                  "id": "corrosion_severity",
+                  "type": "select",
+                  "label": "Corrosion Severity",
+                  "required": false,
+                  "options": [
+                    { "value": "minor", "label": "Minor" },
+                    { "value": "moderate", "label": "Moderate" },
+                    { "value": "severe", "label": "Severe" }
+                  ],
+                  "conditionalDisplay": {
+                    "field": "corrosion_observed",
+                    "operator": "equals",
+                    "value": true
+                  }
+                },
+                {
+                  "id": "mechanical_integrity",
+                  "type": "checkbox",
+                  "label": "Equipment Operating Properly",
+                  "required": false,
+                  "helpText": "Mechanical integrity verified"
+                },
+                {
+                  "id": "maintenance_required",
+                  "type": "checkbox",
+                  "label": "Maintenance Required",
+                  "required": false
+                },
+                {
+                  "id": "maintenance_notes",
+                  "type": "textarea",
+                  "label": "Maintenance Notes",
+                  "required": false,
+                  "validation": { "maxLength": 500 },
+                  "conditionalDisplay": {
+                    "field": "maintenance_required",
+                    "operator": "equals",
+                    "value": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "spill_prevention_measures",
+        "title": "Spill Prevention Measures",
+        "description": "Verification of spill prevention, control, and countermeasure requirements",
+        "order": 3,
+        "fields": [
+          {
+            "id": "secondary_containment_intact",
+            "type": "checkbox",
+            "label": "Secondary containment intact and functional",
+            "required": false
+          },
+          {
+            "id": "containment_capacity_adequate",
+            "type": "checkbox",
+            "label": "Containment capacity adequate (110% of largest tank)",
+            "required": false,
+            "helpText": "Per 40 CFR 112.7(c) - must hold 110% of largest tank or 100% of largest plus sufficient freeboard"
+          },
+          {
+            "id": "containment_free_of_liquids",
+            "type": "checkbox",
+            "label": "Containment area free of accumulated liquids",
+            "required": false
+          },
+          {
+            "id": "valves_closed",
+            "type": "checkbox",
+            "label": "Valves closed when not in use",
+            "required": false
+          },
+          {
+            "id": "overfill_protection_functional",
+            "type": "checkbox",
+            "label": "Overfill protection operational",
+            "required": false
+          },
+          {
+            "id": "spill_kit_available",
+            "type": "checkbox",
+            "label": "Spill prevention kit available and stocked",
+            "required": false
+          },
+          {
+            "id": "response_equipment_accessible",
+            "type": "checkbox",
+            "label": "Spill response equipment accessible",
+            "required": false
+          },
+          {
+            "id": "emergency_contacts_posted",
+            "type": "checkbox",
+            "label": "Emergency contact numbers posted",
+            "required": false
+          },
+          {
+            "id": "drainage_controlled",
+            "type": "checkbox",
+            "label": "Facility drainage controls in place",
+            "required": false
+          },
+          {
+            "id": "no_unauthorized_discharge",
+            "type": "checkbox",
+            "label": "No unauthorized discharge observed",
+            "required": false
+          },
+          {
+            "id": "spcc_plan_onsite",
+            "type": "checkbox",
+            "label": "SPCC plan available on site",
+            "required": false
+          },
+          {
+            "id": "training_records_current",
+            "type": "checkbox",
+            "label": "Employee training records current",
+            "required": false
+          }
+        ]
+      },
+      {
+        "id": "housekeeping_standards",
+        "title": "Housekeeping Standards",
+        "description": "General facility condition and safety compliance",
+        "order": 4,
+        "fields": [
+          {
+            "id": "area_clean_organized",
+            "type": "checkbox",
+            "label": "Work areas clean and organized",
+            "required": false
+          },
+          {
+            "id": "spills_cleaned",
+            "type": "checkbox",
+            "label": "No evidence of unreported spills",
+            "required": false
+          },
+          {
+            "id": "waste_properly_stored",
+            "type": "checkbox",
+            "label": "Waste materials properly stored and labeled",
+            "required": false
+          },
+          {
+            "id": "containers_labeled",
+            "type": "checkbox",
+            "label": "All containers properly labeled",
+            "required": false
+          },
+          {
+            "id": "incompatible_materials_separated",
+            "type": "checkbox",
+            "label": "Incompatible materials separated",
+            "required": false
+          },
+          {
+            "id": "drum_storage_compliant",
+            "type": "checkbox",
+            "label": "Drum storage compliant with regulations",
+            "required": false
+          },
+          {
+            "id": "floor_free_of_debris",
+            "type": "checkbox",
+            "label": "Floors free of debris and obstructions",
+            "required": false
+          },
+          {
+            "id": "lighting_adequate",
+            "type": "checkbox",
+            "label": "Lighting adequate in all areas",
+            "required": false
+          },
+          {
+            "id": "ventilation_functioning",
+            "type": "checkbox",
+            "label": "Ventilation systems functioning",
+            "required": false
+          },
+          {
+            "id": "fire_extinguishers_accessible",
+            "type": "checkbox",
+            "label": "Fire extinguishers accessible and inspected",
+            "required": false
+          }
+        ]
+      },
+      {
+        "id": "material_storage_compliance",
+        "title": "Material Storage Compliance",
+        "description": "Inspection of oil and hazardous material storage areas",
+        "order": 5,
+        "fields": [
+          {
+            "id": "storage_areas",
+            "type": "repeater",
+            "label": "Storage Area Inspections",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 25,
+            "helpText": "Document each material storage area at the facility",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "storage_area_id",
+                  "type": "text",
+                  "label": "Storage Area ID",
+                  "required": true,
+                  "validation": { "maxLength": 50 }
+                },
+                {
+                  "id": "material_stored",
+                  "type": "text",
+                  "label": "Type of Material Stored",
+                  "required": true,
+                  "validation": { "maxLength": 100 }
+                },
+                {
+                  "id": "quantity",
+                  "type": "number",
+                  "label": "Quantity (Gallons)",
+                  "required": false,
+                  "validation": { "min": 0, "max": 1000000 }
+                },
+                {
+                  "id": "secondary_containment",
+                  "type": "checkbox",
+                  "label": "Secondary Containment Present",
+                  "required": false
+                },
+                {
+                  "id": "containment_capacity",
+                  "type": "number",
+                  "label": "Containment Capacity (Gallons)",
+                  "required": false,
+                  "validation": { "min": 0, "max": 1000000 },
+                  "conditionalDisplay": {
+                    "field": "secondary_containment",
+                    "operator": "equals",
+                    "value": true
+                  }
+                },
+                {
+                  "id": "proper_labeling",
+                  "type": "checkbox",
+                  "label": "Materials Properly Labeled",
+                  "required": false
+                },
+                {
+                  "id": "sds_available",
+                  "type": "checkbox",
+                  "label": "Safety Data Sheet Available",
+                  "required": false
+                },
+                {
+                  "id": "compliant_storage",
+                  "type": "checkbox",
+                  "label": "Storage Compliant with Regulations",
+                  "required": false
+                },
+                {
+                  "id": "issues_identified",
+                  "type": "textarea",
+                  "label": "Storage Compliance Issues",
+                  "required": false,
+                  "validation": { "maxLength": 500 },
+                  "placeholder": "Describe any storage compliance issues identified"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "findings_corrective_actions",
+        "title": "Findings and Corrective Actions",
+        "order": 6,
+        "fields": [
+          {
+            "id": "deficiencies_found",
+            "type": "checkbox",
+            "label": "Deficiencies Found During Inspection",
+            "required": false
+          },
+          {
+            "id": "deficiency_count",
+            "type": "number",
+            "label": "Number of Deficiencies",
+            "required": false,
+            "validation": { "min": 0, "max": 100 },
+            "conditionalDisplay": {
+              "field": "deficiencies_found",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "deficiency_summary",
+            "type": "textarea",
+            "label": "Deficiency Summary",
+            "required": false,
+            "validation": { "maxLength": 2000 },
+            "conditionalDisplay": {
+              "field": "deficiencies_found",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "immediate_actions_taken",
+            "type": "textarea",
+            "label": "Immediate Actions Taken",
+            "required": false,
+            "validation": { "maxLength": 1000 }
+          },
+          {
+            "id": "corrective_actions_required",
+            "type": "textarea",
+            "label": "Corrective Actions Required",
+            "required": false,
+            "validation": { "maxLength": 1500 }
+          },
+          {
+            "id": "responsible_party",
+            "type": "text",
+            "label": "Responsible Party",
+            "required": false,
+            "placeholder": "Person responsible for corrective actions",
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "completion_deadline",
+            "type": "date",
+            "label": "Completion Deadline",
+            "required": false
+          },
+          {
+            "id": "next_inspection_date",
+            "type": "date",
+            "label": "Next Inspection Date",
+            "required": true
+          }
+        ]
+      },
+      {
+        "id": "inspector_certification",
+        "title": "Inspector Certification",
+        "order": 7,
+        "fields": [
+          {
+            "id": "inspector_certification",
+            "type": "checkbox",
+            "label": "I certify this inspection was conducted per facility SPCC plan requirements",
+            "required": true,
+            "helpText": "Certification per 40 CFR Part 112 requirements"
+          },
+          {
+            "id": "inspector_name_cert",
+            "type": "text",
+            "label": "Inspector Name (Certification)",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "inspector_signature",
+            "type": "signature",
+            "label": "Inspector Signature",
+            "required": true,
+            "captureTimestamp": true
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "30-45 minutes",
+    "fieldOptimization": "mobile-friendly with large touch targets",
+    "industryStandard": "EPA SPCC (40 CFR Part 112)",
+    "targetRole": "Environmental Compliance Manager, Facility Inspector"
+  }
+}

@@ -5,13 +5,8 @@
   "version": "1.0.0",
   "compliance": {
     "regulation": "OSHA 29 CFR 1926.21(b)(2) - Safety Training and Education",
-    "requiredFields": [
-      "date",
-      "topic",
-      "trainer_name",
-      "location",
-      "attendees"
-    ],
+    "agency": "OSHA",
+    "requiredFields": ["date", "topic", "trainer_name", "location", "attendees"],
     "recordkeeping": "Duration of employment + 3 years per OSHA",
     "training_requirement": "Documented employee instruction required"
   },

@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "compliance": {
     "regulation": "OSHA 29 CFR 1926.20(b) - Accident Prevention Programs",
+    "agency": "OSHA",
     "requiredFields": [
       "date",
       "inspector_name",

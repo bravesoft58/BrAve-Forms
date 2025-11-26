@@ -71,17 +71,42 @@
 
 ## Issue Status Tracking
 
-**Last Updated:** 2025-10-23 (Sprint Start)
+**Last Updated:** 2025-11-26
 
-**Completed:** 0/24 issues (0%)
+**Completed:** 19/25 issues (76%) - includes ISSUE-105.5 integration work
 **In Progress:** None
-**Not Started:** 24/24 issues (100%)
+**Not Started:** 6/25 issues (24%)
 
 ### Phase Status
 
-- **Phase 1 (QR Portal):** 0/6 issues (0%)
-- **Phase 2 (Agency Templates):** 0/12 issues (0%)
+- **Phase 1 (QR Portal):** 6/6 issues (100%) - COMPLETE
+- **Integration (ISSUE-105.5):** 1/1 issues (100%) - COMPLETE
+- **Phase 2 (Agency Templates):** 12/12 issues (100%) - COMPLETE
 - **Phase 3 (Testing):** 0/6 issues (0%)
+
+### Completed Issues
+
+| Issue       | Title                                         | Completed  |
+| ----------- | --------------------------------------------- | ---------- |
+| ISSUE-100   | Time-Limited QR Token Generation              | 2025-11-26 |
+| ISSUE-101   | Inspector Portal Layout                       | 2025-11-26 |
+| ISSUE-102   | Project-Level QR Code Display                 | 2025-11-26 |
+| ISSUE-103   | Form Submission Viewer (Read-Only)            | 2025-11-26 |
+| ISSUE-104   | Photo Gallery Viewer                          | 2025-11-26 |
+| ISSUE-105   | QR Portal Tests                               | 2025-11-26 |
+| ISSUE-105.5 | Web UI Integration & Template Rendering Fixes | 2025-11-26 |
+| ISSUE-106   | NDEP BWPC SWPPP Template                      | 2025-11-26 |
+| ISSUE-107   | NDOT SWPPP Template                           | 2025-11-26 |
+| ISSUE-108   | NDEP Weekly Stormwater Log                    | 2025-11-26 |
+| ISSUE-109   | NDOT Weekly Stormwater Logs                   | 2025-11-26 |
+| ISSUE-110   | TMWA Inspection Checklist                     | 2025-11-26 |
+| ISSUE-111   | Quarterly Visual Assessment                   | 2025-11-26 |
+| ISSUE-112   | Visual Assessment Report                      | 2025-11-26 |
+| ISSUE-113   | Routine Facility Inspection                   | 2025-11-26 |
+| ISSUE-114   | Daily Dust Logs                               | 2025-11-26 |
+| ISSUE-115   | Validate All Templates                        | 2025-11-26 |
+| ISSUE-116   | Seed All Q&D Templates                        | 2025-11-26 |
+| ISSUE-117   | Template Documentation Update                 | 2025-11-26 |
 
 ## Evidence Collection Requirements
 
@@ -212,4 +237,45 @@ kubectl get all -n braveforms
 
 ## Completed Evidence Links
 
-(Will be populated as issues complete)
+### Phase 1: QR Inspector Portal (COMPLETE)
+
+- **ISSUE-100:** Backend QRTokenService - 77 tests passing
+- **ISSUE-101:** Inspector portal layout - Mobile-optimized
+- **ISSUE-102:** ProjectQRCode component - QR generation modal
+- **ISSUE-103:** SubmissionViewer component - Read-only
+- **ISSUE-104:** PhotoGalleryViewer component - Lightbox with GPS
+- **ISSUE-105:** QR Portal Tests - 77 tests across all components
+
+### Integration Work (COMPLETE)
+
+- **ISSUE-105.5:** Web UI Integration & Template Rendering Fixes
+  - Fixed Zod schema generation bug ("s.max is not a function")
+  - Fixed GraphQL endpoint configuration
+  - Verified 21 templates load and render
+  - Evidence: `.playwright-mcp/ndot-swppp-form-*.png`
+  - Details: [ISSUE-105.5.md](issues/ISSUE-105.5.md)
+
+### Phase 2: Q&D Agency Templates (COMPLETE)
+
+**ISSUE-106 through ISSUE-117: Nevada Agency-Specific Templates** - COMPLETE
+
+- **Templates Created:** 20 JSON template files (packages/database/templates/)
+- **Tests Passing:** 236 template tests
+- **Code Review:** 11 compliance.agency fields fixed per code review findings
+- **Templates Include:**
+  - NDEP BWPC SWPPP (12-ndep-bwpc-swppp.json)
+  - NDOT SWPPP (13-ndot-swppp.json)
+  - NDEP Weekly Stormwater Log (14-ndep-weekly-stormwater-log.json)
+  - NDOT Weekly Stormwater Logs (15-ndot-weekly-stormwater-logs.json)
+  - TMWA Inspection Checklist (16-tmwa-inspection-checklist.json)
+  - Quarterly Visual Assessment (17-quarterly-visual-assessment.json)
+  - Visual Assessment Report (18-visual-assessment-report.json)
+  - Routine Facility Inspection (19-routine-facility-inspection.json)
+  - Daily Dust Logs (20-daily-dust-logs.json)
+- **Compliance Agency Fields Added:** All 11 templates missing agency field fixed
+  - Internal: 01, 02, 06, 09
+  - OSHA: 03, 04, 05, 08
+  - ACI: 07
+  - EPA: 10
+  - Nevada DEP / Clark County: 11
+- **Evidence:** Template validation passing, tests passing in CI

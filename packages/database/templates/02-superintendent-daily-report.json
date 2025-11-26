@@ -3,7 +3,11 @@
   "description": "Comprehensive superintendent daily report for project management - tracks schedule, progress, issues, inspections, RFIs, and change orders",
   "category": "DAILY_LOG",
   "version": "1.0.0",
-  "compliance": null,
+  "compliance": {
+    "regulation": "Construction Project Management Best Practices",
+    "agency": "Internal",
+    "requiredFields": ["date", "project_name", "superintendent_name", "daily_progress"]
+  },
   "schema": {
     "sections": [
       {

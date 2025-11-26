@@ -1,0 +1,1140 @@
+{
+  "name": "NDOT SWPPP",
+  "description": "Nevada Department of Transportation Stormwater Pollution Prevention Plan per NDOT Form 018-002SWPPP, NDOT Construction Site BMPs Manual (Feb 2025), and NDEP NVR100000 permit requirements. Highway construction-specific SWPPP covering route information, traffic impacts, ROW considerations, and NDOT-specific BMP requirements.",
+  "category": "COMPLIANCE",
+  "version": "1.0.0",
+  "compliance": {
+    "regulation": "NDOT SWPPP Form 018-002, NDOT Construction Site BMPs Manual (Feb 2025), Nevada NVR100000, NDOT MS4 Permit NV0023329, EPA CGP 2022",
+    "requiredFields": [
+      "project_name",
+      "ndot_project_number",
+      "route_number",
+      "permit_number",
+      "wpcm_name",
+      "contractor_name",
+      "total_disturbed_area",
+      "receiving_water",
+      "erosion_control_plan",
+      "sediment_control_plan",
+      "inspection_frequency",
+      "swppp_certification",
+      "wpcm_signature"
+    ],
+    "agency": "Nevada DOT Environmental Division"
+  },
+  "schema": {
+    "sections": [
+      {
+        "id": "ndot_project_information",
+        "title": "NDOT Project Information",
+        "description": "Highway project identification per NDOT Form 018-002SWPPP",
+        "order": 1,
+        "fields": [
+          {
+            "id": "project_name",
+            "type": "text",
+            "label": "Project Name",
+            "required": true,
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "ndot_project_number",
+            "type": "text",
+            "label": "NDOT Project Number",
+            "required": true,
+            "placeholder": "EA XXXX",
+            "helpText": "NDOT project/contract number",
+            "validation": { "maxLength": 50 }
+          },
+          {
+            "id": "contract_number",
+            "type": "text",
+            "label": "Contract Number",
+            "required": false,
+            "validation": { "maxLength": 50 }
+          },
+          {
+            "id": "route_number",
+            "type": "text",
+            "label": "Route Number",
+            "required": true,
+            "placeholder": "SR-XXX, US-XX, I-XX",
+            "helpText": "State Route, US Route, or Interstate designation",
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "route_type",
+            "type": "select",
+            "label": "Route Type",
+            "required": true,
+            "options": [
+              { "value": "interstate", "label": "Interstate" },
+              { "value": "us_route", "label": "US Route" },
+              { "value": "state_route", "label": "State Route" },
+              { "value": "county_road", "label": "County Road" },
+              { "value": "local_road", "label": "Local Road" }
+            ]
+          },
+          {
+            "id": "begin_mile_post",
+            "type": "number",
+            "label": "Begin Mile Post",
+            "required": true,
+            "validation": { "min": 0, "max": 999 }
+          },
+          {
+            "id": "end_mile_post",
+            "type": "number",
+            "label": "End Mile Post",
+            "required": true,
+            "validation": { "min": 0, "max": 999 }
+          },
+          {
+            "id": "permit_number",
+            "type": "text",
+            "label": "NDEP Permit Number",
+            "required": true,
+            "placeholder": "NVR10XXXX",
+            "helpText": "Nevada Construction Stormwater General Permit tracking number",
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "district",
+            "type": "select",
+            "label": "NDOT District",
+            "required": true,
+            "options": [
+              { "value": "district_1", "label": "District 1 - Las Vegas" },
+              { "value": "district_2", "label": "District 2 - Reno" },
+              { "value": "district_3", "label": "District 3 - Elko" }
+            ]
+          },
+          {
+            "id": "county",
+            "type": "select",
+            "label": "County",
+            "required": true,
+            "options": [
+              { "value": "carson_city", "label": "Carson City" },
+              { "value": "churchill", "label": "Churchill" },
+              { "value": "clark", "label": "Clark" },
+              { "value": "douglas", "label": "Douglas" },
+              { "value": "elko", "label": "Elko" },
+              { "value": "esmeralda", "label": "Esmeralda" },
+              { "value": "eureka", "label": "Eureka" },
+              { "value": "humboldt", "label": "Humboldt" },
+              { "value": "lander", "label": "Lander" },
+              { "value": "lincoln", "label": "Lincoln" },
+              { "value": "lyon", "label": "Lyon" },
+              { "value": "mineral", "label": "Mineral" },
+              { "value": "nye", "label": "Nye" },
+              { "value": "pershing", "label": "Pershing" },
+              { "value": "storey", "label": "Storey" },
+              { "value": "washoe", "label": "Washoe" },
+              { "value": "white_pine", "label": "White Pine" }
+            ]
+          },
+          {
+            "id": "latitude",
+            "type": "number",
+            "label": "Project Centroid Latitude",
+            "required": true,
+            "validation": { "min": 35, "max": 42 }
+          },
+          {
+            "id": "longitude",
+            "type": "number",
+            "label": "Project Centroid Longitude",
+            "required": true,
+            "validation": { "min": -120, "max": -114 }
+          },
+          {
+            "id": "total_disturbed_area",
+            "type": "number",
+            "label": "Total Disturbed Area (acres)",
+            "required": true,
+            "helpText": "Land area to be disturbed during construction",
+            "validation": { "min": 0.01, "max": 5000 }
+          },
+          {
+            "id": "project_start_date",
+            "type": "date",
+            "label": "Project Start Date",
+            "required": true
+          },
+          {
+            "id": "estimated_completion_date",
+            "type": "date",
+            "label": "Estimated Completion Date",
+            "required": true
+          },
+          {
+            "id": "swppp_preparation_date",
+            "type": "date",
+            "label": "SWPPP Preparation Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}"
+          }
+        ]
+      },
+      {
+        "id": "contractor_wpcm_information",
+        "title": "Contractor and WPCM Information",
+        "description": "Contractor and Water Pollution Control Manager per NDOT requirements",
+        "order": 2,
+        "fields": [
+          {
+            "id": "contractor_name",
+            "type": "text",
+            "label": "Contractor Name",
+            "required": true,
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "contractor_address",
+            "type": "textarea",
+            "label": "Contractor Address",
+            "required": true,
+            "validation": { "maxLength": 300 }
+          },
+          {
+            "id": "contractor_phone",
+            "type": "tel",
+            "label": "Contractor Phone",
+            "required": true,
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "contractor_email",
+            "type": "email",
+            "label": "Contractor Email",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "wpcm_name",
+            "type": "text",
+            "label": "Water Pollution Control Manager (WPCM) Name",
+            "required": true,
+            "helpText": "Person responsible for SWPPP implementation per NDOT requirements",
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "wpcm_title",
+            "type": "text",
+            "label": "WPCM Title",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "wpcm_phone",
+            "type": "tel",
+            "label": "WPCM Phone",
+            "required": true,
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "wpcm_email",
+            "type": "email",
+            "label": "WPCM Email",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "wpcm_training_completed",
+            "type": "checkbox",
+            "label": "WPCM Training Completed",
+            "required": true,
+            "helpText": "Preventing Storm Water Pollution from Construction Activities training"
+          },
+          {
+            "id": "wpcm_training_date",
+            "type": "date",
+            "label": "WPCM Training Date",
+            "required": false,
+            "conditionalDisplay": {
+              "field": "wpcm_training_completed",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "wpcm_certification_number",
+            "type": "text",
+            "label": "WPCM Certification Number",
+            "required": false,
+            "validation": { "maxLength": 50 }
+          },
+          {
+            "id": "backup_wpcm_name",
+            "type": "text",
+            "label": "Backup WPCM Name",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "backup_wpcm_phone",
+            "type": "tel",
+            "label": "Backup WPCM Phone",
+            "required": false,
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "ndot_resident_engineer",
+            "type": "text",
+            "label": "NDOT Resident Engineer",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "ndot_re_phone",
+            "type": "tel",
+            "label": "NDOT RE Phone",
+            "required": false,
+            "validation": { "maxLength": 20 }
+          }
+        ]
+      },
+      {
+        "id": "project_description",
+        "title": "Project Description",
+        "description": "Nature of highway construction activities",
+        "order": 3,
+        "fields": [
+          {
+            "id": "construction_type",
+            "type": "select",
+            "label": "Construction Type",
+            "required": true,
+            "options": [
+              { "value": "new_construction", "label": "New Construction" },
+              { "value": "reconstruction", "label": "Reconstruction" },
+              { "value": "widening", "label": "Widening" },
+              { "value": "bridge_work", "label": "Bridge Work" },
+              { "value": "drainage_improvement", "label": "Drainage Improvement" },
+              { "value": "pavement_preservation", "label": "Pavement Preservation" },
+              { "value": "safety_improvement", "label": "Safety Improvement" },
+              { "value": "utility_relocation", "label": "Utility Relocation" },
+              { "value": "intersection_improvement", "label": "Intersection Improvement" },
+              { "value": "maintenance", "label": "Maintenance" }
+            ]
+          },
+          {
+            "id": "project_scope",
+            "type": "textarea",
+            "label": "Project Scope Description",
+            "required": true,
+            "helpText": "Detailed description of highway construction activities",
+            "validation": { "maxLength": 2000 }
+          },
+          {
+            "id": "construction_sequence",
+            "type": "textarea",
+            "label": "Construction Sequence",
+            "required": true,
+            "helpText": "Major phases and sequence of construction activities",
+            "validation": { "maxLength": 2000 }
+          },
+          {
+            "id": "soil_types",
+            "type": "textarea",
+            "label": "Soil Types",
+            "required": true,
+            "helpText": "Soil types and erodibility characteristics",
+            "validation": { "maxLength": 1000 }
+          },
+          {
+            "id": "existing_drainage",
+            "type": "textarea",
+            "label": "Existing Drainage Features",
+            "required": true,
+            "helpText": "Culverts, ditches, channels, storm drains within project limits",
+            "validation": { "maxLength": 1000 }
+          },
+          {
+            "id": "receiving_water",
+            "type": "text",
+            "label": "Receiving Water Body",
+            "required": true,
+            "helpText": "Name of water body receiving stormwater discharge",
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "impaired_water",
+            "type": "checkbox",
+            "label": "Discharge to 303(d) Impaired Waters",
+            "required": false
+          },
+          {
+            "id": "impairment_pollutant",
+            "type": "text",
+            "label": "Impairment Pollutant(s)",
+            "required": false,
+            "validation": { "maxLength": 200 },
+            "conditionalDisplay": {
+              "field": "impaired_water",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "tmdl_area",
+            "type": "checkbox",
+            "label": "Within TMDL Watershed",
+            "required": false
+          },
+          {
+            "id": "endangered_species",
+            "type": "checkbox",
+            "label": "Endangered Species Present",
+            "required": false
+          },
+          {
+            "id": "cultural_resources",
+            "type": "checkbox",
+            "label": "Cultural/Historic Resources Present",
+            "required": false
+          }
+        ]
+      },
+      {
+        "id": "erosion_control_plan",
+        "title": "Erosion Control Plan",
+        "description": "Erosion control BMPs per NDOT Construction Site BMPs Manual",
+        "order": 4,
+        "fields": [
+          {
+            "id": "erosion_control_plan",
+            "type": "textarea",
+            "label": "Erosion Control Strategy",
+            "required": true,
+            "helpText": "Overall erosion prevention approach per NDOT BMPs Manual",
+            "validation": { "maxLength": 2000 }
+          },
+          {
+            "id": "temporary_seeding",
+            "type": "checkbox",
+            "label": "Temporary Seeding",
+            "required": false
+          },
+          {
+            "id": "permanent_seeding",
+            "type": "checkbox",
+            "label": "Permanent Seeding/Revegetation",
+            "required": false
+          },
+          {
+            "id": "mulching",
+            "type": "checkbox",
+            "label": "Mulching",
+            "required": false
+          },
+          {
+            "id": "erosion_blankets",
+            "type": "checkbox",
+            "label": "Erosion Control Blankets/Mats",
+            "required": false
+          },
+          {
+            "id": "hydromulch",
+            "type": "checkbox",
+            "label": "Hydromulch/Hydraulic Mulch",
+            "required": false
+          },
+          {
+            "id": "tackifier",
+            "type": "checkbox",
+            "label": "Soil Tackifier",
+            "required": false
+          },
+          {
+            "id": "slope_drains",
+            "type": "checkbox",
+            "label": "Slope Drains/Interceptors",
+            "required": false
+          },
+          {
+            "id": "check_dams",
+            "type": "checkbox",
+            "label": "Check Dams in Channels",
+            "required": false
+          },
+          {
+            "id": "dust_control",
+            "type": "checkbox",
+            "label": "Dust Control Measures",
+            "required": false
+          },
+          {
+            "id": "stabilized_entrance",
+            "type": "checkbox",
+            "label": "Stabilized Construction Entrance/Exit",
+            "required": false
+          },
+          {
+            "id": "grading_phasing",
+            "type": "checkbox",
+            "label": "Phased Grading Plan",
+            "required": false
+          },
+          {
+            "id": "row_preservation",
+            "type": "checkbox",
+            "label": "ROW Vegetation Preservation",
+            "required": false
+          },
+          {
+            "id": "erosion_bmps_list",
+            "type": "repeater",
+            "label": "Erosion Control BMPs Detail",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 30,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "bmp_id",
+                  "type": "text",
+                  "label": "BMP ID/Reference",
+                  "required": true,
+                  "validation": { "maxLength": 20 }
+                },
+                {
+                  "id": "bmp_type",
+                  "type": "select",
+                  "label": "BMP Type",
+                  "required": true,
+                  "options": [
+                    { "value": "EC-1", "label": "EC-1 Scheduling" },
+                    { "value": "EC-2", "label": "EC-2 Preservation of Existing Vegetation" },
+                    { "value": "EC-3", "label": "EC-3 Hydraulic Mulch" },
+                    { "value": "EC-4", "label": "EC-4 Hydroseeding" },
+                    { "value": "EC-5", "label": "EC-5 Soil Binders" },
+                    { "value": "EC-6", "label": "EC-6 Straw Mulch" },
+                    { "value": "EC-7", "label": "EC-7 Geotextiles and Mats" },
+                    { "value": "EC-8", "label": "EC-8 Wood Mulch" },
+                    { "value": "EC-9", "label": "EC-9 Earth Dikes and Drainage Swales" },
+                    { "value": "EC-10", "label": "EC-10 Velocity Dissipation Devices" },
+                    { "value": "EC-11", "label": "EC-11 Slope Drains" },
+                    { "value": "EC-12", "label": "EC-12 Streambank Stabilization" },
+                    { "value": "other", "label": "Other" }
+                  ]
+                },
+                {
+                  "id": "location",
+                  "type": "text",
+                  "label": "Location (Station/Description)",
+                  "required": true,
+                  "validation": { "maxLength": 200 }
+                },
+                {
+                  "id": "installation_date",
+                  "type": "date",
+                  "label": "Planned Installation Date",
+                  "required": false
+                },
+                {
+                  "id": "maintenance_schedule",
+                  "type": "textarea",
+                  "label": "Maintenance Requirements",
+                  "required": true,
+                  "validation": { "maxLength": 500 }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "sediment_control_plan",
+        "title": "Sediment Control Plan",
+        "description": "Sediment control BMPs per NDOT Construction Site BMPs Manual",
+        "order": 5,
+        "fields": [
+          {
+            "id": "sediment_control_plan",
+            "type": "textarea",
+            "label": "Sediment Control Strategy",
+            "required": true,
+            "helpText": "Overall sediment control approach per NDOT BMPs Manual",
+            "validation": { "maxLength": 2000 }
+          },
+          {
+            "id": "silt_fence",
+            "type": "checkbox",
+            "label": "Silt Fence",
+            "required": false
+          },
+          {
+            "id": "sediment_basin",
+            "type": "checkbox",
+            "label": "Sediment Basin/Trap",
+            "required": false
+          },
+          {
+            "id": "fiber_rolls",
+            "type": "checkbox",
+            "label": "Fiber Rolls/Wattles",
+            "required": false
+          },
+          {
+            "id": "inlet_protection",
+            "type": "checkbox",
+            "label": "Storm Drain Inlet Protection",
+            "required": false
+          },
+          {
+            "id": "gravel_bag_berm",
+            "type": "checkbox",
+            "label": "Gravel Bag Berms",
+            "required": false
+          },
+          {
+            "id": "dewatering_operations",
+            "type": "checkbox",
+            "label": "Dewatering Controls",
+            "required": false
+          },
+          {
+            "id": "temporary_ditches",
+            "type": "checkbox",
+            "label": "Temporary Drainage Ditches",
+            "required": false
+          },
+          {
+            "id": "wheel_wash",
+            "type": "checkbox",
+            "label": "Wheel Wash/Tire Cleaning",
+            "required": false
+          },
+          {
+            "id": "street_sweeping",
+            "type": "checkbox",
+            "label": "Street Sweeping",
+            "required": false
+          },
+          {
+            "id": "sediment_bmps_list",
+            "type": "repeater",
+            "label": "Sediment Control BMPs Detail",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 30,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "bmp_id",
+                  "type": "text",
+                  "label": "BMP ID/Reference",
+                  "required": true,
+                  "validation": { "maxLength": 20 }
+                },
+                {
+                  "id": "bmp_type",
+                  "type": "select",
+                  "label": "BMP Type",
+                  "required": true,
+                  "options": [
+                    { "value": "SE-1", "label": "SE-1 Silt Fence" },
+                    { "value": "SE-2", "label": "SE-2 Sediment Basin" },
+                    { "value": "SE-3", "label": "SE-3 Sediment Trap" },
+                    { "value": "SE-4", "label": "SE-4 Check Dams" },
+                    { "value": "SE-5", "label": "SE-5 Fiber Rolls" },
+                    { "value": "SE-6", "label": "SE-6 Gravel Bag Berm" },
+                    { "value": "SE-7", "label": "SE-7 Street Sweeping and Vacuuming" },
+                    { "value": "SE-8", "label": "SE-8 Sandbag Barrier" },
+                    { "value": "SE-9", "label": "SE-9 Straw Bale Barrier" },
+                    { "value": "SE-10", "label": "SE-10 Storm Drain Inlet Protection" },
+                    { "value": "other", "label": "Other" }
+                  ]
+                },
+                {
+                  "id": "location",
+                  "type": "text",
+                  "label": "Location (Station/Description)",
+                  "required": true,
+                  "validation": { "maxLength": 200 }
+                },
+                {
+                  "id": "sizing",
+                  "type": "text",
+                  "label": "Size/Dimensions",
+                  "required": false,
+                  "validation": { "maxLength": 100 }
+                },
+                {
+                  "id": "installation_date",
+                  "type": "date",
+                  "label": "Planned Installation Date",
+                  "required": false
+                },
+                {
+                  "id": "maintenance_schedule",
+                  "type": "textarea",
+                  "label": "Maintenance Requirements",
+                  "required": true,
+                  "validation": { "maxLength": 500 }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "good_housekeeping_controls",
+        "title": "Good Housekeeping and Materials Management",
+        "description": "Pollution prevention controls per NDOT BMPs Manual",
+        "order": 6,
+        "fields": [
+          {
+            "id": "waste_management",
+            "type": "checkbox",
+            "label": "Solid Waste Management Plan",
+            "required": false
+          },
+          {
+            "id": "concrete_washout",
+            "type": "checkbox",
+            "label": "Concrete Washout Facilities",
+            "required": false
+          },
+          {
+            "id": "concrete_washout_location",
+            "type": "text",
+            "label": "Concrete Washout Location",
+            "required": false,
+            "validation": { "maxLength": 200 },
+            "conditionalDisplay": {
+              "field": "concrete_washout",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "material_storage",
+            "type": "checkbox",
+            "label": "Material Storage Controls",
+            "required": false
+          },
+          {
+            "id": "stockpile_management",
+            "type": "checkbox",
+            "label": "Stockpile Management",
+            "required": false
+          },
+          {
+            "id": "hazmat_management",
+            "type": "checkbox",
+            "label": "Hazardous Materials Management",
+            "required": false
+          },
+          {
+            "id": "spill_prevention",
+            "type": "checkbox",
+            "label": "Spill Prevention and Control Plan",
+            "required": false
+          },
+          {
+            "id": "spill_kit_locations",
+            "type": "textarea",
+            "label": "Spill Kit Locations",
+            "required": false,
+            "validation": { "maxLength": 500 },
+            "conditionalDisplay": {
+              "field": "spill_prevention",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "vehicle_fueling_area",
+            "type": "checkbox",
+            "label": "Designated Vehicle Fueling Area",
+            "required": false
+          },
+          {
+            "id": "vehicle_maintenance_controls",
+            "type": "checkbox",
+            "label": "Vehicle Maintenance Controls",
+            "required": false
+          },
+          {
+            "id": "paint_and_coating_controls",
+            "type": "checkbox",
+            "label": "Painting and Coating Controls",
+            "required": false
+          },
+          {
+            "id": "sanitary_facilities",
+            "type": "checkbox",
+            "label": "Sanitary/Septic Waste Management",
+            "required": false
+          },
+          {
+            "id": "non_stormwater_discharges",
+            "type": "textarea",
+            "label": "Allowable Non-Stormwater Discharges",
+            "required": false,
+            "helpText": "Dust control water, fire hydrant flushing, etc.",
+            "validation": { "maxLength": 1000 }
+          }
+        ]
+      },
+      {
+        "id": "traffic_control_impacts",
+        "title": "Traffic Control and ROW Considerations",
+        "description": "Highway-specific considerations for traffic and right-of-way",
+        "order": 7,
+        "fields": [
+          {
+            "id": "traffic_control_required",
+            "type": "checkbox",
+            "label": "Traffic Control Required",
+            "required": false
+          },
+          {
+            "id": "traffic_control_plan",
+            "type": "textarea",
+            "label": "Traffic Control Plan Summary",
+            "required": false,
+            "validation": { "maxLength": 1500 },
+            "conditionalDisplay": {
+              "field": "traffic_control_required",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "lane_closures",
+            "type": "checkbox",
+            "label": "Lane Closures Anticipated",
+            "required": false
+          },
+          {
+            "id": "detours",
+            "type": "checkbox",
+            "label": "Detours Required",
+            "required": false
+          },
+          {
+            "id": "staging_areas",
+            "type": "repeater",
+            "label": "Staging and Stockpile Areas",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 10,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "area_id",
+                  "type": "text",
+                  "label": "Area ID",
+                  "required": true,
+                  "validation": { "maxLength": 20 }
+                },
+                {
+                  "id": "area_location",
+                  "type": "text",
+                  "label": "Location (Station/Description)",
+                  "required": true,
+                  "validation": { "maxLength": 200 }
+                },
+                {
+                  "id": "area_size",
+                  "type": "number",
+                  "label": "Size (acres)",
+                  "required": false,
+                  "validation": { "min": 0, "max": 100 }
+                },
+                {
+                  "id": "area_bmps",
+                  "type": "textarea",
+                  "label": "BMPs for this Area",
+                  "required": true,
+                  "validation": { "maxLength": 500 }
+                }
+              ]
+            }
+          },
+          {
+            "id": "row_work",
+            "type": "checkbox",
+            "label": "Work Within Existing ROW",
+            "required": false
+          },
+          {
+            "id": "temporary_easements",
+            "type": "checkbox",
+            "label": "Temporary Easements Required",
+            "required": false
+          },
+          {
+            "id": "utility_conflicts",
+            "type": "checkbox",
+            "label": "Utility Relocations Required",
+            "required": false
+          },
+          {
+            "id": "utility_coordination",
+            "type": "textarea",
+            "label": "Utility Coordination Notes",
+            "required": false,
+            "validation": { "maxLength": 1000 },
+            "conditionalDisplay": {
+              "field": "utility_conflicts",
+              "operator": "equals",
+              "value": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "stabilization_requirements",
+        "title": "Stabilization Requirements",
+        "description": "Temporary and final stabilization per NDOT and EPA CGP",
+        "order": 8,
+        "fields": [
+          {
+            "id": "stabilization_deadline",
+            "type": "select",
+            "label": "Stabilization Initiation Deadline",
+            "required": true,
+            "options": [
+              { "value": "14_days", "label": "14 Days (Standard)" },
+              { "value": "7_days", "label": "7 Days (Impaired Waters/TMDL)" },
+              { "value": "immediate", "label": "Immediate (Special Conditions)" }
+            ]
+          },
+          {
+            "id": "temporary_stabilization",
+            "type": "textarea",
+            "label": "Temporary Stabilization Measures",
+            "required": true,
+            "helpText": "Measures for areas inactive 14+ days",
+            "validation": { "maxLength": 1000 }
+          },
+          {
+            "id": "permanent_stabilization",
+            "type": "textarea",
+            "label": "Permanent Stabilization Measures",
+            "required": true,
+            "helpText": "Final stabilization and revegetation plan",
+            "validation": { "maxLength": 1000 }
+          },
+          {
+            "id": "vegetation_establishment",
+            "type": "textarea",
+            "label": "Vegetation Establishment Criteria",
+            "required": true,
+            "helpText": "Criteria for determining successful revegetation",
+            "validation": { "maxLength": 500 }
+          },
+          {
+            "id": "final_stabilization_definition",
+            "type": "textarea",
+            "label": "Final Stabilization Definition",
+            "required": true,
+            "helpText": "When final stabilization is achieved for permit termination",
+            "validation": { "maxLength": 1000 }
+          }
+        ]
+      },
+      {
+        "id": "inspection_procedures",
+        "title": "Inspection and Maintenance Procedures",
+        "description": "Inspection requirements per NDOT Form 018-001WPCM and EPA CGP",
+        "order": 9,
+        "fields": [
+          {
+            "id": "inspection_frequency",
+            "type": "select",
+            "label": "Routine Inspection Frequency",
+            "required": true,
+            "options": [
+              { "value": "7_day", "label": "Every 7 Days" },
+              { "value": "14_day", "label": "Every 14 Days (Arid/Semi-Arid Qualifying)" }
+            ]
+          },
+          {
+            "id": "rain_event_inspection",
+            "type": "checkbox",
+            "label": "Post-Storm Inspections Required",
+            "required": true,
+            "helpText": "Within 24 hours of 0.25 inch or greater storm event"
+          },
+          {
+            "id": "rain_threshold",
+            "type": "number",
+            "label": "Rain Event Threshold (inches)",
+            "required": true,
+            "defaultValue": 0.25,
+            "helpText": "EPA CGP requires inspection after 0.25 inch storm",
+            "validation": { "min": 0.25, "max": 1.0 }
+          },
+          {
+            "id": "inspection_form",
+            "type": "select",
+            "label": "Inspection Form Used",
+            "required": true,
+            "options": [
+              { "value": "ndot_018_001", "label": "NDOT Form 018-001WPCM" },
+              { "value": "custom", "label": "Custom (Approved by NDOT)" }
+            ]
+          },
+          {
+            "id": "inspection_areas",
+            "type": "textarea",
+            "label": "Areas to be Inspected",
+            "required": true,
+            "helpText": "All disturbed areas, BMPs, discharge points",
+            "validation": { "maxLength": 1500 }
+          },
+          {
+            "id": "corrective_action_deadline",
+            "type": "select",
+            "label": "Corrective Action Deadline",
+            "required": true,
+            "options": [
+              { "value": "24_hours", "label": "24 Hours (Safety/Environmental Risk)" },
+              { "value": "7_days", "label": "7 Days (Standard)" }
+            ]
+          },
+          {
+            "id": "record_retention",
+            "type": "select",
+            "label": "Record Retention Period",
+            "required": true,
+            "options": [
+              { "value": "3_years", "label": "3 Years After NOT" },
+              { "value": "project_duration", "label": "Project Duration Plus 3 Years" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "swppp_amendments",
+        "title": "SWPPP Amendment Log",
+        "description": "Track all modifications to the SWPPP",
+        "order": 10,
+        "fields": [
+          {
+            "id": "amendments",
+            "type": "repeater",
+            "label": "SWPPP Amendments",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 50,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "amendment_date",
+                  "type": "date",
+                  "label": "Amendment Date",
+                  "required": true
+                },
+                {
+                  "id": "amendment_section",
+                  "type": "text",
+                  "label": "Section Modified",
+                  "required": true,
+                  "validation": { "maxLength": 100 }
+                },
+                {
+                  "id": "amendment_description",
+                  "type": "textarea",
+                  "label": "Description of Change",
+                  "required": true,
+                  "validation": { "maxLength": 1000 }
+                },
+                {
+                  "id": "amendment_reason",
+                  "type": "textarea",
+                  "label": "Reason for Change",
+                  "required": true,
+                  "validation": { "maxLength": 500 }
+                },
+                {
+                  "id": "amended_by",
+                  "type": "text",
+                  "label": "Amended By",
+                  "required": true,
+                  "validation": { "maxLength": 100 }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "certification",
+        "title": "SWPPP Certification",
+        "description": "Certification per NDOT and EPA CGP requirements",
+        "order": 11,
+        "fields": [
+          {
+            "id": "swppp_certification",
+            "type": "checkbox",
+            "label": "I certify under penalty of law that this document and all attachments were prepared under my direction or supervision in accordance with a system designed to assure that qualified personnel properly gathered and evaluated the information submitted. Based on my inquiry of the person or persons who manage the system, or those persons directly responsible for gathering the information, the information submitted is, to the best of my knowledge and belief, true, accurate, and complete. I am aware that there are significant penalties for submitting false information, including the possibility of fine and imprisonment for knowing violations.",
+            "required": true
+          },
+          {
+            "id": "wpcm_signature",
+            "type": "signature",
+            "label": "WPCM Signature",
+            "required": true,
+            "captureTimestamp": true
+          },
+          {
+            "id": "wpcm_name_printed",
+            "type": "text",
+            "label": "WPCM Name (Printed)",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "wpcm_title_cert",
+            "type": "text",
+            "label": "WPCM Title",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "certification_date",
+            "type": "date",
+            "label": "Certification Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}"
+          },
+          {
+            "id": "contractor_signature",
+            "type": "signature",
+            "label": "Contractor Representative Signature",
+            "required": false,
+            "captureTimestamp": true
+          },
+          {
+            "id": "contractor_name_printed",
+            "type": "text",
+            "label": "Contractor Representative Name",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "60-90 minutes",
+    "fieldOptimization": "Highway construction plan document - recommend desktop completion with mobile review",
+    "industryStandard": "NDOT Form 018-002SWPPP, NDOT Construction Site BMPs Manual (Feb 2025), NVR100000, EPA CGP 2022",
+    "targetRole": "Water Pollution Control Manager (WPCM), Contractor, Environmental Compliance",
+    "requiredAttachments": [
+      "Site Map",
+      "BMP Location Map",
+      "Erosion Control Plan Sheets",
+      "Traffic Control Plan",
+      "NDOT Form 018-001WPCM"
+    ]
+  }
+}

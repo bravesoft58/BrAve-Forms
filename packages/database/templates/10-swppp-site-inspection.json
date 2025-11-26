@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "compliance": {
     "regulation": "EPA CGP 2022 Section 4.4 - Inspection Requirements",
+    "agency": "EPA",
     "requiredFields": [
       "inspection_type",
       "rain_amount",
@@ -32,12 +33,54 @@
         "title": "Inspection Information",
         "order": 1,
         "fields": [
-          {"id": "inspection_type", "type": "select", "label": "Inspection Type", "required": true, "options": [{"value": "7_day_routine", "label": "7-Day Routine Inspection"}, {"value": "post_storm", "label": "Post-Storm Inspection (≥0.25\" rain)"}], "helpText": "EPA CGP requires BOTH types"},
-          {"id": "inspection_date", "type": "date", "label": "Inspection Date", "required": true, "defaultValue": "{{currentDate}}"},
-          {"id": "inspection_time", "type": "time", "label": "Inspection Time", "required": true, "defaultValue": "{{currentTime}}"},
-          {"id": "inspector_name", "type": "text", "label": "Inspector Name", "required": true, "defaultValue": "{{currentUser}}"},
-          {"id": "inspector_qualifications", "type": "text", "label": "Inspector Qualifications", "placeholder": "e.g., CPESC, Qualified SWPPP Practitioner", "required": false, "helpText": "EPA requires qualified personnel"},
-          {"id": "project_name", "type": "text", "label": "Project Name", "required": true, "defaultValue": "{{projectName}}", "readonly": true}
+          {
+            "id": "inspection_type",
+            "type": "select",
+            "label": "Inspection Type",
+            "required": true,
+            "options": [
+              { "value": "7_day_routine", "label": "7-Day Routine Inspection" },
+              { "value": "post_storm", "label": "Post-Storm Inspection (≥0.25\" rain)" }
+            ],
+            "helpText": "EPA CGP requires BOTH types"
+          },
+          {
+            "id": "inspection_date",
+            "type": "date",
+            "label": "Inspection Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}"
+          },
+          {
+            "id": "inspection_time",
+            "type": "time",
+            "label": "Inspection Time",
+            "required": true,
+            "defaultValue": "{{currentTime}}"
+          },
+          {
+            "id": "inspector_name",
+            "type": "text",
+            "label": "Inspector Name",
+            "required": true,
+            "defaultValue": "{{currentUser}}"
+          },
+          {
+            "id": "inspector_qualifications",
+            "type": "text",
+            "label": "Inspector Qualifications",
+            "placeholder": "e.g., CPESC, Qualified SWPPP Practitioner",
+            "required": false,
+            "helpText": "EPA requires qualified personnel"
+          },
+          {
+            "id": "project_name",
+            "type": "text",
+            "label": "Project Name",
+            "required": true,
+            "defaultValue": "{{projectName}}",
+            "readonly": true
+          }
         ]
       },
       {
@@ -45,11 +88,66 @@
         "title": "Storm Event Information (Post-Storm Only)",
         "order": 2,
         "fields": [
-          {"id": "storm_date", "type": "date", "label": "Storm Date", "required": true, "conditionalDisplay": {"field": "inspection_type", "operator": "equals", "value": "post_storm"}},
-          {"id": "storm_end_time", "type": "time", "label": "Storm End Time", "required": false, "conditionalDisplay": {"field": "inspection_type", "operator": "equals", "value": "post_storm"}},
-          {"id": "rain_amount", "type": "number", "label": "Total Rainfall (inches)", "required": true, "validation": {"min": 0.25, "max": 20, "precision": 0.01}, "conditionalDisplay": {"field": "inspection_type", "operator": "equals", "value": "post_storm"}, "helpText": "EXACT 0.25 inches triggers inspection per EPA CGP 2022 Section 4.4"},
-          {"id": "accumulation_period", "type": "text", "label": "Accumulation Period", "placeholder": "e.g., Single storm or multiple storms within 24 hours", "required": false, "conditionalDisplay": {"field": "inspection_type", "operator": "equals", "value": "post_storm"}, "helpText": "Multiple storms totaling ≥0.25\" in 24-hour window = one inspection"},
-          {"id": "inspection_deadline", "type": "datetime-local", "label": "Inspection Deadline (24 hours working hours)", "required": false, "conditionalDisplay": {"field": "inspection_type", "operator": "equals", "value": "post_storm"}, "helpText": "If storm Friday, inspection due Monday next work day"}
+          {
+            "id": "storm_date",
+            "type": "date",
+            "label": "Storm Date",
+            "required": true,
+            "conditionalDisplay": {
+              "field": "inspection_type",
+              "operator": "equals",
+              "value": "post_storm"
+            }
+          },
+          {
+            "id": "storm_end_time",
+            "type": "time",
+            "label": "Storm End Time",
+            "required": false,
+            "conditionalDisplay": {
+              "field": "inspection_type",
+              "operator": "equals",
+              "value": "post_storm"
+            }
+          },
+          {
+            "id": "rain_amount",
+            "type": "number",
+            "label": "Total Rainfall (inches)",
+            "required": true,
+            "validation": { "min": 0.25, "max": 20, "precision": 0.01 },
+            "conditionalDisplay": {
+              "field": "inspection_type",
+              "operator": "equals",
+              "value": "post_storm"
+            },
+            "helpText": "EXACT 0.25 inches triggers inspection per EPA CGP 2022 Section 4.4"
+          },
+          {
+            "id": "accumulation_period",
+            "type": "text",
+            "label": "Accumulation Period",
+            "placeholder": "e.g., Single storm or multiple storms within 24 hours",
+            "required": false,
+            "conditionalDisplay": {
+              "field": "inspection_type",
+              "operator": "equals",
+              "value": "post_storm"
+            },
+            "helpText": "Multiple storms totaling ≥0.25\" in 24-hour window = one inspection"
+          },
+          {
+            "id": "inspection_deadline",
+            "type": "datetime-local",
+            "label": "Inspection Deadline (24 hours working hours)",
+            "required": false,
+            "conditionalDisplay": {
+              "field": "inspection_type",
+              "operator": "equals",
+              "value": "post_storm"
+            },
+            "helpText": "If storm Friday, inspection due Monday next work day"
+          }
         ]
       },
       {
@@ -57,9 +155,33 @@
         "title": "Current Weather Conditions",
         "order": 3,
         "fields": [
-          {"id": "weather_conditions", "type": "select", "label": "Weather During Inspection", "required": true, "options": [{"value": "clear", "label": "Clear"}, {"value": "cloudy", "label": "Cloudy"}, {"value": "rain", "label": "Raining"}, {"value": "snow", "label": "Snowing"}]},
-          {"id": "temperature", "type": "number", "label": "Temperature (°F)", "required": false, "validation": {"min": -20, "max": 150}},
-          {"id": "recent_precipitation", "type": "textarea", "label": "Recent Precipitation Notes", "placeholder": "Describe recent weather impacts on site...", "required": false, "validation": {"maxLength": 500}}
+          {
+            "id": "weather_conditions",
+            "type": "select",
+            "label": "Weather During Inspection",
+            "required": true,
+            "options": [
+              { "value": "clear", "label": "Clear" },
+              { "value": "cloudy", "label": "Cloudy" },
+              { "value": "rain", "label": "Raining" },
+              { "value": "snow", "label": "Snowing" }
+            ]
+          },
+          {
+            "id": "temperature",
+            "type": "number",
+            "label": "Temperature (°F)",
+            "required": false,
+            "validation": { "min": -20, "max": 150 }
+          },
+          {
+            "id": "recent_precipitation",
+            "type": "textarea",
+            "label": "Recent Precipitation Notes",
+            "placeholder": "Describe recent weather impacts on site...",
+            "required": false,
+            "validation": { "maxLength": 500 }
+          }
         ]
       },
       {
@@ -67,15 +189,109 @@
         "title": "Best Management Practices (BMP) Inspection",
         "order": 4,
         "fields": [
-          {"id": "silt_fences", "type": "select", "label": "Silt Fences", "required": true, "options": [{"value": "good", "label": "Good - Intact, minimal sediment"}, {"value": "fair", "label": "Fair - Needs maintenance"}, {"value": "poor", "label": "Poor - Damaged/ineffective"}, {"value": "na", "label": "N/A"}]},
-          {"id": "silt_fence_notes", "type": "text", "label": "Silt Fence Notes", "required": false, "validation": {"maxLength": 200}, "helpText": "Location and condition details"},
-          {"id": "inlet_protection", "type": "select", "label": "Inlet Protection", "required": true, "options": [{"value": "good", "label": "Good - Clean, functioning"}, {"value": "fair", "label": "Fair - Needs cleaning"}, {"value": "poor", "label": "Poor - Clogged/damaged"}, {"value": "na", "label": "N/A"}]},
-          {"id": "stabilized_entrance", "type": "select", "label": "Stabilized Construction Entrance", "required": true, "options": [{"value": "good", "label": "Good - Clean, functional"}, {"value": "fair", "label": "Fair - Needs rock added"}, {"value": "poor", "label": "Poor - Mud tracking observed"}, {"value": "na", "label": "N/A"}]},
-          {"id": "storm_drain_covers", "type": "select", "label": "Storm Drain Covers/Filters", "required": true, "options": [{"value": "good", "label": "Good - In place, secure"}, {"value": "fair", "label": "Fair - Needs adjustment"}, {"value": "poor", "label": "Poor - Missing/displaced"}, {"value": "na", "label": "N/A"}]},
-          {"id": "sediment_basins", "type": "select", "label": "Sediment Basins/Traps", "required": true, "options": [{"value": "good", "label": "Good - Adequate capacity"}, {"value": "fair", "label": "Fair - Needs cleaning"}, {"value": "poor", "label": "Poor - At capacity, ineffective"}, {"value": "na", "label": "N/A"}]},
-          {"id": "erosion_control_blankets", "type": "select", "label": "Erosion Control Blankets/Mats", "required": true, "options": [{"value": "good", "label": "Good - Secured, intact"}, {"value": "fair", "label": "Fair - Needs re-staking"}, {"value": "poor", "label": "Poor - Torn/displaced"}, {"value": "na", "label": "N/A"}]},
-          {"id": "perimeter_stabilization", "type": "select", "label": "Construction Site Perimeter", "required": true, "options": [{"value": "good", "label": "Good - Stabilized, no erosion"}, {"value": "fair", "label": "Fair - Minor erosion"}, {"value": "poor", "label": "Poor - Active erosion observed"}]},
-          {"id": "stockpile_covers", "type": "select", "label": "Stockpile Covers/Stabilization", "required": true, "options": [{"value": "good", "label": "Good - Covered/stabilized"}, {"value": "fair", "label": "Fair - Partially covered"}, {"value": "poor", "label": "Poor - Uncovered, eroding"}, {"value": "na", "label": "N/A"}]}
+          {
+            "id": "silt_fences",
+            "type": "select",
+            "label": "Silt Fences",
+            "required": true,
+            "options": [
+              { "value": "good", "label": "Good - Intact, minimal sediment" },
+              { "value": "fair", "label": "Fair - Needs maintenance" },
+              { "value": "poor", "label": "Poor - Damaged/ineffective" },
+              { "value": "na", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "silt_fence_notes",
+            "type": "text",
+            "label": "Silt Fence Notes",
+            "required": false,
+            "validation": { "maxLength": 200 },
+            "helpText": "Location and condition details"
+          },
+          {
+            "id": "inlet_protection",
+            "type": "select",
+            "label": "Inlet Protection",
+            "required": true,
+            "options": [
+              { "value": "good", "label": "Good - Clean, functioning" },
+              { "value": "fair", "label": "Fair - Needs cleaning" },
+              { "value": "poor", "label": "Poor - Clogged/damaged" },
+              { "value": "na", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "stabilized_entrance",
+            "type": "select",
+            "label": "Stabilized Construction Entrance",
+            "required": true,
+            "options": [
+              { "value": "good", "label": "Good - Clean, functional" },
+              { "value": "fair", "label": "Fair - Needs rock added" },
+              { "value": "poor", "label": "Poor - Mud tracking observed" },
+              { "value": "na", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "storm_drain_covers",
+            "type": "select",
+            "label": "Storm Drain Covers/Filters",
+            "required": true,
+            "options": [
+              { "value": "good", "label": "Good - In place, secure" },
+              { "value": "fair", "label": "Fair - Needs adjustment" },
+              { "value": "poor", "label": "Poor - Missing/displaced" },
+              { "value": "na", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "sediment_basins",
+            "type": "select",
+            "label": "Sediment Basins/Traps",
+            "required": true,
+            "options": [
+              { "value": "good", "label": "Good - Adequate capacity" },
+              { "value": "fair", "label": "Fair - Needs cleaning" },
+              { "value": "poor", "label": "Poor - At capacity, ineffective" },
+              { "value": "na", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "erosion_control_blankets",
+            "type": "select",
+            "label": "Erosion Control Blankets/Mats",
+            "required": true,
+            "options": [
+              { "value": "good", "label": "Good - Secured, intact" },
+              { "value": "fair", "label": "Fair - Needs re-staking" },
+              { "value": "poor", "label": "Poor - Torn/displaced" },
+              { "value": "na", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "perimeter_stabilization",
+            "type": "select",
+            "label": "Construction Site Perimeter",
+            "required": true,
+            "options": [
+              { "value": "good", "label": "Good - Stabilized, no erosion" },
+              { "value": "fair", "label": "Fair - Minor erosion" },
+              { "value": "poor", "label": "Poor - Active erosion observed" }
+            ]
+          },
+          {
+            "id": "stockpile_covers",
+            "type": "select",
+            "label": "Stockpile Covers/Stabilization",
+            "required": true,
+            "options": [
+              { "value": "good", "label": "Good - Covered/stabilized" },
+              { "value": "fair", "label": "Fair - Partially covered" },
+              { "value": "poor", "label": "Poor - Uncovered, eroding" },
+              { "value": "na", "label": "N/A" }
+            ]
+          }
         ]
       },
       {
@@ -83,11 +299,51 @@
         "title": "Site Conditions",
         "order": 5,
         "fields": [
-          {"id": "discharge_points", "type": "select", "label": "Active Discharge Points", "required": true, "options": [{"value": "clear", "label": "Clear - No visible discharge"}, {"value": "turbid", "label": "Turbid discharge observed"}, {"value": "sediment_laden", "label": "Sediment-laden discharge"}, {"value": "na", "label": "N/A"}]},
-          {"id": "soil_disturbance", "type": "number", "label": "Actively Disturbed Areas (acres)", "required": false, "validation": {"min": 0, "max": 1000, "precision": 0.1}},
-          {"id": "stabilized_areas", "type": "number", "label": "Stabilized Areas (acres)", "required": false, "validation": {"min": 0, "max": 1000, "precision": 0.1}},
-          {"id": "accumulated_sediment", "type": "select", "label": "Accumulated Sediment Off-Site", "required": true, "options": [{"value": "none", "label": "None observed"}, {"value": "minor", "label": "Minor - Clean up scheduled"}, {"value": "major", "label": "Major - Immediate action required"}]},
-          {"id": "site_notes", "type": "textarea", "label": "Site Condition Notes", "placeholder": "Describe overall site conditions, erosion, tracking, etc.", "required": false, "validation": {"maxLength": 1500}}
+          {
+            "id": "discharge_points",
+            "type": "select",
+            "label": "Active Discharge Points",
+            "required": true,
+            "options": [
+              { "value": "clear", "label": "Clear - No visible discharge" },
+              { "value": "turbid", "label": "Turbid discharge observed" },
+              { "value": "sediment_laden", "label": "Sediment-laden discharge" },
+              { "value": "na", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "soil_disturbance",
+            "type": "number",
+            "label": "Actively Disturbed Areas (acres)",
+            "required": false,
+            "validation": { "min": 0, "max": 1000, "precision": 0.1 }
+          },
+          {
+            "id": "stabilized_areas",
+            "type": "number",
+            "label": "Stabilized Areas (acres)",
+            "required": false,
+            "validation": { "min": 0, "max": 1000, "precision": 0.1 }
+          },
+          {
+            "id": "accumulated_sediment",
+            "type": "select",
+            "label": "Accumulated Sediment Off-Site",
+            "required": true,
+            "options": [
+              { "value": "none", "label": "None observed" },
+              { "value": "minor", "label": "Minor - Clean up scheduled" },
+              { "value": "major", "label": "Major - Immediate action required" }
+            ]
+          },
+          {
+            "id": "site_notes",
+            "type": "textarea",
+            "label": "Site Condition Notes",
+            "placeholder": "Describe overall site conditions, erosion, tracking, etc.",
+            "required": false,
+            "validation": { "maxLength": 1500 }
+          }
         ]
       },
       {
@@ -95,8 +351,80 @@
         "title": "Deficiencies & Corrective Actions",
         "order": 6,
         "fields": [
-          {"id": "deficiencies_found", "type": "radio", "label": "Were deficiencies found?", "required": true, "options": [{"value": "yes", "label": "Yes"}, {"value": "no", "label": "No"}], "defaultValue": "no"},
-          {"id": "deficiency_list", "type": "repeater", "label": "Deficiencies", "required": true, "minItems": 1, "maxItems": 30, "conditionalDisplay": {"field": "deficiencies_found", "operator": "equals", "value": "yes"}, "itemSchema": {"fields": [{"id": "deficiency", "type": "textarea", "label": "Deficiency Description", "required": true, "validation": {"maxLength": 500}}, {"id": "location", "type": "text", "label": "Location", "required": false, "validation": {"maxLength": 150}}, {"id": "severity", "type": "select", "label": "Severity", "required": true, "options": [{"value": "immediate", "label": "Immediate - Active discharge/violation"}, {"value": "high", "label": "High - Fix today"}, {"value": "medium", "label": "Medium - Fix within 7 days"}, {"value": "low", "label": "Low - Monitor"}]}, {"id": "corrective_action", "type": "text", "label": "Required Corrective Action", "required": true, "validation": {"maxLength": 300}}, {"id": "responsible_person", "type": "text", "label": "Responsible Person", "required": true, "validation": {"maxLength": 100}}, {"id": "completion_deadline", "type": "date", "label": "Completion Deadline", "required": true}]}}
+          {
+            "id": "deficiencies_found",
+            "type": "radio",
+            "label": "Were deficiencies found?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no"
+          },
+          {
+            "id": "deficiency_list",
+            "type": "repeater",
+            "label": "Deficiencies",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 30,
+            "conditionalDisplay": {
+              "field": "deficiencies_found",
+              "operator": "equals",
+              "value": "yes"
+            },
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "deficiency",
+                  "type": "textarea",
+                  "label": "Deficiency Description",
+                  "required": true,
+                  "validation": { "maxLength": 500 }
+                },
+                {
+                  "id": "location",
+                  "type": "text",
+                  "label": "Location",
+                  "required": false,
+                  "validation": { "maxLength": 150 }
+                },
+                {
+                  "id": "severity",
+                  "type": "select",
+                  "label": "Severity",
+                  "required": true,
+                  "options": [
+                    { "value": "immediate", "label": "Immediate - Active discharge/violation" },
+                    { "value": "high", "label": "High - Fix today" },
+                    { "value": "medium", "label": "Medium - Fix within 7 days" },
+                    { "value": "low", "label": "Low - Monitor" }
+                  ]
+                },
+                {
+                  "id": "corrective_action",
+                  "type": "text",
+                  "label": "Required Corrective Action",
+                  "required": true,
+                  "validation": { "maxLength": 300 }
+                },
+                {
+                  "id": "responsible_person",
+                  "type": "text",
+                  "label": "Responsible Person",
+                  "required": true,
+                  "validation": { "maxLength": 100 }
+                },
+                {
+                  "id": "completion_deadline",
+                  "type": "date",
+                  "label": "Completion Deadline",
+                  "required": true
+                }
+              ]
+            }
+          }
         ]
       },
       {
@@ -104,7 +432,16 @@
         "title": "Photo Documentation",
         "order": 7,
         "fields": [
-          {"id": "inspection_photos", "type": "photo", "label": "BMP/Site Condition Photos", "required": false, "multiple": true, "maxPhotos": 40, "captureGPS": true, "helpText": "Document BMPs, deficiencies, discharge points, and site conditions"}
+          {
+            "id": "inspection_photos",
+            "type": "photo",
+            "label": "BMP/Site Condition Photos",
+            "required": false,
+            "multiple": true,
+            "maxPhotos": 40,
+            "captureGPS": true,
+            "helpText": "Document BMPs, deficiencies, discharge points, and site conditions"
+          }
         ]
       },
       {
@@ -112,11 +449,60 @@
         "title": "Compliance & SWPPP Updates",
         "order": 8,
         "fields": [
-          {"id": "swppp_amendment_needed", "type": "radio", "label": "Does SWPPP need to be amended?", "required": true, "options": [{"value": "yes", "label": "Yes"}, {"value": "no", "label": "No"}], "defaultValue": "no", "helpText": "Changes in operations, site conditions, or BMP effectiveness may require SWPPP update"},
-          {"id": "amendment_reason", "type": "textarea", "label": "Reason for SWPPP Amendment", "required": true, "validation": {"maxLength": 1000}, "conditionalDisplay": {"field": "swppp_amendment_needed", "operator": "equals", "value": "yes"}},
-          {"id": "followup_required", "type": "radio", "label": "Is follow-up inspection required?", "required": true, "options": [{"value": "yes", "label": "Yes"}, {"value": "no", "label": "No"}], "defaultValue": "no"},
-          {"id": "followup_date", "type": "date", "label": "Follow-Up Inspection Date", "required": true, "conditionalDisplay": {"field": "followup_required", "operator": "equals", "value": "yes"}},
-          {"id": "notes", "type": "textarea", "label": "Additional Notes/Observations", "placeholder": "Any additional observations or recommendations...", "required": false, "validation": {"maxLength": 2000}}
+          {
+            "id": "swppp_amendment_needed",
+            "type": "radio",
+            "label": "Does SWPPP need to be amended?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no",
+            "helpText": "Changes in operations, site conditions, or BMP effectiveness may require SWPPP update"
+          },
+          {
+            "id": "amendment_reason",
+            "type": "textarea",
+            "label": "Reason for SWPPP Amendment",
+            "required": true,
+            "validation": { "maxLength": 1000 },
+            "conditionalDisplay": {
+              "field": "swppp_amendment_needed",
+              "operator": "equals",
+              "value": "yes"
+            }
+          },
+          {
+            "id": "followup_required",
+            "type": "radio",
+            "label": "Is follow-up inspection required?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no"
+          },
+          {
+            "id": "followup_date",
+            "type": "date",
+            "label": "Follow-Up Inspection Date",
+            "required": true,
+            "conditionalDisplay": {
+              "field": "followup_required",
+              "operator": "equals",
+              "value": "yes"
+            }
+          },
+          {
+            "id": "notes",
+            "type": "textarea",
+            "label": "Additional Notes/Observations",
+            "placeholder": "Any additional observations or recommendations...",
+            "required": false,
+            "validation": { "maxLength": 2000 }
+          }
         ]
       },
       {
@@ -124,7 +510,14 @@
         "title": "Inspector Certification",
         "order": 9,
         "fields": [
-          {"id": "inspector_signature", "type": "signature", "label": "Inspector Signature", "required": true, "captureTimestamp": true, "helpText": "I certify this inspection was conducted per EPA CGP 2022 Section 4.4"}
+          {
+            "id": "inspector_signature",
+            "type": "signature",
+            "label": "Inspector Signature",
+            "required": true,
+            "captureTimestamp": true,
+            "helpText": "I certify this inspection was conducted per EPA CGP 2022 Section 4.4"
+          }
         ]
       }
     ]

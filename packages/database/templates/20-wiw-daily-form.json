@@ -1,0 +1,595 @@
+{
+  "name": "WIW Daily Form",
+  "description": "Work In Water daily monitoring form for aquatic environment protection with turbidity readings, BMP compliance, and fish/wildlife observations per Nevada NAC 503 (Wildlife Protection) and NAC 445A (Water Quality)",
+  "category": "COMPLIANCE",
+  "version": "1.0.0",
+  "compliance": {
+    "regulation": "Nevada NAC 503 (Wildlife Protection) and NAC 445A (Water Quality Standards)",
+    "requiredFields": [
+      "project_name",
+      "project_location",
+      "waterbody_name",
+      "contractor_name",
+      "environmental_monitor",
+      "work_start_date",
+      "bmps_maintained",
+      "no_unauthorized_impacts",
+      "monitor_signature",
+      "monitor_date"
+    ],
+    "agency": "Nevada NDOW and Nevada DEP"
+  },
+  "schema": {
+    "sections": [
+      {
+        "id": "project_information",
+        "title": "Project Information",
+        "order": 1,
+        "fields": [
+          {
+            "id": "project_name",
+            "type": "text",
+            "label": "Project Name",
+            "required": true,
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "project_location",
+            "type": "text",
+            "label": "Project Location",
+            "required": true,
+            "validation": { "maxLength": 300 }
+          },
+          {
+            "id": "waterbody_name",
+            "type": "text",
+            "label": "Waterbody Name",
+            "required": true,
+            "placeholder": "Name of stream, river, or lake",
+            "validation": { "maxLength": 150 }
+          },
+          {
+            "id": "waterbody_type",
+            "type": "select",
+            "label": "Waterbody Type",
+            "required": true,
+            "options": [
+              { "value": "stream", "label": "Stream" },
+              { "value": "river", "label": "River" },
+              { "value": "lake", "label": "Lake" },
+              { "value": "reservoir", "label": "Reservoir" },
+              { "value": "wetland", "label": "Wetland" }
+            ]
+          },
+          {
+            "id": "work_type",
+            "type": "select",
+            "label": "Work Type",
+            "required": true,
+            "options": [
+              { "value": "bridge_construction", "label": "Bridge Construction" },
+              { "value": "culvert_installation", "label": "Culvert Installation" },
+              { "value": "stream_crossing", "label": "Stream Crossing" },
+              { "value": "dredging", "label": "Dredging" },
+              { "value": "riprap_installation", "label": "Riprap Installation" },
+              { "value": "other", "label": "Other" }
+            ]
+          },
+          {
+            "id": "contractor_name",
+            "type": "text",
+            "label": "Contractor Name",
+            "required": true,
+            "validation": { "maxLength": 150 }
+          },
+          {
+            "id": "environmental_monitor",
+            "type": "text",
+            "label": "Environmental Monitor",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "monitor_phone",
+            "type": "tel",
+            "label": "Monitor Phone",
+            "required": false,
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "work_start_date",
+            "type": "date",
+            "label": "Work Start Date",
+            "required": true
+          },
+          {
+            "id": "work_end_date",
+            "type": "date",
+            "label": "Work End Date",
+            "required": false
+          },
+          {
+            "id": "permit_number",
+            "type": "text",
+            "label": "Permit Number",
+            "required": false,
+            "placeholder": "Nevada DEP or Army Corps permit number",
+            "validation": { "maxLength": 50 }
+          },
+          {
+            "id": "permit_agency",
+            "type": "select",
+            "label": "Permit Agency",
+            "required": false,
+            "options": [
+              { "value": "nevada_dep", "label": "Nevada DEP" },
+              { "value": "army_corps", "label": "Army Corps of Engineers" },
+              { "value": "both", "label": "Both" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "daily_work_log",
+        "title": "Daily Work Log",
+        "description": "Daily tracking of work in water activities",
+        "order": 2,
+        "fields": [
+          {
+            "id": "daily_logs",
+            "type": "repeater",
+            "label": "Daily Work Logs",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 31,
+            "helpText": "Add one entry for each day of work in water",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "log_date",
+                  "type": "date",
+                  "label": "Log Date",
+                  "required": true
+                },
+                {
+                  "id": "work_performed",
+                  "type": "checkbox",
+                  "label": "Work in Water Performed Today",
+                  "required": false
+                },
+                {
+                  "id": "work_description",
+                  "type": "textarea",
+                  "label": "Work Description",
+                  "required": false,
+                  "validation": { "maxLength": 1000 },
+                  "conditionalDisplay": {
+                    "field": "work_performed",
+                    "operator": "equals",
+                    "value": true
+                  }
+                },
+                {
+                  "id": "work_start_time",
+                  "type": "time",
+                  "label": "Work Start Time",
+                  "required": false,
+                  "conditionalDisplay": {
+                    "field": "work_performed",
+                    "operator": "equals",
+                    "value": true
+                  }
+                },
+                {
+                  "id": "work_end_time",
+                  "type": "time",
+                  "label": "Work End Time",
+                  "required": false,
+                  "conditionalDisplay": {
+                    "field": "work_performed",
+                    "operator": "equals",
+                    "value": true
+                  }
+                },
+                {
+                  "id": "equipment_used",
+                  "type": "textarea",
+                  "label": "Equipment Used in Water",
+                  "required": false,
+                  "validation": { "maxLength": 500 },
+                  "conditionalDisplay": {
+                    "field": "work_performed",
+                    "operator": "equals",
+                    "value": true
+                  }
+                },
+                {
+                  "id": "water_depth_ft",
+                  "type": "number",
+                  "label": "Water Depth at Work Location (ft)",
+                  "required": false,
+                  "validation": { "min": 0, "max": 100, "precision": 0.1 }
+                },
+                {
+                  "id": "flow_conditions",
+                  "type": "select",
+                  "label": "Flow Conditions",
+                  "required": false,
+                  "options": [
+                    { "value": "no_flow", "label": "No Flow" },
+                    { "value": "low_flow", "label": "Low Flow" },
+                    { "value": "moderate_flow", "label": "Moderate Flow" },
+                    { "value": "high_flow", "label": "High Flow" }
+                  ]
+                },
+                {
+                  "id": "weather_conditions",
+                  "type": "select",
+                  "label": "Weather Conditions",
+                  "required": false,
+                  "options": [
+                    { "value": "clear", "label": "Clear" },
+                    { "value": "cloudy", "label": "Cloudy" },
+                    { "value": "rain", "label": "Rain" }
+                  ]
+                },
+                {
+                  "id": "air_temp_f",
+                  "type": "number",
+                  "label": "Air Temperature (F)",
+                  "required": false,
+                  "validation": { "min": -20, "max": 130 }
+                },
+                {
+                  "id": "water_temp_f",
+                  "type": "number",
+                  "label": "Water Temperature (F)",
+                  "required": false,
+                  "validation": { "min": 32, "max": 100 }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "turbidity_monitoring",
+        "title": "Turbidity Monitoring",
+        "description": "NTU readings required when working in water per NAC 445A. Threshold: 25 NTU above upstream.",
+        "order": 3,
+        "fields": [
+          {
+            "id": "turbidity_readings",
+            "type": "repeater",
+            "label": "Turbidity Readings",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 50,
+            "helpText": "Record NTU readings at multiple locations during work activities",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "reading_date",
+                  "type": "date",
+                  "label": "Reading Date",
+                  "required": true
+                },
+                {
+                  "id": "reading_time",
+                  "type": "time",
+                  "label": "Reading Time",
+                  "required": true
+                },
+                {
+                  "id": "location",
+                  "type": "select",
+                  "label": "Monitoring Location",
+                  "required": true,
+                  "options": [
+                    { "value": "upstream", "label": "Upstream (Baseline)" },
+                    { "value": "work_area", "label": "Work Area" },
+                    { "value": "downstream_100ft", "label": "Downstream 100ft" },
+                    { "value": "downstream_300ft", "label": "Downstream 300ft" }
+                  ]
+                },
+                {
+                  "id": "turbidity_ntu",
+                  "type": "number",
+                  "label": "Turbidity (NTU)",
+                  "required": true,
+                  "validation": { "min": 0, "max": 1000, "precision": 0.1 },
+                  "helpText": "Nephelometric Turbidity Units"
+                },
+                {
+                  "id": "threshold_exceeded",
+                  "type": "checkbox",
+                  "label": "Threshold Exceeded (>25 NTU above upstream)",
+                  "required": false,
+                  "helpText": "Check if reading exceeds baseline by >25 NTU"
+                },
+                {
+                  "id": "corrective_action",
+                  "type": "textarea",
+                  "label": "Corrective Action Taken",
+                  "required": false,
+                  "validation": { "maxLength": 500 },
+                  "conditionalDisplay": {
+                    "field": "threshold_exceeded",
+                    "operator": "equals",
+                    "value": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "best_management_practices",
+        "title": "Best Management Practices",
+        "description": "Aquatic protection BMPs per permit requirements",
+        "order": 4,
+        "fields": [
+          {
+            "id": "silt_curtain_installed",
+            "type": "checkbox",
+            "label": "Silt curtain installed and functional",
+            "required": false
+          },
+          {
+            "id": "turbidity_curtain_maintained",
+            "type": "checkbox",
+            "label": "Turbidity curtain properly maintained",
+            "required": false
+          },
+          {
+            "id": "cofferdam_intact",
+            "type": "checkbox",
+            "label": "Cofferdam intact and dewatered",
+            "required": false
+          },
+          {
+            "id": "dewatering_controlled",
+            "type": "checkbox",
+            "label": "Dewatering discharge controlled",
+            "required": false
+          },
+          {
+            "id": "sediment_controls_functional",
+            "type": "checkbox",
+            "label": "Sediment controls functional",
+            "required": false
+          },
+          {
+            "id": "no_fuel_in_water",
+            "type": "checkbox",
+            "label": "No fueling operations over water",
+            "required": false
+          },
+          {
+            "id": "equipment_clean",
+            "type": "checkbox",
+            "label": "Equipment clean, no leaks",
+            "required": false
+          },
+          {
+            "id": "spill_kit_onsite",
+            "type": "checkbox",
+            "label": "Spill prevention kit on site",
+            "required": false
+          },
+          {
+            "id": "exclusion_zone_marked",
+            "type": "checkbox",
+            "label": "Work exclusion zone marked",
+            "required": false
+          },
+          {
+            "id": "fish_relocation_complete",
+            "type": "checkbox",
+            "label": "Fish relocation complete (if required)",
+            "required": false
+          },
+          {
+            "id": "vegetation_buffers_protected",
+            "type": "checkbox",
+            "label": "Riparian vegetation buffers protected",
+            "required": false
+          },
+          {
+            "id": "work_area_isolated",
+            "type": "checkbox",
+            "label": "Work area isolated from flowing water",
+            "required": false
+          }
+        ]
+      },
+      {
+        "id": "fish_wildlife_observations",
+        "title": "Fish and Wildlife Observations",
+        "description": "Nevada NAC 503 wildlife protection compliance",
+        "order": 5,
+        "fields": [
+          {
+            "id": "fish_observed",
+            "type": "checkbox",
+            "label": "Fish Observed",
+            "required": false
+          },
+          {
+            "id": "fish_species",
+            "type": "textarea",
+            "label": "Fish Species Observed",
+            "required": false,
+            "validation": { "maxLength": 300 },
+            "conditionalDisplay": {
+              "field": "fish_observed",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "fish_behavior",
+            "type": "select",
+            "label": "Fish Behavior",
+            "required": false,
+            "options": [
+              { "value": "normal", "label": "Normal" },
+              { "value": "stressed", "label": "Stressed" },
+              { "value": "mortality", "label": "Mortality" }
+            ],
+            "conditionalDisplay": {
+              "field": "fish_observed",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "wildlife_observed",
+            "type": "checkbox",
+            "label": "Other Wildlife Observed",
+            "required": false
+          },
+          {
+            "id": "wildlife_species",
+            "type": "textarea",
+            "label": "Wildlife Species Observed",
+            "required": false,
+            "validation": { "maxLength": 300 },
+            "conditionalDisplay": {
+              "field": "wildlife_observed",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "nesting_birds_present",
+            "type": "checkbox",
+            "label": "Nesting Birds Present Near Work Area",
+            "required": false
+          },
+          {
+            "id": "work_restrictions_followed",
+            "type": "checkbox",
+            "label": "Wildlife Work Restrictions Followed",
+            "required": false,
+            "helpText": "Seasonal restrictions, buffer zones, etc."
+          },
+          {
+            "id": "wildlife_agency_notified",
+            "type": "checkbox",
+            "label": "Nevada NDOW Notified (if required)",
+            "required": false
+          }
+        ]
+      },
+      {
+        "id": "environmental_incidents",
+        "title": "Environmental Incidents",
+        "order": 6,
+        "fields": [
+          {
+            "id": "incidents_occurred",
+            "type": "checkbox",
+            "label": "Environmental Incident Occurred",
+            "required": false
+          },
+          {
+            "id": "incident_type",
+            "type": "select",
+            "label": "Incident Type",
+            "required": false,
+            "options": [
+              { "value": "spill", "label": "Spill" },
+              { "value": "fish_kill", "label": "Fish Kill" },
+              { "value": "excessive_turbidity", "label": "Excessive Turbidity" },
+              { "value": "equipment_failure", "label": "Equipment Failure" },
+              { "value": "other", "label": "Other" }
+            ],
+            "conditionalDisplay": {
+              "field": "incidents_occurred",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "incident_description",
+            "type": "textarea",
+            "label": "Incident Description",
+            "required": false,
+            "validation": { "maxLength": 1000 },
+            "conditionalDisplay": {
+              "field": "incidents_occurred",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "incident_response",
+            "type": "textarea",
+            "label": "Incident Response",
+            "required": false,
+            "validation": { "maxLength": 1000 },
+            "conditionalDisplay": {
+              "field": "incidents_occurred",
+              "operator": "equals",
+              "value": true
+            }
+          },
+          {
+            "id": "agency_notification_required",
+            "type": "checkbox",
+            "label": "Agency Notification Required",
+            "required": false,
+            "conditionalDisplay": {
+              "field": "incidents_occurred",
+              "operator": "equals",
+              "value": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "daily_certification",
+        "title": "Daily Certification",
+        "order": 7,
+        "fields": [
+          {
+            "id": "bmps_maintained",
+            "type": "checkbox",
+            "label": "All BMPs Maintained Per Permit Requirements",
+            "required": true
+          },
+          {
+            "id": "no_unauthorized_impacts",
+            "type": "checkbox",
+            "label": "No Unauthorized Impacts to Waterbody",
+            "required": true
+          },
+          {
+            "id": "monitor_signature",
+            "type": "signature",
+            "label": "Environmental Monitor Signature",
+            "required": true,
+            "captureTimestamp": true
+          },
+          {
+            "id": "monitor_date",
+            "type": "date",
+            "label": "Certification Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}"
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "20-30 minutes per daily entry",
+    "fieldOptimization": "mobile-friendly for field use",
+    "industryStandard": "Nevada NAC 503 and NAC 445A Work In Water Requirements",
+    "targetRole": "Environmental Monitor, Field Inspector"
+  }
+}

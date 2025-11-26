@@ -3,7 +3,11 @@
   "description": "Comprehensive delivery receipt for equipment and materials - tracks deliveries, quantities, condition, and discrepancies for cost control and inventory management",
   "category": "LOGISTICS",
   "version": "1.0.0",
-  "compliance": null,
+  "compliance": {
+    "regulation": "Construction Logistics and Inventory Management",
+    "agency": "Internal",
+    "requiredFields": ["date", "supplier", "items_delivered", "received_by"]
+  },
   "schema": {
     "sections": [
       {
@@ -11,10 +15,35 @@
         "title": "Delivery Information",
         "order": 1,
         "fields": [
-          {"id": "date", "type": "date", "label": "Delivery Date", "required": true, "defaultValue": "{{currentDate}}"},
-          {"id": "time", "type": "time", "label": "Delivery Time", "required": true, "defaultValue": "{{currentTime}}"},
-          {"id": "project_name", "type": "text", "label": "Project Name", "required": true, "defaultValue": "{{projectName}}", "readonly": true},
-          {"id": "delivery_location", "type": "text", "label": "Delivery Location on Site", "placeholder": "e.g., Lay down yard, Building A entrance", "required": true}
+          {
+            "id": "date",
+            "type": "date",
+            "label": "Delivery Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}"
+          },
+          {
+            "id": "time",
+            "type": "time",
+            "label": "Delivery Time",
+            "required": true,
+            "defaultValue": "{{currentTime}}"
+          },
+          {
+            "id": "project_name",
+            "type": "text",
+            "label": "Project Name",
+            "required": true,
+            "defaultValue": "{{projectName}}",
+            "readonly": true
+          },
+          {
+            "id": "delivery_location",
+            "type": "text",
+            "label": "Delivery Location on Site",
+            "placeholder": "e.g., Lay down yard, Building A entrance",
+            "required": true
+          }
         ]
       },
       {
@@ -22,11 +51,42 @@
         "title": "Supplier Information",
         "order": 2,
         "fields": [
-          {"id": "supplier_name", "type": "text", "label": "Supplier/Vendor Name", "required": true, "validation": {"maxLength": 200}},
-          {"id": "supplier_contact", "type": "text", "label": "Supplier Contact/Phone", "required": false, "validation": {"maxLength": 100}},
-          {"id": "driver_name", "type": "text", "label": "Delivery Driver Name", "required": false, "validation": {"maxLength": 100}},
-          {"id": "truck_number", "type": "text", "label": "Truck/Vehicle Number", "required": false, "validation": {"maxLength": 50}},
-          {"id": "delivery_ticket_number", "type": "text", "label": "Delivery Ticket/BOL Number", "required": false, "validation": {"maxLength": 100}, "helpText": "Bill of Lading or delivery ticket reference"}
+          {
+            "id": "supplier_name",
+            "type": "text",
+            "label": "Supplier/Vendor Name",
+            "required": true,
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "supplier_contact",
+            "type": "text",
+            "label": "Supplier Contact/Phone",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "driver_name",
+            "type": "text",
+            "label": "Delivery Driver Name",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "truck_number",
+            "type": "text",
+            "label": "Truck/Vehicle Number",
+            "required": false,
+            "validation": { "maxLength": 50 }
+          },
+          {
+            "id": "delivery_ticket_number",
+            "type": "text",
+            "label": "Delivery Ticket/BOL Number",
+            "required": false,
+            "validation": { "maxLength": 100 },
+            "helpText": "Bill of Lading or delivery ticket reference"
+          }
         ]
       },
       {
@@ -34,9 +94,27 @@
         "title": "Purchase Order",
         "order": 3,
         "fields": [
-          {"id": "po_number", "type": "text", "label": "Purchase Order Number", "required": false, "validation": {"maxLength": 100}},
-          {"id": "po_line_item", "type": "text", "label": "PO Line Item", "required": false, "validation": {"maxLength": 50}},
-          {"id": "requisition_number", "type": "text", "label": "Requisition Number", "required": false, "validation": {"maxLength": 100}}
+          {
+            "id": "po_number",
+            "type": "text",
+            "label": "Purchase Order Number",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "po_line_item",
+            "type": "text",
+            "label": "PO Line Item",
+            "required": false,
+            "validation": { "maxLength": 50 }
+          },
+          {
+            "id": "requisition_number",
+            "type": "text",
+            "label": "Requisition Number",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          }
         ]
       },
       {
@@ -44,7 +122,93 @@
         "title": "Items Delivered",
         "order": 4,
         "fields": [
-          {"id": "delivery_items", "type": "repeater", "label": "Items", "required": true, "minItems": 1, "maxItems": 50, "itemSchema": {"fields": [{"id": "description", "type": "text", "label": "Item Description", "placeholder": "e.g., Rebar #5, 20ft lengths; Plywood 3/4\" 4x8 sheets", "required": true, "validation": {"maxLength": 300}}, {"id": "quantity_ordered", "type": "number", "label": "Quantity Ordered", "required": false, "validation": {"min": 0, "max": 999999}, "helpText": "Expected quantity per PO"}, {"id": "quantity_delivered", "type": "number", "label": "Quantity Delivered", "required": true, "validation": {"min": 0, "max": 999999}}, {"id": "unit", "type": "select", "label": "Unit of Measure", "required": true, "options": [{"value": "each", "label": "Each (ea)"}, {"value": "pieces", "label": "Pieces (pcs)"}, {"value": "boxes", "label": "Boxes"}, {"value": "pallets", "label": "Pallets"}, {"value": "cubic_yards", "label": "Cubic Yards (CY)"}, {"value": "square_feet", "label": "Square Feet (SF)"}, {"value": "linear_feet", "label": "Linear Feet (LF)"}, {"value": "tons", "label": "Tons"}, {"value": "pounds", "label": "Pounds (lbs)"}, {"value": "gallons", "label": "Gallons"}, {"value": "rolls", "label": "Rolls"}, {"value": "bundles", "label": "Bundles"}, {"value": "other", "label": "Other"}]}, {"id": "unit_other", "type": "text", "label": "Specify Unit", "required": true, "conditionalDisplay": {"field": "unit", "operator": "equals", "value": "other"}}, {"id": "condition", "type": "select", "label": "Condition Upon Receipt", "required": true, "options": [{"value": "good", "label": "Good - No damage"}, {"value": "fair", "label": "Fair - Minor issues"}, {"value": "damaged", "label": "Damaged"}, {"value": "incorrect", "label": "Incorrect item"}]}, {"id": "damage_description", "type": "textarea", "label": "Damage/Issue Description", "required": true, "validation": {"maxLength": 500}, "conditionalDisplay": {"field": "condition", "operator": "in", "value": ["fair", "damaged", "incorrect"]}}]}}
+          {
+            "id": "delivery_items",
+            "type": "repeater",
+            "label": "Items",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 50,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "description",
+                  "type": "text",
+                  "label": "Item Description",
+                  "placeholder": "e.g., Rebar #5, 20ft lengths; Plywood 3/4\" 4x8 sheets",
+                  "required": true,
+                  "validation": { "maxLength": 300 }
+                },
+                {
+                  "id": "quantity_ordered",
+                  "type": "number",
+                  "label": "Quantity Ordered",
+                  "required": false,
+                  "validation": { "min": 0, "max": 999999 },
+                  "helpText": "Expected quantity per PO"
+                },
+                {
+                  "id": "quantity_delivered",
+                  "type": "number",
+                  "label": "Quantity Delivered",
+                  "required": true,
+                  "validation": { "min": 0, "max": 999999 }
+                },
+                {
+                  "id": "unit",
+                  "type": "select",
+                  "label": "Unit of Measure",
+                  "required": true,
+                  "options": [
+                    { "value": "each", "label": "Each (ea)" },
+                    { "value": "pieces", "label": "Pieces (pcs)" },
+                    { "value": "boxes", "label": "Boxes" },
+                    { "value": "pallets", "label": "Pallets" },
+                    { "value": "cubic_yards", "label": "Cubic Yards (CY)" },
+                    { "value": "square_feet", "label": "Square Feet (SF)" },
+                    { "value": "linear_feet", "label": "Linear Feet (LF)" },
+                    { "value": "tons", "label": "Tons" },
+                    { "value": "pounds", "label": "Pounds (lbs)" },
+                    { "value": "gallons", "label": "Gallons" },
+                    { "value": "rolls", "label": "Rolls" },
+                    { "value": "bundles", "label": "Bundles" },
+                    { "value": "other", "label": "Other" }
+                  ]
+                },
+                {
+                  "id": "unit_other",
+                  "type": "text",
+                  "label": "Specify Unit",
+                  "required": true,
+                  "conditionalDisplay": { "field": "unit", "operator": "equals", "value": "other" }
+                },
+                {
+                  "id": "condition",
+                  "type": "select",
+                  "label": "Condition Upon Receipt",
+                  "required": true,
+                  "options": [
+                    { "value": "good", "label": "Good - No damage" },
+                    { "value": "fair", "label": "Fair - Minor issues" },
+                    { "value": "damaged", "label": "Damaged" },
+                    { "value": "incorrect", "label": "Incorrect item" }
+                  ]
+                },
+                {
+                  "id": "damage_description",
+                  "type": "textarea",
+                  "label": "Damage/Issue Description",
+                  "required": true,
+                  "validation": { "maxLength": 500 },
+                  "conditionalDisplay": {
+                    "field": "condition",
+                    "operator": "in",
+                    "value": ["fair", "damaged", "incorrect"]
+                  }
+                }
+              ]
+            }
+          }
         ]
       },
       {
@@ -52,10 +216,64 @@
         "title": "Discrepancies",
         "order": 5,
         "fields": [
-          {"id": "discrepancies_found", "type": "radio", "label": "Were there any discrepancies?", "required": true, "options": [{"value": "yes", "label": "Yes"}, {"value": "no", "label": "No - Delivery matches PO"}], "defaultValue": "no"},
-          {"id": "discrepancy_type", "type": "checkboxes", "label": "Discrepancy Type (select all that apply)", "required": true, "conditionalDisplay": {"field": "discrepancies_found", "operator": "equals", "value": "yes"}, "options": [{"value": "short_shipment", "label": "Short Shipment - Less than ordered"}, {"value": "over_shipment", "label": "Over Shipment - More than ordered"}, {"value": "wrong_item", "label": "Wrong Item - Incorrect material"}, {"value": "damaged", "label": "Damaged - Physical damage"}, {"value": "missing_docs", "label": "Missing Documentation (certs, test reports)"}, {"value": "late_delivery", "label": "Late Delivery"}]},
-          {"id": "discrepancy_notes", "type": "textarea", "label": "Discrepancy Details", "placeholder": "Describe the discrepancies and actions taken...", "required": true, "validation": {"maxLength": 1500}, "conditionalDisplay": {"field": "discrepancies_found", "operator": "equals", "value": "yes"}},
-          {"id": "supplier_notified", "type": "radio", "label": "Supplier Notified of Discrepancy?", "required": true, "conditionalDisplay": {"field": "discrepancies_found", "operator": "equals", "value": "yes"}, "options": [{"value": "yes", "label": "Yes"}, {"value": "no", "label": "No"}]}
+          {
+            "id": "discrepancies_found",
+            "type": "radio",
+            "label": "Were there any discrepancies?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No - Delivery matches PO" }
+            ],
+            "defaultValue": "no"
+          },
+          {
+            "id": "discrepancy_type",
+            "type": "checkboxes",
+            "label": "Discrepancy Type (select all that apply)",
+            "required": true,
+            "conditionalDisplay": {
+              "field": "discrepancies_found",
+              "operator": "equals",
+              "value": "yes"
+            },
+            "options": [
+              { "value": "short_shipment", "label": "Short Shipment - Less than ordered" },
+              { "value": "over_shipment", "label": "Over Shipment - More than ordered" },
+              { "value": "wrong_item", "label": "Wrong Item - Incorrect material" },
+              { "value": "damaged", "label": "Damaged - Physical damage" },
+              { "value": "missing_docs", "label": "Missing Documentation (certs, test reports)" },
+              { "value": "late_delivery", "label": "Late Delivery" }
+            ]
+          },
+          {
+            "id": "discrepancy_notes",
+            "type": "textarea",
+            "label": "Discrepancy Details",
+            "placeholder": "Describe the discrepancies and actions taken...",
+            "required": true,
+            "validation": { "maxLength": 1500 },
+            "conditionalDisplay": {
+              "field": "discrepancies_found",
+              "operator": "equals",
+              "value": "yes"
+            }
+          },
+          {
+            "id": "supplier_notified",
+            "type": "radio",
+            "label": "Supplier Notified of Discrepancy?",
+            "required": true,
+            "conditionalDisplay": {
+              "field": "discrepancies_found",
+              "operator": "equals",
+              "value": "yes"
+            },
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ]
+          }
         ]
       },
       {
@@ -63,7 +281,16 @@
         "title": "Photo Documentation",
         "order": 6,
         "fields": [
-          {"id": "delivery_photos", "type": "photo", "label": "Delivery Photos", "required": false, "multiple": true, "maxPhotos": 30, "captureGPS": true, "helpText": "Document materials, equipment, damage, or discrepancies"}
+          {
+            "id": "delivery_photos",
+            "type": "photo",
+            "label": "Delivery Photos",
+            "required": false,
+            "multiple": true,
+            "maxPhotos": 30,
+            "captureGPS": true,
+            "helpText": "Document materials, equipment, damage, or discrepancies"
+          }
         ]
       },
       {
@@ -71,9 +298,34 @@
         "title": "Special Handling/Notes",
         "order": 7,
         "fields": [
-          {"id": "storage_location", "type": "text", "label": "Storage Location Assigned", "placeholder": "Where materials were placed/stored", "required": false, "validation": {"maxLength": 200}},
-          {"id": "certifications_received", "type": "radio", "label": "Certifications/Test Reports Received?", "required": false, "options": [{"value": "yes", "label": "Yes"}, {"value": "no", "label": "No"}, {"value": "na", "label": "N/A"}], "helpText": "Mill certs, test reports, material certifications"},
-          {"id": "special_instructions", "type": "textarea", "label": "Special Handling Instructions/Notes", "placeholder": "Any special storage, handling, or usage requirements...", "required": false, "validation": {"maxLength": 1000}}
+          {
+            "id": "storage_location",
+            "type": "text",
+            "label": "Storage Location Assigned",
+            "placeholder": "Where materials were placed/stored",
+            "required": false,
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "certifications_received",
+            "type": "radio",
+            "label": "Certifications/Test Reports Received?",
+            "required": false,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" },
+              { "value": "na", "label": "N/A" }
+            ],
+            "helpText": "Mill certs, test reports, material certifications"
+          },
+          {
+            "id": "special_instructions",
+            "type": "textarea",
+            "label": "Special Handling Instructions/Notes",
+            "placeholder": "Any special storage, handling, or usage requirements...",
+            "required": false,
+            "validation": { "maxLength": 1000 }
+          }
         ]
       },
       {
@@ -81,11 +333,46 @@
         "title": "Signatures & Acknowledgment",
         "order": 8,
         "fields": [
-          {"id": "notes", "type": "textarea", "label": "Additional Notes", "placeholder": "Any additional information about the delivery...", "required": false, "validation": {"maxLength": 1000}},
-          {"id": "receiver_name", "type": "text", "label": "Receiver Name", "required": true, "defaultValue": "{{currentUser}}", "readonly": true},
-          {"id": "receiver_title", "type": "text", "label": "Receiver Title/Position", "placeholder": "e.g., Foreman, Project Manager, Warehouse Lead", "required": false, "validation": {"maxLength": 100}},
-          {"id": "receiver_signature", "type": "signature", "label": "Receiver Signature", "required": true, "captureTimestamp": true, "helpText": "I acknowledge receipt of the above materials/equipment"},
-          {"id": "driver_signature", "type": "signature", "label": "Driver Signature", "required": false, "captureTimestamp": true, "helpText": "Driver acknowledges delivery completed"}
+          {
+            "id": "notes",
+            "type": "textarea",
+            "label": "Additional Notes",
+            "placeholder": "Any additional information about the delivery...",
+            "required": false,
+            "validation": { "maxLength": 1000 }
+          },
+          {
+            "id": "receiver_name",
+            "type": "text",
+            "label": "Receiver Name",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "readonly": true
+          },
+          {
+            "id": "receiver_title",
+            "type": "text",
+            "label": "Receiver Title/Position",
+            "placeholder": "e.g., Foreman, Project Manager, Warehouse Lead",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "receiver_signature",
+            "type": "signature",
+            "label": "Receiver Signature",
+            "required": true,
+            "captureTimestamp": true,
+            "helpText": "I acknowledge receipt of the above materials/equipment"
+          },
+          {
+            "id": "driver_signature",
+            "type": "signature",
+            "label": "Driver Signature",
+            "required": false,
+            "captureTimestamp": true,
+            "helpText": "Driver acknowledges delivery completed"
+          }
         ]
       }
     ]

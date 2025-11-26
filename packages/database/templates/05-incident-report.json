@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "compliance": {
     "regulation": "OSHA Form 301 - Injury and Illness Incident Report",
+    "agency": "OSHA",
     "requiredFields": [
       "employee_info",
       "incident_date_time",
@@ -462,7 +463,10 @@
               { "value": "fatigue", "label": "Fatigue" },
               { "value": "communication_failure", "label": "Communication Failure" },
               { "value": "lack_of_supervision", "label": "Lack of Supervision" },
-              { "value": "environmental", "label": "Environmental Factors (weather, lighting, etc.)" }
+              {
+                "value": "environmental",
+                "label": "Environmental Factors (weather, lighting, etc.)"
+              }
             ]
           }
         ]

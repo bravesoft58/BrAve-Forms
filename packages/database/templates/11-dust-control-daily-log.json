@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "compliance": {
     "regulation": "Clark County Air Quality Regulations Section 94",
+    "agency": "Nevada DEP / Clark County",
     "jurisdiction": "Clark County NV, Washoe County NV, Nevada DEP",
     "requiredFields": [
       "date",
@@ -39,12 +40,55 @@
         "title": "Daily Log Information",
         "order": 1,
         "fields": [
-          {"id": "date", "type": "date", "label": "Date", "required": true, "defaultValue": "{{currentDate}}"},
-          {"id": "project_name", "type": "text", "label": "Project Name", "required": true, "defaultValue": "{{projectName}}", "readonly": true},
-          {"id": "location", "type": "text", "label": "Project Location", "required": true, "defaultValue": "{{projectLocation}}"},
-          {"id": "inspector_name", "type": "text", "label": "Inspector/Monitor Name", "required": true, "defaultValue": "{{currentUser}}"},
-          {"id": "jurisdiction", "type": "select", "label": "Jurisdiction", "required": true, "options": [{"value": "clark_county", "label": "Clark County (Las Vegas area)"}, {"value": "washoe_county", "label": "Washoe County (Reno area)"}, {"value": "nevada_dep", "label": "Nevada DEP (Outside Clark/Washoe)"}, {"value": "other", "label": "Other"}], "helpText": "Select the air quality jurisdiction"},
-          {"id": "dust_control_permit", "type": "text", "label": "Dust Control Permit Number", "required": false, "validation": {"maxLength": 100}}
+          {
+            "id": "date",
+            "type": "date",
+            "label": "Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}"
+          },
+          {
+            "id": "project_name",
+            "type": "text",
+            "label": "Project Name",
+            "required": true,
+            "defaultValue": "{{projectName}}",
+            "readonly": true
+          },
+          {
+            "id": "location",
+            "type": "text",
+            "label": "Project Location",
+            "required": true,
+            "defaultValue": "{{projectLocation}}"
+          },
+          {
+            "id": "inspector_name",
+            "type": "text",
+            "label": "Inspector/Monitor Name",
+            "required": true,
+            "defaultValue": "{{currentUser}}"
+          },
+          {
+            "id": "jurisdiction",
+            "type": "select",
+            "label": "Jurisdiction",
+            "required": true,
+            "options": [
+              { "value": "clark_county", "label": "Clark County (Las Vegas area)" },
+              { "value": "washoe_county", "label": "Washoe County (Reno area)" },
+              { "value": "nevada_dep", "label": "Nevada DEP (Outside Clark/Washoe)" },
+              { "value": "other", "label": "Other" }
+            ],
+            "helpText": "Select the air quality jurisdiction"
+          },
+          {
+            "id": "dust_control_permit",
+            "type": "text",
+            "label": "Dust Control Permit Number",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          }
         ]
       },
       {
@@ -52,13 +96,73 @@
         "title": "Weather Conditions",
         "order": 2,
         "fields": [
-          {"id": "temperature", "type": "number", "label": "Temperature (°F)", "required": true, "validation": {"min": -20, "max": 150}},
-          {"id": "wind_speed", "type": "number", "label": "Wind Speed (mph)", "required": true, "validation": {"min": 0, "max": 100}, "helpText": "CRITICAL: >15 mph requires increased watering frequency"},
-          {"id": "wind_speed_warning", "type": "checkbox", "label": "Wind Speed >15 mph - Increased watering required", "required": false, "defaultValue": false, "computedValue": "wind_speed > 15", "readonly": true},
-          {"id": "wind_direction", "type": "select", "label": "Wind Direction", "required": true, "options": [{"value": "N", "label": "North"}, {"value": "NE", "label": "Northeast"}, {"value": "E", "label": "East"}, {"value": "SE", "label": "Southeast"}, {"value": "S", "label": "South"}, {"value": "SW", "label": "Southwest"}, {"value": "W", "label": "West"}, {"value": "NW", "label": "Northwest"}, {"value": "calm", "label": "Calm"}]},
-          {"id": "precipitation", "type": "number", "label": "Precipitation (inches)", "required": false, "validation": {"min": 0, "max": 10, "precision": 0.01}},
-          {"id": "humidity", "type": "number", "label": "Humidity (%)", "required": false, "validation": {"min": 0, "max": 100}},
-          {"id": "visibility", "type": "select", "label": "Visibility Conditions", "required": true, "options": [{"value": "excellent", "label": "Excellent - >10 miles"}, {"value": "good", "label": "Good - 5-10 miles"}, {"value": "fair", "label": "Fair - 2-5 miles"}, {"value": "poor", "label": "Poor - <2 miles (dust impact)"}]}
+          {
+            "id": "temperature",
+            "type": "number",
+            "label": "Temperature (°F)",
+            "required": true,
+            "validation": { "min": -20, "max": 150 }
+          },
+          {
+            "id": "wind_speed",
+            "type": "number",
+            "label": "Wind Speed (mph)",
+            "required": true,
+            "validation": { "min": 0, "max": 100 },
+            "helpText": "CRITICAL: >15 mph requires increased watering frequency"
+          },
+          {
+            "id": "wind_speed_warning",
+            "type": "checkbox",
+            "label": "Wind Speed >15 mph - Increased watering required",
+            "required": false,
+            "defaultValue": false,
+            "computedValue": "wind_speed > 15",
+            "readonly": true
+          },
+          {
+            "id": "wind_direction",
+            "type": "select",
+            "label": "Wind Direction",
+            "required": true,
+            "options": [
+              { "value": "N", "label": "North" },
+              { "value": "NE", "label": "Northeast" },
+              { "value": "E", "label": "East" },
+              { "value": "SE", "label": "Southeast" },
+              { "value": "S", "label": "South" },
+              { "value": "SW", "label": "Southwest" },
+              { "value": "W", "label": "West" },
+              { "value": "NW", "label": "Northwest" },
+              { "value": "calm", "label": "Calm" }
+            ]
+          },
+          {
+            "id": "precipitation",
+            "type": "number",
+            "label": "Precipitation (inches)",
+            "required": false,
+            "validation": { "min": 0, "max": 10, "precision": 0.01 }
+          },
+          {
+            "id": "humidity",
+            "type": "number",
+            "label": "Humidity (%)",
+            "required": false,
+            "validation": { "min": 0, "max": 100 }
+          },
+          {
+            "id": "visibility",
+            "type": "select",
+            "label": "Visibility Conditions",
+            "required": true,
+            "options": [
+              { "value": "excellent", "label": "Excellent - >10 miles" },
+              { "value": "good", "label": "Good - 5-10 miles" },
+              { "value": "fair", "label": "Fair - 2-5 miles" },
+              { "value": "poor", "label": "Poor - <2 miles (dust impact)" }
+            ]
+          }
         ]
       },
       {
@@ -66,9 +170,33 @@
         "title": "Soil Conditions",
         "order": 3,
         "fields": [
-          {"id": "soil_moisture", "type": "select", "label": "Soil Moisture Level", "required": true, "options": [{"value": "wet", "label": "Wet"}, {"value": "moist", "label": "Moist"}, {"value": "dry", "label": "Dry"}, {"value": "very_dry", "label": "Very Dry - High dust potential"}]},
-          {"id": "actively_disturbed", "type": "number", "label": "Actively Disturbed Areas (acres)", "required": true, "validation": {"min": 0, "max": 1000, "precision": 0.1}, "helpText": "Projects ≥50 acres require Dust Control Monitor"},
-          {"id": "stabilized_areas", "type": "number", "label": "Stabilized Areas (acres)", "required": false, "validation": {"min": 0, "max": 1000, "precision": 0.1}}
+          {
+            "id": "soil_moisture",
+            "type": "select",
+            "label": "Soil Moisture Level",
+            "required": true,
+            "options": [
+              { "value": "wet", "label": "Wet" },
+              { "value": "moist", "label": "Moist" },
+              { "value": "dry", "label": "Dry" },
+              { "value": "very_dry", "label": "Very Dry - High dust potential" }
+            ]
+          },
+          {
+            "id": "actively_disturbed",
+            "type": "number",
+            "label": "Actively Disturbed Areas (acres)",
+            "required": true,
+            "validation": { "min": 0, "max": 1000, "precision": 0.1 },
+            "helpText": "Projects ≥50 acres require Dust Control Monitor"
+          },
+          {
+            "id": "stabilized_areas",
+            "type": "number",
+            "label": "Stabilized Areas (acres)",
+            "required": false,
+            "validation": { "min": 0, "max": 1000, "precision": 0.1 }
+          }
         ]
       },
       {
@@ -76,8 +204,66 @@
         "title": "Water Application",
         "order": 4,
         "fields": [
-          {"id": "water_trucks", "type": "repeater", "label": "Water Truck Applications", "required": false, "minItems": 0, "maxItems": 20, "itemSchema": {"fields": [{"id": "truck_id", "type": "text", "label": "Truck ID/Operator", "required": true, "validation": {"maxLength": 100}}, {"id": "start_time", "type": "time", "label": "Start Time", "required": true}, {"id": "end_time", "type": "time", "label": "End Time", "required": true}, {"id": "areas_watered", "type": "text", "label": "Areas Watered", "placeholder": "Describe locations watered", "required": true, "validation": {"maxLength": 300}}, {"id": "gallons_applied", "type": "number", "label": "Gallons Applied (estimate)", "required": false, "validation": {"min": 0, "max": 50000}}, {"id": "application_frequency", "type": "number", "label": "Times Applied Today", "required": false, "validation": {"min": 1, "max": 20}, "helpText": "Increased frequency if wind >15 mph"}, {"id": "weather_adjustment", "type": "text", "label": "Weather Adjustment Notes", "placeholder": "e.g., Increased frequency due to wind", "required": false, "validation": {"maxLength": 200}}]}},
-          {"id": "total_water_applications", "type": "number", "label": "Total Water Applications Today", "required": false, "readonly": true, "computed": {"formula": "SUM(water_trucks.*.application_frequency)"}}
+          {
+            "id": "water_trucks",
+            "type": "repeater",
+            "label": "Water Truck Applications",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 20,
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "truck_id",
+                  "type": "text",
+                  "label": "Truck ID/Operator",
+                  "required": true,
+                  "validation": { "maxLength": 100 }
+                },
+                { "id": "start_time", "type": "time", "label": "Start Time", "required": true },
+                { "id": "end_time", "type": "time", "label": "End Time", "required": true },
+                {
+                  "id": "areas_watered",
+                  "type": "text",
+                  "label": "Areas Watered",
+                  "placeholder": "Describe locations watered",
+                  "required": true,
+                  "validation": { "maxLength": 300 }
+                },
+                {
+                  "id": "gallons_applied",
+                  "type": "number",
+                  "label": "Gallons Applied (estimate)",
+                  "required": false,
+                  "validation": { "min": 0, "max": 50000 }
+                },
+                {
+                  "id": "application_frequency",
+                  "type": "number",
+                  "label": "Times Applied Today",
+                  "required": false,
+                  "validation": { "min": 1, "max": 20 },
+                  "helpText": "Increased frequency if wind >15 mph"
+                },
+                {
+                  "id": "weather_adjustment",
+                  "type": "text",
+                  "label": "Weather Adjustment Notes",
+                  "placeholder": "e.g., Increased frequency due to wind",
+                  "required": false,
+                  "validation": { "maxLength": 200 }
+                }
+              ]
+            }
+          },
+          {
+            "id": "total_water_applications",
+            "type": "number",
+            "label": "Total Water Applications Today",
+            "required": false,
+            "readonly": true,
+            "computed": { "formula": "SUM(water_trucks.*.application_frequency)" }
+          }
         ]
       },
       {
@@ -85,8 +271,81 @@
         "title": "Dust Palliatives (Chemical Stabilization)",
         "order": 5,
         "fields": [
-          {"id": "palliatives_used", "type": "radio", "label": "Were dust palliatives used today?", "required": true, "options": [{"value": "yes", "label": "Yes"}, {"value": "no", "label": "No"}], "defaultValue": "no"},
-          {"id": "palliative_applications", "type": "repeater", "label": "Palliative Applications", "required": true, "minItems": 1, "maxItems": 15, "conditionalDisplay": {"field": "palliatives_used", "operator": "equals", "value": "yes"}, "itemSchema": {"fields": [{"id": "product_name", "type": "text", "label": "Palliative Type/Product Name", "required": true, "validation": {"maxLength": 150}}, {"id": "application_areas", "type": "text", "label": "Application Areas", "required": true, "validation": {"maxLength": 300}}, {"id": "application_rate", "type": "text", "label": "Application Rate", "placeholder": "e.g., 0.5 gal/sq yd", "required": true, "validation": {"maxLength": 100}}, {"id": "application_method", "type": "select", "label": "Application Method", "required": true, "options": [{"value": "spray", "label": "Spray"}, {"value": "disk_in", "label": "Disk-In"}, {"value": "other", "label": "Other"}]}, {"id": "contractor", "type": "text", "label": "Contractor/Applicator", "required": false, "validation": {"maxLength": 150}}, {"id": "batch_lot_number", "type": "text", "label": "Batch/Lot Number", "required": false, "validation": {"maxLength": 100}}]}}
+          {
+            "id": "palliatives_used",
+            "type": "radio",
+            "label": "Were dust palliatives used today?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" }
+            ],
+            "defaultValue": "no"
+          },
+          {
+            "id": "palliative_applications",
+            "type": "repeater",
+            "label": "Palliative Applications",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 15,
+            "conditionalDisplay": {
+              "field": "palliatives_used",
+              "operator": "equals",
+              "value": "yes"
+            },
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "product_name",
+                  "type": "text",
+                  "label": "Palliative Type/Product Name",
+                  "required": true,
+                  "validation": { "maxLength": 150 }
+                },
+                {
+                  "id": "application_areas",
+                  "type": "text",
+                  "label": "Application Areas",
+                  "required": true,
+                  "validation": { "maxLength": 300 }
+                },
+                {
+                  "id": "application_rate",
+                  "type": "text",
+                  "label": "Application Rate",
+                  "placeholder": "e.g., 0.5 gal/sq yd",
+                  "required": true,
+                  "validation": { "maxLength": 100 }
+                },
+                {
+                  "id": "application_method",
+                  "type": "select",
+                  "label": "Application Method",
+                  "required": true,
+                  "options": [
+                    { "value": "spray", "label": "Spray" },
+                    { "value": "disk_in", "label": "Disk-In" },
+                    { "value": "other", "label": "Other" }
+                  ]
+                },
+                {
+                  "id": "contractor",
+                  "type": "text",
+                  "label": "Contractor/Applicator",
+                  "required": false,
+                  "validation": { "maxLength": 150 }
+                },
+                {
+                  "id": "batch_lot_number",
+                  "type": "text",
+                  "label": "Batch/Lot Number",
+                  "required": false,
+                  "validation": { "maxLength": 100 }
+                }
+              ]
+            }
+          }
         ]
       },
       {
@@ -94,13 +353,89 @@
         "title": "Control Measures Active",
         "order": 6,
         "fields": [
-          {"id": "speed_limits", "type": "select", "label": "Speed Limits Enforced", "required": true, "options": [{"value": "yes", "label": "Yes - Posted and enforced"}, {"value": "no", "label": "No"}, {"value": "na", "label": "N/A"}]},
-          {"id": "gravel_roads", "type": "select", "label": "Gravel/Rock Cover on Roads", "required": true, "options": [{"value": "adequate", "label": "Adequate coverage"}, {"value": "needs_replenish", "label": "Needs replenishment"}, {"value": "none", "label": "None"}, {"value": "na", "label": "N/A"}]},
-          {"id": "perimeter_fencing", "type": "select", "label": "Perimeter Fencing/Barriers", "required": true, "options": [{"value": "installed", "label": "Installed"}, {"value": "partial", "label": "Partially installed"}, {"value": "none", "label": "None"}, {"value": "na", "label": "N/A"}]},
-          {"id": "stockpile_tarps", "type": "select", "label": "Tarps on Stockpiles", "required": true, "options": [{"value": "all_covered", "label": "All covered"}, {"value": "partial", "label": "Partially covered"}, {"value": "none", "label": "None covered"}, {"value": "na", "label": "N/A"}]},
-          {"id": "tire_washing", "type": "select", "label": "Vehicle Tire Washing Station", "required": true, "options": [{"value": "operational", "label": "Operational"}, {"value": "not_operational", "label": "Not operational"}, {"value": "none", "label": "None installed"}, {"value": "na", "label": "N/A"}]},
-          {"id": "street_sweeping", "type": "radio", "label": "Street Sweeping Performed Today?", "required": true, "options": [{"value": "yes", "label": "Yes"}, {"value": "no", "label": "No"}, {"value": "na", "label": "N/A"}], "defaultValue": "no"},
-          {"id": "haul_truck_covers", "type": "select", "label": "Haul Truck Covers/Tarps", "required": true, "options": [{"value": "all_covered", "label": "All covered"}, {"value": "some_covered", "label": "Some covered"}, {"value": "none_covered", "label": "None covered"}, {"value": "na", "label": "N/A - No haul trucks"}]}
+          {
+            "id": "speed_limits",
+            "type": "select",
+            "label": "Speed Limits Enforced",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes - Posted and enforced" },
+              { "value": "no", "label": "No" },
+              { "value": "na", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "gravel_roads",
+            "type": "select",
+            "label": "Gravel/Rock Cover on Roads",
+            "required": true,
+            "options": [
+              { "value": "adequate", "label": "Adequate coverage" },
+              { "value": "needs_replenish", "label": "Needs replenishment" },
+              { "value": "none", "label": "None" },
+              { "value": "na", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "perimeter_fencing",
+            "type": "select",
+            "label": "Perimeter Fencing/Barriers",
+            "required": true,
+            "options": [
+              { "value": "installed", "label": "Installed" },
+              { "value": "partial", "label": "Partially installed" },
+              { "value": "none", "label": "None" },
+              { "value": "na", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "stockpile_tarps",
+            "type": "select",
+            "label": "Tarps on Stockpiles",
+            "required": true,
+            "options": [
+              { "value": "all_covered", "label": "All covered" },
+              { "value": "partial", "label": "Partially covered" },
+              { "value": "none", "label": "None covered" },
+              { "value": "na", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "tire_washing",
+            "type": "select",
+            "label": "Vehicle Tire Washing Station",
+            "required": true,
+            "options": [
+              { "value": "operational", "label": "Operational" },
+              { "value": "not_operational", "label": "Not operational" },
+              { "value": "none", "label": "None installed" },
+              { "value": "na", "label": "N/A" }
+            ]
+          },
+          {
+            "id": "street_sweeping",
+            "type": "radio",
+            "label": "Street Sweeping Performed Today?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" },
+              { "value": "na", "label": "N/A" }
+            ],
+            "defaultValue": "no"
+          },
+          {
+            "id": "haul_truck_covers",
+            "type": "select",
+            "label": "Haul Truck Covers/Tarps",
+            "required": true,
+            "options": [
+              { "value": "all_covered", "label": "All covered" },
+              { "value": "some_covered", "label": "Some covered" },
+              { "value": "none_covered", "label": "None covered" },
+              { "value": "na", "label": "N/A - No haul trucks" }
+            ]
+          }
         ]
       },
       {
@@ -108,12 +443,63 @@
         "title": "Inspection Results",
         "order": 7,
         "fields": [
-          {"id": "visible_dust", "type": "select", "label": "Visible Dust Emissions Observed", "required": true, "options": [{"value": "none", "label": "None"}, {"value": "minimal", "label": "Minimal - Acceptable"}, {"value": "moderate", "label": "Moderate - Increase controls"}, {"value": "excessive", "label": "Excessive - Immediate action required"}]},
-          {"id": "offsite_migration", "type": "select", "label": "Off-Site Dust Migration", "required": true, "options": [{"value": "none", "label": "None observed"}, {"value": "minor", "label": "Minor - Contained quickly"}, {"value": "major", "label": "Major - Public complaint risk"}]},
-          {"id": "control_effectiveness", "type": "select", "label": "Control Measures Effective", "required": true, "options": [{"value": "yes", "label": "Yes - Controls working well"}, {"value": "marginal", "label": "Marginal - Need enhancement"}, {"value": "no", "label": "No - Controls inadequate"}]},
-          {"id": "deficiencies", "type": "textarea", "label": "Deficiencies Identified", "placeholder": "Describe any deficiencies or issues...", "required": false, "validation": {"maxLength": 1500}},
-          {"id": "corrective_actions", "type": "textarea", "label": "Corrective Actions Taken", "placeholder": "What actions were taken to address issues?", "required": false, "validation": {"maxLength": 1500}},
-          {"id": "action_time", "type": "time", "label": "Time Corrective Actions Completed", "required": false, "helpText": "When were issues resolved?"}
+          {
+            "id": "visible_dust",
+            "type": "select",
+            "label": "Visible Dust Emissions Observed",
+            "required": true,
+            "options": [
+              { "value": "none", "label": "None" },
+              { "value": "minimal", "label": "Minimal - Acceptable" },
+              { "value": "moderate", "label": "Moderate - Increase controls" },
+              { "value": "excessive", "label": "Excessive - Immediate action required" }
+            ]
+          },
+          {
+            "id": "offsite_migration",
+            "type": "select",
+            "label": "Off-Site Dust Migration",
+            "required": true,
+            "options": [
+              { "value": "none", "label": "None observed" },
+              { "value": "minor", "label": "Minor - Contained quickly" },
+              { "value": "major", "label": "Major - Public complaint risk" }
+            ]
+          },
+          {
+            "id": "control_effectiveness",
+            "type": "select",
+            "label": "Control Measures Effective",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes - Controls working well" },
+              { "value": "marginal", "label": "Marginal - Need enhancement" },
+              { "value": "no", "label": "No - Controls inadequate" }
+            ]
+          },
+          {
+            "id": "deficiencies",
+            "type": "textarea",
+            "label": "Deficiencies Identified",
+            "placeholder": "Describe any deficiencies or issues...",
+            "required": false,
+            "validation": { "maxLength": 1500 }
+          },
+          {
+            "id": "corrective_actions",
+            "type": "textarea",
+            "label": "Corrective Actions Taken",
+            "placeholder": "What actions were taken to address issues?",
+            "required": false,
+            "validation": { "maxLength": 1500 }
+          },
+          {
+            "id": "action_time",
+            "type": "time",
+            "label": "Time Corrective Actions Completed",
+            "required": false,
+            "helpText": "When were issues resolved?"
+          }
         ]
       },
       {
@@ -121,7 +507,16 @@
         "title": "Photo Documentation",
         "order": 8,
         "fields": [
-          {"id": "dust_photos", "type": "photo", "label": "Dust Conditions & Control Measures", "required": false, "multiple": true, "maxPhotos": 30, "captureGPS": true, "helpText": "Document dust conditions, control measures, and any violations"}
+          {
+            "id": "dust_photos",
+            "type": "photo",
+            "label": "Dust Conditions & Control Measures",
+            "required": false,
+            "multiple": true,
+            "maxPhotos": 30,
+            "captureGPS": true,
+            "helpText": "Document dust conditions, control measures, and any violations"
+          }
         ]
       },
       {
@@ -129,10 +524,42 @@
         "title": "Compliance Certification",
         "order": 9,
         "fields": [
-          {"id": "overall_compliance", "type": "select", "label": "Overall Compliance Status", "required": true, "options": [{"value": "compliant", "label": "Compliant - No violations"}, {"value": "minor_issues", "label": "Minor Issues - Corrected same day"}, {"value": "violation", "label": "Violation - Air quality impacted"}]},
-          {"id": "notes", "type": "textarea", "label": "Additional Notes/Observations", "placeholder": "Any additional information for the daily log...", "required": false, "validation": {"maxLength": 2000}},
-          {"id": "inspector_signature", "type": "signature", "label": "Inspector/Monitor Signature", "required": true, "captureTimestamp": true, "helpText": "I certify this log accurately reflects dust control activities"},
-          {"id": "dust_monitor_signature", "type": "signature", "label": "Dust Control Monitor Signature (if ≥50 acres)", "required": false, "captureTimestamp": true, "helpText": "Required for projects ≥50 acres actively disturbed", "conditionalDisplay": {"field": "actively_disturbed", "operator": ">=", "value": 50}}
+          {
+            "id": "overall_compliance",
+            "type": "select",
+            "label": "Overall Compliance Status",
+            "required": true,
+            "options": [
+              { "value": "compliant", "label": "Compliant - No violations" },
+              { "value": "minor_issues", "label": "Minor Issues - Corrected same day" },
+              { "value": "violation", "label": "Violation - Air quality impacted" }
+            ]
+          },
+          {
+            "id": "notes",
+            "type": "textarea",
+            "label": "Additional Notes/Observations",
+            "placeholder": "Any additional information for the daily log...",
+            "required": false,
+            "validation": { "maxLength": 2000 }
+          },
+          {
+            "id": "inspector_signature",
+            "type": "signature",
+            "label": "Inspector/Monitor Signature",
+            "required": true,
+            "captureTimestamp": true,
+            "helpText": "I certify this log accurately reflects dust control activities"
+          },
+          {
+            "id": "dust_monitor_signature",
+            "type": "signature",
+            "label": "Dust Control Monitor Signature (if ≥50 acres)",
+            "required": false,
+            "captureTimestamp": true,
+            "helpText": "Required for projects ≥50 acres actively disturbed",
+            "conditionalDisplay": { "field": "actively_disturbed", "operator": ">=", "value": 50 }
+          }
         ]
       }
     ]

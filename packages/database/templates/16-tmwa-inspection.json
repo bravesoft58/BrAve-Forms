@@ -1,0 +1,532 @@
+{
+  "name": "TMWA Inspection Checklist",
+  "description": "Truckee Meadows Water Authority inspection checklist for water quality protection, erosion control verification, and Lake Tahoe watershed TMDL compliance per TMWA regulations",
+  "category": "COMPLIANCE",
+  "version": "1.0.0",
+  "compliance": {
+    "regulation": "TMWA Regulation 21 - Erosion and Sediment Control + Lake Tahoe TMDL",
+    "requiredFields": [
+      "site_name",
+      "site_address",
+      "tmwa_permit_number",
+      "inspection_date",
+      "inspector_name",
+      "swppp_onsite",
+      "training_current",
+      "compliance_status",
+      "next_inspection_date",
+      "inspector_signature"
+    ],
+    "agency": "Truckee Meadows Water Authority"
+  },
+  "schema": {
+    "sections": [
+      {
+        "id": "site_information",
+        "title": "Site Information",
+        "order": 1,
+        "fields": [
+          {
+            "id": "site_name",
+            "type": "text",
+            "label": "Site Name",
+            "required": true,
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "site_address",
+            "type": "text",
+            "label": "Site Address",
+            "required": true,
+            "validation": { "maxLength": 300 }
+          },
+          {
+            "id": "tmwa_permit_number",
+            "type": "text",
+            "label": "TMWA Permit Number",
+            "required": true,
+            "placeholder": "TMWA-YYYY-XXXX",
+            "helpText": "TMWA permit number format",
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "project_type",
+            "type": "select",
+            "label": "Project Type",
+            "required": true,
+            "options": [
+              { "value": "residential", "label": "Residential" },
+              { "value": "commercial", "label": "Commercial" },
+              { "value": "industrial", "label": "Industrial" },
+              { "value": "utilities", "label": "Utilities" },
+              { "value": "roadway", "label": "Roadway" }
+            ]
+          },
+          {
+            "id": "watershed",
+            "type": "select",
+            "label": "Watershed",
+            "required": true,
+            "options": [
+              { "value": "truckee_river", "label": "Truckee River" },
+              { "value": "steamboat_creek", "label": "Steamboat Creek" },
+              { "value": "lake_tahoe", "label": "Lake Tahoe" },
+              { "value": "other", "label": "Other" }
+            ],
+            "helpText": "Select the primary watershed for this project"
+          },
+          {
+            "id": "lake_tahoe_tmdl",
+            "type": "checkbox",
+            "label": "Project in Lake Tahoe TMDL Area",
+            "required": false,
+            "helpText": "Check if project is within Lake Tahoe Total Maximum Daily Load watershed area"
+          },
+          {
+            "id": "contractor_name",
+            "type": "text",
+            "label": "Contractor Name",
+            "required": true,
+            "validation": { "maxLength": 150 }
+          },
+          {
+            "id": "contractor_contact",
+            "type": "text",
+            "label": "Contractor Contact",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "contractor_phone",
+            "type": "text",
+            "label": "Contractor Phone",
+            "required": false,
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "inspection_date",
+            "type": "date",
+            "label": "Inspection Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}"
+          },
+          {
+            "id": "inspector_name",
+            "type": "text",
+            "label": "Inspector Name",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "inspector_cert",
+            "type": "text",
+            "label": "TMWA Certification Number",
+            "required": false,
+            "placeholder": "TMWA-EC-XXXX",
+            "validation": { "maxLength": 30 }
+          }
+        ]
+      },
+      {
+        "id": "erosion_control_measures",
+        "title": "Erosion Control Measures",
+        "description": "Water quality protection per TMWA requirements",
+        "order": 2,
+        "fields": [
+          {
+            "id": "perimeter_controls_installed",
+            "type": "checkbox",
+            "label": "Perimeter erosion controls installed",
+            "required": false
+          },
+          {
+            "id": "sediment_barriers_functional",
+            "type": "checkbox",
+            "label": "Sediment barriers functional",
+            "required": false
+          },
+          {
+            "id": "inlet_protection_installed",
+            "type": "checkbox",
+            "label": "Storm drain inlet protection installed",
+            "required": false
+          },
+          {
+            "id": "inlet_protection_maintained",
+            "type": "checkbox",
+            "label": "Inlet protection properly maintained",
+            "required": false
+          },
+          {
+            "id": "construction_entrance_stabilized",
+            "type": "checkbox",
+            "label": "Construction entrance stabilized",
+            "required": false
+          },
+          {
+            "id": "tracking_prevented",
+            "type": "checkbox",
+            "label": "Sediment tracking prevented",
+            "required": false
+          },
+          {
+            "id": "disturbed_areas_stabilized",
+            "type": "checkbox",
+            "label": "Disturbed areas stabilized or covered",
+            "required": false
+          },
+          {
+            "id": "stockpiles_protected",
+            "type": "checkbox",
+            "label": "Stockpiles covered or protected",
+            "required": false
+          },
+          {
+            "id": "slopes_protected",
+            "type": "checkbox",
+            "label": "Slopes protected with BMPs",
+            "required": false
+          },
+          {
+            "id": "drainage_controls_functional",
+            "type": "checkbox",
+            "label": "Drainage controls functional",
+            "required": false
+          },
+          {
+            "id": "discharge_clear",
+            "type": "checkbox",
+            "label": "No sediment in discharge",
+            "required": false
+          },
+          {
+            "id": "no_offsite_impacts",
+            "type": "checkbox",
+            "label": "No offsite water quality impacts",
+            "required": false
+          },
+          {
+            "id": "bmps_maintained",
+            "type": "checkbox",
+            "label": "All BMPs properly maintained",
+            "required": false
+          },
+          {
+            "id": "erosion_control_blankets",
+            "type": "checkbox",
+            "label": "Erosion control blankets installed on steep slopes",
+            "required": false
+          },
+          {
+            "id": "vegetation_established",
+            "type": "checkbox",
+            "label": "Vegetation established on completed areas",
+            "required": false
+          }
+        ]
+      },
+      {
+        "id": "sediment_control_measures",
+        "title": "Sediment Control Measures",
+        "order": 3,
+        "fields": [
+          {
+            "id": "sediment_traps_functional",
+            "type": "checkbox",
+            "label": "Sediment traps/basins functional",
+            "required": false
+          },
+          {
+            "id": "check_dams_installed",
+            "type": "checkbox",
+            "label": "Check dams installed in swales",
+            "required": false
+          },
+          {
+            "id": "silt_fence_intact",
+            "type": "checkbox",
+            "label": "Silt fence intact and properly embedded",
+            "required": false
+          },
+          {
+            "id": "filter_fabric_clean",
+            "type": "checkbox",
+            "label": "Filter fabric clean and functional",
+            "required": false
+          },
+          {
+            "id": "sediment_removed",
+            "type": "checkbox",
+            "label": "Accumulated sediment removed",
+            "required": false
+          },
+          {
+            "id": "overflow_protection",
+            "type": "checkbox",
+            "label": "Overflow protection in place",
+            "required": false
+          },
+          {
+            "id": "no_bypass",
+            "type": "checkbox",
+            "label": "No evidence of BMP bypass",
+            "required": false
+          },
+          {
+            "id": "proper_installation",
+            "type": "checkbox",
+            "label": "BMPs properly installed per plans",
+            "required": false
+          },
+          {
+            "id": "adequate_capacity",
+            "type": "checkbox",
+            "label": "BMPs have adequate capacity",
+            "required": false
+          },
+          {
+            "id": "replacement_materials_onsite",
+            "type": "checkbox",
+            "label": "Replacement materials available on site",
+            "required": false
+          }
+        ]
+      },
+      {
+        "id": "water_quality_protection",
+        "title": "Water Quality Protection",
+        "description": "TMWA-specific water quality requirements",
+        "order": 4,
+        "fields": [
+          {
+            "id": "concrete_washout_designated",
+            "type": "checkbox",
+            "label": "Concrete washout area designated and posted",
+            "required": false
+          },
+          {
+            "id": "washout_contained",
+            "type": "checkbox",
+            "label": "Washout area contained and functional",
+            "required": false
+          },
+          {
+            "id": "no_concrete_discharge",
+            "type": "checkbox",
+            "label": "No concrete discharge to waters",
+            "required": false
+          },
+          {
+            "id": "chemical_storage_compliant",
+            "type": "checkbox",
+            "label": "Chemical storage compliant",
+            "required": false
+          },
+          {
+            "id": "fuel_storage_compliant",
+            "type": "checkbox",
+            "label": "Fuel storage in secondary containment",
+            "required": false
+          },
+          {
+            "id": "spill_kit_available",
+            "type": "checkbox",
+            "label": "Spill prevention kit available",
+            "required": false
+          },
+          {
+            "id": "no_spills_observed",
+            "type": "checkbox",
+            "label": "No spills or leaks observed",
+            "required": false
+          },
+          {
+            "id": "equipment_clean",
+            "type": "checkbox",
+            "label": "Equipment free of leaks",
+            "required": false
+          },
+          {
+            "id": "dewatering_permit_current",
+            "type": "checkbox",
+            "label": "Dewatering permit current (if applicable)",
+            "required": false
+          },
+          {
+            "id": "dewatering_discharge_clear",
+            "type": "checkbox",
+            "label": "Dewatering discharge clear (if applicable)",
+            "required": false
+          },
+          {
+            "id": "waterbody_protection",
+            "type": "checkbox",
+            "label": "Waterbodies protected with buffers",
+            "required": false
+          },
+          {
+            "id": "lake_tahoe_bmps",
+            "type": "checkbox",
+            "label": "Lake Tahoe TMDL BMPs implemented",
+            "required": false,
+            "conditionalDisplay": {
+              "field": "lake_tahoe_tmdl",
+              "operator": "equals",
+              "value": true
+            },
+            "helpText": "Additional BMPs required for Lake Tahoe watershed per TMDL regulations"
+          }
+        ]
+      },
+      {
+        "id": "findings_corrective_actions",
+        "title": "Findings and Corrective Actions",
+        "order": 5,
+        "fields": [
+          {
+            "id": "findings",
+            "type": "repeater",
+            "label": "Inspection Findings",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 20,
+            "helpText": "Document any deficiencies found and required corrective actions",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "finding_date",
+                  "type": "date",
+                  "label": "Finding Date",
+                  "required": true
+                },
+                {
+                  "id": "deficiency_description",
+                  "type": "textarea",
+                  "label": "Deficiency Description",
+                  "required": true,
+                  "validation": { "maxLength": 1000 }
+                },
+                {
+                  "id": "location",
+                  "type": "text",
+                  "label": "Location on Site",
+                  "required": false,
+                  "validation": { "maxLength": 200 }
+                },
+                {
+                  "id": "severity",
+                  "type": "select",
+                  "label": "Severity",
+                  "required": true,
+                  "options": [
+                    { "value": "minor", "label": "Minor" },
+                    { "value": "moderate", "label": "Moderate" },
+                    { "value": "major", "label": "Major" }
+                  ]
+                },
+                {
+                  "id": "corrective_action_required",
+                  "type": "textarea",
+                  "label": "Corrective Action Required",
+                  "required": true,
+                  "validation": { "maxLength": 1000 }
+                },
+                {
+                  "id": "responsible_party",
+                  "type": "text",
+                  "label": "Responsible Party",
+                  "required": false,
+                  "validation": { "maxLength": 100 }
+                },
+                {
+                  "id": "completion_deadline",
+                  "type": "date",
+                  "label": "Completion Deadline",
+                  "required": false
+                },
+                {
+                  "id": "corrective_action_completed",
+                  "type": "checkbox",
+                  "label": "Corrective Action Completed",
+                  "required": false
+                },
+                {
+                  "id": "completion_date",
+                  "type": "date",
+                  "label": "Completion Date",
+                  "required": false,
+                  "conditionalDisplay": {
+                    "field": "corrective_action_completed",
+                    "operator": "equals",
+                    "value": true
+                  }
+                },
+                {
+                  "id": "verification_notes",
+                  "type": "textarea",
+                  "label": "Verification Notes",
+                  "required": false,
+                  "validation": { "maxLength": 500 }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "tmwa_certification",
+        "title": "TMWA Certification",
+        "order": 6,
+        "fields": [
+          {
+            "id": "swppp_onsite",
+            "type": "checkbox",
+            "label": "SWPPP Available on Site",
+            "required": true,
+            "helpText": "Stormwater Pollution Prevention Plan must be accessible at the project site"
+          },
+          {
+            "id": "training_current",
+            "type": "checkbox",
+            "label": "Crew Training Current",
+            "required": true,
+            "helpText": "Site personnel trained in erosion and sediment control"
+          },
+          {
+            "id": "compliance_status",
+            "type": "select",
+            "label": "Compliance Status",
+            "required": true,
+            "options": [
+              { "value": "in_compliance", "label": "In Compliance" },
+              { "value": "minor_deficiencies", "label": "Minor Deficiencies" },
+              { "value": "major_deficiencies", "label": "Major Deficiencies" }
+            ]
+          },
+          {
+            "id": "next_inspection_date",
+            "type": "date",
+            "label": "Next Inspection Date",
+            "required": true
+          },
+          {
+            "id": "inspector_signature",
+            "type": "signature",
+            "label": "Inspector Signature",
+            "required": true,
+            "captureTimestamp": true,
+            "helpText": "I certify this inspection was conducted per TMWA requirements"
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "25-35 minutes",
+    "fieldOptimization": "mobile-friendly with large touch targets",
+    "industryStandard": "TMWA Erosion and Sediment Control Program",
+    "targetRole": "TMWA Inspector, Environmental Compliance Manager"
+  }
+}

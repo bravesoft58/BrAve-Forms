@@ -1,0 +1,594 @@
+{
+  "name": "Visual Assessment Report",
+  "description": "Detailed EPA MSGP visual assessment report with laboratory analysis, monitoring data summary, and corrective action tracking for comprehensive stormwater compliance reporting",
+  "category": "COMPLIANCE",
+  "version": "1.0.0",
+  "compliance": {
+    "regulation": "EPA MSGP (Multi-Sector General Permit) - Detailed Visual Assessment Reporting",
+    "requiredFields": [
+      "facility_name",
+      "facility_address",
+      "npdes_permit_number",
+      "facility_contact_name",
+      "reporting_period_start",
+      "reporting_period_end",
+      "report_date",
+      "total_observations_conducted",
+      "preparer_name",
+      "preparer_date",
+      "authorized_signatory_name",
+      "authorized_signatory_signature"
+    ],
+    "agency": "EPA"
+  },
+  "schema": {
+    "sections": [
+      {
+        "id": "facility_permit_information",
+        "title": "Facility and Permit Information",
+        "order": 1,
+        "fields": [
+          {
+            "id": "facility_name",
+            "type": "text",
+            "label": "Facility Name",
+            "required": true,
+            "validation": { "maxLength": 200 }
+          },
+          {
+            "id": "facility_address",
+            "type": "text",
+            "label": "Facility Address",
+            "required": true,
+            "validation": { "maxLength": 300 }
+          },
+          {
+            "id": "city",
+            "type": "text",
+            "label": "City",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "state",
+            "type": "select",
+            "label": "State",
+            "required": false,
+            "options": [
+              { "value": "NV", "label": "Nevada" },
+              { "value": "CA", "label": "California" },
+              { "value": "AZ", "label": "Arizona" },
+              { "value": "UT", "label": "Utah" },
+              { "value": "OR", "label": "Oregon" },
+              { "value": "ID", "label": "Idaho" }
+            ]
+          },
+          {
+            "id": "zip_code",
+            "type": "text",
+            "label": "ZIP Code",
+            "required": false,
+            "validation": { "maxLength": 10 }
+          },
+          {
+            "id": "npdes_permit_number",
+            "type": "text",
+            "label": "NPDES Permit Number",
+            "required": true,
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "facility_contact_name",
+            "type": "text",
+            "label": "Facility Contact Name",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "contact_phone",
+            "type": "tel",
+            "label": "Contact Phone",
+            "required": false,
+            "validation": { "maxLength": 20 }
+          },
+          {
+            "id": "contact_email",
+            "type": "email",
+            "label": "Contact Email",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "reporting_period_start",
+            "type": "date",
+            "label": "Reporting Period Start",
+            "required": true
+          },
+          {
+            "id": "reporting_period_end",
+            "type": "date",
+            "label": "Reporting Period End",
+            "required": true
+          },
+          {
+            "id": "report_date",
+            "type": "date",
+            "label": "Report Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}"
+          }
+        ]
+      },
+      {
+        "id": "visual_assessment_observations",
+        "title": "Visual Assessment Observations",
+        "description": "Record each visual assessment conducted during the reporting period",
+        "order": 2,
+        "fields": [
+          {
+            "id": "observations",
+            "type": "repeater",
+            "label": "Visual Assessment Observations",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 50,
+            "helpText": "Add one entry for each visual assessment conducted",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "observation_date",
+                  "type": "date",
+                  "label": "Observation Date",
+                  "required": true
+                },
+                {
+                  "id": "observation_time",
+                  "type": "time",
+                  "label": "Observation Time",
+                  "required": true
+                },
+                {
+                  "id": "discharge_point_id",
+                  "type": "text",
+                  "label": "Discharge Point ID",
+                  "required": true,
+                  "validation": { "maxLength": 50 }
+                },
+                {
+                  "id": "weather_past_72h",
+                  "type": "textarea",
+                  "label": "Weather Conditions Past 72 Hours",
+                  "required": false,
+                  "validation": { "maxLength": 500 }
+                },
+                {
+                  "id": "discharge_present",
+                  "type": "checkbox",
+                  "label": "Discharge Present",
+                  "required": false
+                },
+                {
+                  "id": "discharge_color",
+                  "type": "select",
+                  "label": "Discharge Color",
+                  "required": false,
+                  "options": [
+                    { "value": "clear", "label": "Clear" },
+                    { "value": "brown", "label": "Brown" },
+                    { "value": "gray", "label": "Gray" },
+                    { "value": "green", "label": "Green" },
+                    { "value": "yellow", "label": "Yellow" },
+                    { "value": "red", "label": "Red" },
+                    { "value": "black", "label": "Black" },
+                    { "value": "other", "label": "Other" }
+                  ]
+                },
+                {
+                  "id": "discharge_odor",
+                  "type": "select",
+                  "label": "Discharge Odor",
+                  "required": false,
+                  "options": [
+                    { "value": "none", "label": "None" },
+                    { "value": "petroleum", "label": "Petroleum" },
+                    { "value": "chemical", "label": "Chemical" },
+                    { "value": "sewage", "label": "Sewage" },
+                    { "value": "fishy", "label": "Fishy" },
+                    { "value": "rotten_eggs", "label": "Rotten Eggs" },
+                    { "value": "other", "label": "Other" }
+                  ]
+                },
+                {
+                  "id": "discharge_clarity",
+                  "type": "select",
+                  "label": "Discharge Clarity",
+                  "required": false,
+                  "options": [
+                    { "value": "clear", "label": "Clear" },
+                    { "value": "slightly_cloudy", "label": "Slightly Cloudy" },
+                    { "value": "cloudy", "label": "Cloudy" },
+                    { "value": "opaque", "label": "Opaque" }
+                  ]
+                },
+                {
+                  "id": "floating_solids",
+                  "type": "checkbox",
+                  "label": "Floating Solids",
+                  "required": false
+                },
+                {
+                  "id": "suspended_solids",
+                  "type": "checkbox",
+                  "label": "Suspended Solids",
+                  "required": false
+                },
+                {
+                  "id": "foam",
+                  "type": "checkbox",
+                  "label": "Foam",
+                  "required": false
+                },
+                {
+                  "id": "oil_sheen",
+                  "type": "checkbox",
+                  "label": "Oil Sheen",
+                  "required": false
+                },
+                {
+                  "id": "other_obvious_indicators",
+                  "type": "textarea",
+                  "label": "Other Obvious Indicators",
+                  "required": false,
+                  "validation": { "maxLength": 500 }
+                },
+                {
+                  "id": "visual_assessment_passed",
+                  "type": "checkbox",
+                  "label": "Visual Assessment Indicates Acceptable Discharge Quality",
+                  "required": false
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "laboratory_analysis",
+        "title": "Laboratory Analysis",
+        "description": "Optional laboratory testing when visual assessment indicates potential issues",
+        "order": 3,
+        "fields": [
+          {
+            "id": "lab_results",
+            "type": "repeater",
+            "label": "Laboratory Results",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 20,
+            "helpText": "Add lab results when visual assessment indicates need for testing",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "sample_date",
+                  "type": "date",
+                  "label": "Sample Date",
+                  "required": true
+                },
+                {
+                  "id": "sample_time",
+                  "type": "time",
+                  "label": "Sample Time",
+                  "required": true
+                },
+                {
+                  "id": "discharge_point_sampled",
+                  "type": "text",
+                  "label": "Discharge Point Sampled",
+                  "required": true,
+                  "validation": { "maxLength": 50 }
+                },
+                {
+                  "id": "lab_name",
+                  "type": "text",
+                  "label": "Laboratory Name",
+                  "required": false,
+                  "validation": { "maxLength": 150 }
+                },
+                {
+                  "id": "lab_cert_number",
+                  "type": "text",
+                  "label": "Lab Certification Number",
+                  "required": false,
+                  "validation": { "maxLength": 50 }
+                },
+                {
+                  "id": "ph_value",
+                  "type": "number",
+                  "label": "pH Value",
+                  "required": false,
+                  "validation": { "min": 0, "max": 14, "precision": 0.1 }
+                },
+                {
+                  "id": "turbidity_ntu",
+                  "type": "number",
+                  "label": "Turbidity (NTU)",
+                  "required": false,
+                  "validation": { "min": 0, "max": 10000, "precision": 0.1 },
+                  "helpText": "Nephelometric Turbidity Units"
+                },
+                {
+                  "id": "tss_mg_l",
+                  "type": "number",
+                  "label": "Total Suspended Solids (mg/L)",
+                  "required": false,
+                  "validation": { "min": 0, "max": 10000, "precision": 1 }
+                },
+                {
+                  "id": "oil_grease_mg_l",
+                  "type": "number",
+                  "label": "Oil and Grease (mg/L)",
+                  "required": false,
+                  "validation": { "min": 0, "max": 1000, "precision": 0.1 }
+                },
+                {
+                  "id": "bod_mg_l",
+                  "type": "number",
+                  "label": "Biochemical Oxygen Demand (mg/L)",
+                  "required": false,
+                  "validation": { "min": 0, "max": 1000, "precision": 1 }
+                },
+                {
+                  "id": "cod_mg_l",
+                  "type": "number",
+                  "label": "Chemical Oxygen Demand (mg/L)",
+                  "required": false,
+                  "validation": { "min": 0, "max": 5000, "precision": 1 }
+                },
+                {
+                  "id": "other_parameters_tested",
+                  "type": "textarea",
+                  "label": "Other Parameters Tested",
+                  "required": false,
+                  "validation": { "maxLength": 500 }
+                },
+                {
+                  "id": "exceedances_observed",
+                  "type": "checkbox",
+                  "label": "Exceedances Observed",
+                  "required": false
+                },
+                {
+                  "id": "exceedance_description",
+                  "type": "textarea",
+                  "label": "Exceedance Description",
+                  "required": false,
+                  "validation": { "maxLength": 1000 },
+                  "conditionalDisplay": {
+                    "field": "exceedances_observed",
+                    "operator": "equals",
+                    "value": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "corrective_actions",
+        "title": "Corrective Actions",
+        "description": "Track corrective actions taken in response to visual assessment or lab findings",
+        "order": 4,
+        "fields": [
+          {
+            "id": "corrective_actions",
+            "type": "repeater",
+            "label": "Corrective Actions",
+            "required": false,
+            "minItems": 0,
+            "maxItems": 25,
+            "helpText": "Document all corrective actions taken during reporting period",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "action_date",
+                  "type": "date",
+                  "label": "Action Date",
+                  "required": true
+                },
+                {
+                  "id": "deficiency_identified",
+                  "type": "textarea",
+                  "label": "Deficiency Identified",
+                  "required": true,
+                  "validation": { "maxLength": 1000 }
+                },
+                {
+                  "id": "corrective_action_description",
+                  "type": "textarea",
+                  "label": "Corrective Action Description",
+                  "required": true,
+                  "validation": { "maxLength": 1500 }
+                },
+                {
+                  "id": "responsible_party",
+                  "type": "text",
+                  "label": "Responsible Party",
+                  "required": false,
+                  "validation": { "maxLength": 100 }
+                },
+                {
+                  "id": "completion_deadline",
+                  "type": "date",
+                  "label": "Completion Deadline",
+                  "required": false
+                },
+                {
+                  "id": "action_status",
+                  "type": "select",
+                  "label": "Action Status",
+                  "required": true,
+                  "options": [
+                    { "value": "planned", "label": "Planned" },
+                    { "value": "in_progress", "label": "In Progress" },
+                    { "value": "completed", "label": "Completed" }
+                  ]
+                },
+                {
+                  "id": "completion_date",
+                  "type": "date",
+                  "label": "Completion Date",
+                  "required": false,
+                  "conditionalDisplay": {
+                    "field": "action_status",
+                    "operator": "equals",
+                    "value": "completed"
+                  }
+                },
+                {
+                  "id": "verification_method",
+                  "type": "textarea",
+                  "label": "Verification Method",
+                  "required": false,
+                  "validation": { "maxLength": 500 },
+                  "placeholder": "How corrective action effectiveness was verified"
+                },
+                {
+                  "id": "followup_required",
+                  "type": "checkbox",
+                  "label": "Follow-up Required",
+                  "required": false
+                },
+                {
+                  "id": "followup_date",
+                  "type": "date",
+                  "label": "Follow-up Date",
+                  "required": false,
+                  "conditionalDisplay": {
+                    "field": "followup_required",
+                    "operator": "equals",
+                    "value": true
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "monitoring_data_summary",
+        "title": "Monitoring Data Summary",
+        "description": "Summary statistics for the reporting period",
+        "order": 5,
+        "fields": [
+          {
+            "id": "total_observations_conducted",
+            "type": "number",
+            "label": "Total Observations Conducted",
+            "required": true,
+            "validation": { "min": 0, "max": 1000 }
+          },
+          {
+            "id": "observations_with_discharge",
+            "type": "number",
+            "label": "Observations With Discharge",
+            "required": false,
+            "validation": { "min": 0, "max": 1000 }
+          },
+          {
+            "id": "observations_passed_visual",
+            "type": "number",
+            "label": "Observations Passed Visual Assessment",
+            "required": false,
+            "validation": { "min": 0, "max": 1000 }
+          },
+          {
+            "id": "observations_failed_visual",
+            "type": "number",
+            "label": "Observations Failed Visual Assessment",
+            "required": false,
+            "validation": { "min": 0, "max": 1000 }
+          },
+          {
+            "id": "lab_samples_collected",
+            "type": "number",
+            "label": "Lab Samples Collected",
+            "required": false,
+            "validation": { "min": 0, "max": 500 }
+          },
+          {
+            "id": "lab_exceedances_detected",
+            "type": "number",
+            "label": "Lab Exceedances Detected",
+            "required": false,
+            "validation": { "min": 0, "max": 500 }
+          },
+          {
+            "id": "corrective_actions_implemented",
+            "type": "number",
+            "label": "Corrective Actions Implemented",
+            "required": false,
+            "validation": { "min": 0, "max": 500 }
+          },
+          {
+            "id": "facility_in_compliance",
+            "type": "checkbox",
+            "label": "Facility in Compliance with MSGP Requirements",
+            "required": false,
+            "helpText": "Check if facility is in compliance after corrective actions"
+          }
+        ]
+      },
+      {
+        "id": "certification_signature",
+        "title": "Certification and Signature",
+        "order": 6,
+        "fields": [
+          {
+            "id": "preparer_name",
+            "type": "text",
+            "label": "Report Prepared By",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "preparer_title",
+            "type": "text",
+            "label": "Preparer Title",
+            "required": false,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "preparer_date",
+            "type": "date",
+            "label": "Preparer Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}"
+          },
+          {
+            "id": "authorized_signatory_name",
+            "type": "text",
+            "label": "Authorized Signatory Name",
+            "required": true,
+            "validation": { "maxLength": 100 }
+          },
+          {
+            "id": "authorized_signatory_signature",
+            "type": "signature",
+            "label": "Authorized Signatory Signature",
+            "required": true,
+            "captureTimestamp": true,
+            "helpText": "Signature of facility authorized signatory"
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "45-60 minutes",
+    "fieldOptimization": "desktop-optimized for detailed data entry",
+    "industryStandard": "EPA MSGP Detailed Reporting",
+    "targetRole": "Environmental Manager, Compliance Officer"
+  }
+}
