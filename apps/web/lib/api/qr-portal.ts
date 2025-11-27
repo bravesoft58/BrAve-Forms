@@ -70,7 +70,7 @@ export class QRPortalAPIError extends Error {
   constructor(
     message: string,
     public readonly code: string,
-    public readonly context?: Record<string, unknown>,
+    public readonly context?: Record<string, unknown>
   ) {
     super(message);
     this.name = 'QRPortalAPIError';
@@ -83,7 +83,7 @@ export class QRPortalAPIError extends Error {
 async function executeGraphQL<T>(
   query: string,
   variables?: Record<string, unknown>,
-  authToken?: string,
+  authToken?: string
 ): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ async function executeGraphQL<T>(
     throw new QRPortalAPIError(
       `Network error: ${response.status} ${response.statusText}`,
       'NETWORK_ERROR',
-      { status: response.status },
+      { status: response.status }
     );
   }
 
@@ -114,7 +114,7 @@ async function executeGraphQL<T>(
     throw new QRPortalAPIError(
       error.message || 'GraphQL error',
       error.extensions?.code || 'GRAPHQL_ERROR',
-      { errors: json.errors },
+      { errors: json.errors }
     );
   }
 
@@ -131,7 +131,7 @@ async function executeGraphQL<T>(
  */
 export async function generateQRToken(
   input: GenerateQRTokenInput,
-  authToken: string,
+  authToken: string
 ): Promise<QRToken> {
   const query = `
     mutation GenerateQRToken($input: GenerateQRTokenInput!) {
@@ -152,11 +152,7 @@ export async function generateQRToken(
     }
   `;
 
-  const data = await executeGraphQL<{ generateQRToken: QRToken }>(
-    query,
-    { input },
-    authToken,
-  );
+  const data = await executeGraphQL<{ generateQRToken: QRToken }>(query, { input }, authToken);
 
   return data.generateQRToken;
 }
@@ -165,10 +161,7 @@ export async function generateQRToken(
  * Revoke a specific QR token
  * Requires authentication
  */
-export async function revokeQRToken(
-  tokenId: string,
-  authToken: string,
-): Promise<QRToken> {
+export async function revokeQRToken(tokenId: string, authToken: string): Promise<QRToken> {
   const query = `
     mutation RevokeQRToken($tokenId: String!) {
       revokeQRToken(tokenId: $tokenId) {
@@ -188,11 +181,7 @@ export async function revokeQRToken(
     }
   `;
 
-  const data = await executeGraphQL<{ revokeQRToken: QRToken }>(
-    query,
-    { tokenId },
-    authToken,
-  );
+  const data = await executeGraphQL<{ revokeQRToken: QRToken }>(query, { tokenId }, authToken);
 
   return data.revokeQRToken;
 }
@@ -203,7 +192,7 @@ export async function revokeQRToken(
  */
 export async function revokeAllProjectTokens(
   projectId: string,
-  authToken: string,
+  authToken: string
 ): Promise<RevokeAllResult> {
   const query = `
     mutation RevokeAllProjectTokens($projectId: String!) {
@@ -217,7 +206,7 @@ export async function revokeAllProjectTokens(
   const data = await executeGraphQL<{ revokeAllProjectTokens: RevokeAllResult }>(
     query,
     { projectId },
-    authToken,
+    authToken
   );
 
   return data.revokeAllProjectTokens;
@@ -227,10 +216,7 @@ export async function revokeAllProjectTokens(
  * Get all QR tokens for a project
  * Requires authentication
  */
-export async function getProjectQRTokens(
-  projectId: string,
-  authToken: string,
-): Promise<QRToken[]> {
+export async function getProjectQRTokens(projectId: string, authToken: string): Promise<QRToken[]> {
   const query = `
     query GetProjectQRTokens($projectId: String!) {
       getProjectQRTokens(projectId: $projectId) {
@@ -253,7 +239,7 @@ export async function getProjectQRTokens(
   const data = await executeGraphQL<{ getProjectQRTokens: QRToken[] }>(
     query,
     { projectId },
-    authToken,
+    authToken
   );
 
   return data.getProjectQRTokens;
@@ -294,10 +280,7 @@ export async function verifyQRToken(token: string): Promise<VerifiedTokenPayload
     }
   `;
 
-  const data = await executeGraphQL<{ verifyQRToken: VerifiedTokenPayload }>(
-    query,
-    { token },
-  );
+  const data = await executeGraphQL<{ verifyQRToken: VerifiedTokenPayload }>(query, { token });
 
   // Cache the verified token for offline use (cache for 24 hours from now)
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
@@ -311,9 +294,7 @@ export async function verifyQRToken(token: string): Promise<VerifiedTokenPayload
  * PUBLIC - requires valid token
  * Includes offline caching
  */
-export async function getInspectorProjectInfo(
-  token: string,
-): Promise<InspectorProjectInfo> {
+export async function getInspectorProjectInfo(token: string): Promise<InspectorProjectInfo> {
   // Try to get cached project info first
   const cached = await getCachedProjectInfo(token);
   if (cached) {
@@ -335,10 +316,9 @@ export async function getInspectorProjectInfo(
     }
   `;
 
-  const data = await executeGraphQL<{ getInspectorProjectInfo: InspectorProjectInfo }>(
-    query,
-    { token },
-  );
+  const data = await executeGraphQL<{ getInspectorProjectInfo: InspectorProjectInfo }>(query, {
+    token,
+  });
 
   // Cache project info for offline use
   await cacheProjectInfo(token, data.getInspectorProjectInfo);
@@ -395,7 +375,7 @@ function openDatabase(): Promise<IDBDatabase> {
 async function cacheVerifiedToken(
   token: string,
   payload: VerifiedTokenPayload,
-  expiresAt: string,
+  expiresAt: string
 ): Promise<void> {
   try {
     const db = await openDatabase();
@@ -459,10 +439,7 @@ async function removeCachedToken(token: string): Promise<void> {
 /**
  * Cache project info for offline use
  */
-async function cacheProjectInfo(
-  token: string,
-  projectInfo: InspectorProjectInfo,
-): Promise<void> {
+async function cacheProjectInfo(token: string, projectInfo: InspectorProjectInfo): Promise<void> {
   try {
     const db = await openDatabase();
     const transaction = db.transaction(PROJECT_STORE_NAME, 'readwrite');
@@ -537,4 +514,131 @@ export async function hasValidOfflineToken(token: string): Promise<boolean> {
 
   const expiresAt = new Date(cached.expiresAt);
   return expiresAt > new Date();
+}
+
+// ============================================================================
+// INSPECTOR PORTAL DATA APIs (for viewing submissions and photos)
+// ============================================================================
+
+/**
+ * Form field in a submission
+ */
+export interface InspectorFormField {
+  id: string;
+  name: string;
+  label: string;
+  type: string;
+  value: string | number | boolean | string[] | null;
+}
+
+/**
+ * Form section containing fields
+ */
+export interface InspectorFormSection {
+  id: string;
+  title: string;
+  fields: InspectorFormField[];
+}
+
+/**
+ * Form submission for inspector portal
+ */
+export interface InspectorSubmission {
+  id: string;
+  templateName: string;
+  templateCategory: string;
+  status: 'DRAFT' | 'SUBMITTED' | 'REVIEWED' | 'APPROVED' | 'REJECTED';
+  submittedBy: string;
+  submittedAt: string;
+  sections: InspectorFormSection[];
+}
+
+/**
+ * GPS location for photos
+ */
+export interface InspectorGeoLocation {
+  latitude: number;
+  longitude: number;
+  altitude?: number;
+}
+
+/**
+ * Photo for inspector portal
+ */
+export interface InspectorPhoto {
+  id: string;
+  url: string;
+  thumbnailUrl: string;
+  caption?: string;
+  takenAt: string;
+  uploadedBy: string;
+  location?: InspectorGeoLocation;
+  fileSize: number;
+  mimeType: string;
+}
+
+/**
+ * Get form submissions for inspector portal
+ * PUBLIC - requires valid token
+ */
+export async function getInspectorSubmissions(token: string): Promise<InspectorSubmission[]> {
+  const query = `
+    query GetInspectorSubmissions($token: String!) {
+      getInspectorSubmissions(token: $token) {
+        id
+        templateName
+        templateCategory
+        status
+        submittedBy
+        submittedAt
+        sections {
+          id
+          title
+          fields {
+            id
+            name
+            label
+            type
+            value
+          }
+        }
+      }
+    }
+  `;
+
+  const data = await executeGraphQL<{ getInspectorSubmissions: InspectorSubmission[] }>(query, {
+    token,
+  });
+
+  return data.getInspectorSubmissions;
+}
+
+/**
+ * Get photos for inspector portal
+ * PUBLIC - requires valid token
+ */
+export async function getInspectorPhotos(token: string): Promise<InspectorPhoto[]> {
+  const query = `
+    query GetInspectorPhotos($token: String!) {
+      getInspectorPhotos(token: $token) {
+        id
+        url
+        thumbnailUrl
+        caption
+        takenAt
+        uploadedBy
+        location {
+          latitude
+          longitude
+          altitude
+        }
+        fileSize
+        mimeType
+      }
+    }
+  `;
+
+  const data = await executeGraphQL<{ getInspectorPhotos: InspectorPhoto[] }>(query, { token });
+
+  return data.getInspectorPhotos;
 }

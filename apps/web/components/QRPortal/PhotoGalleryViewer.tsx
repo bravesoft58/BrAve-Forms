@@ -14,6 +14,9 @@ import {
   ActionIcon,
   Box,
   Tooltip,
+  Loader,
+  Alert,
+  Image,
   useMantineTheme,
 } from '@mantine/core';
 import {
@@ -26,35 +29,24 @@ import {
   IconDownload,
   IconZoomIn,
   IconUser,
+  IconAlertCircle,
 } from '@tabler/icons-react';
-
-interface GeoLocation {
-  latitude: number;
-  longitude: number;
-  altitude?: number;
-}
-
-interface Photo {
-  id: string;
-  url: string;
-  thumbnailUrl: string;
-  caption?: string;
-  takenAt: string;
-  uploadedBy: string;
-  location?: GeoLocation;
-  fileSize: number;
-  mimeType: string;
-}
+import {
+  useInspectorPhotos,
+  InspectorPhoto,
+  InspectorGeoLocation,
+} from '@/hooks/useInspectorPortal';
 
 interface PhotoGalleryViewerProps {
   projectId: string;
+  token: string;
 }
 
 /**
- * PhotoGalleryViewer Component - Sprint 4 ISSUE-104
+ * PhotoGalleryViewer Component - Sprint 4 ISSUE-104, Updated Sprint 5 ISSUE-165
  *
  * Read-only photo gallery for the inspector portal.
- * Displays inspection photos with GPS coordinates and lightbox view.
+ * Now fetches real data from the backend API.
  *
  * Features:
  * - Grid view with thumbnails
@@ -62,97 +54,14 @@ interface PhotoGalleryViewerProps {
  * - GPS location display (lat/lng)
  * - Photo metadata (date, caption, size)
  * - Navigation between photos
+ * - Loading and error states
  */
-export function PhotoGalleryViewer({ projectId: _projectId }: PhotoGalleryViewerProps) {
+export function PhotoGalleryViewer({ projectId: _projectId, token }: PhotoGalleryViewerProps) {
   const theme = useMantineTheme();
-  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<InspectorPhoto | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  // Mock photos for development
-  // TODO: Replace with actual GraphQL query when backend integration is complete
-  const mockPhotos: Photo[] = [
-    {
-      id: 'photo_001',
-      url: '/placeholder-photo-1.jpg',
-      thumbnailUrl: '/placeholder-photo-1-thumb.jpg',
-      caption: 'Sediment basin - east side',
-      takenAt: '2025-11-25T10:30:00Z',
-      uploadedBy: 'John Inspector',
-      location: {
-        latitude: 39.5296,
-        longitude: -119.8138,
-        altitude: 1373,
-      },
-      fileSize: 2456789,
-      mimeType: 'image/jpeg',
-    },
-    {
-      id: 'photo_002',
-      url: '/placeholder-photo-2.jpg',
-      thumbnailUrl: '/placeholder-photo-2-thumb.jpg',
-      caption: 'Erosion control measures - north entrance',
-      takenAt: '2025-11-25T10:45:00Z',
-      uploadedBy: 'John Inspector',
-      location: {
-        latitude: 39.5301,
-        longitude: -119.8142,
-      },
-      fileSize: 1987654,
-      mimeType: 'image/jpeg',
-    },
-    {
-      id: 'photo_003',
-      url: '/placeholder-photo-3.jpg',
-      thumbnailUrl: '/placeholder-photo-3-thumb.jpg',
-      caption: 'Silt fence installation',
-      takenAt: '2025-11-24T14:20:00Z',
-      uploadedBy: 'Jane Compliance',
-      location: {
-        latitude: 39.5289,
-        longitude: -119.8150,
-      },
-      fileSize: 3124567,
-      mimeType: 'image/jpeg',
-    },
-    {
-      id: 'photo_004',
-      url: '/placeholder-photo-4.jpg',
-      thumbnailUrl: '/placeholder-photo-4-thumb.jpg',
-      caption: 'Storm drain inlet protection',
-      takenAt: '2025-11-24T14:35:00Z',
-      uploadedBy: 'Jane Compliance',
-      fileSize: 2654321,
-      mimeType: 'image/jpeg',
-    },
-    {
-      id: 'photo_005',
-      url: '/placeholder-photo-5.jpg',
-      thumbnailUrl: '/placeholder-photo-5-thumb.jpg',
-      caption: 'Material storage area',
-      takenAt: '2025-11-23T09:15:00Z',
-      uploadedBy: 'Mike Supervisor',
-      location: {
-        latitude: 39.5295,
-        longitude: -119.8135,
-      },
-      fileSize: 1876543,
-      mimeType: 'image/jpeg',
-    },
-    {
-      id: 'photo_006',
-      url: '/placeholder-photo-6.jpg',
-      thumbnailUrl: '/placeholder-photo-6-thumb.jpg',
-      caption: 'Vehicle tracking pad',
-      takenAt: '2025-11-23T09:30:00Z',
-      uploadedBy: 'Mike Supervisor',
-      location: {
-        latitude: 39.5302,
-        longitude: -119.8128,
-      },
-      fileSize: 2234567,
-      mimeType: 'image/jpeg',
-    },
-  ];
+  const { data: photos, isLoading, error } = useInspectorPhotos(token);
 
   // Format file size
   const formatFileSize = (bytes: number): string => {
@@ -162,14 +71,14 @@ export function PhotoGalleryViewer({ projectId: _projectId }: PhotoGalleryViewer
   };
 
   // Format coordinates
-  const formatCoordinates = (location: GeoLocation): string => {
+  const formatCoordinates = (location: InspectorGeoLocation): string => {
     const lat = location.latitude.toFixed(4);
     const lng = location.longitude.toFixed(4);
     return `${lat}, ${lng}`;
   };
 
   // Open lightbox
-  const openLightbox = (photo: Photo) => {
+  const openLightbox = (photo: InspectorPhoto) => {
     setSelectedPhoto(photo);
     setLightboxOpen(true);
   };
@@ -182,21 +91,47 @@ export function PhotoGalleryViewer({ projectId: _projectId }: PhotoGalleryViewer
 
   // Navigate to previous/next photo
   const navigatePhoto = (direction: 'prev' | 'next') => {
-    if (!selectedPhoto) return;
-    const currentIndex = mockPhotos.findIndex((p) => p.id === selectedPhoto.id);
+    if (!selectedPhoto || !photos) return;
+    const currentIndex = photos.findIndex((p) => p.id === selectedPhoto.id);
     let newIndex: number;
 
     if (direction === 'prev') {
-      newIndex = currentIndex === 0 ? mockPhotos.length - 1 : currentIndex - 1;
+      newIndex = currentIndex === 0 ? photos.length - 1 : currentIndex - 1;
     } else {
-      newIndex = currentIndex === mockPhotos.length - 1 ? 0 : currentIndex + 1;
+      newIndex = currentIndex === photos.length - 1 ? 0 : currentIndex + 1;
     }
 
-    setSelectedPhoto(mockPhotos[newIndex]);
+    setSelectedPhoto(photos[newIndex]);
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <Center py="xl">
+        <Stack align="center" gap="md">
+          <Loader size="lg" />
+          <Text c="dimmed">Loading photos...</Text>
+        </Stack>
+      </Center>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <Alert
+        icon={<IconAlertCircle size={20} />}
+        title="Failed to load photos"
+        color="red"
+        variant="light"
+      >
+        {error.message || 'Unable to load photos. Please try again.'}
+      </Alert>
+    );
+  }
+
   // Empty state
-  if (mockPhotos.length === 0) {
+  if (!photos || photos.length === 0) {
     return (
       <Center py="xl">
         <Stack align="center" gap="md">
@@ -219,7 +154,7 @@ export function PhotoGalleryViewer({ projectId: _projectId }: PhotoGalleryViewer
       {/* Header */}
       <Group justify="space-between">
         <Text size="sm" c="dimmed">
-          {mockPhotos.length} photo{mockPhotos.length !== 1 ? 's' : ''}
+          {photos.length} photo{photos.length !== 1 ? 's' : ''}
         </Text>
         <Badge variant="light" color="blue" leftSection={<IconMapPin size={10} />}>
           GPS Tagged
@@ -228,7 +163,7 @@ export function PhotoGalleryViewer({ projectId: _projectId }: PhotoGalleryViewer
 
       {/* Photo Grid */}
       <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="md">
-        {mockPhotos.map((photo) => (
+        {photos.map((photo) => (
           <Paper
             key={photo.id}
             shadow="xs"
@@ -238,20 +173,37 @@ export function PhotoGalleryViewer({ projectId: _projectId }: PhotoGalleryViewer
             style={{ cursor: 'pointer', overflow: 'hidden' }}
             onClick={() => openLightbox(photo)}
           >
-            {/* Thumbnail placeholder - using colored box since we don't have real images */}
+            {/* Thumbnail */}
             <Box
               h={140}
-              bg={`${theme.colors.blue[1]}`}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
                 position: 'relative',
+                overflow: 'hidden',
               }}
             >
-              <ThemeIcon size={48} variant="light" color="blue" radius="xl">
-                <IconPhoto size={24} />
-              </ThemeIcon>
+              {photo.thumbnailUrl ? (
+                <Image
+                  src={photo.thumbnailUrl}
+                  alt={photo.caption || 'Photo'}
+                  h={140}
+                  fit="cover"
+                  fallbackSrc={undefined}
+                />
+              ) : (
+                <Box
+                  h={140}
+                  bg={`${theme.colors.blue[1]}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <ThemeIcon size={48} variant="light" color="blue" radius="xl">
+                    <IconPhoto size={24} />
+                  </ThemeIcon>
+                </Box>
+              )}
               {photo.location && (
                 <Tooltip label="GPS tagged">
                   <Badge
@@ -318,7 +270,13 @@ export function PhotoGalleryViewer({ projectId: _projectId }: PhotoGalleryViewer
               size="xl"
               radius="xl"
               onClick={() => navigatePhoto('prev')}
-              style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 10 }}
+              style={{
+                position: 'absolute',
+                left: 12,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 10,
+              }}
             >
               <IconChevronLeft size={24} />
             </ActionIcon>
@@ -328,12 +286,18 @@ export function PhotoGalleryViewer({ projectId: _projectId }: PhotoGalleryViewer
               size="xl"
               radius="xl"
               onClick={() => navigatePhoto('next')}
-              style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 10 }}
+              style={{
+                position: 'absolute',
+                right: 12,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 10,
+              }}
             >
               <IconChevronRight size={24} />
             </ActionIcon>
 
-            {/* Image placeholder */}
+            {/* Full-size image */}
             <Box
               h={400}
               bg={theme.colors.gray[8]}
@@ -341,16 +305,27 @@ export function PhotoGalleryViewer({ projectId: _projectId }: PhotoGalleryViewer
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                overflow: 'hidden',
               }}
             >
-              <Stack align="center" gap="md">
-                <ThemeIcon size={80} variant="light" color="gray" radius="xl">
-                  <IconZoomIn size={40} />
-                </ThemeIcon>
-                <Text c="gray.4" size="sm">
-                  Photo Preview
-                </Text>
-              </Stack>
+              {selectedPhoto.url ? (
+                <Image
+                  src={selectedPhoto.url}
+                  alt={selectedPhoto.caption || 'Photo'}
+                  h={400}
+                  fit="contain"
+                  fallbackSrc={undefined}
+                />
+              ) : (
+                <Stack align="center" gap="md">
+                  <ThemeIcon size={80} variant="light" color="gray" radius="xl">
+                    <IconZoomIn size={40} />
+                  </ThemeIcon>
+                  <Text c="gray.4" size="sm">
+                    Photo Preview
+                  </Text>
+                </Stack>
+              )}
             </Box>
 
             {/* Photo details */}
@@ -399,7 +374,13 @@ export function PhotoGalleryViewer({ projectId: _projectId }: PhotoGalleryViewer
                 {/* Action buttons */}
                 <Group justify="flex-end" mt="xs">
                   <Tooltip label="Download photo">
-                    <ActionIcon variant="light" size="lg">
+                    <ActionIcon
+                      variant="light"
+                      size="lg"
+                      component="a"
+                      href={selectedPhoto.url}
+                      download
+                    >
                       <IconDownload size={18} />
                     </ActionIcon>
                   </Tooltip>

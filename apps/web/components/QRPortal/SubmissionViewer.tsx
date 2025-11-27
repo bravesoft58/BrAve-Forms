@@ -16,6 +16,8 @@ import {
   Collapse,
   Tooltip,
   Box,
+  Loader,
+  Alert,
   useMantineTheme,
 } from '@mantine/core';
 import {
@@ -30,218 +32,38 @@ import {
   IconEye,
   IconFileDescription,
 } from '@tabler/icons-react';
-
-interface FormField {
-  id: string;
-  name: string;
-  label: string;
-  type: string;
-  value: string | number | boolean | string[];
-}
-
-interface FormSection {
-  id: string;
-  title: string;
-  fields: FormField[];
-}
-
-interface FormSubmission {
-  id: string;
-  templateName: string;
-  templateCategory: string;
-  status: 'DRAFT' | 'SUBMITTED' | 'REVIEWED' | 'APPROVED' | 'REJECTED';
-  submittedBy: string;
-  submittedAt: string;
-  sections: FormSection[];
-}
+import {
+  useInspectorSubmissions,
+  InspectorSubmission,
+  InspectorFormField,
+} from '@/hooks/useInspectorPortal';
 
 interface SubmissionViewerProps {
   projectId: string;
+  token: string;
 }
 
 /**
- * SubmissionViewer Component - Sprint 4 ISSUE-103
+ * SubmissionViewer Component - Sprint 4 ISSUE-103, Updated Sprint 5 ISSUE-165
  *
  * Read-only viewer for form submissions in the inspector portal.
- * Displays submitted forms with expandable sections.
+ * Now fetches real data from the backend API.
  *
  * Features:
- * - Filter by date range, template, status
  * - Accordion view of form sections
  * - Field values displayed read-only
  * - Status badges (Approved, Submitted, etc.)
  * - Submission metadata (who, when)
+ * - Loading and error states
  */
-export function SubmissionViewer({ projectId: _projectId }: SubmissionViewerProps) {
+export function SubmissionViewer({ projectId: _projectId, token }: SubmissionViewerProps) {
   const theme = useMantineTheme();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  // Mock submissions for development
-  // TODO: Replace with actual GraphQL query when backend integration is complete
-  const mockSubmissions: FormSubmission[] = [
-    {
-      id: 'sub_001',
-      templateName: 'Daily Site Inspection',
-      templateCategory: 'OSHA_SAFETY',
-      status: 'APPROVED',
-      submittedBy: 'John Inspector',
-      submittedAt: '2025-11-25T14:30:00Z',
-      sections: [
-        {
-          id: 'sec_1',
-          title: 'General Information',
-          fields: [
-            { id: 'f1', name: 'date', label: 'Inspection Date', type: 'date', value: '2025-11-25' },
-            {
-              id: 'f2',
-              name: 'weather',
-              label: 'Weather Conditions',
-              type: 'select',
-              value: 'Clear',
-            },
-            {
-              id: 'f3',
-              name: 'temperature',
-              label: 'Temperature (F)',
-              type: 'number',
-              value: 72,
-            },
-          ],
-        },
-        {
-          id: 'sec_2',
-          title: 'Safety Checklist',
-          fields: [
-            {
-              id: 'f4',
-              name: 'hardHats',
-              label: 'Hard Hats in Use',
-              type: 'checkbox',
-              value: true,
-            },
-            {
-              id: 'f5',
-              name: 'safetyVests',
-              label: 'Safety Vests Worn',
-              type: 'checkbox',
-              value: true,
-            },
-            {
-              id: 'f6',
-              name: 'hazards',
-              label: 'Hazards Identified',
-              type: 'textarea',
-              value: 'None identified',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'sub_002',
-      templateName: 'Storm Water Inspection',
-      templateCategory: 'EPA_SWPPP',
-      status: 'SUBMITTED',
-      submittedBy: 'Jane Compliance',
-      submittedAt: '2025-11-24T09:15:00Z',
-      sections: [
-        {
-          id: 'sec_1',
-          title: 'Weather Event Details',
-          fields: [
-            {
-              id: 'f1',
-              name: 'precipitation',
-              label: 'Precipitation (inches)',
-              type: 'number',
-              value: 0.35,
-            },
-            {
-              id: 'f2',
-              name: 'stormStart',
-              label: 'Storm Start Time',
-              type: 'datetime',
-              value: '2025-11-23T22:00:00Z',
-            },
-            {
-              id: 'f3',
-              name: 'stormEnd',
-              label: 'Storm End Time',
-              type: 'datetime',
-              value: '2025-11-24T06:00:00Z',
-            },
-          ],
-        },
-        {
-          id: 'sec_2',
-          title: 'BMP Assessment',
-          fields: [
-            {
-              id: 'f4',
-              name: 'erosionControl',
-              label: 'Erosion Controls Effective',
-              type: 'checkbox',
-              value: true,
-            },
-            {
-              id: 'f5',
-              name: 'sedimentBasin',
-              label: 'Sediment Basin Status',
-              type: 'select',
-              value: 'Operational - 75% capacity',
-            },
-            {
-              id: 'f6',
-              name: 'correctiveActions',
-              label: 'Corrective Actions Needed',
-              type: 'textarea',
-              value: 'Install additional silt fence along eastern boundary',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'sub_003',
-      templateName: 'Weekly Stormwater Log',
-      templateCategory: 'EPA_CGP',
-      status: 'REVIEWED',
-      submittedBy: 'Mike Supervisor',
-      submittedAt: '2025-11-23T16:45:00Z',
-      sections: [
-        {
-          id: 'sec_1',
-          title: 'Weekly Summary',
-          fields: [
-            {
-              id: 'f1',
-              name: 'weekEnding',
-              label: 'Week Ending',
-              type: 'date',
-              value: '2025-11-22',
-            },
-            {
-              id: 'f2',
-              name: 'totalRain',
-              label: 'Total Rainfall (inches)',
-              type: 'number',
-              value: 1.25,
-            },
-            {
-              id: 'f3',
-              name: 'inspectionsCompleted',
-              label: 'Inspections Completed',
-              type: 'number',
-              value: 3,
-            },
-          ],
-        },
-      ],
-    },
-  ];
+  const { data: submissions, isLoading, error } = useInspectorSubmissions(token);
 
   // Get status color
-  const getStatusColor = (status: FormSubmission['status']) => {
+  const getStatusColor = (status: InspectorSubmission['status']) => {
     switch (status) {
       case 'APPROVED':
         return 'green';
@@ -259,7 +81,7 @@ export function SubmissionViewer({ projectId: _projectId }: SubmissionViewerProp
   };
 
   // Get status icon
-  const getStatusIcon = (status: FormSubmission['status']) => {
+  const getStatusIcon = (status: InspectorSubmission['status']) => {
     switch (status) {
       case 'APPROVED':
         return <IconCheck size={12} />;
@@ -275,7 +97,7 @@ export function SubmissionViewer({ projectId: _projectId }: SubmissionViewerProp
   };
 
   // Format field value for display
-  const formatFieldValue = (field: FormField): string => {
+  const formatFieldValue = (field: InspectorFormField): string => {
     if (field.value === null || field.value === undefined) return '-';
 
     switch (field.type) {
@@ -317,8 +139,34 @@ export function SubmissionViewer({ projectId: _projectId }: SubmissionViewerProp
     }
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <Center py="xl">
+        <Stack align="center" gap="md">
+          <Loader size="lg" />
+          <Text c="dimmed">Loading submissions...</Text>
+        </Stack>
+      </Center>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <Alert
+        icon={<IconAlertCircle size={20} />}
+        title="Failed to load submissions"
+        color="red"
+        variant="light"
+      >
+        {error.message || 'Unable to load form submissions. Please try again.'}
+      </Alert>
+    );
+  }
+
   // Empty state
-  if (mockSubmissions.length === 0) {
+  if (!submissions || submissions.length === 0) {
     return (
       <Center py="xl">
         <Stack align="center" gap="md">
@@ -341,7 +189,7 @@ export function SubmissionViewer({ projectId: _projectId }: SubmissionViewerProp
       {/* Submissions count */}
       <Group justify="space-between">
         <Text size="sm" c="dimmed">
-          {mockSubmissions.length} submission{mockSubmissions.length !== 1 ? 's' : ''} found
+          {submissions.length} submission{submissions.length !== 1 ? 's' : ''} found
         </Text>
         <Badge variant="light" color="blue">
           Last 30 days
@@ -349,14 +197,12 @@ export function SubmissionViewer({ projectId: _projectId }: SubmissionViewerProp
       </Group>
 
       {/* Submission cards */}
-      {mockSubmissions.map((submission) => (
+      {submissions.map((submission) => (
         <Card key={submission.id} shadow="xs" radius="md" withBorder p={0}>
           {/* Header - clickable to expand */}
           <Box
             p="md"
-            onClick={() =>
-              setExpandedId(expandedId === submission.id ? null : submission.id)
-            }
+            onClick={() => setExpandedId(expandedId === submission.id ? null : submission.id)}
             style={{ cursor: 'pointer' }}
           >
             <Group justify="space-between" wrap="wrap" gap="sm">

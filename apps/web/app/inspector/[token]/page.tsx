@@ -289,7 +289,9 @@ export default function InspectorPortalPage() {
             variant="filled"
             radius="md"
           >
-            <Text>{state.error || 'This access link is not valid. Please scan a valid QR code.'}</Text>
+            <Text>
+              {state.error || 'This access link is not valid. Please scan a valid QR code.'}
+            </Text>
           </Alert>
           {state.status === 'error' && (
             <Button
@@ -428,14 +430,14 @@ export default function InspectorPortalPage() {
           {/* Form Submissions Panel */}
           {hasPermission('VIEW_SUBMISSIONS') && (
             <Tabs.Panel value="submissions">
-              <SubmissionViewer projectId={state.token?.projectId || ''} />
+              <SubmissionViewer projectId={state.token?.projectId || ''} token={token} />
             </Tabs.Panel>
           )}
 
           {/* Photos Panel */}
           {hasPermission('VIEW_PHOTOS') && (
             <Tabs.Panel value="photos">
-              <PhotoGalleryViewer projectId={state.token?.projectId || ''} />
+              <PhotoGalleryViewer projectId={state.token?.projectId || ''} token={token} />
             </Tabs.Panel>
           )}
 
