@@ -1,36 +1,11 @@
 'use client';
 
-import { Paper, Text, Stack, Group, ThemeIcon, Badge } from '@mantine/core';
+import { Paper, Text, Stack, Group, ThemeIcon, Badge, Skeleton } from '@mantine/core';
 import { IconClipboardCheck } from '@tabler/icons-react';
-
-interface PendingTask {
-  id: string;
-  name: string;
-  projectName: string;
-  dueTime: string;
-  priority: 'high' | 'medium' | 'low';
-}
-
-// Mock data for Sprint 3 (will be replaced with real API in Sprint 4)
-const mockPendingTasks: PendingTask[] = [
-  {
-    id: '1',
-    name: 'Post-Storm Inspection',
-    projectName: 'Mill Street Construction',
-    dueTime: '2:00 PM',
-    priority: 'high',
-  },
-  {
-    id: '2',
-    name: 'Weekly SWPPP Review',
-    projectName: 'Rancho Road Homes',
-    dueTime: '4:30 PM',
-    priority: 'medium',
-  },
-];
+import { usePendingTasks } from '@/hooks/useDashboard';
 
 export function PendingTasksList() {
-  const tasks = mockPendingTasks;
+  const { data: tasks, isLoading, error } = usePendingTasks();
 
   return (
     <Paper withBorder p="md" data-testid="pending-tasks-widget">
@@ -44,7 +19,16 @@ export function PendingTasksList() {
       </Group>
 
       <Stack gap="xs">
-        {tasks.length === 0 ? (
+        {isLoading ? (
+          <>
+            <Skeleton height={50} radius="sm" />
+            <Skeleton height={50} radius="sm" />
+          </>
+        ) : error ? (
+          <Text size="13px" c="red">
+            Failed to load tasks
+          </Text>
+        ) : !tasks || tasks.length === 0 ? (
           <Text size="13px" c="dimmed">
             No tasks due today
           </Text>

@@ -1,75 +1,24 @@
 'use client';
 
-import { Paper, Text, Stack, Group, ThemeIcon, Badge } from '@mantine/core';
+import { Paper, Text, Stack, Group, ThemeIcon, Badge, Skeleton } from '@mantine/core';
 import { IconHistory, IconFileText, IconCamera, IconClipboard } from '@tabler/icons-react';
+import { useRecentActivity, RecentActivity } from '@/hooks/useDashboard';
 
-interface ActivityItem {
-  id: string;
-  type: 'inspection' | 'photo' | 'form';
-  projectName: string;
-  description: string;
-  timestamp: Date;
-  status: 'completed' | 'pending' | 'draft';
-}
-
-// Mock data for Sprint 3 (will be replaced with real API in Sprint 4)
-const mockActivityData: ActivityItem[] = [
-  {
-    id: '1',
-    type: 'inspection',
-    projectName: 'Mill Street Construction',
-    description: 'Post-Storm Inspection',
-    timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 min ago
-    status: 'completed',
-  },
-  {
-    id: '2',
-    type: 'photo',
-    projectName: 'Rancho Road Homes',
-    description: 'Site Photos Uploaded',
-    timestamp: new Date(Date.now() - 1000 * 60 * 120), // 2 hours ago
-    status: 'completed',
-  },
-  {
-    id: '3',
-    type: 'form',
-    projectName: 'Mill Street Construction',
-    description: 'Daily Dust Log',
-    timestamp: new Date(Date.now() - 1000 * 60 * 240), // 4 hours ago
-    status: 'completed',
-  },
-  {
-    id: '4',
-    type: 'inspection',
-    projectName: 'Downtown Plaza',
-    description: 'Weekly SWPPP Review',
-    timestamp: new Date(Date.now() - 1000 * 60 * 360), // 6 hours ago
-    status: 'pending',
-  },
-  {
-    id: '5',
-    type: 'form',
-    projectName: 'Rancho Road Homes',
-    description: 'BMP Maintenance Log',
-    timestamp: new Date(Date.now() - 1000 * 60 * 480), // 8 hours ago
-    status: 'draft',
-  },
-];
-
-function getActivityIcon(type: ActivityItem['type']) {
+function getActivityIcon(type: RecentActivity['type']) {
   switch (type) {
     case 'inspection':
       return IconClipboard;
     case 'photo':
       return IconCamera;
-    case 'form':
+    case 'submission':
       return IconFileText;
     default:
       return IconFileText;
   }
 }
 
-function formatTimestamp(date: Date): string {
+function formatTimestamp(timestamp: string): string {
+  const date = new Date(timestamp);
   const now = Date.now();
   const diff = now - date.getTime();
   const minutes = Math.floor(diff / 1000 / 60);
@@ -89,7 +38,7 @@ interface RecentActivityListProps {
 }
 
 export function RecentActivityList({ limit = 5 }: RecentActivityListProps) {
-  const activities = mockActivityData.slice(0, limit);
+  const { data: activities, isLoading, error } = useRecentActivity(limit);
 
   return (
     <Paper withBorder p="md" data-testid="recent-activity-widget">
@@ -103,7 +52,17 @@ export function RecentActivityList({ limit = 5 }: RecentActivityListProps) {
       </Group>
 
       <Stack gap="xs">
-        {activities.length === 0 ? (
+        {isLoading ? (
+          <>
+            <Skeleton height={60} radius="sm" />
+            <Skeleton height={60} radius="sm" />
+            <Skeleton height={60} radius="sm" />
+          </>
+        ) : error ? (
+          <Text size="13px" c="red">
+            Failed to load activity
+          </Text>
+        ) : !activities || activities.length === 0 ? (
           <Text size="13px" c="dimmed">
             No recent activity
           </Text>
@@ -119,7 +78,7 @@ export function RecentActivityList({ limit = 5 }: RecentActivityListProps) {
                   <Stack gap={4} style={{ flex: 1 }}>
                     <Group justify="space-between">
                       <Text size="13px" fw={500} lineClamp={1}>
-                        {activity.description}
+                        {activity.title}
                       </Text>
                       <Badge
                         size="xs"

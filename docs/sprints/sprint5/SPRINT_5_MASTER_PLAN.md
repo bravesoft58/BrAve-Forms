@@ -4,7 +4,7 @@
 **Sprint Duration:** January 2026 (7-8 weeks)
 **Sprint Goal:** Complete 100% production-ready MVP with photo management, offline experience, user settings, and form builder
 **Business Value:** 100% production-ready platform - field-tested confidence with professional UX and admin form creation
-**Velocity Target:** 35 issues (164 hours total) - includes ISSUE-126 carried over from Sprint 4
+**Velocity Target:** 41 issues (200 hours total) - includes Phase 0 production fixes and ISSUE-126 carried over from Sprint 4
 
 ## Sprint Objectives
 
@@ -47,7 +47,66 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - After Sprint 5: 100% MVP (production-ready platform with all core features)
 - Deferred to Sprint 6+: Approval Workflows (60h), Analytics (80h), Multi-tenancy (40h)
 
-## 34 Issues Breakdown
+## 41 Issues Breakdown
+
+### Phase 0: Production-Ready Fixes (6 issues, 36h) - BLOCKING MVP
+
+**NOTE:** These issues were discovered during Sprint 4 development. They replace mock data with real API connections and are critical blockers for production readiness.
+
+**ISSUE-162: Replace Mock Data in Form Submissions (8h)** - P0 - COMPLETE
+
+- Replace hardcoded mock data in form submission list with real GraphQL API calls
+- Create TanStack Query hooks for form submissions (useFormSubmissions, useProjectSubmissions)
+- Connect SubmittedFormsList component to real backend data
+- Add proper loading and error states
+- Dependencies: Sprint 4 complete
+- Status: COMPLETE (November 2025)
+- Success: Form submissions fetched from real API
+
+**ISSUE-163: Fix Status Enum Mismatch (2h)** - P0 - COMPLETE
+
+- Fix status enum values (frontend used lowercase, backend uses UPPERCASE)
+- Update TransformedSubmission interface to use FormSubmissionStatus enum
+- Update getSubmissionStatusColor to use correct UPPERCASE values
+- Dependencies: ISSUE-162
+- Status: COMPLETE (November 2025)
+- Success: Status badges and filters work correctly
+
+**ISSUE-164: Replace Mock Data in Dashboard (4h)** - P0
+
+- Replace hardcoded statistics in dashboard widgets with real GraphQL API calls
+- Create dashboard API helpers (fetchDashboardStats, fetchRecentActivity)
+- Create useDashboard hooks for TanStack Query
+- Update StatsWidget, RecentSubmissions, ProjectsOverview components
+- Dependencies: ISSUE-162 complete
+- Success: Dashboard shows real project/submission statistics
+
+**ISSUE-165: Connect QR Inspector Portal to Backend (8h)** - P0
+
+- Replace mock data in QR Inspector Portal with real GraphQL queries
+- Create inspector API helpers with time-limited JWT token validation
+- Create useInspectorPortal hooks for token validation and inspection data
+- Handle expired/invalid token states with user-friendly messages
+- Dependencies: ISSUE-162 complete, QR Portal UI complete
+- Success: Inspector portal displays real inspection data
+
+**ISSUE-166: Implement GPS Field Functionality (6h)** - P0
+
+- Implement real GPS coordinate capture using Geolocation API (web) and Capacitor plugin (mobile)
+- Create geolocation.ts utility with getCurrentPosition, permission handling
+- Create functional GPSField component with capture button and accuracy indicator
+- Handle permission denied, timeout, and unavailable GPS gracefully
+- Dependencies: Form schema supports GPS field type
+- Success: GPS fields capture real coordinates with accuracy display
+
+**ISSUE-167: Implement Photo Upload to Storage (8h)** - P0
+
+- Implement real photo upload to MinIO (local) or S3 (production)
+- Create photo-upload.ts service with compression, EXIF extraction
+- Create functional PhotoField component with capture, gallery, and upload
+- Handle file size limits, upload progress, and offline queue
+- Dependencies: MinIO/S3 configured, Backend upload mutation exists
+- Success: Photos upload to real storage with thumbnails
 
 ### Phase 1: Photo Gallery (6 issues, 20h)
 
@@ -826,11 +885,21 @@ Deferred to Sprint 6+:
 ---
 
 **Last Updated:** 2025-11-27
-**Sprint Duration:** 7-8 weeks (164 hours)
-**Total Issues:** 35 (includes ISSUE-126 carried over from Sprint 4)
-**Status:** PLANNING COMPLETE - Ready for Implementation
+**Sprint Duration:** 7-8 weeks (200 hours)
+**Total Issues:** 41 (includes Phase 0 production fixes and ISSUE-126 carried over from Sprint 4)
+**Status:** IN PROGRESS - Phase 0 started (2/6 issues complete)
+
+**Issue Breakdown:**
+
+- Phase 0: Production-Ready Fixes (6 issues, 36h) - 2 COMPLETE, 4 READY
+- Phase 1: Photo Gallery (6 issues, 20h) - READY
+- Phase 2: Offline Experience UI (7 issues, 24h) - READY
+- Phase 3: Settings & Profile (5 issues, 12h) - READY
+- Phase 4: Polish & Testing (5 issues, 8h) - READY (includes ISSUE-126)
+- Phase 5: Form Builder (12 issues, 100h) - READY
 
 **Major Additions:**
 
+- Phase 0: Production-Ready Fixes (6 issues, 36h) - Replace mock data with real API connections
 - Phase 5: Form Builder (12 issues, 100h) - Complete drag-drop form designer
-- Production MVP: 100% complete (was 95% without Form Builder)
+- Production MVP: 100% complete (was 95% without Form Builder and real data connections)
