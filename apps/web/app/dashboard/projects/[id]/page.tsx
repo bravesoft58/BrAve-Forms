@@ -17,11 +17,11 @@ import {
 import { PageContainer } from '@/components/Layout/PageContainer';
 import { Breadcrumbs } from '@/components/Layout/Breadcrumbs';
 import { getMockProjectById } from '@/lib/mock-data/projects';
-import { ProjectFormsTab } from '@/components/projects/ProjectFormsTab';
-import { ProjectPhotosTab } from '@/components/projects/ProjectPhotosTab';
-import { ProjectTeamTab } from '@/components/projects/ProjectTeamTab';
-import { ProjectWeatherTab } from '@/components/projects/ProjectWeatherTab';
-import { ProjectComplianceTab } from '@/components/projects/ProjectComplianceTab';
+import { ProjectFormsTab } from '@/components/Projects/ProjectFormsTab';
+import { ProjectPhotosTab } from '@/components/Projects/ProjectPhotosTab';
+import { ProjectTeamTab } from '@/components/Projects/ProjectTeamTab';
+import { ProjectWeatherTab } from '@/components/Projects/ProjectWeatherTab';
+import { ProjectComplianceTab } from '@/components/Projects/ProjectComplianceTab';
 import { ProjectQRCode } from '@/components/QRPortal/ProjectQRCode';
 
 /**
@@ -159,4 +159,3 @@ export default function ProjectDetailPage() {
     </PageContainer>
   );
 }
-

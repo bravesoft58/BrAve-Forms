@@ -4,11 +4,20 @@
 // Dynamic rendering is handled by client-side hooks and state
 
 import { useState } from 'react';
-import { SimpleGrid, Stack, Group, TextInput, SegmentedControl, Button, Text, Center } from '@mantine/core';
+import {
+  SimpleGrid,
+  Stack,
+  Group,
+  TextInput,
+  SegmentedControl,
+  Button,
+  Text,
+  Center,
+} from '@mantine/core';
 import { IconSearch, IconPlus, IconFolderOff } from '@tabler/icons-react';
 import { PageContainer } from '@/components/Layout/PageContainer';
 import { Breadcrumbs } from '@/components/Layout/Breadcrumbs';
-import { ProjectCard } from '@/components/projects/ProjectCard';
+import { ProjectCard } from '@/components/Projects/ProjectCard';
 import { getMockProjects, filterProjectsByStatus, searchProjects } from '@/lib/mock-data/projects';
 
 /**
