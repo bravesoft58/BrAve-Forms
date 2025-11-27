@@ -72,14 +72,23 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Status: COMPLETE (November 2025)
 - Success: Status badges and filters work correctly
 
-**ISSUE-164: Replace Mock Data in Dashboard (4h)** - P0
+**ISSUE-164: Replace Mock Data in Dashboard (4h)** - P0 - COMPLETE
 
 - Replace hardcoded statistics in dashboard widgets with real GraphQL API calls
 - Create dashboard API helpers (fetchDashboardStats, fetchRecentActivity)
 - Create useDashboard hooks for TanStack Query
 - Update StatsWidget, RecentSubmissions, ProjectsOverview components
 - Dependencies: ISSUE-162 complete
+- Status: COMPLETE (November 2025)
 - Success: Dashboard shows real project/submission statistics
+
+**ISSUE-164.5: Forms Page UX Improvements (30min)** - P1 - COMPLETE
+
+- Add "Create Template" button to Forms page linking to Form Builder
+- Remove unused demo page with MantineProvider error
+- Dependencies: ISSUE-164 complete
+- Status: COMPLETE (November 2025)
+- Success: Forms page has clear path to Form Builder
 
 **ISSUE-165: Connect QR Inspector Portal to Backend (8h)** - P0
 
@@ -886,12 +895,12 @@ Deferred to Sprint 6+:
 
 **Last Updated:** 2025-11-27
 **Sprint Duration:** 7-8 weeks (200 hours)
-**Total Issues:** 41 (includes Phase 0 production fixes and ISSUE-126 carried over from Sprint 4)
-**Status:** IN PROGRESS - Phase 0 started (2/6 issues complete)
+**Total Issues:** 41.5 (includes Phase 0 production fixes, ISSUE-164.5, and ISSUE-126 carried over from Sprint 4)
+**Status:** IN PROGRESS - Phase 0 started (3.5/6.5 issues complete)
 
 **Issue Breakdown:**
 
-- Phase 0: Production-Ready Fixes (6 issues, 36h) - 2 COMPLETE, 4 READY
+- Phase 0: Production-Ready Fixes (6.5 issues, 36.5h) - 3.5 COMPLETE, 3 READY
 - Phase 1: Photo Gallery (6 issues, 20h) - READY
 - Phase 2: Offline Experience UI (7 issues, 24h) - READY
 - Phase 3: Settings & Profile (5 issues, 12h) - READY
