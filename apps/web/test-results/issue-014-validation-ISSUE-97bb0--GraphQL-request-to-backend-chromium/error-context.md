@@ -1,0 +1,161 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "BF BrAve Forms" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e7] [cursor=pointer]: BF
+          - paragraph [ref=e8] [cursor=pointer]: BrAve Forms
+        - generic [ref=e9]:
+          - button "Search" [ref=e10] [cursor=pointer]:
+            - img [ref=e12] [cursor=pointer]
+          - button "Last synced just now" [ref=e15] [cursor=pointer]:
+            - img [ref=e17] [cursor=pointer]
+          - button "User menu" [ref=e20] [cursor=pointer]:
+            - generic [ref=e23] [cursor=pointer]: QC
+    - navigation [ref=e24]:
+      - generic [ref=e25]:
+        - link "Dashboard" [ref=e26] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e28] [cursor=pointer]
+          - generic [ref=e34] [cursor=pointer]: Dashboard
+        - link "Projects" [ref=e35] [cursor=pointer]:
+          - /url: /dashboard/projects
+          - img [ref=e37] [cursor=pointer]
+          - generic [ref=e40] [cursor=pointer]: Projects
+        - link "Forms" [ref=e41] [cursor=pointer]:
+          - /url: /dashboard/forms
+          - img [ref=e43] [cursor=pointer]
+          - generic [ref=e48] [cursor=pointer]: Forms
+        - link "Settings" [ref=e49] [cursor=pointer]:
+          - /url: /dashboard/settings
+          - img [ref=e51] [cursor=pointer]
+          - generic [ref=e55] [cursor=pointer]: Settings
+    - main [ref=e56]:
+      - generic [ref=e57]:
+        - heading "Welcome, User" [level=1] [ref=e59]
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - generic [ref=e63]:
+              - link "New Inspection" [ref=e64] [cursor=pointer]:
+                - /url: /dashboard/inspections/new
+                - generic [ref=e65] [cursor=pointer]:
+                  - img [ref=e67] [cursor=pointer]
+                  - generic [ref=e68] [cursor=pointer]: New Inspection
+              - link "Upload Photos" [ref=e69] [cursor=pointer]:
+                - /url: /dashboard/photos/upload
+                - generic [ref=e70] [cursor=pointer]:
+                  - img [ref=e72] [cursor=pointer]
+                  - generic [ref=e75] [cursor=pointer]: Upload Photos
+              - generic [ref=e76]:
+                - link "Forms" [ref=e77] [cursor=pointer]:
+                  - /url: /dashboard/forms
+                  - generic [ref=e78] [cursor=pointer]:
+                    - img [ref=e80] [cursor=pointer]
+                    - generic [ref=e83] [cursor=pointer]: Forms
+                - link "Projects" [ref=e84] [cursor=pointer]:
+                  - /url: /dashboard/projects
+                  - generic [ref=e85] [cursor=pointer]:
+                    - img [ref=e87] [cursor=pointer]
+                    - generic [ref=e90] [cursor=pointer]: Projects
+              - generic [ref=e91]:
+                - link "Weather" [ref=e92] [cursor=pointer]:
+                  - /url: /dashboard/weather
+                  - generic [ref=e93] [cursor=pointer]:
+                    - img [ref=e95] [cursor=pointer]
+                    - generic [ref=e97] [cursor=pointer]: Weather
+                - button "Sync" [ref=e98] [cursor=pointer]:
+                  - generic [ref=e99] [cursor=pointer]:
+                    - img [ref=e101] [cursor=pointer]
+                    - generic [ref=e104] [cursor=pointer]: Sync
+            - generic [ref=e105]:
+              - generic [ref=e106]:
+                - img [ref=e108]
+                - paragraph [ref=e112]: Pending Tasks
+              - generic [ref=e113]:
+                - generic [ref=e114]:
+                  - generic [ref=e115]:
+                    - paragraph [ref=e116]: Post-Storm Inspection
+                    - generic [ref=e118]: high
+                  - generic [ref=e119]:
+                    - paragraph [ref=e120]: Mill Street Construction
+                    - paragraph [ref=e121]: •
+                    - paragraph [ref=e122]: Due 2:00 PM
+                - generic [ref=e123]:
+                  - generic [ref=e124]:
+                    - paragraph [ref=e125]: Weekly SWPPP Review
+                    - generic [ref=e127]: medium
+                  - generic [ref=e128]:
+                    - paragraph [ref=e129]: Rancho Road Homes
+                    - paragraph [ref=e130]: •
+                    - paragraph [ref=e131]: Due 4:30 PM
+            - generic [ref=e132]:
+              - generic [ref=e133]:
+                - img [ref=e135]
+                - paragraph [ref=e138]: Weather Alerts
+              - alert [ref=e140]:
+                - generic [ref=e141]:
+                  - img [ref=e143]
+                  - generic [ref=e146]:
+                    - paragraph [ref=e147]: Mill Street Construction
+                    - paragraph [ref=e148]: 0.35" rain recorded - Inspection required
+          - generic [ref=e150]:
+            - generic [ref=e151]:
+              - img [ref=e153]
+              - paragraph [ref=e156]: Recent Activity
+            - generic [ref=e157]:
+              - generic [ref=e159]:
+                - img [ref=e161]
+                - generic [ref=e164]:
+                  - generic [ref=e165]:
+                    - paragraph [ref=e166]: Post-Storm Inspection
+                    - generic [ref=e168]: completed
+                  - generic [ref=e169]:
+                    - paragraph [ref=e170]: Mill Street Construction
+                    - paragraph [ref=e171]: •
+                    - paragraph [ref=e172]: 30m ago
+              - generic [ref=e174]:
+                - img [ref=e176]
+                - generic [ref=e179]:
+                  - generic [ref=e180]:
+                    - paragraph [ref=e181]: Site Photos Uploaded
+                    - generic [ref=e183]: completed
+                  - generic [ref=e184]:
+                    - paragraph [ref=e185]: Rancho Road Homes
+                    - paragraph [ref=e186]: •
+                    - paragraph [ref=e187]: 2h ago
+              - generic [ref=e189]:
+                - img [ref=e191]
+                - generic [ref=e194]:
+                  - generic [ref=e195]:
+                    - paragraph [ref=e196]: Daily Dust Log
+                    - generic [ref=e198]: completed
+                  - generic [ref=e199]:
+                    - paragraph [ref=e200]: Mill Street Construction
+                    - paragraph [ref=e201]: •
+                    - paragraph [ref=e202]: 4h ago
+              - generic [ref=e204]:
+                - img [ref=e206]
+                - generic [ref=e209]:
+                  - generic [ref=e210]:
+                    - paragraph [ref=e211]: Weekly SWPPP Review
+                    - generic [ref=e213]: pending
+                  - generic [ref=e214]:
+                    - paragraph [ref=e215]: Downtown Plaza
+                    - paragraph [ref=e216]: •
+                    - paragraph [ref=e217]: 6h ago
+              - generic [ref=e219]:
+                - img [ref=e221]
+                - generic [ref=e224]:
+                  - generic [ref=e225]:
+                    - paragraph [ref=e226]: BMP Maintenance Log
+                    - generic [ref=e228]: draft
+                  - generic [ref=e229]:
+                    - paragraph [ref=e230]: Rancho Road Homes
+                    - paragraph [ref=e231]: •
+                    - paragraph [ref=e232]: 8h ago
+  - alert [ref=e233]
+```

@@ -39,6 +39,7 @@ export function FormRenderer({
   onSubmit,
   initialValues = {},
   readOnly = false,
+  hideHeader = false,
 }: FormRendererProps) {
   // Generate Zod schema from template
   const validationSchema = generateValidationSchema(template);
@@ -116,22 +117,25 @@ export function FormRenderer({
 
   return (
     <Paper p="md" component="form" onSubmit={handleSubmit(onSubmitForm)} maw={800} mx="auto">
-      {/* Form Header */}
-      <Stack gap="xs" mb="md">
-        <Text size="24px" fw={600}>
-          {template.title}
+      {/* Form Header - optionally hidden when page already shows title */}
+      {!hideHeader && (
+        <Stack gap="xs" mb="md">
+          <Text size="24px" fw={600}>
+            {template.title}
+          </Text>
+          {template.description && (
+            <Text size="14px" c="dimmed">
+              {template.description}
+            </Text>
+          )}
+        </Stack>
+      )}
+      {/* Draft status - always show when saved */}
+      {lastSaved && !readOnly && (
+        <Text size="12px" c="dimmed" mb="md">
+          Draft saved at {lastSaved.toLocaleTimeString()}
         </Text>
-        {template.description && (
-          <Text size="14px" c="dimmed">
-            {template.description}
-          </Text>
-        )}
-        {lastSaved && !readOnly && (
-          <Text size="12px" c="dimmed">
-            Draft saved at {lastSaved.toLocaleTimeString()}
-          </Text>
-        )}
-      </Stack>
+      )}
 
       {/* Form Fields */}
       <Stack gap="md">
@@ -446,18 +450,21 @@ export function generateValidationSchema(template: FormTemplate) {
 
 /**
  * Generate string field validation schema
+ *
+ * Important: Apply all string validations FIRST, then make optional at the end
+ * This is because .optional() returns ZodOptional which doesn't have .min()/.max()/.regex()
  */
-function generateStringSchema(field: FormField): z.ZodString {
-  let schema = z.string();
+function generateStringSchema(field: FormField): z.ZodTypeAny {
+  let schema: z.ZodString = z.string();
 
-  // Required validation
+  // Apply all string validations FIRST (while still a ZodString)
+
+  // Min length validation (includes required check)
   if (field.required) {
     schema = schema.min(1, `${field.label} is required`);
-  } else {
-    schema = schema.optional() as any;
   }
 
-  // Min length validation
+  // Additional minLength validation from field.validation
   if (field.validation?.minLength) {
     schema = schema.min(
       field.validation.minLength,
@@ -479,6 +486,11 @@ function generateStringSchema(field: FormField): z.ZodString {
       new RegExp(field.validation.pattern),
       field.validation.customMessage || 'Invalid format'
     );
+  }
+
+  // Apply optional LAST (after all validations)
+  if (!field.required) {
+    return schema.optional();
   }
 
   return schema;

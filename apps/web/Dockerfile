@@ -41,6 +41,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV NEXT_PUBLIC_SKIP_CLERK_AUTH=true
 
+# GraphQL API endpoint (baked into build for client-side requests)
+ARG NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://localhost:4000/graphql
+ENV NEXT_PUBLIC_GRAPHQL_ENDPOINT=$NEXT_PUBLIC_GRAPHQL_ENDPOINT
+
 # Build Next.js app with standalone output
 WORKDIR /app/apps/web
 RUN pnpm build

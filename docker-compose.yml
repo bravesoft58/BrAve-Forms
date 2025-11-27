@@ -108,7 +108,7 @@ services:
     container_name: braveforms-web
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: http://localhost:4000/graphql
+      NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://localhost:4000/graphql
       NEXT_PUBLIC_SKIP_CLERK_AUTH: 'true'
     ports:
       - '3000:3000'

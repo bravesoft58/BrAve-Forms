@@ -97,5 +97,7 @@ export interface FormRendererProps {
   onSubmit: (data: FormSubmissionData) => void;
   initialValues?: Record<string, any>;
   readOnly?: boolean;
+  /** Hide form header (title/description) - use when page already shows them */
+  hideHeader?: boolean;
 }
 

@@ -4,7 +4,7 @@
 **Sprint Duration:** January 2026 (7-8 weeks)
 **Sprint Goal:** Complete 100% production-ready MVP with photo management, offline experience, user settings, and form builder
 **Business Value:** 100% production-ready platform - field-tested confidence with professional UX and admin form creation
-**Velocity Target:** 34 issues (160 hours total)
+**Velocity Target:** 35 issues (164 hours total) - includes ISSUE-126 carried over from Sprint 4
 
 ## Sprint Objectives
 
@@ -301,7 +301,7 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 
 **ISSUE-149: Sprint 5 Completion Report (1h)** - P0
 
-- Gather evidence from all 34 issues
+- Gather evidence from all 35 issues
 - Document photo gallery features
 - Document offline UI features
 - Document settings features
@@ -311,6 +311,18 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Sprint 6 planning notes
 - Dependencies: All issues complete
 - Success: Sprint 5 completion report created
+
+**ISSUE-126: Load Testing (4h)** - P1 (Carried over from Sprint 4)
+
+- Load testing for 100+ concurrent users
+- Stress test API endpoints under heavy load
+- Test database query performance at scale
+- Test photo upload throughput
+- Test sync queue performance with large backlog
+- Document performance baselines and bottlenecks
+- Dependencies: ISSUE-149
+- Success: Load testing complete with documented results
+- Note: Deferred from Sprint 4 - not needed for Q&D pilot (5-25 users), needed before enterprise scaling
 
 ### Phase 5: Form Builder (12 issues, 100h)
 
@@ -563,10 +575,11 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - [ ] Form validation engine (ISSUE-155)
 - [ ] Form builder tests (ISSUE-156)
 
-**Should Complete (P1 - 4 issues, 12%):**
+**Should Complete (P1 - 5 issues, 14%):**
 
 - [ ] Photo annotations (ISSUE-131) - nice-to-have for inspectors
 - [ ] Before/after photo pairing (ISSUE-128) - nice-to-have for progress tracking
+- [ ] Load testing (ISSUE-126) - carried over from Sprint 4, needed before enterprise scaling
 
 **Sprint 5 Readiness:**
 
@@ -812,9 +825,9 @@ Deferred to Sprint 6+:
 
 ---
 
-**Last Updated:** 2025-10-23
-**Sprint Duration:** 7-8 weeks (160 hours)
-**Total Issues:** 34
+**Last Updated:** 2025-11-27
+**Sprint Duration:** 7-8 weeks (164 hours)
+**Total Issues:** 35 (includes ISSUE-126 carried over from Sprint 4)
 **Status:** PLANNING COMPLETE - Ready for Implementation
 
 **Major Additions:**

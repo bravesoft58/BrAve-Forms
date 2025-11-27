@@ -37,13 +37,27 @@ export class FormsService {
       skip?: number;
     }
   ) {
-    const where: any = { orgId };
+    // Find the system organization ID for system templates
+    const systemOrg = await this.prisma.organization.findFirst({
+      where: { clerkOrgId: 'system' },
+      select: { id: true },
+    });
 
-    if (filters?.category) where.category = filters.category;
-    if (filters?.isActive !== undefined) where.isActive = filters.isActive;
+    // Build where clause to include both user's org and system templates
+    const whereClause: any = {
+      OR: [{ orgId }],
+    };
+
+    // Include system templates if system org exists
+    if (systemOrg) {
+      whereClause.OR.push({ orgId: systemOrg.id });
+    }
+
+    if (filters?.category) whereClause.category = filters.category;
+    if (filters?.isActive !== undefined) whereClause.isActive = filters.isActive;
 
     return this.prisma.formTemplate.findMany({
-      where,
+      where: whereClause,
       orderBy: {
         createdAt: 'desc',
       },
@@ -53,10 +67,17 @@ export class FormsService {
   }
 
   async getFormTemplate(id: string, orgId: string) {
+    // Find the system organization ID for system templates
+    const systemOrg = await this.prisma.organization.findFirst({
+      where: { clerkOrgId: 'system' },
+      select: { id: true },
+    });
+
+    // Allow access to templates from user's org or system org
     const template = await this.prisma.formTemplate.findFirst({
       where: {
         id,
-        orgId,
+        OR: systemOrg ? [{ orgId }, { orgId: systemOrg.id }] : [{ orgId }],
       },
     });
 

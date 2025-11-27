@@ -1,8 +1,8 @@
 # BrAve Forms - Construction Form Templates
 
-**Version:** 1.0.0
-**Last Updated:** 2025-10-23
-**Template Count:** 11
+**Version:** 2.0.0
+**Last Updated:** 2025-11-26
+**Template Count:** 20
 **Status:** Production-ready
 
 ---
@@ -180,6 +180,117 @@ This directory contains 11 construction-native form templates designed for field
 
 ---
 
+### Nevada Q&D Agency Templates (9 templates)
+
+These templates are designed for Nevada-specific Quality & Discipline compliance requirements, covering various state and federal stormwater, water quality, and environmental protection regulations.
+
+#### 14 - NDEP Weekly Stormwater Log
+- **File:** `14-ndep-weekly-stormwater.json`
+- **Category:** COMPLIANCE
+- **Purpose:** Weekly stormwater inspection log for Nevada DEP compliance
+- **Compliance:** Nevada NAC 445A - Water Pollution Control, NVR100000 Construction Stormwater General Permit
+- **Time:** 20-30 minutes
+- **Key Sections:** Site info, weather conditions, BMP inspections, corrective actions, certification
+- **Target Role:** SWPPP Coordinator, Environmental Compliance Officer
+- **Frequency:** Weekly (every 7 calendar days) + within 24 hours of >=0.25" rain
+- **Tests:** 14 tests
+
+#### 15 - NDOT Weekly Stormwater Logs
+- **File:** `15-ndot-weekly-stormwater.json`
+- **Category:** COMPLIANCE
+- **Purpose:** Nevada DOT highway project weekly stormwater inspection
+- **Compliance:** NDOT Stormwater Quality Manual, NVR100000, NDOT MS4 Permit NV0023329
+- **Time:** 25-35 minutes
+- **Key Sections:** Highway project info, weather, erosion controls, sediment controls, material storage, corrective actions
+- **Target Role:** NDOT Environmental Coordinator, WPCM, Highway Project Engineer
+- **Highway-Specific:** Route number, mile posts, district, NDOT project number
+- **Tests:** 16 tests
+
+#### 16 - TMWA Inspection Checklist
+- **File:** `16-tmwa-inspection.json`
+- **Category:** COMPLIANCE
+- **Purpose:** Truckee Meadows Water Authority infrastructure inspection
+- **Compliance:** TMWA Water Quality Standards, Nevada NAC 445A, Safe Drinking Water Act
+- **Time:** 30-45 minutes
+- **Key Sections:** Facility info, water quality parameters, chlorine residuals, storage tanks, distribution system, cross-connection control
+- **Target Role:** TMWA Inspector, Water System Operator, Distribution System Technician
+- **Water Quality Fields:** pH, turbidity, chlorine residual, temperature, coliform testing
+- **Tests:** 25 tests
+
+#### 17 - Quarterly Visual Assessment
+- **File:** `17-quarterly-visual-assessment.json`
+- **Category:** COMPLIANCE
+- **Purpose:** EPA MSGP quarterly visual assessment of stormwater discharge
+- **Compliance:** EPA Multi-Sector General Permit (MSGP), 40 CFR 122.26
+- **Time:** 15-25 minutes
+- **Key Sections:** Facility info, outfall observations, discharge characteristics, visual indicators, corrective actions
+- **Target Role:** Environmental Manager, Stormwater Coordinator, Facility Manager
+- **Visual Indicators:** Color, odor, clarity, floating solids, suspended solids, foam, oil sheen, other
+- **Frequency:** Once per quarter during discharge events
+- **Tests:** 23 tests
+
+#### 18 - Visual Assessment Report
+- **File:** `18-visual-assessment-report.json`
+- **Category:** COMPLIANCE
+- **Purpose:** Comprehensive visual assessment report for EPA MSGP annual reporting
+- **Compliance:** EPA MSGP Part 4.2 - Visual Assessment Requirements, EPA NetDMR Reporting
+- **Time:** 30-45 minutes
+- **Key Sections:** Facility/permit info, observations repeater, laboratory analysis, corrective actions, monitoring summary, certification
+- **Target Role:** Environmental Manager, Compliance Officer, SWPPP Coordinator
+- **Lab Parameters:** pH, turbidity (NTU), TSS, oil & grease, BOD, COD
+- **Annual Summary:** Total observations, passed/failed counts, lab samples, exceedances
+- **Tests:** 25 tests
+
+#### 19 - Routine Facility Inspection
+- **File:** `19-routine-facility-inspection.json`
+- **Category:** COMPLIANCE
+- **Purpose:** Monthly routine facility inspection for EPA MSGP and SPCC compliance
+- **Compliance:** EPA MSGP Part 4.1 - Routine Facility Inspections, 40 CFR 112 SPCC
+- **Time:** 45-60 minutes
+- **Key Sections:** Facility info, stormwater controls, industrial areas, material storage, SPCC equipment, spill response, documentation
+- **Target Role:** Facility Manager, Environmental Coordinator, SPCC Inspector
+- **Inspection Areas:** 12 BMP checkboxes, 8 industrial activity fields, SPCC containment verification
+- **Frequency:** Monthly per EPA MSGP, or as specified in SWPPP
+- **Tests:** 26 tests
+
+#### 20 - WIW Daily Form
+- **File:** `20-wiw-daily-form.json`
+- **Category:** COMPLIANCE
+- **Purpose:** Work-In-Water daily environmental monitoring form
+- **Compliance:** Nevada NAC 503 - Wildlife Protection, NAC 445A - Water Quality, Army Corps Section 404
+- **Time:** 20-30 minutes
+- **Key Sections:** Project info, daily work log (repeater), turbidity monitoring, BMPs, fish/wildlife observations, incidents, certification
+- **Target Role:** Environmental Monitor, WIW Inspector, Project Biologist
+- **Aquatic BMPs:** Silt curtain, turbidity curtain, cofferdam, fish relocation, dewatering, fish screens
+- **Wildlife Monitoring:** Fish observations, species, behavior (normal/stressed/mortality), NDOW notification
+- **Tests:** 28 tests
+
+#### 21 - NDEP BWPC SWPPP
+- **File:** `21-ndep-bwpc-swppp.json`
+- **Category:** COMPLIANCE
+- **Purpose:** Nevada DEP Bureau of Water Pollution Control Stormwater Pollution Prevention Plan
+- **Compliance:** EPA CGP 2022 Part 7.2, Nevada NAC 445A, NVR100000 General Permit
+- **Time:** 2-4 hours (initial preparation)
+- **Key Sections:** Project/site info, site operators, stormwater team, nature of construction, erosion controls, sediment controls, good housekeeping, stabilization, inspection procedures, amendments, certification
+- **Sections:** 11 sections, 80+ fields
+- **Nevada-Specific:** 17 Nevada county options, NDEP permit number, NVR permit reference
+- **EPA CGP 7.2 Elements:** All 14 required SWPPP elements per EPA CGP 2022
+- **Tests:** 41 tests
+
+#### 22 - NDOT SWPPP
+- **File:** `22-ndot-swppp.json`
+- **Category:** COMPLIANCE
+- **Purpose:** Nevada DOT Highway Construction SWPPP per NDOT Form 018-002
+- **Compliance:** NDOT Form 018-002SWPPP, NDOT BMPs Manual (Feb 2025), NVR100000, EPA CGP 2022
+- **Time:** 2-4 hours (initial preparation)
+- **Key Sections:** Project info, highway location, site operators, stormwater team, nature of construction, erosion controls, sediment controls, good housekeeping, stabilization, traffic control impacts, inspection procedures, certification
+- **Sections:** 11 sections, 90+ fields
+- **Highway-Specific:** Route type (Interstate/US/State/Local), route number, begin/end mile posts, NDOT project number, district (1/2/3), WPCM certification
+- **NDOT BMP Codes:** EC-1 to EC-12 (erosion controls), SE-1 to SE-10 (sediment controls) per NDOT BMPs Manual
+- **Tests:** 38 tests
+
+---
+
 ## Template Structure
 
 All templates follow a standardized JSON structure:
@@ -313,7 +424,7 @@ Templates are organized into 6 categories:
 3. **QUALITY_CONTROL** (2 templates): Quality inspections and testing
 4. **EQUIPMENT** (1 template): Equipment inspection and maintenance
 5. **LOGISTICS** (1 template): Deliveries and inventory
-6. **COMPLIANCE** (2 templates): EPA/environmental compliance
+6. **COMPLIANCE** (11 templates): EPA/OSHA/Nevada environmental compliance including Q&D agency templates
 
 ---
 
@@ -423,6 +534,24 @@ pnpm --filter database validate-templates
 - Nevada Division of Environmental Protection (NDEP) - Surface Area Disturbance Permits
 - Northern Nevada Public Health - Dust Control Requirements
 
+### Nevada Water Quality & Stormwater
+- Nevada NAC 445A - Water Pollution Control
+- NVR100000 - Nevada Construction Stormwater General Permit
+- NDOT Form 018-002SWPPP - Highway Construction SWPPP
+- NDOT BMPs Manual (February 2025) - Erosion/Sediment Control Best Management Practices
+- NDOT MS4 Permit NV0023329 - Municipal Separate Storm Sewer System
+- TMWA Water Quality Standards - Truckee Meadows Water Authority
+
+### Nevada Wildlife Protection
+- Nevada NAC 503 - Wildlife Protection
+- Army Corps Section 404 - Clean Water Act Dredge and Fill Permits
+
+### EPA Multi-Sector General Permit
+- EPA MSGP Part 4.1 - Routine Facility Inspections
+- EPA MSGP Part 4.2 - Visual Assessment Requirements
+- 40 CFR 122.26 - Stormwater Discharges
+- 40 CFR 112 - SPCC (Spill Prevention, Control, and Countermeasure)
+
 ---
 
 ## Support
@@ -434,6 +563,7 @@ For questions or issues with templates:
 
 ---
 
-**Template Library Status:** COMPLETE (11/11 templates)
-**Validation Status:** All templates validated against industry standards
-**Production Readiness:** Ready for database seeding (ISSUE-071)
+**Template Library Status:** COMPLETE (20/20 templates)
+**Validation Status:** All templates validated against industry standards (236 tests passing)
+**Production Readiness:** Ready for database seeding
+**Sprint 4 Phase 2:** Nevada Q&D Agency Templates (ISSUE-106 through ISSUE-117) - COMPLETE

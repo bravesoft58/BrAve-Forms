@@ -1,10 +1,25 @@
 # ISSUE-126: Load Testing & Stress Testing
 
-**Sprint:** Sprint 4 | **Phase:** 3 - Testing & Polish | **Priority:** P1
-**Time:** 2 hours | **Complexity:** Small
+**Sprint:** Sprint 5 (Moved from Sprint 4) | **Phase:** 4 - Polish & Testing | **Priority:** P1
+**Time:** 4 hours | **Complexity:** Small
 **Created:** 2025-10-23
-**Dependencies:** ISSUE-125 (security audit complete)
-**Status:** NOT STARTED
+**Moved:** 2025-11-27 (Sprint 4 closed, issue carried over to Sprint 5)
+**Dependencies:** ISSUE-149 (Sprint 5 completion report)
+**Status:** MOVED TO SPRINT 5
+
+---
+
+## Sprint 4 Deferral Record
+
+**Reason:** Q&D pilot deployment targets 5-25 users. Load testing for 100+ concurrent users is not required for initial pilot launch.
+
+**Sprint 5 Assignment:**
+
+- Added as P1 issue in Sprint 5 Phase 4 (Polish & Testing)
+- Estimated 4 hours
+- Scheduled after Sprint 5 completion report
+
+**Risk Assessment:** LOW - Pilot user count is well within application capacity based on architecture review.
 
 ## What You'll Do
 

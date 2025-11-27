@@ -1,0 +1,42 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - button "Toggle navigation menu" [ref=e6] [cursor=pointer]:
+            - img [ref=e8] [cursor=pointer]
+          - link "BF" [ref=e9] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e10] [cursor=pointer]: BF
+        - generic [ref=e11]:
+          - button "Search" [ref=e12] [cursor=pointer]:
+            - img [ref=e14] [cursor=pointer]
+          - button "Last synced just now" [ref=e17] [cursor=pointer]:
+            - img [ref=e19] [cursor=pointer]
+          - button "User menu" [ref=e22] [cursor=pointer]:
+            - generic [ref=e25] [cursor=pointer]: QC
+    - navigation [ref=e26]:
+      - generic [ref=e27]:
+        - link "Dashboard" [ref=e28] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e29] [cursor=pointer]
+          - generic [ref=e34] [cursor=pointer]: Dashboard
+        - link "Projects" [ref=e35] [cursor=pointer]:
+          - /url: /dashboard/projects
+          - img [ref=e36] [cursor=pointer]
+          - generic [ref=e38] [cursor=pointer]: Projects
+        - link "Forms" [ref=e39] [cursor=pointer]:
+          - /url: /dashboard/forms
+          - img [ref=e40] [cursor=pointer]
+          - generic [ref=e44] [cursor=pointer]: Forms
+        - link "Settings" [ref=e45] [cursor=pointer]:
+          - /url: /dashboard/settings
+          - img [ref=e46] [cursor=pointer]
+          - generic [ref=e49] [cursor=pointer]: Settings
+    - main [ref=e50]:
+      - paragraph [ref=e54]: Loading form template...
+  - alert [ref=e55]
+```

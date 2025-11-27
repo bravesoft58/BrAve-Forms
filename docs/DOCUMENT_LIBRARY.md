@@ -192,6 +192,24 @@ This master index provides a complete inventory of all documentation in the BrAv
 
 ## Sprint Documentation
 
+### Sprint 4 - CLOSED (November 27, 2025)
+
+- CLOSED **[Sprint 4 Master Plan](../sprints/sprint4/SPRINT_4_ISSUES_SUMMARY.md)**
+  - **Purpose:** QR Inspector Portal and Q&D Agency Templates
+  - **Status:** CLOSED (November 27, 2025)
+  - **Total Issues:** 25/26 (96%) - ISSUE-126 moved to Sprint 5
+  - **Phase 1:** QR Inspector Portal (ISSUE-100 to ISSUE-105) - COMPLETE (6/6)
+  - **Phase 2:** Q&D Agency Templates (ISSUE-106 to ISSUE-117) - COMPLETE (12/12)
+  - **Phase 3:** Testing & Polish (ISSUE-118 to ISSUE-127) - COMPLETE (9/10)
+  - **Carried Over:** ISSUE-126 (Load Testing) moved to Sprint 5
+
+- CLOSED **[Sprint 4 Completion Report](../sprints/sprint4/SPRINT_4_COMPLETION_REPORT.md)**
+  - **Purpose:** Final sprint completion documentation with Q&D pilot readiness
+  - **Status:** CLOSED (November 27, 2025)
+  - **Key Deliverables:** QR Portal (77 tests), 20+ templates, E2E test suite
+  - **Pilot Status:** APPROVED for Q&D Construction deployment
+  - **Bugs Fixed:** BUG-001 (Mobile layout), BUG-002 (Title duplication)
+
 ### Sprint 3 - COMPLETE (November 25, 2025)
 
 - COMPLETED **[Sprint 3 Master Plan](../sprints/sprint3/SPRINT_3_MASTER_PLAN.md)**
@@ -524,7 +542,8 @@ All previously identified actions have been completed:
   - Sprint 1: COMPLETE (46 issues - 100%)
   - Sprint 2: COMPLETE (24 issues - 100%)
   - Sprint 3: COMPLETE (38/38 issues - 100%) - Completed November 25, 2025
-  - Sprint 4: NOT STARTED (QR Inspector Portal + Quality & Discipline Templates)
+  - Sprint 4: CLOSED (25/26 issues - 96%) - Closed November 27, 2025, ISSUE-126 moved to Sprint 5
+  - Sprint 5: PLANNED (35 issues) - Production-Ready MVP
 
 ---
 
