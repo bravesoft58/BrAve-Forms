@@ -4,6 +4,7 @@ import { ColorSchemeScript, MantineProvider } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { ClerkProvider } from '@clerk/nextjs';
 
 // Local imports
 import { theme } from '@/lib/theme/construction.theme';
@@ -108,58 +109,60 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" className={inter.variable}>
-      <head>
-        {/* Color scheme script must be in head */}
-        <ColorSchemeScript />
+    <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up" afterSignOutUrl="/sign-in">
+      <html lang="en" className={inter.variable}>
+        <head>
+          {/* Color scheme script must be in head */}
+          <ColorSchemeScript />
 
-        {/* Optimize viewport for mobile construction sites */}
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+          {/* Optimize viewport for mobile construction sites */}
+          <meta name="mobile-web-app-capable" content="yes" />
+          <meta name="apple-mobile-web-app-capable" content="yes" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
-        {/* Prevent zoom on input focus (iOS) while maintaining accessibility */}
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"
-        />
+          {/* Prevent zoom on input focus (iOS) while maintaining accessibility */}
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"
+          />
 
-        {/* Construction-specific meta tags */}
-        <meta name="application-name" content="BrAve Forms" />
-        <meta name="format-detection" content="telephone=yes" />
-        <meta name="format-detection" content="address=yes" />
-      </head>
-      <body className={`${inter.className} antialiased`}>
-        <MantineProvider theme={theme} defaultColorScheme="light">
-          <ModalsProvider
-            modalProps={{
-              centered: true,
-              overlayProps: { backgroundOpacity: 0.55, blur: 3 },
-              radius: 'md',
-              shadow: 'xl',
-            }}
-          >
-            <AppProviders>
-              {/* Application layout with header and navigation */}
-              <AppLayout>{children}</AppLayout>
+          {/* Construction-specific meta tags */}
+          <meta name="application-name" content="BrAve Forms" />
+          <meta name="format-detection" content="telephone=yes" />
+          <meta name="format-detection" content="address=yes" />
+        </head>
+        <body className={`${inter.className} antialiased`}>
+          <MantineProvider theme={theme} defaultColorScheme="light">
+            <ModalsProvider
+              modalProps={{
+                centered: true,
+                overlayProps: { backgroundOpacity: 0.55, blur: 3 },
+                radius: 'md',
+                shadow: 'xl',
+              }}
+            >
+              <AppProviders>
+                {/* Application layout with header and navigation */}
+                <AppLayout>{children}</AppLayout>
 
-              {/* Global notifications */}
-              <Notifications
-                position="top-right"
-                zIndex={1000}
-                limit={5}
-                containerWidth={400}
-                transitionDuration={300}
-              />
+                {/* Global notifications */}
+                <Notifications
+                  position="top-right"
+                  zIndex={1000}
+                  limit={5}
+                  containerWidth={400}
+                  transitionDuration={300}
+                />
 
-              {/* Development tools */}
-              {process.env.NODE_ENV === 'development' && (
-                <ReactQueryDevtools initialIsOpen={false} />
-              )}
-            </AppProviders>
-          </ModalsProvider>
-        </MantineProvider>
-      </body>
-    </html>
+                {/* Development tools */}
+                {process.env.NODE_ENV === 'development' && (
+                  <ReactQueryDevtools initialIsOpen={false} />
+                )}
+              </AppProviders>
+            </ModalsProvider>
+          </MantineProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
