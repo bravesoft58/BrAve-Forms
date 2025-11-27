@@ -130,7 +130,7 @@ describe('FormFillPage - Form Submission Integration', () => {
       id: 'sub-123',
       templateId: TEST_TEMPLATE_ID,
       data: {},
-      status: 'submitted',
+      status: 'SUBMITTED',
     });
   });
 
@@ -212,7 +212,7 @@ describe('FormFillPage - Form Submission Integration', () => {
       expect(mocks.createSubmission).toHaveBeenCalledWith(
         expect.objectContaining({
           templateId: TEST_TEMPLATE_ID,
-          status: 'submitted',
+          status: 'SUBMITTED',
           data: expect.objectContaining({
             'sample-field': 'Test value',
           }),
@@ -327,7 +327,7 @@ describe('FormFillPage - Form Submission Integration', () => {
       id: 'sub-123',
       templateId: TEST_TEMPLATE_ID,
       data: {},
-      status: 'submitted',
+      status: 'SUBMITTED',
     });
 
     // Wait for navigation after completion
@@ -359,7 +359,7 @@ describe('FormFillPage - Form Submission Integration', () => {
     expect(mocks.createSubmission).toHaveBeenCalledWith(
       expect.objectContaining({
         templateId: TEST_TEMPLATE_ID,
-        status: 'submitted',
+        status: 'SUBMITTED',
       }),
       expect.any(String) // token
     );

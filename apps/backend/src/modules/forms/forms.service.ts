@@ -161,9 +161,12 @@ export class FormsService {
     data: any;
     metadata?: any;
     offlineCreated?: boolean;
+    status?: 'DRAFT' | 'IN_PROGRESS' | 'SUBMITTED' | 'REVIEWED' | 'APPROVED' | 'REJECTED';
   }) {
     // Validate template exists and belongs to org
     await this.getFormTemplate(data.templateId, data.orgId);
+
+    const submissionStatus = data.status || 'DRAFT';
 
     return this.prisma.formSubmission.create({
       data: {
@@ -175,7 +178,8 @@ export class FormsService {
         data: data.data,
         metadata: data.metadata,
         offlineCreated: data.offlineCreated || false,
-        status: 'DRAFT',
+        status: submissionStatus,
+        submittedAt: submissionStatus === 'SUBMITTED' ? new Date() : null,
       },
       include: {
         template: true,

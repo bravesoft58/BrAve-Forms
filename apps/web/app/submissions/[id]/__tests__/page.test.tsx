@@ -58,7 +58,7 @@ describe('SubmissionDetailPage', () => {
     },
     createdBy: { name: 'John Doe' },
     submittedAt: '2025-11-20T10:00:00Z',
-    status: 'submitted',
+    status: 'SUBMITTED',
     data: {
       site_name: 'Construction Site A',
       inspector_name: 'John Doe',
@@ -465,7 +465,7 @@ describe('SubmissionDetailPage', () => {
     it('should use correct color for draft status', async () => {
       const draftSubmission = {
         ...mockSubmission,
-        status: 'draft',
+        status: 'DRAFT',
       };
 
       (findSubmissionById as any).mockResolvedValue(draftSubmission);
@@ -473,7 +473,7 @@ describe('SubmissionDetailPage', () => {
       render(<SubmissionDetailPage />, { wrapper: createWrapper() });
 
       await waitFor(() => {
-        expect(screen.getByText('draft')).toBeInTheDocument();
+        expect(screen.getByText('DRAFT')).toBeInTheDocument();
       });
     });
 

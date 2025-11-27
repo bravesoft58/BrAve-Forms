@@ -12,16 +12,18 @@ import {
   Text,
   Button,
   ScrollArea,
+  Loader,
+  Alert,
 } from '@mantine/core';
-import { IconForms, IconPlus, IconCalendar } from '@tabler/icons-react';
+import { IconForms, IconPlus, IconCalendar, IconAlertCircle } from '@tabler/icons-react';
 import {
-  getMockFormSubmissions,
+  useProjectSubmissions,
   filterSubmissionsByTemplate,
   filterSubmissionsByStatus,
   getSubmissionStatusColor,
-  type FormSubmissionStatus,
-} from '@/lib/mock-data/form-submissions';
-import { getMockFormTemplates } from '@/lib/mock-data/form-templates';
+} from '@/hooks/useFormSubmissions';
+import { useFormTemplates } from '@/hooks/useFormTemplates';
+import { FormSubmissionStatus } from '@brave-forms/types';
 
 interface SubmittedFormsListProps {
   projectId: string;
@@ -47,11 +49,13 @@ export function SubmittedFormsList({ projectId }: SubmittedFormsListProps) {
   const [templateFilter, setTemplateFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<FormSubmissionStatus | 'all'>('all');
 
-  // Get all submissions for this project
-  const allSubmissions = useMemo(() => getMockFormSubmissions(projectId), [projectId]);
+  // Fetch submissions for this project from API
+  const { data: allSubmissions = [], isLoading, error } = useProjectSubmissions(projectId);
 
-  // Get available templates for filter dropdown
-  const templates = useMemo(() => getMockFormTemplates(), []);
+  // Fetch templates for filter dropdown from API
+  const { data: templates = [], isLoading: templatesLoading } = useFormTemplates({
+    isActive: true,
+  });
 
   // Filter submissions
   const filteredSubmissions = useMemo(() => {
@@ -64,6 +68,34 @@ export function SubmittedFormsList({ projectId }: SubmittedFormsListProps) {
   const handleSubmissionClick = (submissionId: string) => {
     router.push(`/dashboard/forms/submissions/${submissionId}`);
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <Paper p="xl" withBorder>
+        <Stack align="center" gap="md">
+          <Loader size="lg" />
+          <Text size="14px" c="dimmed">
+            Loading submissions...
+          </Text>
+        </Stack>
+      </Paper>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <Alert
+        icon={<IconAlertCircle size={16} />}
+        title="Error loading submissions"
+        color="red"
+        variant="light"
+      >
+        {error instanceof Error ? error.message : 'Failed to load submissions. Please try again.'}
+      </Alert>
+    );
+  }
 
   // Empty state
   if (filteredSubmissions.length === 0) {
@@ -109,11 +141,13 @@ export function SubmittedFormsList({ projectId }: SubmittedFormsListProps) {
           data={[
             { label: 'All Templates', value: 'all' },
             ...templates.map((template) => ({
-              label: template.title,
+              label: template.name,
               value: template.id,
             })),
           ]}
           clearable
+          disabled={templatesLoading}
+          rightSection={templatesLoading ? <Loader size="xs" /> : undefined}
           style={{ flex: 1, minWidth: '200px' }}
           size="sm"
         />
@@ -232,4 +266,3 @@ export function SubmittedFormsList({ projectId }: SubmittedFormsListProps) {
     </Stack>
   );
 }
-

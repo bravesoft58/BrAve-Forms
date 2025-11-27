@@ -19,7 +19,7 @@ import {
   Alert,
 } from '@mantine/core';
 import { findAllSubmissions } from '@/lib/api/submissions';
-import { getMockFormTemplates } from '@/lib/mock-data/form-templates';
+import { useFormTemplates } from '@/hooks/useFormTemplates';
 import { useCopyYesterdaysLog } from '@/hooks/useCopyYesterdaysLog';
 
 export default function SubmissionsPage() {
@@ -64,11 +64,16 @@ export default function SubmissionsPage() {
     enabled: auth.isLoaded,
   });
 
-  const templates = getMockFormTemplates();
+  // Fetch templates from API for filter dropdown
+  const { data: templates = [] } = useFormTemplates({ isActive: true });
 
   // Find first daily log template for "Copy Yesterday's Log" button
+  // Look for templates with "daily" or "log" in the name, or fall back to first template
   const dailyLogTemplate = useMemo(() => {
-    return templates.find((t) => t.category === 'daily-logs') || templates[0];
+    const dailyTemplate = templates.find(
+      (t) => t.name.toLowerCase().includes('daily') || t.name.toLowerCase().includes('log')
+    );
+    return dailyTemplate || templates[0];
   }, [templates]);
 
   const handleFilterChange = (key: string, value: string) => {
@@ -152,7 +157,7 @@ export default function SubmissionsPage() {
               placeholder="All Templates"
               data={[
                 { value: '', label: 'All Templates' },
-                ...templates.map((t) => ({ value: t.id, label: t.title })),
+                ...templates.map((t) => ({ value: t.id, label: t.name })),
               ]}
               value={filters.templateId}
               onChange={(value) => handleFilterChange('templateId', value || '')}
@@ -162,10 +167,10 @@ export default function SubmissionsPage() {
               placeholder="All Statuses"
               data={[
                 { value: '', label: 'All Statuses' },
-                { value: 'draft', label: 'Draft' },
-                { value: 'submitted', label: 'Submitted' },
-                { value: 'approved', label: 'Approved' },
-                { value: 'rejected', label: 'Rejected' },
+                { value: 'DRAFT', label: 'Draft' },
+                { value: 'SUBMITTED', label: 'Submitted' },
+                { value: 'APPROVED', label: 'Approved' },
+                { value: 'REJECTED', label: 'Rejected' },
               ]}
               value={filters.status}
               onChange={(value) => handleFilterChange('status', value || '')}

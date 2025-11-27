@@ -10,7 +10,7 @@ import { makeAuthenticatedRequest } from './client';
 export interface CreateSubmissionInput {
   templateId: string;
   data: Record<string, unknown>;
-  status: 'draft' | 'submitted';
+  status: 'DRAFT' | 'SUBMITTED';
 }
 
 export interface SubmissionResponse {

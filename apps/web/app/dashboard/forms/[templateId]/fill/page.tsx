@@ -5,7 +5,11 @@ import { useParams } from 'next/navigation';
 import { Container, Title, Text, Stack, Button, Loader, Alert } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { FormRenderer } from '@/components/Forms/FormRenderer';
-import { FormSubmissionData, FormTemplate as FormRendererTemplate, FormField } from '@/components/Forms/FormRenderer/types';
+import {
+  FormSubmissionData,
+  FormTemplate as FormRendererTemplate,
+  FormField,
+} from '@/components/Forms/FormRenderer/types';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useSubmitForm } from '@/hooks/useSubmitForm';
 import { useFormTemplate } from '@/hooks/useFormTemplates';
@@ -57,21 +61,27 @@ function transformTemplateForRenderer(apiTemplate: {
             value: opt.value,
             label: opt.label,
           })),
-          validation: field.validation ? {
-            min: field.validation.min as number | undefined,
-            max: field.validation.max as number | undefined,
-            minLength: field.validation.minLength as number | undefined,
-            maxLength: field.validation.maxLength as number | undefined,
-            pattern: field.validation.pattern as string | undefined,
-            customMessage: field.validation.customMessage as string | undefined,
-          } : undefined,
-          conditional: field.conditionalLogic ? {
-            showIf: field.conditionalLogic.showIf as {
-              field: string;
-              operator: 'equals' | 'notEquals' | 'contains' | 'greaterThan' | 'lessThan';
-              value: unknown;
-            } | undefined,
-          } : undefined,
+          validation: field.validation
+            ? {
+                min: field.validation.min as number | undefined,
+                max: field.validation.max as number | undefined,
+                minLength: field.validation.minLength as number | undefined,
+                maxLength: field.validation.maxLength as number | undefined,
+                pattern: field.validation.pattern as string | undefined,
+                customMessage: field.validation.customMessage as string | undefined,
+              }
+            : undefined,
+          conditional: field.conditionalLogic
+            ? {
+                showIf: field.conditionalLogic.showIf as
+                  | {
+                      field: string;
+                      operator: 'equals' | 'notEquals' | 'contains' | 'greaterThan' | 'lessThan';
+                      value: unknown;
+                    }
+                  | undefined,
+              }
+            : undefined,
         });
       }
     }
@@ -108,7 +118,7 @@ export default function FormFillPage() {
     await submitMutation.mutateAsync({
       templateId,
       data: data.values,
-      status: 'submitted',
+      status: 'SUBMITTED',
     });
   };
 
@@ -119,7 +129,7 @@ export default function FormFillPage() {
     await submitMutation.mutateAsync({
       templateId,
       data: data.values,
-      status: 'draft',
+      status: 'DRAFT',
     });
   };
 
@@ -145,11 +155,7 @@ export default function FormFillPage() {
   if (error) {
     return (
       <Container size="md" py="xl">
-        <Alert
-          icon={<IconAlertCircle size={16} />}
-          title="Failed to load form"
-          color="red"
-        >
+        <Alert icon={<IconAlertCircle size={16} />} title="Failed to load form" color="red">
           {error instanceof Error ? error.message : 'An error occurred while loading the form.'}
         </Alert>
       </Container>
@@ -201,7 +207,12 @@ export default function FormFillPage() {
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <FormRenderer template={template} onSubmit={handleSubmit} initialValues={{}} hideHeader />
+            <FormRenderer
+              template={template}
+              onSubmit={handleSubmit}
+              initialValues={{}}
+              hideHeader
+            />
           </div>
         </Stack>
       </Container>

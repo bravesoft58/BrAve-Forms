@@ -127,7 +127,7 @@ describe('FormFillPage - Offline Scenarios', () => {
       id: 'sub-123',
       templateId: TEST_TEMPLATE_ID,
       data: {},
-      status: 'submitted',
+      status: 'SUBMITTED',
     });
 
     // Mock IndexedDB for offline queue functionality

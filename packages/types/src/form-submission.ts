@@ -1,33 +1,21 @@
 export enum FormSubmissionStatus {
-  DRAFT = 'draft',
-  IN_PROGRESS = 'in_progress',
-  SUBMITTED = 'submitted',
-  REVIEWED = 'reviewed',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
+  DRAFT = 'DRAFT',
+  IN_PROGRESS = 'IN_PROGRESS',
+  SUBMITTED = 'SUBMITTED',
+  REVIEWED = 'REVIEWED',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
 }
 
-export const VALID_STATUS_TRANSITIONS: Record<
-  FormSubmissionStatus,
-  FormSubmissionStatus[]
-> = {
-  [FormSubmissionStatus.DRAFT]: [
-    FormSubmissionStatus.IN_PROGRESS,
-    FormSubmissionStatus.SUBMITTED,
-  ],
-  [FormSubmissionStatus.IN_PROGRESS]: [
-    FormSubmissionStatus.SUBMITTED,
-    FormSubmissionStatus.DRAFT,
-  ],
+export const VALID_STATUS_TRANSITIONS: Record<FormSubmissionStatus, FormSubmissionStatus[]> = {
+  [FormSubmissionStatus.DRAFT]: [FormSubmissionStatus.IN_PROGRESS, FormSubmissionStatus.SUBMITTED],
+  [FormSubmissionStatus.IN_PROGRESS]: [FormSubmissionStatus.SUBMITTED, FormSubmissionStatus.DRAFT],
   [FormSubmissionStatus.SUBMITTED]: [
     FormSubmissionStatus.REVIEWED,
     FormSubmissionStatus.APPROVED,
     FormSubmissionStatus.REJECTED,
   ],
-  [FormSubmissionStatus.REVIEWED]: [
-    FormSubmissionStatus.APPROVED,
-    FormSubmissionStatus.REJECTED,
-  ],
+  [FormSubmissionStatus.REVIEWED]: [FormSubmissionStatus.APPROVED, FormSubmissionStatus.REJECTED],
   [FormSubmissionStatus.APPROVED]: [],
   [FormSubmissionStatus.REJECTED]: [FormSubmissionStatus.DRAFT],
 };

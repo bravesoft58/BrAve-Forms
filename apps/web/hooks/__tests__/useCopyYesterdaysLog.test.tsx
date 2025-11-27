@@ -68,7 +68,7 @@ describe('useCopyYesterdaysLog', () => {
         id: 'cloned-id',
         templateId: 'template-id',
         data: { field1: 'value1' },
-        status: 'draft',
+        status: 'DRAFT',
         submittedAt: null,
       };
 
@@ -93,7 +93,7 @@ describe('useCopyYesterdaysLog', () => {
         id: 'cloned-id',
         templateId: 'template-id',
         data: {},
-        status: 'draft',
+        status: 'DRAFT',
         submittedAt: null,
       };
 
@@ -119,7 +119,7 @@ describe('useCopyYesterdaysLog', () => {
         id: 'cloned-id',
         templateId: 'template-id',
         data: {},
-        status: 'draft',
+        status: 'DRAFT',
         submittedAt: null,
       };
 
@@ -143,7 +143,7 @@ describe('useCopyYesterdaysLog', () => {
         id: 'cloned-id',
         templateId: 'template-id',
         data: {},
-        status: 'draft',
+        status: 'DRAFT',
         submittedAt: null,
       };
 
@@ -299,7 +299,7 @@ describe('useCopyYesterdaysLog', () => {
         id: 'cloned-id',
         templateId: 'template-id',
         data: {},
-        status: 'draft',
+        status: 'DRAFT',
         submittedAt: null,
       });
     });

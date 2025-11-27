@@ -115,7 +115,7 @@ describe('useSubmitForm', () => {
         id: 'sub-123',
         templateId: 'tmpl-1',
         data: { field1: 'value1' },
-        status: 'submitted' as const,
+        status: 'SUBMITTED' as const,
       };
 
       (createSubmission as any).mockResolvedValue(mockSubmission);
@@ -127,7 +127,7 @@ describe('useSubmitForm', () => {
       const input = {
         templateId: 'tmpl-1',
         data: { field1: 'value1' },
-        status: 'submitted' as const,
+        status: 'SUBMITTED' as const,
       };
 
       result.current.mutate(input);
@@ -145,7 +145,7 @@ describe('useSubmitForm', () => {
         id: 'sub-123',
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted' as const,
+        status: 'SUBMITTED' as const,
       };
 
       (createSubmission as any).mockResolvedValue(mockSubmission);
@@ -157,7 +157,7 @@ describe('useSubmitForm', () => {
       result.current.mutate({
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted',
+        status: 'SUBMITTED',
       });
 
       await waitFor(() => {
@@ -174,7 +174,7 @@ describe('useSubmitForm', () => {
         id: 'sub-123',
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted' as const,
+        status: 'SUBMITTED' as const,
       };
 
       (createSubmission as any).mockResolvedValue(mockSubmission);
@@ -186,7 +186,7 @@ describe('useSubmitForm', () => {
       result.current.mutate({
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted',
+        status: 'SUBMITTED',
       });
 
       await waitFor(() => {
@@ -199,7 +199,7 @@ describe('useSubmitForm', () => {
         id: 'sub-123',
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted' as const,
+        status: 'SUBMITTED' as const,
       };
 
       (createSubmission as any).mockResolvedValue(mockSubmission);
@@ -213,7 +213,7 @@ describe('useSubmitForm', () => {
       result.current.mutate({
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted',
+        status: 'SUBMITTED',
       });
 
       await waitFor(() => {
@@ -228,7 +228,7 @@ describe('useSubmitForm', () => {
         id: 'draft-123',
         templateId: 'tmpl-1',
         data: { field1: 'partial' },
-        status: 'draft' as const,
+        status: 'DRAFT' as const,
       };
 
       (createSubmission as any).mockResolvedValue(mockDraft);
@@ -240,7 +240,7 @@ describe('useSubmitForm', () => {
       result.current.mutate({
         templateId: 'tmpl-1',
         data: { field1: 'partial' },
-        status: 'draft',
+        status: 'DRAFT',
       });
 
       await waitFor(() => {
@@ -255,7 +255,7 @@ describe('useSubmitForm', () => {
         id: 'draft-123',
         templateId: 'tmpl-1',
         data: {},
-        status: 'draft' as const,
+        status: 'DRAFT' as const,
       };
 
       (createSubmission as any).mockResolvedValue(mockDraft);
@@ -267,7 +267,7 @@ describe('useSubmitForm', () => {
       result.current.mutate({
         templateId: 'tmpl-1',
         data: {},
-        status: 'draft',
+        status: 'DRAFT',
       });
 
       await waitFor(() => {
@@ -284,7 +284,7 @@ describe('useSubmitForm', () => {
         id: 'draft-123',
         templateId: 'tmpl-1',
         data: {},
-        status: 'draft' as const,
+        status: 'DRAFT' as const,
       };
 
       (createSubmission as any).mockResolvedValue(mockDraft);
@@ -296,7 +296,7 @@ describe('useSubmitForm', () => {
       result.current.mutate({
         templateId: 'tmpl-1',
         data: {},
-        status: 'draft',
+        status: 'DRAFT',
       });
 
       await waitFor(() => {
@@ -320,7 +320,7 @@ describe('useSubmitForm', () => {
       const input = {
         templateId: 'tmpl-1',
         data: { field1: 'value1' },
-        status: 'submitted' as const,
+        status: 'SUBMITTED' as const,
       };
 
       result.current.mutate(input);
@@ -341,7 +341,7 @@ describe('useSubmitForm', () => {
       result.current.mutate({
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted',
+        status: 'SUBMITTED',
       });
 
       await waitFor(() => {
@@ -361,7 +361,7 @@ describe('useSubmitForm', () => {
       result.current.mutate({
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted',
+        status: 'SUBMITTED',
       });
 
       await waitFor(() => {
@@ -382,7 +382,7 @@ describe('useSubmitForm', () => {
       result.current.mutate({
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted',
+        status: 'SUBMITTED',
       });
 
       await waitFor(() => {
@@ -411,7 +411,7 @@ describe('useSubmitForm', () => {
       result.current.mutate({
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted',
+        status: 'SUBMITTED',
       });
 
       await waitFor(() => {
@@ -433,7 +433,7 @@ describe('useSubmitForm', () => {
       result.current.mutate({
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted',
+        status: 'SUBMITTED',
       });
 
       await waitFor(() => {
@@ -455,7 +455,7 @@ describe('useSubmitForm', () => {
       result.current.mutate({
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted',
+        status: 'SUBMITTED',
       });
 
       await waitFor(() => {
@@ -475,7 +475,7 @@ describe('useSubmitForm', () => {
       result.current.mutate({
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted',
+        status: 'SUBMITTED',
       });
 
       await waitFor(() => {
@@ -502,14 +502,14 @@ describe('useSubmitForm', () => {
       result.current.mutate({
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted',
+        status: 'SUBMITTED',
       });
 
       await waitFor(() => {
         expect(result.current.isPending).toBe(true);
       });
 
-      resolveFn({ id: 'sub-123', templateId: 'tmpl-1', data: {}, status: 'submitted' });
+      resolveFn({ id: 'sub-123', templateId: 'tmpl-1', data: {}, status: 'SUBMITTED' });
     });
 
     it('should reset state when using reset', async () => {
@@ -517,7 +517,7 @@ describe('useSubmitForm', () => {
         id: 'sub-123',
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted' as const,
+        status: 'SUBMITTED' as const,
       };
 
       (createSubmission as any).mockResolvedValue(mockSubmission);
@@ -529,7 +529,7 @@ describe('useSubmitForm', () => {
       result.current.mutate({
         templateId: 'tmpl-1',
         data: {},
-        status: 'submitted',
+        status: 'SUBMITTED',
       });
 
       await waitFor(() => {

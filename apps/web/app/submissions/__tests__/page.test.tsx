@@ -6,7 +6,6 @@ import { MantineProvider } from '@mantine/core';
 import { useRouter } from 'next/navigation';
 import SubmissionsPage from '../page';
 import { findAllSubmissions } from '@/lib/api/submissions';
-import { getMockFormTemplates } from '@/lib/mock-data/form-templates';
 import React from 'react';
 
 // Mock dependencies
@@ -17,7 +16,15 @@ vi.mock('next/navigation', () => ({
 vi.mock('@clerk/nextjs', () => ({
   useAuth: vi.fn(() => ({
     isLoaded: true,
+    isSignedIn: true,
+    userId: 'user-123',
+    sessionId: 'session-123',
     getToken: vi.fn().mockResolvedValue('mock-token'),
+  })),
+  useUser: vi.fn(() => ({
+    user: { id: 'user-123', fullName: 'Test User' },
+    isLoaded: true,
+    isSignedIn: true,
   })),
 }));
 
@@ -25,8 +32,10 @@ vi.mock('@/lib/api/submissions', () => ({
   findAllSubmissions: vi.fn(),
 }));
 
-vi.mock('@/lib/mock-data/form-templates', () => ({
-  getMockFormTemplates: vi.fn(),
+// Mock useFormTemplates hook
+const mockUseFormTemplates = vi.fn();
+vi.mock('@/hooks/useFormTemplates', () => ({
+  useFormTemplates: () => mockUseFormTemplates(),
 }));
 
 describe('SubmissionsPage', () => {
@@ -34,8 +43,8 @@ describe('SubmissionsPage', () => {
   let mockRouter: { push: ReturnType<typeof vi.fn> };
 
   const mockTemplates = [
-    { id: 'tmpl-1', title: 'SWPPP Inspection' },
-    { id: 'tmpl-2', title: 'Safety Checklist' },
+    { id: 'tmpl-1', name: 'SWPPP Inspection', category: 'EPA_SWPPP', isActive: true },
+    { id: 'tmpl-2', name: 'Safety Checklist', category: 'OSHA_SAFETY', isActive: true },
   ];
 
   const mockSubmissions = [
@@ -45,7 +54,7 @@ describe('SubmissionsPage', () => {
       template: { name: 'SWPPP Inspection', version: 1 },
       createdBy: { name: 'John Doe' },
       submittedAt: '2025-11-20T10:00:00Z',
-      status: 'submitted',
+      status: 'SUBMITTED',
       data: {},
     },
     {
@@ -54,7 +63,7 @@ describe('SubmissionsPage', () => {
       template: { name: 'Safety Checklist', version: 1 },
       createdBy: { name: 'Jane Smith' },
       submittedAt: '2025-11-19T14:30:00Z',
-      status: 'draft',
+      status: 'DRAFT',
       data: {},
     },
   ];
@@ -80,7 +89,11 @@ describe('SubmissionsPage', () => {
     };
 
     (useRouter as any).mockReturnValue(mockRouter);
-    (getMockFormTemplates as any).mockReturnValue(mockTemplates);
+    mockUseFormTemplates.mockReturnValue({
+      data: mockTemplates,
+      isLoading: false,
+      error: null,
+    });
 
     vi.clearAllMocks();
   });
@@ -215,7 +228,7 @@ describe('SubmissionsPage', () => {
       render(<SubmissionsPage />, { wrapper: createWrapper() });
 
       await waitFor(() => {
-        const submittedBadge = screen.getByText('submitted');
+        const submittedBadge = screen.getByText('SUBMITTED');
         expect(submittedBadge).toBeInTheDocument();
       });
     });
@@ -226,7 +239,7 @@ describe('SubmissionsPage', () => {
       render(<SubmissionsPage />, { wrapper: createWrapper() });
 
       await waitFor(() => {
-        const draftBadge = screen.getByText('draft');
+        const draftBadge = screen.getByText('DRAFT');
         expect(draftBadge).toBeInTheDocument();
       });
     });
@@ -349,7 +362,7 @@ describe('SubmissionsPage', () => {
           template: null,
           createdBy: { name: 'John Doe' },
           submittedAt: '2025-11-20T10:00:00Z',
-          status: 'submitted',
+          status: 'SUBMITTED',
           data: {},
         },
       ];
@@ -371,7 +384,7 @@ describe('SubmissionsPage', () => {
           template: { name: 'SWPPP Inspection', version: 1 },
           createdBy: null,
           submittedAt: '2025-11-20T10:00:00Z',
-          status: 'submitted',
+          status: 'SUBMITTED',
           data: {},
         },
       ];
@@ -393,7 +406,7 @@ describe('SubmissionsPage', () => {
           template: { name: 'SWPPP Inspection', version: 1 },
           createdBy: { name: 'John Doe' },
           submittedAt: null,
-          status: 'draft',
+          status: 'DRAFT',
           data: {},
         },
       ];
