@@ -39,11 +39,14 @@ COPY packages/types ./packages/types
 # Set build environment variables
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-ENV NEXT_PUBLIC_SKIP_CLERK_AUTH=true
 
 # GraphQL API endpoint (baked into build for client-side requests)
 ARG NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://localhost:4000/graphql
 ENV NEXT_PUBLIC_GRAPHQL_ENDPOINT=$NEXT_PUBLIC_GRAPHQL_ENDPOINT
+
+# Clerk authentication (required at build time for static page generation)
+ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 
 # Build Next.js app with standalone output
 WORKDIR /app/apps/web
