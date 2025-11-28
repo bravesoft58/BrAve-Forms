@@ -53,6 +53,7 @@
     "styled-jsx": "^5.1.7",
     "valtio": "^1.12.1",
     "valtio-persist": "^2.2.4",
+    "yet-another-react-lightbox": "^3.25.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

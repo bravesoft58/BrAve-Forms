@@ -16,9 +16,10 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { useInView } from 'react-intersection-observer';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { IconMapPin, IconAlertCircle, IconPhoto } from '@tabler/icons-react';
+import { PhotoLightbox } from './photo-lightbox';
 
 /**
  * Photo type matching backend GraphQL schema
@@ -155,6 +156,9 @@ export function PhotoGalleryGrid({
   // Get orgId for multi-tenant cache isolation
   const { orgId } = useAuth();
 
+  // Lightbox state for full-screen photo viewing
+  const [lightboxIndex, setLightboxIndex] = useState<number>(-1);
+
   const { ref, inView } = useInView({
     threshold: 0.1,
     triggerOnce: false,
@@ -187,16 +191,30 @@ export function PhotoGalleryGrid({
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Handle keyboard navigation for photo cards
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent, photo: Photo) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        onPhotoClick?.(photo);
-      }
+  // Handle photo click - opens lightbox and calls external handler
+  const handlePhotoClick = useCallback(
+    (photo: Photo, index: number) => {
+      setLightboxIndex(index);
+      onPhotoClick?.(photo);
     },
     [onPhotoClick]
   );
+
+  // Handle keyboard navigation for photo cards
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent, photo: Photo, index: number) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handlePhotoClick(photo, index);
+      }
+    },
+    [handlePhotoClick]
+  );
+
+  // Close lightbox
+  const handleCloseLightbox = useCallback(() => {
+    setLightboxIndex(-1);
+  }, []);
 
   // Loading state with skeleton cards for better perceived performance
   if (isLoading) {
@@ -272,7 +290,7 @@ export function PhotoGalleryGrid({
         data-testid="photo-gallery-grid"
         aria-label={`Photo gallery with ${totalCount} photos`}
       >
-        {photos.map((photo) => (
+        {photos.map((photo, index) => (
           <Card
             key={photo.id}
             shadow="sm"
@@ -282,8 +300,8 @@ export function PhotoGalleryGrid({
             data-testid={`photo-card-${photo.id}`}
             role="button"
             tabIndex={0}
-            onClick={() => onPhotoClick?.(photo)}
-            onKeyDown={(e) => handleKeyDown(e, photo)}
+            onClick={() => handlePhotoClick(photo, index)}
+            onKeyDown={(e) => handleKeyDown(e, photo, index)}
             style={{
               cursor: 'pointer',
               transition: 'transform 0.2s, box-shadow 0.2s',
@@ -389,6 +407,14 @@ export function PhotoGalleryGrid({
           </Text>
         </Center>
       )}
+
+      {/* Photo Lightbox for full-screen viewing */}
+      <PhotoLightbox
+        photos={photos}
+        index={lightboxIndex}
+        open={lightboxIndex >= 0}
+        onClose={handleCloseLightbox}
+      />
     </Stack>
   );
 }
