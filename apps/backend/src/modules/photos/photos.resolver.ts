@@ -1,14 +1,25 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, Logger, BadRequestException } from '@nestjs/common';
 import { ClerkAuthGuard } from '@/modules/auth/guards/clerk-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { PhotosService } from './photos.service';
-import { Photo, UploadPhotoInput } from './photos.types';
+import {
+  Photo,
+  UploadPhotoInput,
+  UploadPhotoBase64Input,
+  PhotoUploadResult,
+} from './photos.types';
+import { ConfigService } from '@nestjs/config';
 
 @Resolver(() => Photo)
 @UseGuards(ClerkAuthGuard)
 export class PhotosResolver {
-  constructor(private readonly photosService: PhotosService) {}
+  private readonly logger = new Logger(PhotosResolver.name);
+
+  constructor(
+    private readonly photosService: PhotosService,
+    private readonly configService: ConfigService
+  ) {}
 
   @Query(() => [Photo])
   async photos(
@@ -40,6 +51,99 @@ export class PhotosResolver {
       take,
       skip,
     });
+  }
+
+  /**
+   * Upload a photo from base64 data to MinIO storage
+   * Extracts EXIF data (GPS, timestamp, device info) and creates thumbnails
+   */
+  @Mutation(() => PhotoUploadResult, {
+    description: 'Upload a photo from base64 to MinIO storage with EXIF extraction',
+  })
+  async uploadPhoto(
+    @Args('input') input: UploadPhotoBase64Input,
+    @CurrentUser() user: { userId: string; orgId: string }
+  ): Promise<PhotoUploadResult> {
+    const startTime = Date.now();
+
+    // Validate base64 input
+    if (!input.base64 || input.base64.length === 0) {
+      throw new BadRequestException('Base64 image data is required');
+    }
+
+    // Remove data URL prefix if present
+    let base64Data = input.base64;
+    if (base64Data.includes(',')) {
+      base64Data = base64Data.split(',')[1];
+    }
+
+    // Validate size (max 10MB = ~13.3MB in base64)
+    const maxBase64Size = 14 * 1024 * 1024;
+    if (base64Data.length > maxBase64Size) {
+      throw new BadRequestException('Photo is too large. Maximum size is 10MB.');
+    }
+
+    try {
+      // Convert base64 to Buffer
+      const imageBuffer = Buffer.from(base64Data, 'base64');
+
+      this.logger.log(`Uploading photo for org ${user.orgId}`, {
+        size: imageBuffer.length,
+        format: input.format,
+        projectId: input.projectId,
+        submissionId: input.submissionId,
+        hasGps: !!(input.latitude && input.longitude),
+      });
+
+      // Upload to storage via PhotosService
+      const photo = await this.photosService.uploadPhotoFromBase64(
+        imageBuffer,
+        user.orgId,
+        user.userId,
+        {
+          projectId: input.projectId,
+          submissionId: input.submissionId,
+          fieldName: input.fieldName,
+          caption: input.caption,
+          latitude: input.latitude,
+          longitude: input.longitude,
+        }
+      );
+
+      // Generate URLs
+      const s3Endpoint = this.configService.get<string>('S3_ENDPOINT', 'http://localhost:9000');
+      const bucketName = this.configService.get<string>('S3_BUCKET_NAME', 'braveforms-photos');
+
+      const url = photo.s3Key ? `${s3Endpoint}/${bucketName}/${photo.s3Key}` : '';
+      const thumbnailUrl = photo.thumbnailKey
+        ? `${s3Endpoint}/${bucketName}/${photo.thumbnailKey}`
+        : url;
+
+      const uploadTime = Date.now() - startTime;
+      this.logger.log(`Photo uploaded successfully in ${uploadTime}ms`, {
+        photoId: photo.id,
+        size: photo.fileSize,
+      });
+
+      return {
+        id: photo.id,
+        url,
+        thumbnailUrl,
+        filename: photo.s3Key?.split('/').pop() || `photo-${photo.id}.jpg`,
+        size: photo.fileSize,
+        mimeType: photo.mimeType,
+        latitude: photo.latitude,
+        longitude: photo.longitude,
+        takenAt: photo.takenAt,
+      };
+    } catch (error) {
+      this.logger.error('Failed to upload photo', {
+        error: error.message,
+        stack: error.stack,
+        orgId: user.orgId,
+      });
+      throw new BadRequestException(`Failed to upload photo: ${error.message}`);
+    }
   }
 
   @Mutation(() => Boolean)

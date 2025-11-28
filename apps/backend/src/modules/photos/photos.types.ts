@@ -70,3 +70,60 @@ export class UploadPhotoInput {
   @Field(() => Date, { nullable: true })
   takenAt?: Date;
 }
+
+@InputType()
+export class UploadPhotoBase64Input {
+  @Field({ description: 'Base64 encoded image data (without data URL prefix)' })
+  base64: string;
+
+  @Field({ description: 'Image format: jpeg, png, webp', defaultValue: 'jpeg' })
+  format: string;
+
+  @Field({ nullable: true, description: 'Project ID for organizing photos' })
+  projectId?: string;
+
+  @Field({ nullable: true, description: 'Form submission ID if from a form' })
+  submissionId?: string;
+
+  @Field({ nullable: true, description: 'Field name in the form' })
+  fieldName?: string;
+
+  @Field({ nullable: true, description: 'Photo caption or description' })
+  caption?: string;
+
+  @Field({ nullable: true, description: 'GPS latitude from device' })
+  latitude?: number;
+
+  @Field({ nullable: true, description: 'GPS longitude from device' })
+  longitude?: number;
+}
+
+@ObjectType()
+export class PhotoUploadResult {
+  @Field(() => ID)
+  id: string;
+
+  @Field({ description: 'Full-size photo URL' })
+  url: string;
+
+  @Field({ description: 'Thumbnail URL (200px)' })
+  thumbnailUrl: string;
+
+  @Field()
+  filename: string;
+
+  @Field()
+  size: number;
+
+  @Field()
+  mimeType: string;
+
+  @Field({ nullable: true })
+  latitude?: number;
+
+  @Field({ nullable: true })
+  longitude?: number;
+
+  @Field({ nullable: true, description: 'When the photo was taken (from EXIF or current time)' })
+  takenAt?: Date;
+}

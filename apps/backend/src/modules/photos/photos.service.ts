@@ -151,4 +151,89 @@ export class PhotosService {
       },
     });
   }
+
+  /**
+   * Upload a photo from base64 data (for form submissions)
+   * Does not require an inspection - can be standalone or associated with a submission
+   */
+  async uploadPhotoFromBase64(
+    imageBuffer: Buffer,
+    orgId: string,
+    uploadedBy: string,
+    metadata?: {
+      projectId?: string;
+      submissionId?: string;
+      fieldName?: string;
+      caption?: string;
+      latitude?: number;
+      longitude?: number;
+    }
+  ): Promise<{
+    id: string;
+    s3Key?: string;
+    thumbnailKey?: string;
+    fileSize: number;
+    mimeType: string;
+    latitude?: number;
+    longitude?: number;
+    takenAt: Date;
+  }> {
+    const photoId = `photo_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
+    // Extract EXIF data from image
+    const exifData = this.exifService.extractExifData(imageBuffer);
+    const fullExif = this.exifService.extractFullExifMetadata(imageBuffer);
+
+    // Use GPS from EXIF if available, otherwise use provided GPS
+    const latitude = exifData.latitude ?? metadata?.latitude;
+    const longitude = exifData.longitude ?? metadata?.longitude;
+
+    // Process and store photo
+    const processed = await this.storageService.processAndStorePhoto(
+      imageBuffer,
+      orgId,
+      photoId
+    );
+
+    // Generate thumbnail key based on main s3Key
+    const thumbnailKey = processed.s3Key
+      ? processed.s3Key.replace(/(\.[^.]+)$/, '-thumb$1')
+      : undefined;
+
+    // Create photo record
+    const photo = await this.prisma.photo.create({
+      data: {
+        orgId,
+        fileSize: processed.size,
+        mimeType: 'image/jpeg',
+        uploadedBy,
+        takenAt: exifData.takenAt || new Date(),
+        caption: metadata?.caption,
+        latitude,
+        longitude,
+        altitude: exifData.altitude,
+        deviceModel: exifData.deviceModel,
+        deviceMake: exifData.deviceMake,
+        exifData: fullExif,
+        storageType: processed.storageType,
+        s3Key: processed.s3Key,
+        thumbnailKey,
+        imageData: processed.storageType === StorageType.POSTGRESQL ? processed.buffer : null,
+        // Optional associations
+        submissionId: metadata?.submissionId,
+        fieldName: metadata?.fieldName,
+      },
+    });
+
+    return {
+      id: photo.id,
+      s3Key: photo.s3Key || undefined,
+      thumbnailKey: photo.thumbnailKey || undefined,
+      fileSize: photo.fileSize,
+      mimeType: photo.mimeType,
+      latitude: photo.latitude || undefined,
+      longitude: photo.longitude || undefined,
+      takenAt: photo.takenAt,
+    };
+  }
 }

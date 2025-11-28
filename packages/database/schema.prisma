@@ -93,7 +93,9 @@ model Inspection {
 model Photo {
   id           String       @id @default(uuid())
   orgId        String       @map("org_id")
-  inspectionId String       @map("inspection_id")
+  inspectionId String?      @map("inspection_id")
+  submissionId String?      @map("submission_id")
+  fieldName    String?      @map("field_name")
   s3Key        String?      @map("s3_key")
   thumbnailKey String?      @map("thumbnail_key")
   imageData    Bytes?       @map("image_data")
@@ -110,11 +112,12 @@ model Photo {
   exifData     Json?        @map("exif_data")
   uploadedBy   String       @map("uploaded_by")
   uploadedAt   DateTime     @default(now()) @map("uploaded_at")
-  inspection   Inspection   @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  inspection   Inspection?  @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
   @@index([orgId])
   @@index([inspectionId])
+  @@index([submissionId])
   @@index([storageType])
   @@map("photos")
 }
@@ -251,17 +254,17 @@ model FormSubmission {
 }
 
 model QRToken {
-  id          String        @id @default(uuid())
-  projectId   String        @map("project_id")
-  token       String        @unique
-  permissions TokenPermission[]
-  expiresAt   DateTime      @map("expires_at")
-  revokedAt   DateTime?     @map("revoked_at")
-  generatedBy String        @map("generated_by")
-  createdAt   DateTime      @default(now()) @map("created_at")
-  accessCount Int           @default(0) @map("access_count")
-  lastAccessAt DateTime?    @map("last_access_at")
-  project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  id           String            @id @default(uuid())
+  projectId    String            @map("project_id")
+  token        String            @unique
+  permissions  TokenPermission[]
+  expiresAt    DateTime          @map("expires_at")
+  revokedAt    DateTime?         @map("revoked_at")
+  generatedBy  String            @map("generated_by")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  accessCount  Int               @default(0) @map("access_count")
+  lastAccessAt DateTime?         @map("last_access_at")
+  project      Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
   @@index([token])

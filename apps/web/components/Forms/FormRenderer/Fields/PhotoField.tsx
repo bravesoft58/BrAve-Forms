@@ -1,12 +1,30 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Controller, Control, FieldError } from 'react-hook-form';
-import { Button, Image, Group, Stack, Text } from '@mantine/core';
-import { IconCamera, IconTrash, IconRefresh } from '@tabler/icons-react';
+import {
+  Button,
+  Image,
+  Group,
+  Stack,
+  Text,
+  Progress,
+  Paper,
+  Badge,
+} from '@mantine/core';
+import { IconCamera, IconTrash, IconRefresh, IconPhoto } from '@tabler/icons-react';
 import { FieldWrapper } from './FieldWrapper';
 import { FormField } from '../types';
 import { notifications } from '@mantine/notifications';
+import { useAuth } from '@clerk/nextjs';
+import {
+  capturePhoto,
+  selectPhoto,
+  uploadPhoto,
+  isPhotoUploadError,
+  isCapturedPhoto,
+  PhotoUploadResult,
+} from '@/lib/photo-upload';
 
 interface PhotoFieldProps {
   field: FormField;
@@ -15,106 +33,215 @@ interface PhotoFieldProps {
   disabled?: boolean;
 }
 
-interface GPSData {
-  lat: number;
-  lng: number;
+interface PhotoData {
+  id: string;
+  url: string;
+  thumbnailUrl: string;
+  latitude?: number;
+  longitude?: number;
+  takenAt?: string;
 }
 
 export function PhotoField({ field, control, error, disabled }: PhotoFieldProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [gpsData, setGpsData] = useState<GPSData | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const { getToken } = useAuth();
 
-  const getCurrentLocation = async (): Promise<GPSData | null> => {
-    if (!navigator.geolocation) {
-      return null;
-    }
+  const handleCapture = useCallback(
+    async (onChange: (value: PhotoData | null) => void) => {
+      setIsUploading(true);
+      setUploadProgress(10);
 
-    try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0,
+      try {
+        // Capture photo
+        const captured = await capturePhoto();
+
+        if (isPhotoUploadError(captured)) {
+          notifications.show({
+            title: 'Capture Failed',
+            message: captured.message,
+            color: 'red',
+          });
+          setIsUploading(false);
+          setUploadProgress(0);
+          return;
+        }
+
+        if (!isCapturedPhoto(captured)) {
+          setIsUploading(false);
+          setUploadProgress(0);
+          return;
+        }
+
+        setUploadProgress(40);
+
+        // Get auth token
+        const token = await getToken();
+        if (!token) {
+          notifications.show({
+            title: 'Upload Failed',
+            message: 'Authentication required. Please sign in.',
+            color: 'red',
+          });
+          setIsUploading(false);
+          setUploadProgress(0);
+          return;
+        }
+
+        setUploadProgress(50);
+
+        // Upload to MinIO
+        const result = await uploadPhoto(captured, token, {
+          fieldName: field.id,
         });
-      });
 
-      return {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      };
-    } catch (error) {
-      console.warn('Failed to get GPS location:', error);
-      return null;
-    }
-  };
+        if (isPhotoUploadError(result)) {
+          notifications.show({
+            title: 'Upload Failed',
+            message: result.message,
+            color: 'red',
+          });
+          setIsUploading(false);
+          setUploadProgress(0);
+          return;
+        }
 
-  const handleFileUpload = async (file: File | null, onChange: (value: string) => void) => {
-    if (!file) {
-      onChange('');
-      setGpsData(null);
-      return;
-    }
+        setUploadProgress(100);
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      notifications.show({
-        title: 'Invalid File',
-        message: 'Please select an image file (JPG, PNG, etc.)',
-        color: 'red',
-      });
-      return;
-    }
+        // Store photo data in form
+        const photoData: PhotoData = {
+          id: result.id,
+          url: result.url,
+          thumbnailUrl: result.thumbnailUrl,
+          latitude: result.latitude,
+          longitude: result.longitude,
+          takenAt: result.takenAt,
+        };
 
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      notifications.show({
-        title: 'File Too Large',
-        message: 'Image must be less than 10MB',
-        color: 'red',
-      });
-      return;
-    }
+        onChange(photoData);
 
-    setIsUploading(true);
-
-    try {
-      // Get GPS location
-      const gps = await getCurrentLocation();
-      if (gps) {
-        setGpsData(gps);
-      }
-
-      // Convert to base64 data URL
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = reader.result as string;
-        onChange(dataUrl);
-        setIsUploading(false);
         notifications.show({
           title: 'Photo Uploaded',
-          message: 'Photo uploaded successfully',
+          message: 'Photo uploaded to storage successfully',
           color: 'green',
         });
-      };
-      reader.onerror = () => {
-        setIsUploading(false);
+      } catch (err) {
+        console.error('Photo capture error:', err);
         notifications.show({
           title: 'Upload Failed',
-          message: 'Failed to read file',
+          message: 'An unexpected error occurred',
           color: 'red',
         });
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      setIsUploading(false);
-      notifications.show({
-        title: 'Upload Failed',
-        message: 'Failed to upload photo',
-        color: 'red',
-      });
-    }
-  };
+      } finally {
+        setIsUploading(false);
+        setUploadProgress(0);
+      }
+    },
+    [getToken, field.id]
+  );
+
+  const handleSelect = useCallback(
+    async (onChange: (value: PhotoData | null) => void) => {
+      setIsUploading(true);
+      setUploadProgress(10);
+
+      try {
+        // Select photo from gallery
+        const captured = await selectPhoto();
+
+        if (isPhotoUploadError(captured)) {
+          notifications.show({
+            title: 'Selection Failed',
+            message: captured.message,
+            color: 'red',
+          });
+          setIsUploading(false);
+          setUploadProgress(0);
+          return;
+        }
+
+        if (!isCapturedPhoto(captured)) {
+          setIsUploading(false);
+          setUploadProgress(0);
+          return;
+        }
+
+        setUploadProgress(40);
+
+        // Get auth token
+        const token = await getToken();
+        if (!token) {
+          notifications.show({
+            title: 'Upload Failed',
+            message: 'Authentication required. Please sign in.',
+            color: 'red',
+          });
+          setIsUploading(false);
+          setUploadProgress(0);
+          return;
+        }
+
+        setUploadProgress(50);
+
+        // Upload to MinIO
+        const result = await uploadPhoto(captured, token, {
+          fieldName: field.id,
+        });
+
+        if (isPhotoUploadError(result)) {
+          notifications.show({
+            title: 'Upload Failed',
+            message: result.message,
+            color: 'red',
+          });
+          setIsUploading(false);
+          setUploadProgress(0);
+          return;
+        }
+
+        setUploadProgress(100);
+
+        // Store photo data in form
+        const photoData: PhotoData = {
+          id: result.id,
+          url: result.url,
+          thumbnailUrl: result.thumbnailUrl,
+          latitude: result.latitude,
+          longitude: result.longitude,
+          takenAt: result.takenAt,
+        };
+
+        onChange(photoData);
+
+        notifications.show({
+          title: 'Photo Uploaded',
+          message: 'Photo uploaded to storage successfully',
+          color: 'green',
+        });
+      } catch (err) {
+        console.error('Photo selection error:', err);
+        notifications.show({
+          title: 'Upload Failed',
+          message: 'An unexpected error occurred',
+          color: 'red',
+        });
+      } finally {
+        setIsUploading(false);
+        setUploadProgress(0);
+      }
+    },
+    [getToken, field.id]
+  );
+
+  const handleDelete = useCallback((onChange: (value: PhotoData | null) => void) => {
+    onChange(null);
+    notifications.show({
+      title: 'Photo Removed',
+      message: 'Photo has been removed from the form',
+      color: 'blue',
+    });
+  }, []);
 
   return (
     <FieldWrapper id={field.id} label={field.label} required={field.required}>
@@ -122,69 +249,82 @@ export function PhotoField({ field, control, error, disabled }: PhotoFieldProps)
         name={field.id}
         control={control}
         render={({ field: formField }) => {
-          const value = formField.value as string | undefined;
+          const value = formField.value as PhotoData | string | null | undefined;
+
+          // Handle both old format (string URL) and new format (PhotoData object)
+          const photoData: PhotoData | null =
+            typeof value === 'string'
+              ? value
+                ? { id: '', url: value, thumbnailUrl: value }
+                : null
+              : value || null;
 
           return (
             <Stack gap="sm">
-              {/* Hidden file input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={(e) => {
-                  const file = e.target.files?.[0] || null;
-                  handleFileUpload(file, formField.onChange);
-                }}
-                disabled={disabled}
-              />
+              {/* Upload Progress */}
+              {isUploading && (
+                <Paper p="sm" withBorder>
+                  <Stack gap="xs">
+                    <Text size="sm">Uploading photo to storage...</Text>
+                    <Progress value={uploadProgress} animated size="sm" />
+                  </Stack>
+                </Paper>
+              )}
 
-              {!value ? (
-                <Button
-                  leftSection={<IconCamera size={18} />}
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={disabled || isUploading}
-                  loading={isUploading}
-                >
-                  {isUploading ? 'Uploading...' : 'Upload Photo'}
-                </Button>
-              ) : (
+              {!photoData && !isUploading ? (
+                <Group gap="sm">
+                  <Button
+                    leftSection={<IconCamera size={18} />}
+                    onClick={() => handleCapture(formField.onChange)}
+                    disabled={disabled}
+                    h={48}
+                  >
+                    Take Photo
+                  </Button>
+                  <Button
+                    leftSection={<IconPhoto size={18} />}
+                    variant="light"
+                    onClick={() => handleSelect(formField.onChange)}
+                    disabled={disabled}
+                    h={48}
+                  >
+                    Choose Photo
+                  </Button>
+                </Group>
+              ) : photoData ? (
                 <Stack gap="sm">
-                  <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <Paper p="xs" withBorder style={{ position: 'relative', display: 'inline-block' }}>
                     <Image
-                      src={value}
+                      src={photoData.thumbnailUrl || photoData.url}
                       alt={field.label}
-                      width={200}
-                      height={200}
+                      w={200}
+                      h={200}
                       fit="cover"
-                      radius="md"
-                      style={{ border: '1px solid #e2e8f0' }}
+                      radius="sm"
                     />
-                    {gpsData && (
-                      <div
+                    {photoData.latitude && photoData.longitude && (
+                      <Badge
+                        size="sm"
+                        variant="filled"
+                        color="dark"
                         style={{
                           position: 'absolute',
                           bottom: 8,
                           left: 8,
-                          padding: '4px 8px',
-                          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                          color: 'white',
-                          fontSize: '12px',
-                          borderRadius: '4px',
-                          fontFamily: 'monospace',
                         }}
                       >
-                        GPS: {gpsData.lat.toFixed(4)}, {gpsData.lng.toFixed(4)}
-                      </div>
+                        GPS: {photoData.latitude.toFixed(4)}, {photoData.longitude.toFixed(4)}
+                      </Badge>
                     )}
-                  </div>
+                  </Paper>
                   <Group gap="sm">
                     <Button
                       leftSection={<IconRefresh size={16} />}
                       variant="light"
                       size="sm"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={disabled}
+                      onClick={() => handleCapture(formField.onChange)}
+                      disabled={disabled || isUploading}
+                      h={40}
                     >
                       Retake
                     </Button>
@@ -193,20 +333,18 @@ export function PhotoField({ field, control, error, disabled }: PhotoFieldProps)
                       variant="light"
                       color="red"
                       size="sm"
-                      onClick={() => {
-                        formField.onChange('');
-                        setGpsData(null);
-                      }}
-                      disabled={disabled}
+                      onClick={() => handleDelete(formField.onChange)}
+                      disabled={disabled || isUploading}
+                      h={40}
                     >
                       Delete
                     </Button>
                   </Group>
                 </Stack>
-              )}
+              ) : null}
 
               {error && (
-                <Text size="12px" c="red">
+                <Text size="xs" c="red">
                   {error.message}
                 </Text>
               )}
