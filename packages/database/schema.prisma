@@ -112,6 +112,8 @@ model Photo {
   exifData     Json?        @map("exif_data")
   uploadedBy   String       @map("uploaded_by")
   uploadedAt   DateTime     @default(now()) @map("uploaded_at")
+  weather      String?      @map("weather") // Weather conditions at time of photo (for EPA compliance)
+  formType     String?      @map("form_type") // Form template name for quick filtering
   inspection   Inspection?  @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
@@ -119,6 +121,8 @@ model Photo {
   @@index([inspectionId])
   @@index([submissionId])
   @@index([storageType])
+  @@index([takenAt]) // For date range queries
+  @@index([weather]) // For weather filter queries
   @@map("photos")
 }
 

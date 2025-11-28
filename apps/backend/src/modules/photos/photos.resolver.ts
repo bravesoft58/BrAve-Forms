@@ -78,6 +78,11 @@ export class PhotosResolver {
     @Args('gpsRadiusKm', { nullable: true }) gpsRadiusKm?: number,
     @CurrentUser() user?: any
   ): Promise<Photo[]> {
+    // Validate search query length (max 200 chars to prevent DoS)
+    if (search && search.length > 200) {
+      throw new BadRequestException('Search query too long (max 200 characters)');
+    }
+
     // Validate GPS radius parameters - all three must be present or none
     if (
       (gpsLat !== undefined || gpsLng !== undefined || gpsRadiusKm !== undefined) &&
@@ -108,13 +113,16 @@ export class PhotosResolver {
       );
     }
 
+    // Sanitize search input - trim whitespace
+    const sanitizedSearch = search?.trim().slice(0, 200);
+
     return this.photosService.getPhotosByProject(projectId, user.orgId, {
       startDate,
       endDate,
       hasGps,
       take,
       skip,
-      search,
+      search: sanitizedSearch,
       userId,
       formType,
       weather: sanitizedWeather,

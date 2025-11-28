@@ -102,6 +102,16 @@ export class PhotosService {
     return photo;
   }
 
+  /**
+   * Get photos by project with comprehensive filtering options
+   *
+   * GPS Radius Filtering Strategy:
+   * 1. Apply boundary box pre-filter at database level (reduces candidate set)
+   * 2. Apply precise Haversine formula on reduced result set
+   * 3. Over-fetch by GPS_OVERFETCH_BUFFER to handle edge cases near radius boundary
+   *
+   * Performance: O(n) Haversine calculations on pre-filtered set vs entire dataset
+   */
   async getPhotosByProject(
     projectId: string,
     orgId: string,
@@ -120,6 +130,10 @@ export class PhotosService {
       gpsRadiusKm?: number;
     }
   ) {
+    // Safety limit for GPS post-filtering - prevents memory issues on large datasets
+    const GPS_OVERFETCH_BUFFER = 100;
+    const MAX_GPS_FETCH = 1000;
+
     const where: any = { orgId };
 
     if (filters?.startDate || filters?.endDate) {
@@ -133,7 +147,7 @@ export class PhotosService {
       where.longitude = { not: null };
     }
 
-    // Search filter: search in caption
+    // Search filter: search in caption (already sanitized and length-limited in resolver)
     if (filters?.search) {
       where.caption = { contains: filters.search, mode: 'insensitive' };
     }
@@ -143,37 +157,51 @@ export class PhotosService {
       where.uploadedBy = filters.userId;
     }
 
-    // Form type filter: get submissionIds matching the form type by template name
+    // Form type filter: check Photo.formType directly first (fast, indexed)
+    // Falls back to submission template lookup if Photo.formType is not set
     if (filters?.formType) {
-      const matchingSubmissions = await this.prisma.formSubmission.findMany({
+      // First try direct Photo.formType (exact match, faster)
+      const directMatchCount = await this.prisma.photo.count({
         where: {
           orgId,
-          template: {
-            name: { contains: filters.formType, mode: 'insensitive' },
-          },
+          formType: filters.formType,
+          inspection: { projectId },
         },
-        select: { id: true },
       });
-      const submissionIds = matchingSubmissions.map((s) => s.id);
-      if (submissionIds.length === 0) {
-        return []; // No matching submissions, return empty
+
+      if (directMatchCount > 0) {
+        // Use direct Photo.formType filter (exact match)
+        where.formType = filters.formType;
+      } else {
+        // Fall back to submission template name lookup (substring match for compatibility)
+        const matchingSubmissions = await this.prisma.formSubmission.findMany({
+          where: {
+            orgId,
+            template: {
+              name: { contains: filters.formType, mode: 'insensitive' },
+            },
+          },
+          select: { id: true },
+        });
+        const submissionIds = matchingSubmissions.map((s) => s.id);
+        if (submissionIds.length === 0) {
+          return []; // No matching submissions, return empty
+        }
+        where.submissionId = { in: submissionIds };
       }
-      where.submissionId = { in: submissionIds };
+    }
+
+    // Weather filter: filter by Photo.weather field (exact match from array)
+    if (filters?.weather && filters.weather.length > 0) {
+      where.weather = { in: filters.weather };
     }
 
     where.inspection = {
       projectId,
     };
 
-    // Fetch photos with potential GPS radius filtering
-    let photos = await this.prisma.photo.findMany({
-      where,
-      orderBy: { takenAt: 'desc' },
-      take: filters?.take ? filters.take + 100 : undefined, // Fetch extra for post-filtering
-      skip: filters?.skip,
-    });
-
-    // GPS radius filter (Haversine formula for distance calculation)
+    // GPS Boundary Box Pre-Filter (optimization)
+    // Reduces candidate set before expensive Haversine calculations
     if (
       filters?.gpsLat !== undefined &&
       filters?.gpsLng !== undefined &&
@@ -183,6 +211,53 @@ export class PhotosService {
       const centerLng = filters.gpsLng;
       const radiusKm = filters.gpsRadiusKm;
 
+      // Calculate approximate bounding box (1 degree lat ~ 111.32km)
+      const latDelta = radiusKm / 111.32;
+      // Longitude degrees vary by latitude (narrower near poles)
+      const lngDelta = radiusKm / (111.32 * Math.cos((centerLat * Math.PI) / 180));
+
+      // Apply boundary box filter at database level
+      where.latitude = {
+        gte: centerLat - latDelta,
+        lte: centerLat + latDelta,
+      };
+      where.longitude = {
+        gte: centerLng - lngDelta,
+        lte: centerLng + lngDelta,
+      };
+    }
+
+    // Calculate fetch limit with GPS over-fetch buffer
+    // Over-fetch to handle edge cases near radius boundary after Haversine precision filter
+    let fetchLimit: number | undefined;
+    if (filters?.take) {
+      if (filters.gpsLat !== undefined) {
+        // GPS filter active: over-fetch for post-filtering, with safety cap
+        fetchLimit = Math.min(filters.take + GPS_OVERFETCH_BUFFER, MAX_GPS_FETCH);
+      } else {
+        fetchLimit = filters.take;
+      }
+    }
+
+    // Fetch photos with optimized WHERE clause
+    let photos = await this.prisma.photo.findMany({
+      where,
+      orderBy: { takenAt: 'desc' },
+      take: fetchLimit,
+      skip: filters?.skip,
+    });
+
+    // GPS radius filter - precise Haversine formula on pre-filtered boundary box results
+    if (
+      filters?.gpsLat !== undefined &&
+      filters?.gpsLng !== undefined &&
+      filters?.gpsRadiusKm !== undefined
+    ) {
+      const centerLat = filters.gpsLat;
+      const centerLng = filters.gpsLng;
+      const radiusKm = filters.gpsRadiusKm;
+
+      // Apply precise Haversine distance filter
       photos = photos.filter((photo) => {
         if (!photo.latitude || !photo.longitude) return false;
 
@@ -196,7 +271,7 @@ export class PhotosService {
         return distance <= radiusKm;
       });
 
-      // Apply take limit after GPS filtering
+      // Apply original take limit after GPS filtering
       if (filters.take && photos.length > filters.take) {
         photos = photos.slice(0, filters.take);
       }

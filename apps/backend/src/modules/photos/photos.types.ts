@@ -57,6 +57,12 @@ export class Photo {
 
   @Field()
   uploadedAt: Date;
+
+  @Field({ nullable: true, description: 'Weather conditions at time of photo (for EPA compliance)' })
+  weather?: string;
+
+  @Field({ nullable: true, description: 'Form template name for quick filtering' })
+  formType?: string;
 }
 
 @InputType()

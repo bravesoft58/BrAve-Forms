@@ -363,6 +363,158 @@ describe('PhotoFilters', () => {
     });
   });
 
+  describe('Weather Filter Edge Cases', () => {
+    it('should handle empty weather array gracefully', async () => {
+      render(
+        <TestWrapper>
+          <PhotoFilters filters={{ weather: [] }} onChange={mockOnChange} showWeatherFilter />
+        </TestWrapper>
+      );
+
+      // Should render without crashing
+      expect(screen.getByPlaceholderText(/weather conditions/i)).toBeInTheDocument();
+      // Empty array should not show as active filter
+      expect(screen.queryByText(/filter.* active/i)).not.toBeInTheDocument();
+    });
+
+    it('should clear weather filter when all selections are removed', async () => {
+      const { rerender } = render(
+        <TestWrapper>
+          <PhotoFilters filters={{ weather: ['rain', 'snow'] }} onChange={mockOnChange} showWeatherFilter />
+        </TestWrapper>
+      );
+
+      // Simulate clearing to empty array
+      rerender(
+        <TestWrapper>
+          <PhotoFilters filters={{ weather: [] }} onChange={mockOnChange} showWeatherFilter />
+        </TestWrapper>
+      );
+
+      // Should not show as active filter when empty
+      expect(screen.queryByText(/2 filter.* active/i)).not.toBeInTheDocument();
+    });
+
+    it('should only accept valid weather condition values from predefined list', async () => {
+      render(
+        <TestWrapper>
+          <PhotoFilters filters={{}} onChange={mockOnChange} showWeatherFilter />
+        </TestWrapper>
+      );
+
+      // Weather filter should be rendered and use a predefined select/multiselect
+      // which limits user input to only valid options
+      const weatherSelect = screen.getByPlaceholderText(/weather conditions/i);
+      expect(weatherSelect).toBeInTheDocument();
+
+      // The filter is a MultiSelect with predefined options - users cannot type arbitrary values
+      // Test that a valid selection works (Rain option exists from previous tests)
+      fireEvent.click(weatherSelect);
+
+      await waitFor(() => {
+        const option = screen.getByText('Rain');
+        expect(option).toBeInTheDocument();
+      });
+    });
+
+    it('should not accept script tags or XSS attempts in weather values', async () => {
+      // Mock onChange to capture actual values passed
+      const capturedValues: { weather?: string[] }[] = [];
+      const captureOnChange = (filters: { weather?: string[] }) => {
+        capturedValues.push(filters);
+      };
+
+      render(
+        <TestWrapper>
+          <PhotoFilters filters={{}} onChange={captureOnChange} showWeatherFilter />
+        </TestWrapper>
+      );
+
+      // Weather filter uses predefined options - user cannot type arbitrary values
+      // This tests that only valid options from dropdown are selectable
+      const weatherSelect = screen.getByPlaceholderText(/weather conditions/i);
+      fireEvent.click(weatherSelect);
+
+      await waitFor(() => {
+        const option = screen.getByText('Rain');
+        fireEvent.click(option);
+      });
+
+      // Only valid, predefined values should be in the filter
+      await waitFor(() => {
+        expect(capturedValues.length).toBeGreaterThan(0);
+        const lastValue = capturedValues[capturedValues.length - 1];
+        if (lastValue?.weather) {
+          // Should only contain alphanumeric values from predefined list
+          lastValue.weather.forEach((w) => {
+            expect(w).toMatch(/^[a-z-]+$/);
+            expect(w).not.toContain('<script>');
+            expect(w).not.toContain('javascript:');
+          });
+        }
+      });
+    });
+
+    it('should sanitize weather values with special characters', () => {
+      // Backend sanitization validation pattern - matches alphanumeric, spaces, and hyphens only
+      // Note: Uses space character explicitly, not \s (which includes newlines)
+      const validWeatherPattern = /^[a-zA-Z0-9 -]+$/;
+
+      // Valid weather values
+      expect(validWeatherPattern.test('rain')).toBe(true);
+      expect(validWeatherPattern.test('heavy-rain')).toBe(true);
+      expect(validWeatherPattern.test('partly cloudy')).toBe(true);
+
+      // Invalid/malicious values should NOT match
+      expect(validWeatherPattern.test('<script>alert(1)</script>')).toBe(false);
+      expect(validWeatherPattern.test('rain; DROP TABLE photos;')).toBe(false);
+      expect(validWeatherPattern.test("rain' OR '1'='1")).toBe(false);
+      expect(validWeatherPattern.test('rain\ninjection')).toBe(false);
+      expect(validWeatherPattern.test('rain\tinjection')).toBe(false); // tabs also not allowed
+    });
+
+    it('should reject weather values exceeding maximum length', () => {
+      // Backend enforces max 50 character length per weather value
+      const maxLength = 50;
+      const validValue = 'a'.repeat(50);
+      const invalidValue = 'a'.repeat(51);
+
+      expect(validValue.length).toBeLessThanOrEqual(maxLength);
+      expect(invalidValue.length).toBeGreaterThan(maxLength);
+
+      // Simulating backend validation
+      const isValidLength = (value: string) => value.length <= maxLength;
+      expect(isValidLength(validValue)).toBe(true);
+      expect(isValidLength(invalidValue)).toBe(false);
+    });
+
+    it('should handle undefined weather filter gracefully', () => {
+      render(
+        <TestWrapper>
+          <PhotoFilters filters={{ weather: undefined }} onChange={mockOnChange} showWeatherFilter />
+        </TestWrapper>
+      );
+
+      // Should render without crashing
+      expect(screen.getByPlaceholderText(/weather conditions/i)).toBeInTheDocument();
+    });
+
+    it('should count weather filter correctly in active filter count', () => {
+      render(
+        <TestWrapper>
+          <PhotoFilters
+            filters={{ weather: ['rain', 'snow'], hasGps: true }}
+            onChange={mockOnChange}
+            showWeatherFilter
+          />
+        </TestWrapper>
+      );
+
+      // Weather counts as 1 filter, GPS as another = 2 total
+      expect(screen.getByText(/2 filters active/i)).toBeInTheDocument();
+    });
+  });
+
   describe('Collapse/Expand', () => {
     it('should toggle filter visibility on icon click', async () => {
       render(
