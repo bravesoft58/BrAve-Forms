@@ -8,6 +8,16 @@ import { PhotoGalleryGrid } from '../photo-gallery-grid';
 // Mock the fetch function
 global.fetch = vi.fn();
 
+// Mock Clerk useAuth hook for multi-tenant testing
+vi.mock('@clerk/nextjs', () => ({
+  useAuth: vi.fn(() => ({
+    orgId: 'org_test123',
+    userId: 'user_test123',
+    isLoaded: true,
+    isSignedIn: true,
+  })),
+}));
+
 // Mock the useInView hook
 vi.mock('react-intersection-observer', () => ({
   useInView: vi.fn(() => ({ ref: vi.fn(), inView: false })),

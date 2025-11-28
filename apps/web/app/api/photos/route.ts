@@ -53,15 +53,31 @@ const PHOTOS_BY_PROJECT_QUERY = `
  * - startDate: Filter by date range start
  * - endDate: Filter by date range end
  * - hasGps: Filter by GPS coordinates presence
+ *
+ * Security:
+ * - Requires valid Clerk JWT with orgId
+ * - Backend validates orgId ownership of project
+ * - Multi-tenant isolation enforced at API and database layers
  */
 export async function GET(request: NextRequest) {
   try {
-    // Get authentication token
-    const { getToken } = await auth();
+    // Get authentication context with orgId for multi-tenant isolation
+    const { userId, orgId, getToken } = await auth();
     const token = await getToken();
 
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Validate authentication - require both userId and orgId for multi-tenancy
+    if (!token || !userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized - authentication required' },
+        { status: 401 }
+      );
+    }
+
+    if (!orgId) {
+      return NextResponse.json(
+        { error: 'Unauthorized - organization context required' },
+        { status: 401 }
+      );
     }
 
     // Parse query parameters
@@ -115,16 +131,23 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
-      console.error('GraphQL request failed:', response.status, response.statusText);
-      return NextResponse.json({ error: 'Failed to fetch photos' }, { status: response.status });
+      console.error(
+        `GraphQL request failed for org ${orgId}, project ${projectId}:`,
+        response.status,
+        response.statusText
+      );
+      return NextResponse.json(
+        { error: `Failed to fetch photos for project ${projectId}` },
+        { status: response.status }
+      );
     }
 
     const result = await response.json();
 
     if (result.errors) {
-      console.error('GraphQL errors:', result.errors);
+      console.error(`GraphQL errors for org ${orgId}, project ${projectId}:`, result.errors);
       return NextResponse.json(
-        { error: result.errors[0]?.message || 'GraphQL error' },
+        { error: result.errors[0]?.message || 'Failed to query photos' },
         { status: 400 }
       );
     }
@@ -160,6 +183,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching photos:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'An unexpected error occurred while fetching photos' },
+      { status: 500 }
+    );
   }
 }

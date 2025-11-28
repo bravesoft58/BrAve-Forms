@@ -12,9 +12,12 @@ import {
   Badge,
   Group,
   Alert,
+  Skeleton,
+  Tooltip,
 } from '@mantine/core';
 import { useInView } from 'react-intersection-observer';
 import { useEffect, useCallback } from 'react';
+import { useAuth } from '@clerk/nextjs';
 import { IconMapPin, IconAlertCircle, IconPhoto } from '@tabler/icons-react';
 
 /**
@@ -149,6 +152,9 @@ export function PhotoGalleryGrid({
   onPhotoClick,
   pageSize = 20,
 }: PhotoGalleryGridProps) {
+  // Get orgId for multi-tenant cache isolation
+  const { orgId } = useAuth();
+
   const { ref, inView } = useInView({
     threshold: 0.1,
     triggerOnce: false,
@@ -156,7 +162,8 @@ export function PhotoGalleryGrid({
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, error } =
     useInfiniteQuery({
-      queryKey: ['photos', projectId, filters],
+      // Include orgId in queryKey for multi-tenant cache isolation
+      queryKey: ['photos', orgId, projectId, filters],
       queryFn: async ({ pageParam = 0 }) => {
         return fetchPhotos(projectId, pageParam, pageSize, filters);
       },
@@ -167,6 +174,10 @@ export function PhotoGalleryGrid({
         return totalLoaded;
       },
       initialPageParam: 0,
+      // Offline-first configuration for 30-day capability
+      networkMode: 'offlineFirst',
+      staleTime: 1000 * 60 * 60, // 1 hour - photos rarely change
+      gcTime: 1000 * 60 * 60 * 24 * 30, // 30 days - EPA compliance requirement
     });
 
   // Trigger fetch when sentinel comes into view
@@ -187,15 +198,32 @@ export function PhotoGalleryGrid({
     [onPhotoClick]
   );
 
-  // Loading state
+  // Loading state with skeleton cards for better perceived performance
   if (isLoading) {
     return (
-      <Center h={400} data-testid="photo-gallery-loading">
-        <Stack align="center" gap="md">
-          <Loader size="lg" />
-          <Text c="dimmed">Loading photos...</Text>
-        </Stack>
-      </Center>
+      <Stack gap="lg" data-testid="photo-gallery-loading">
+        <SimpleGrid cols={{ base: 2, sm: 3, md: 4, lg: 5, xl: 6 }} spacing="md">
+          {Array.from({ length: pageSize }).map((_, i) => (
+            <Card key={`skeleton-${i}`} shadow="sm" padding="xs" radius="md" withBorder>
+              <Card.Section>
+                <Skeleton height={160} />
+              </Card.Section>
+              <Stack gap={4} mt="xs">
+                <Skeleton height={16} width="80%" />
+                <Skeleton height={12} width="60%" />
+              </Stack>
+            </Card>
+          ))}
+        </SimpleGrid>
+        <Center>
+          <Group gap="sm">
+            <Loader size="sm" />
+            <Text c="dimmed" size="sm">
+              Loading photos...
+            </Text>
+          </Group>
+        </Center>
+      </Stack>
     );
   }
 
@@ -280,22 +308,30 @@ export function PhotoGalleryGrid({
                 height={160}
                 fit="cover"
                 fallbackSrc="/images/photo-placeholder.png"
+                loading="lazy"
               />
 
-              {/* GPS Badge */}
+              {/* GPS Badge with coordinate tooltip for EPA compliance documentation */}
               {photo.latitude != null && photo.longitude != null && (
-                <Badge
-                  size="xs"
-                  variant="filled"
-                  color="blue"
-                  leftSection={<IconMapPin size={10} />}
-                  pos="absolute"
-                  top={8}
-                  right={8}
-                  data-testid={`gps-badge-${photo.id}`}
+                <Tooltip
+                  label={`Lat: ${photo.latitude.toFixed(6)}, Lon: ${photo.longitude.toFixed(6)}`}
+                  position="bottom"
+                  withArrow
                 >
-                  GPS
-                </Badge>
+                  <Badge
+                    size="xs"
+                    variant="filled"
+                    color="blue"
+                    leftSection={<IconMapPin size={10} />}
+                    pos="absolute"
+                    top={8}
+                    right={8}
+                    data-testid={`gps-badge-${photo.id}`}
+                    style={{ cursor: 'help' }}
+                  >
+                    GPS
+                  </Badge>
+                </Tooltip>
               )}
             </Card.Section>
 
