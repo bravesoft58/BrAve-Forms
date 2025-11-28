@@ -77,9 +77,11 @@ export interface PhotoResponse {
 
 /**
  * Photo type matching backend GraphQL schema
+ * CRITICAL: orgId is required for multi-tenant data isolation
  */
 export interface Photo {
   id: string;
+  orgId: string; // REQUIRED for multi-tenant isolation
   url: string;
   thumbnailUrl?: string;
   caption?: string;

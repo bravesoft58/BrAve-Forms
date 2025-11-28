@@ -17,7 +17,7 @@ import { PhotoGalleryGrid, PhotoMapView } from '@/components/photos';
 import { PhotoFilters } from '@/components/photos/photo-filters';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useAuth } from '@clerk/nextjs';
-import { fetchAllPhotosForMap, type PhotoFilters as Filters } from '@/lib/photo-api';
+import { fetchAllPhotosForMap, type PhotoFilters as Filters, type Photo } from '@/lib/photo-api';
 
 /**
  * View mode for photos display
