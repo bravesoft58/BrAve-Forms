@@ -65,9 +65,9 @@ export function FormRenderer({
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   // Auto-save draft functionality
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {
     saveDraft,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     loadDraft: _loadDraft,
     clearDraft,
   } = useFormDraft(template.id, formValues, (draftValues) => {
@@ -271,7 +271,7 @@ export function FormRenderer({
                 <GpsField
                   key={field.id}
                   field={field}
-                  register={register}
+                  control={control}
                   error={error}
                   disabled={readOnly}
                 />
@@ -414,19 +414,25 @@ export function generateValidationSchema(template: FormTemplate) {
         }
         break;
 
-      case 'gps':
+      case 'gps': {
+        // GPS field stores a GPSCoordinates object with lat, lng, accuracy, timestamp
+        const gpsObjectSchema = z.object({
+          latitude: z.number(),
+          longitude: z.number(),
+          accuracy: z.number(),
+          altitude: z.number().optional(),
+          timestamp: z.string(),
+        });
         if (field.required) {
-          fieldSchema = z
-            .string()
-            .regex(/^-?\d+\.\d+,\s*-?\d+\.\d+$/, 'Invalid GPS format (lat, lng)')
-            .min(1, `${field.label} is required`);
+          fieldSchema = gpsObjectSchema.refine(
+            (val) => val.latitude !== undefined && val.longitude !== undefined,
+            { message: `${field.label} is required` }
+          );
         } else {
-          fieldSchema = z
-            .string()
-            .regex(/^-?\d+\.\d+,\s*-?\d+\.\d+$/, 'Invalid GPS format (lat, lng)')
-            .optional();
+          fieldSchema = gpsObjectSchema.optional().nullable();
         }
         break;
+      }
 
       case 'computed':
         // Computed fields don't need validation (auto-generated)
