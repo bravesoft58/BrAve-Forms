@@ -13,54 +13,16 @@ import {
 } from '@mantine/core';
 import { IconPhoto, IconHome, IconLayoutGrid, IconMap } from '@tabler/icons-react';
 import Link from 'next/link';
-import { PhotoGalleryGrid, PhotoMapView, Photo } from '@/components/photos';
+import { PhotoGalleryGrid, PhotoMapView } from '@/components/photos';
 import { PhotoFilters } from '@/components/photos/photo-filters';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useAuth } from '@clerk/nextjs';
-
-/**
- * Filter state for photo gallery
- */
-interface Filters {
-  projectId?: string;
-  formType?: string;
-  dateRange?: [Date, Date];
-  hasGps?: boolean;
-}
+import { fetchAllPhotosForMap, type PhotoFilters as Filters } from '@/lib/photo-api';
 
 /**
  * View mode for photos display
  */
 type ViewMode = 'grid' | 'map';
-
-/**
- * Fetch photos for map view
- */
-async function fetchAllPhotos(filters?: Filters): Promise<Photo[]> {
-  const params = new URLSearchParams();
-  params.set('take', '100'); // Get more photos for map view
-
-  if (filters?.projectId) {
-    params.set('projectId', filters.projectId);
-  }
-  if (filters?.formType) {
-    params.set('formType', filters.formType);
-  }
-  if (filters?.hasGps !== undefined) {
-    params.set('hasGps', String(filters.hasGps));
-  }
-  if (filters?.dateRange) {
-    params.set('startDate', filters.dateRange[0].toISOString());
-    params.set('endDate', filters.dateRange[1].toISOString());
-  }
-
-  const response = await fetch(`/api/photos?${params.toString()}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch photos: ${response.statusText}`);
-  }
-  const data = await response.json();
-  return data.photos || [];
-}
 
 /**
  * All Photos Page - Browse all photos across all projects
@@ -78,15 +40,16 @@ export default function AllPhotosPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const { orgId } = useAuth();
 
-  // Fetch photos for map view
+  // Fetch photos for map view using shared utility
   const { data: mapPhotos = [] } = useInfiniteQuery({
     queryKey: ['photos', 'all', orgId, filters],
-    queryFn: () => fetchAllPhotos(filters),
+    queryFn: () => fetchAllPhotosForMap(filters),
     getNextPageParam: () => undefined,
     initialPageParam: 0,
     enabled: viewMode === 'map',
     networkMode: 'offlineFirst',
-    staleTime: 1000 * 60 * 60, // 1 hour
+    staleTime: 1000 * 60 * 60, // 1 hour - photos rarely change
+    gcTime: 1000 * 60 * 60 * 24 * 30, // 30 days - EPA compliance requirement
     select: (data) => data.pages.flat(),
   });
 
