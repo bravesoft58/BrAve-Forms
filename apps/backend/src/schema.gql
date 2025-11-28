@@ -2,10 +2,82 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type FormTemplate {
+  id: ID!
+  orgId: String!
+  name: String!
+  description: String
+  category: FormCategory!
+  version: Float!
+  isActive: Boolean!
+  schema: JSON!
+  compliance: JSON
+  createdBy: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+enum FormCategory {
+  EPA_SWPPP
+  EPA_CGP
+  OSHA_SAFETY
+  STATE_PERMIT
+  CUSTOM
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type FormSubmission {
+  id: ID!
+  orgId: String!
+  templateId: String!
+  inspectionId: String
+  projectId: String
+  submittedBy: String!
+  status: FormStatus!
+  data: JSON!
+  metadata: JSON
+  offlineCreated: Boolean!
+  submittedAt: DateTime
+  reviewedBy: String
+  reviewedAt: DateTime
+  reviewNotes: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  template: FormTemplate!
+}
+
+enum FormStatus {
+  DRAFT
+  IN_PROGRESS
+  SUBMITTED
+  REVIEWED
+  APPROVED
+  REJECTED
+}
+
+type ComplianceValidation {
+  isCompliant: Boolean!
+  violations: [String!]!
+  warnings: [String!]!
+  recommendations: [String!]!
+}
+
 type PrecipitationCheckResult {
   exceeded: Boolean!
   amount: Float!
   requiresInspection: Boolean!
+  source: String!
+  confidence: String!
+  timestamp: String
 }
 
 type WeatherEvent {
@@ -20,18 +92,119 @@ type WeatherEvent {
   createdAt: DateTime!
 }
 
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-
 enum WeatherSource {
   NOAA
   OPENWEATHER
   MANUAL
 }
 
+type UserRoleStats {
+  role: String!
+  count: Float!
+}
+
+type ProjectStatusStats {
+  status: String!
+  count: Float!
+}
+
+type InspectionStats {
+  type: String!
+  total: Float!
+  compliant: Float!
+  overdue: Float!
+}
+
+type OrganizationStats {
+  totalProjects: Float!
+  activeProjects: Float!
+  totalInspections: Float!
+  pendingInspections: Float!
+  complianceRate: Float!
+  totalUsers: Float!
+  usersByRole: [UserRoleStats!]!
+  projectsByStatus: [ProjectStatusStats!]!
+  inspectionStats: [InspectionStats!]!
+}
+
+type ProjectStats {
+  totalInspections: Float!
+  compliantInspections: Float!
+  overdue: Float!
+  lastInspection: DateTime
+  nextDeadline: DateTime
+}
+
+type Organization {
+  id: String!
+  clerkOrgId: String!
+  name: String!
+  plan: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  projects: [Project!]!
+  users: [UserOrganization!]!
+  stats: OrganizationStats
+}
+
+type Project {
+  id: String!
+  name: String!
+  address: String!
+  latitude: Float!
+  longitude: Float!
+  permitNumber: String
+  startDate: DateTime!
+  endDate: DateTime
+  disturbedAcres: Float!
+  status: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  inspections: [Inspection!]!
+  stats: ProjectStats
+}
+
+type Inspection {
+  id: String!
+  projectId: String!
+  inspectorId: String!
+  type: String!
+  status: String!
+  weatherTriggered: Boolean!
+  precipitationInches: Float
+  inspectionDate: DateTime!
+  submittedAt: DateTime
+  offlineCreated: Boolean!
+  photos: [Photo!]!
+}
+
+type Photo {
+  id: String!
+  inspectionId: String!
+  s3Key: String!
+  thumbnailKey: String
+  latitude: Float
+  longitude: Float
+  takenAt: DateTime!
+  caption: String
+  fileSize: Float!
+  mimeType: String!
+}
+
+type UserOrganization {
+  id: String!
+  userId: String!
+  role: String!
+  joinedAt: DateTime!
+}
+
 type Query {
+  formTemplates(category: String, isActive: Boolean, take: Float, skip: Float): [FormTemplate!]!
+  formTemplate(id: String!): FormTemplate!
+  formSubmissions(templateId: String, projectId: String, inspectionId: String, status: String, take: Float, skip: Float): [JSON!]!
+  formSubmission(id: ID!): JSON!
+  validateFormCompliance(submissionId: String!): ComplianceValidation!
+
   """Check if project location has exceeded EPA 0.25 inch threshold"""
   checkProjectWeather(projectId: String!, latitude: Float!, longitude: Float!): PrecipitationCheckResult!
 
@@ -43,4 +216,78 @@ type Query {
   getStorageStats: String!
   generatePhotoUrl(photoKey: String!): String!
   getCompliancePackage(inspectionId: String!): String!
+  currentOrganization: String
+  projects(filter: ProjectFilterInput): [Project!]!
+  organizationDashboard: OrganizationStats!
+  organizationStats: String
+  organizationProjects: [String!]!
+  organizationUsers: [String!]!
+}
+
+input ProjectFilterInput {
+  status: String
+  search: String
+  limit: Float
+  offset: Float
+}
+
+type Mutation {
+  createFormTemplate(input: CreateFormTemplateInput!): FormTemplate!
+  updateFormTemplate(id: String!, input: UpdateFormTemplateInput!): FormTemplate!
+  duplicateFormTemplate(id: String!): FormTemplate!
+  deleteFormTemplate(id: String!): Boolean!
+  createEpaSwpppTemplate: FormTemplate!
+  cloneFormTemplate(sourceTemplateId: String!, input: CloneFormTemplateInput): FormTemplate!
+  createFormSubmission(input: CreateFormSubmissionInput!): String!
+  updateFormSubmission(id: ID!, input: UpdateFormSubmissionInput!): String!
+  approveFormSubmission(id: ID!): String!
+  rejectFormSubmission(id: ID!, notes: String!): String!
+  deleteFormSubmission(id: ID!): Boolean!
+  cloneSubmission(sourceId: ID!, mode: String = "keep_all"): FormSubmission!
+  copyYesterdaysLog(templateId: ID!): FormSubmission!
+  updateOrganization(input: UpdateOrganizationInput!): Organization!
+  syncOrganization(clerkOrgId: String!, orgData: String!): String!
+  syncUserOrganization(userId: String!, orgId: String!, role: String!): String!
+  removeUserFromOrganization(userId: String!, orgId: String!): String!
+}
+
+input CreateFormTemplateInput {
+  name: String!
+  description: String
+  category: FormCategory!
+  schema: JSON!
+  compliance: JSON
+}
+
+input UpdateFormTemplateInput {
+  name: String
+  description: String
+  schema: JSON
+  compliance: JSON
+  isActive: Boolean
+}
+
+input CloneFormTemplateInput {
+  name: String
+  description: String
+  category: FormCategory
+  schema: JSON
+  offlineCreated: Boolean
+}
+
+input CreateFormSubmissionInput {
+  templateId: String!
+  inspectionId: String
+  projectId: String
+  data: JSON!
+}
+
+input UpdateFormSubmissionInput {
+  data: JSON
+  status: String
+  reviewNotes: String
+}
+
+input UpdateOrganizationInput {
+  name: String
 }

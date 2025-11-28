@@ -7,6 +7,8 @@ import {
   ObjectType,
   InputType,
   registerEnumType,
+  Float,
+  Int,
 } from '@nestjs/graphql';
 import { UseGuards, Logger } from '@nestjs/common';
 import { ClerkAuthGuard } from '../auth/guards/clerk-auth.guard';
@@ -15,7 +17,8 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ManagementAccess } from '../../common/decorators/roles.decorator';
 import { QRTokenService } from './qr-token.service';
 import { PrismaService } from '../database/prisma.service';
-import { TokenPermission } from '@prisma/client';
+import { TokenPermission, StorageType } from '@prisma/client';
+import GraphQLJSON from 'graphql-type-json';
 
 // Register TokenPermission enum with GraphQL
 registerEnumType(TokenPermission, {
@@ -137,6 +140,121 @@ export class RevokeAllResultGQL {
   success: boolean;
 }
 
+// ============================================================================
+// INSPECTOR PORTAL TYPES - Sprint 5 ISSUE-165
+// ============================================================================
+
+/**
+ * Form field in a submission (for inspector portal)
+ */
+@ObjectType('InspectorFormField')
+export class InspectorFormFieldGQL {
+  @Field()
+  id: string;
+
+  @Field()
+  name: string;
+
+  @Field()
+  label: string;
+
+  @Field()
+  type: string;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  value: unknown;
+}
+
+/**
+ * Form section containing fields (for inspector portal)
+ */
+@ObjectType('InspectorFormSection')
+export class InspectorFormSectionGQL {
+  @Field()
+  id: string;
+
+  @Field()
+  title: string;
+
+  @Field(() => [InspectorFormFieldGQL])
+  fields: InspectorFormFieldGQL[];
+}
+
+/**
+ * Form submission for inspector portal (read-only view)
+ */
+@ObjectType('InspectorSubmission')
+export class InspectorSubmissionGQL {
+  @Field()
+  id: string;
+
+  @Field()
+  templateName: string;
+
+  @Field()
+  templateCategory: string;
+
+  @Field()
+  status: string;
+
+  @Field()
+  submittedBy: string;
+
+  @Field()
+  submittedAt: string;
+
+  @Field(() => [InspectorFormSectionGQL])
+  sections: InspectorFormSectionGQL[];
+}
+
+/**
+ * GPS location for photos (for inspector portal)
+ */
+@ObjectType('InspectorGeoLocation')
+export class InspectorGeoLocationGQL {
+  @Field(() => Float)
+  latitude: number;
+
+  @Field(() => Float)
+  longitude: number;
+
+  @Field(() => Float, { nullable: true })
+  altitude?: number;
+}
+
+/**
+ * Photo for inspector portal (read-only view)
+ */
+@ObjectType('InspectorPhoto')
+export class InspectorPhotoGQL {
+  @Field()
+  id: string;
+
+  @Field()
+  url: string;
+
+  @Field()
+  thumbnailUrl: string;
+
+  @Field({ nullable: true })
+  caption?: string;
+
+  @Field()
+  takenAt: string;
+
+  @Field()
+  uploadedBy: string;
+
+  @Field(() => InspectorGeoLocationGQL, { nullable: true })
+  location?: InspectorGeoLocationGQL;
+
+  @Field(() => Int)
+  fileSize: number;
+
+  @Field()
+  mimeType: string;
+}
+
 /**
  * QR Portal Resolver - Sprint 4 ISSUE-100
  *
@@ -158,7 +276,7 @@ export class QRPortalResolver {
 
   constructor(
     private readonly qrTokenService: QRTokenService,
-    private readonly prisma: PrismaService,
+    private readonly prisma: PrismaService
   ) {}
 
   /**
@@ -172,7 +290,7 @@ export class QRPortalResolver {
   @ManagementAccess()
   async generateQRToken(
     @CurrentUser() user: { userId: string; orgId: string },
-    @Args('input') input: GenerateQRTokenInput,
+    @Args('input') input: GenerateQRTokenInput
   ): Promise<QRTokenGQL> {
     this.logger.log(`Generating QR token for project ${input.projectId}`, {
       userId: user.userId,
@@ -205,6 +323,10 @@ export class QRPortalResolver {
   })
   async verifyQRToken(@Args('token') token: string): Promise<VerifiedTokenPayloadGQL> {
     const startTime = Date.now();
+
+    // Validate token format before processing
+    this.validateTokenFormat(token);
+
     this.logger.debug(`QR token verification attempt`, {
       tokenPrefix: token.substring(0, 8) + '...',
       timestamp: new Date().toISOString(),
@@ -244,10 +366,11 @@ export class QRPortalResolver {
   @Query(() => InspectorProjectInfoGQL, {
     description: 'Get project information for inspector portal (requires valid token)',
   })
-  async getInspectorProjectInfo(
-    @Args('token') token: string,
-  ): Promise<InspectorProjectInfoGQL> {
+  async getInspectorProjectInfo(@Args('token') token: string): Promise<InspectorProjectInfoGQL> {
     const startTime = Date.now();
+
+    // Validate token format before processing
+    this.validateTokenFormat(token);
 
     // Verify token first
     const verified = await this.qrTokenService.verifyToken(token);
@@ -295,6 +418,172 @@ export class QRPortalResolver {
   }
 
   /**
+   * Get form submissions for inspector portal - Sprint 5 ISSUE-165
+   * PUBLIC endpoint - requires valid token with VIEW_SUBMISSIONS permission
+   */
+  @Query(() => [InspectorSubmissionGQL], {
+    description: 'Get form submissions for inspector portal (requires valid token)',
+  })
+  async getInspectorSubmissions(@Args('token') token: string): Promise<InspectorSubmissionGQL[]> {
+    const startTime = Date.now();
+
+    // Validate token format before processing
+    this.validateTokenFormat(token);
+
+    // Verify token first
+    const verified = await this.qrTokenService.verifyToken(token);
+
+    // Check if token has VIEW_SUBMISSIONS permission
+    if (!verified.permissions.includes(TokenPermission.VIEW_SUBMISSIONS)) {
+      this.logger.warn(`Submissions access denied - missing permission`, {
+        tokenId: verified.tokenId,
+        projectId: verified.projectId,
+        requiredPermission: 'VIEW_SUBMISSIONS',
+        grantedPermissions: verified.permissions,
+      });
+      throw new Error('Token does not have VIEW_SUBMISSIONS permission');
+    }
+
+    // Get project to find orgId
+    const project = await this.prisma.project.findUnique({
+      where: { id: verified.projectId },
+      select: { orgId: true },
+    });
+
+    if (!project) {
+      this.logger.error(`Project not found for inspector submissions`, {
+        projectId: verified.projectId,
+        tokenId: verified.tokenId,
+      });
+      throw new Error('Project not found');
+    }
+
+    // Query submissions for this project (exclude drafts)
+    const submissions = await this.prisma.formSubmission.findMany({
+      where: {
+        projectId: verified.projectId,
+        orgId: project.orgId,
+        status: { not: 'DRAFT' },
+      },
+      include: {
+        template: {
+          select: { name: true, category: true, schema: true },
+        },
+      },
+      orderBy: { submittedAt: 'desc' },
+      take: 100,
+    });
+
+    this.logger.log(`Inspector accessed submissions`, {
+      tokenId: verified.tokenId,
+      projectId: verified.projectId,
+      submissionCount: submissions.length,
+      durationMs: Date.now() - startTime,
+    });
+
+    // Transform to InspectorSubmissionGQL format
+    return submissions.map((sub) => ({
+      id: sub.id,
+      templateName: sub.template.name,
+      templateCategory: sub.template.category,
+      status: sub.status,
+      submittedBy: sub.submittedBy,
+      submittedAt: sub.submittedAt?.toISOString() || sub.createdAt.toISOString(),
+      sections: this.transformFormDataToSections(
+        sub.data as Record<string, unknown>,
+        sub.template.schema as {
+          sections?: Array<{
+            id: string;
+            title: string;
+            fields?: Array<{ id: string; name: string; label: string; type: string }>;
+          }>;
+        }
+      ),
+    }));
+  }
+
+  /**
+   * Get photos for inspector portal - Sprint 5 ISSUE-165
+   * PUBLIC endpoint - requires valid token with VIEW_PHOTOS permission
+   */
+  @Query(() => [InspectorPhotoGQL], {
+    description: 'Get photos for inspector portal (requires valid token)',
+  })
+  async getInspectorPhotos(@Args('token') token: string): Promise<InspectorPhotoGQL[]> {
+    const startTime = Date.now();
+
+    // Validate token format before processing
+    this.validateTokenFormat(token);
+
+    // Verify token first
+    const verified = await this.qrTokenService.verifyToken(token);
+
+    // Check if token has VIEW_PHOTOS permission
+    if (!verified.permissions.includes(TokenPermission.VIEW_PHOTOS)) {
+      this.logger.warn(`Photos access denied - missing permission`, {
+        tokenId: verified.tokenId,
+        projectId: verified.projectId,
+        requiredPermission: 'VIEW_PHOTOS',
+        grantedPermissions: verified.permissions,
+      });
+      throw new Error('Token does not have VIEW_PHOTOS permission');
+    }
+
+    // Get project to find orgId
+    const project = await this.prisma.project.findUnique({
+      where: { id: verified.projectId },
+      select: { orgId: true },
+    });
+
+    if (!project) {
+      this.logger.error(`Project not found for inspector photos`, {
+        projectId: verified.projectId,
+        tokenId: verified.tokenId,
+      });
+      throw new Error('Project not found');
+    }
+
+    // Query photos for this project (through inspections)
+    const photos = await this.prisma.photo.findMany({
+      where: {
+        orgId: project.orgId,
+        inspection: {
+          projectId: verified.projectId,
+        },
+      },
+      orderBy: { takenAt: 'desc' },
+      take: 100,
+    });
+
+    this.logger.log(`Inspector accessed photos`, {
+      tokenId: verified.tokenId,
+      projectId: verified.projectId,
+      photoCount: photos.length,
+      durationMs: Date.now() - startTime,
+    });
+
+    // Transform to InspectorPhotoGQL format
+    return photos.map((photo) => ({
+      id: photo.id,
+      url: this.getPhotoUrl(photo),
+      thumbnailUrl: this.getThumbnailUrl(photo),
+      caption: photo.caption ?? undefined,
+      takenAt: photo.takenAt.toISOString(),
+      uploadedBy: photo.uploadedBy,
+      location:
+        photo.latitude && photo.longitude
+          ? {
+              latitude: photo.latitude,
+              longitude: photo.longitude,
+              altitude: photo.altitude ?? undefined,
+            }
+          : undefined,
+      fileSize: photo.fileSize,
+      mimeType: photo.mimeType,
+    }));
+  }
+
+  /**
    * Revoke a specific QR token
    * Requires authentication and ManagementAccess role
    */
@@ -305,7 +594,7 @@ export class QRPortalResolver {
   @ManagementAccess()
   async revokeQRToken(
     @CurrentUser() user: { userId: string; orgId: string },
-    @Args('tokenId') tokenId: string,
+    @Args('tokenId') tokenId: string
   ): Promise<QRTokenGQL> {
     this.logger.log(`Revoking QR token ${tokenId}`, {
       userId: user.userId,
@@ -329,7 +618,7 @@ export class QRPortalResolver {
   @ManagementAccess()
   async revokeAllProjectTokens(
     @CurrentUser() user: { userId: string; orgId: string },
-    @Args('projectId') projectId: string,
+    @Args('projectId') projectId: string
   ): Promise<RevokeAllResultGQL> {
     this.logger.log(`Revoking all tokens for project ${projectId}`, {
       userId: user.userId,
@@ -356,7 +645,7 @@ export class QRPortalResolver {
   @ManagementAccess()
   async getProjectQRTokens(
     @CurrentUser() user: { userId: string; orgId: string },
-    @Args('projectId') projectId: string,
+    @Args('projectId') projectId: string
   ): Promise<QRTokenGQL[]> {
     const org = await this.getOrganizationByClerkId(user.orgId);
     const tokens = await this.qrTokenService.getProjectTokens(projectId, org.id);
@@ -378,6 +667,38 @@ export class QRPortalResolver {
     }
 
     return org;
+  }
+
+  /**
+   * Helper: Validate token format before processing
+   * QR tokens are 256-bit entropy base64url encoded strings (43 characters)
+   * This provides early validation with clear error messages
+   */
+  private validateTokenFormat(token: string): void {
+    // Check for empty or null token
+    if (!token || token.trim().length === 0) {
+      this.logger.warn('Token validation failed: Empty token provided');
+      throw new Error('Token is required');
+    }
+
+    // Trim whitespace
+    const trimmedToken = token.trim();
+
+    // Check minimum length (base64url encoded 256-bit = ~43 characters)
+    if (trimmedToken.length < 40 || trimmedToken.length > 50) {
+      this.logger.warn('Token validation failed: Invalid token length', {
+        length: trimmedToken.length,
+        expected: '40-50 characters',
+      });
+      throw new Error('Invalid token format: Unexpected length');
+    }
+
+    // Check for valid base64url characters only (A-Z, a-z, 0-9, -, _)
+    const base64urlRegex = /^[A-Za-z0-9_-]+$/;
+    if (!base64urlRegex.test(trimmedToken)) {
+      this.logger.warn('Token validation failed: Invalid characters in token');
+      throw new Error('Invalid token format: Contains invalid characters');
+    }
   }
 
   /**
@@ -413,5 +734,121 @@ export class QRPortalResolver {
       isActive: !isExpired && !isRevoked,
       isExpired,
     };
+  }
+
+  /**
+   * Helper: Transform form data and schema to sections/fields structure
+   * Used by getInspectorSubmissions to present form data in structured format
+   */
+  private transformFormDataToSections(
+    data: Record<string, unknown>,
+    schema: {
+      sections?: Array<{
+        id: string;
+        title: string;
+        fields?: Array<{
+          id: string;
+          name: string;
+          label: string;
+          type: string;
+        }>;
+      }>;
+    }
+  ): InspectorFormSectionGQL[] {
+    if (!schema?.sections) {
+      // Fallback: Create a single section with all data fields
+      return [
+        {
+          id: 'default',
+          title: 'Form Data',
+          fields: Object.entries(data).map(([key, value]) => ({
+            id: key,
+            name: key,
+            label: key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase()),
+            type: typeof value === 'boolean' ? 'checkbox' : 'text',
+            value: value,
+          })),
+        },
+      ];
+    }
+
+    // Map schema sections with data values
+    return schema.sections.map((section) => ({
+      id: section.id,
+      title: section.title,
+      fields: (section.fields || []).map((field) => ({
+        id: field.id,
+        name: field.name,
+        label: field.label,
+        type: field.type,
+        value: data[field.name] ?? null,
+      })),
+    }));
+  }
+
+  /**
+   * Helper: Get full-size photo URL based on storage type
+   * S3 (MinIO): Returns MinIO endpoint URL
+   * POSTGRESQL: Returns data URL from stored image bytes
+   */
+  private getPhotoUrl(photo: {
+    storageType: StorageType;
+    s3Key: string | null;
+    imageData: Buffer | null;
+    mimeType: string;
+  }): string {
+    if (photo.storageType === StorageType.S3 && photo.s3Key) {
+      // MinIO/S3 storage: Construct URL from endpoint and key
+      const endpoint = process.env.S3_ENDPOINT || 'http://localhost:9000';
+      const bucket = process.env.S3_BUCKET_NAME || 'braveforms-photos';
+      return `${endpoint}/${bucket}/${photo.s3Key}`;
+    }
+
+    if (photo.storageType === StorageType.POSTGRESQL && photo.imageData) {
+      // PostgreSQL storage: Return data URL from stored bytes
+      const base64 = photo.imageData.toString('base64');
+      return `data:${photo.mimeType};base64,${base64}`;
+    }
+
+    // Fallback placeholder
+    return '/images/photo-placeholder.png';
+  }
+
+  /**
+   * Helper: Get thumbnail URL based on storage type
+   * S3 (MinIO): Uses dedicated thumbnail key or constructs from s3Key
+   * POSTGRESQL: Returns same data URL (frontend handles resizing)
+   */
+  private getThumbnailUrl(photo: {
+    storageType: StorageType;
+    s3Key: string | null;
+    thumbnailKey: string | null;
+    imageData: Buffer | null;
+    mimeType: string;
+  }): string {
+    if (photo.storageType === StorageType.S3) {
+      const endpoint = process.env.S3_ENDPOINT || 'http://localhost:9000';
+      const bucket = process.env.S3_BUCKET_NAME || 'braveforms-photos';
+
+      // If explicit thumbnail key exists, use it
+      if (photo.thumbnailKey) {
+        return `${endpoint}/${bucket}/${photo.thumbnailKey}`;
+      }
+
+      // Fallback: Construct thumbnail path from s3Key
+      if (photo.s3Key) {
+        const thumbPath = photo.s3Key.replace(/(\.[^.]+)$/, '-thumb$1');
+        return `${endpoint}/${bucket}/${thumbPath}`;
+      }
+    }
+
+    if (photo.storageType === StorageType.POSTGRESQL && photo.imageData) {
+      // PostgreSQL storage: Return data URL (frontend handles resizing)
+      const base64 = photo.imageData.toString('base64');
+      return `data:${photo.mimeType};base64,${base64}`;
+    }
+
+    // Fallback placeholder
+    return '/images/photo-placeholder-thumb.png';
   }
 }

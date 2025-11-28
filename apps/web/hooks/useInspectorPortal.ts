@@ -5,6 +5,11 @@
  *
  * React Query hooks for the inspector portal.
  * Fetches submissions and photos using QR token authentication.
+ *
+ * Offline Support:
+ * - networkMode: 'offlineFirst' - Use cached data when offline
+ * - gcTime: 30 days - Keep data cached for construction site offline use
+ * - retryDelay: Exponential backoff for network retries
  */
 
 import { useQuery } from '@tanstack/react-query';
@@ -15,6 +20,9 @@ import {
   InspectorPhoto,
   QRPortalAPIError,
 } from '@/lib/api/qr-portal';
+
+// 30 days in milliseconds - construction site offline requirement
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 /**
  * Hook to fetch inspector submissions
@@ -33,6 +41,8 @@ export function useInspectorSubmissions(token: string | null, enabled = true) {
     },
     enabled: !!token && enabled,
     staleTime: 2 * 60 * 1000, // 2 minutes - submissions should be reasonably fresh
+    gcTime: THIRTY_DAYS_MS, // Keep cached for 30 days (offline construction site use)
+    networkMode: 'offlineFirst', // Use cached data when offline
     retry: (failureCount, error) => {
       // Don't retry on auth errors
       if (error instanceof QRPortalAPIError) {
@@ -40,8 +50,9 @@ export function useInspectorSubmissions(token: string | null, enabled = true) {
           return false;
         }
       }
-      return failureCount < 2;
+      return failureCount < 3;
     },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 }
 
@@ -62,6 +73,8 @@ export function useInspectorPhotos(token: string | null, enabled = true) {
     },
     enabled: !!token && enabled,
     staleTime: 2 * 60 * 1000, // 2 minutes - photos should be reasonably fresh
+    gcTime: THIRTY_DAYS_MS, // Keep cached for 30 days (offline construction site use)
+    networkMode: 'offlineFirst', // Use cached data when offline
     retry: (failureCount, error) => {
       // Don't retry on auth errors
       if (error instanceof QRPortalAPIError) {
@@ -69,8 +82,9 @@ export function useInspectorPhotos(token: string | null, enabled = true) {
           return false;
         }
       }
-      return failureCount < 2;
+      return failureCount < 3;
     },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 }
 
