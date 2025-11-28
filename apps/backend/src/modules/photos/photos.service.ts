@@ -24,11 +24,7 @@ export class PhotosService {
     const exifData = this.exifService.extractExifData(imageBuffer);
     const fullExif = this.exifService.extractFullExifMetadata(imageBuffer);
 
-    const processed = await this.storageService.processAndStorePhoto(
-      imageBuffer,
-      orgId,
-      photoId
-    );
+    const processed = await this.storageService.processAndStorePhoto(imageBuffer, orgId, photoId);
 
     return this.prisma.photo.create({
       data: {
@@ -115,6 +111,13 @@ export class PhotosService {
       hasGps?: boolean;
       take?: number;
       skip?: number;
+      search?: string;
+      userId?: string;
+      formType?: string;
+      weather?: string[];
+      gpsLat?: number;
+      gpsLng?: number;
+      gpsRadiusKm?: number;
     }
   ) {
     const where: any = { orgId };
@@ -130,16 +133,105 @@ export class PhotosService {
       where.longitude = { not: null };
     }
 
+    // Search filter: search in caption
+    if (filters?.search) {
+      where.caption = { contains: filters.search, mode: 'insensitive' };
+    }
+
+    // User filter: filter by uploadedBy
+    if (filters?.userId) {
+      where.uploadedBy = filters.userId;
+    }
+
+    // Form type filter: get submissionIds matching the form type by template name
+    if (filters?.formType) {
+      const matchingSubmissions = await this.prisma.formSubmission.findMany({
+        where: {
+          orgId,
+          template: {
+            name: { contains: filters.formType, mode: 'insensitive' },
+          },
+        },
+        select: { id: true },
+      });
+      const submissionIds = matchingSubmissions.map((s) => s.id);
+      if (submissionIds.length === 0) {
+        return []; // No matching submissions, return empty
+      }
+      where.submissionId = { in: submissionIds };
+    }
+
     where.inspection = {
       projectId,
     };
 
-    return this.prisma.photo.findMany({
+    // Fetch photos with potential GPS radius filtering
+    let photos = await this.prisma.photo.findMany({
       where,
       orderBy: { takenAt: 'desc' },
-      take: filters?.take,
+      take: filters?.take ? filters.take + 100 : undefined, // Fetch extra for post-filtering
       skip: filters?.skip,
     });
+
+    // GPS radius filter (Haversine formula for distance calculation)
+    if (
+      filters?.gpsLat !== undefined &&
+      filters?.gpsLng !== undefined &&
+      filters?.gpsRadiusKm !== undefined
+    ) {
+      const centerLat = filters.gpsLat;
+      const centerLng = filters.gpsLng;
+      const radiusKm = filters.gpsRadiusKm;
+
+      photos = photos.filter((photo) => {
+        if (!photo.latitude || !photo.longitude) return false;
+
+        const distance = this.calculateHaversineDistance(
+          centerLat,
+          centerLng,
+          photo.latitude,
+          photo.longitude
+        );
+
+        return distance <= radiusKm;
+      });
+
+      // Apply take limit after GPS filtering
+      if (filters.take && photos.length > filters.take) {
+        photos = photos.slice(0, filters.take);
+      }
+    }
+
+    return photos;
+  }
+
+  /**
+   * Calculate distance between two GPS coordinates using Haversine formula
+   * @returns Distance in kilometers
+   */
+  private calculateHaversineDistance(
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number
+  ): number {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = this.toRadians(lat2 - lat1);
+    const dLng = this.toRadians(lng2 - lng1);
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(lat1)) *
+        Math.cos(this.toRadians(lat2)) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  private toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
   }
 
   async deletePhoto(id: string, orgId: string) {
@@ -189,11 +281,7 @@ export class PhotosService {
     const longitude = exifData.longitude ?? metadata?.longitude;
 
     // Process and store photo
-    const processed = await this.storageService.processAndStorePhoto(
-      imageBuffer,
-      orgId,
-      photoId
-    );
+    const processed = await this.storageService.processAndStorePhoto(imageBuffer, orgId, photoId);
 
     // Generate thumbnail key based on main s3Key
     const thumbnailKey = processed.s3Key

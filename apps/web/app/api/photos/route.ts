@@ -112,14 +112,65 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('endDate');
     const hasGps = searchParams.get('hasGps');
 
-    // New filter parameters
+    // New filter parameters with validation
     const search = searchParams.get('search');
     const filterUserId = searchParams.get('userId');
     const formType = searchParams.get('formType');
-    const weather = searchParams.get('weather');
-    const gpsLat = searchParams.get('gpsLat');
-    const gpsLng = searchParams.get('gpsLng');
-    const gpsRadiusKm = searchParams.get('gpsRadiusKm');
+    const weatherRaw = searchParams.get('weather');
+    const gpsLatRaw = searchParams.get('gpsLat');
+    const gpsLngRaw = searchParams.get('gpsLng');
+    const gpsRadiusKmRaw = searchParams.get('gpsRadiusKm');
+
+    // Validate and parse GPS coordinates
+    let gpsLat: number | undefined;
+    let gpsLng: number | undefined;
+    let gpsRadiusKm: number | undefined;
+
+    if (gpsLatRaw || gpsLngRaw || gpsRadiusKmRaw) {
+      // All three must be provided together
+      if (!gpsLatRaw || !gpsLngRaw || !gpsRadiusKmRaw) {
+        return NextResponse.json(
+          { error: 'GPS filter requires all three parameters: gpsLat, gpsLng, and gpsRadiusKm' },
+          { status: 400 }
+        );
+      }
+
+      gpsLat = parseFloat(gpsLatRaw);
+      gpsLng = parseFloat(gpsLngRaw);
+      gpsRadiusKm = parseFloat(gpsRadiusKmRaw);
+
+      // Check for NaN
+      if (isNaN(gpsLat) || isNaN(gpsLng) || isNaN(gpsRadiusKm)) {
+        return NextResponse.json(
+          { error: 'GPS parameters must be valid numbers' },
+          { status: 400 }
+        );
+      }
+
+      // Validate coordinate ranges
+      if (gpsLat < -90 || gpsLat > 90) {
+        return NextResponse.json({ error: 'gpsLat must be between -90 and 90' }, { status: 400 });
+      }
+      if (gpsLng < -180 || gpsLng > 180) {
+        return NextResponse.json({ error: 'gpsLng must be between -180 and 180' }, { status: 400 });
+      }
+      if (gpsRadiusKm <= 0 || gpsRadiusKm > 100) {
+        return NextResponse.json(
+          { error: 'gpsRadiusKm must be between 0 and 100' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Sanitize weather array - only allow safe characters
+    let weather: string[] | undefined;
+    if (weatherRaw) {
+      const validWeatherPattern = /^[a-zA-Z0-9\s-]+$/;
+      weather = weatherRaw
+        .split(',')
+        .map((w) => w.trim())
+        .filter((w) => w.length > 0 && w.length <= 50 && validWeatherPattern.test(w));
+    }
 
     // If no projectId, we need a different query to fetch all photos
     // For now, return empty if no projectId (to be implemented in backend)
@@ -158,13 +209,13 @@ export async function GET(request: NextRequest) {
     if (formType) {
       variables.formType = formType;
     }
-    if (weather) {
-      variables.weather = weather.split(',');
+    if (weather && weather.length > 0) {
+      variables.weather = weather;
     }
-    if (gpsLat && gpsLng && gpsRadiusKm) {
-      variables.gpsLat = parseFloat(gpsLat);
-      variables.gpsLng = parseFloat(gpsLng);
-      variables.gpsRadiusKm = parseFloat(gpsRadiusKm);
+    if (gpsLat !== undefined && gpsLng !== undefined && gpsRadiusKm !== undefined) {
+      variables.gpsLat = gpsLat;
+      variables.gpsLng = gpsLng;
+      variables.gpsRadiusKm = gpsRadiusKm;
     }
 
     // Execute GraphQL query

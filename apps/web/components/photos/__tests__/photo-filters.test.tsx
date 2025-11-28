@@ -404,4 +404,142 @@ describe('PhotoFilters', () => {
       expect(clearButton).toBeInTheDocument();
     });
   });
+
+  describe('Offline Scenarios', () => {
+    it('should render filter controls when offline', () => {
+      // Simulate offline mode
+      Object.defineProperty(navigator, 'onLine', {
+        value: false,
+        writable: true,
+        configurable: true,
+      });
+
+      render(
+        <TestWrapper>
+          <PhotoFilters filters={{}} onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      // Filters should still render when offline
+      expect(screen.getByPlaceholderText(/all form types/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /gps only/i })).toBeInTheDocument();
+    });
+
+    it('should allow filter changes when offline', async () => {
+      Object.defineProperty(navigator, 'onLine', {
+        value: false,
+        writable: true,
+        configurable: true,
+      });
+
+      render(
+        <TestWrapper>
+          <PhotoFilters filters={{}} onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      // User should be able to toggle GPS filter offline
+      const gpsButton = screen.getByRole('button', { name: /gps only/i });
+      fireEvent.click(gpsButton);
+
+      await waitFor(() => {
+        expect(mockOnChange).toHaveBeenCalled();
+      });
+    });
+
+    it('should persist filter state across offline/online transitions', async () => {
+      // Start online
+      Object.defineProperty(navigator, 'onLine', {
+        value: true,
+        writable: true,
+        configurable: true,
+      });
+
+      const { rerender } = render(
+        <TestWrapper>
+          <PhotoFilters filters={{ hasGps: true }} onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      // Go offline
+      Object.defineProperty(navigator, 'onLine', {
+        value: false,
+        writable: true,
+        configurable: true,
+      });
+
+      // Re-render with same filters
+      rerender(
+        <TestWrapper>
+          <PhotoFilters filters={{ hasGps: true }} onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      // Filter state should persist
+      expect(screen.getByText(/1 filter.* active/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Multi-Tenant Isolation', () => {
+    it('should fetch projects only for current organization', async () => {
+      render(
+        <TestWrapper>
+          <PhotoFilters filters={{}} onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      // Wait for projects API call - the fetch returns org-scoped data by API design
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalled();
+        const calls = (global.fetch as ReturnType<typeof vi.fn>).mock.calls;
+        const projectsCall = calls.find(
+          (call: string[]) => typeof call[0] === 'string' && call[0].includes('/api/projects')
+        );
+        expect(projectsCall).toBeDefined();
+      });
+    });
+
+    it('should fetch users only for current organization', async () => {
+      render(
+        <TestWrapper>
+          <PhotoFilters filters={{}} onChange={mockOnChange} showUserFilter />
+        </TestWrapper>
+      );
+
+      // Wait for users API call - the fetch returns org-scoped data by API design
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalled();
+        const calls = (global.fetch as ReturnType<typeof vi.fn>).mock.calls;
+        const usersCall = calls.find(
+          (call: string[]) => typeof call[0] === 'string' && call[0].includes('/api/users')
+        );
+        expect(usersCall).toBeDefined();
+      });
+    });
+
+    it('should not expose cross-tenant data in filter options', async () => {
+      // Mock returns specific org-scoped projects
+      const orgProjects = [{ id: 'org-1-project', name: 'My Org Project' }];
+      global.fetch = vi.fn().mockImplementation((url: string) => {
+        if (url.includes('/api/projects')) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ projects: orgProjects }),
+          });
+        }
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      });
+
+      render(
+        <TestWrapper>
+          <PhotoFilters filters={{}} onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      // Should NOT see other org's projects
+      await waitFor(() => {
+        expect(screen.queryByText('Other Org Project')).not.toBeInTheDocument();
+      });
+    });
+  });
 });

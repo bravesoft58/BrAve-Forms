@@ -69,14 +69,58 @@ export class PhotosResolver {
     @Args('hasGps', { nullable: true }) hasGps?: boolean,
     @Args('take', { nullable: true }) take?: number,
     @Args('skip', { nullable: true }) skip?: number,
+    @Args('search', { nullable: true }) search?: string,
+    @Args('userId', { nullable: true }) userId?: string,
+    @Args('formType', { nullable: true }) formType?: string,
+    @Args('weather', { type: () => [String], nullable: true }) weather?: string[],
+    @Args('gpsLat', { nullable: true }) gpsLat?: number,
+    @Args('gpsLng', { nullable: true }) gpsLng?: number,
+    @Args('gpsRadiusKm', { nullable: true }) gpsRadiusKm?: number,
     @CurrentUser() user?: any
   ): Promise<Photo[]> {
+    // Validate GPS radius parameters - all three must be present or none
+    if (
+      (gpsLat !== undefined || gpsLng !== undefined || gpsRadiusKm !== undefined) &&
+      !(gpsLat !== undefined && gpsLng !== undefined && gpsRadiusKm !== undefined)
+    ) {
+      throw new BadRequestException(
+        'GPS radius filter requires all three parameters: gpsLat, gpsLng, and gpsRadiusKm'
+      );
+    }
+
+    // Validate GPS coordinate ranges
+    if (gpsLat !== undefined && (gpsLat < -90 || gpsLat > 90)) {
+      throw new BadRequestException('gpsLat must be between -90 and 90');
+    }
+    if (gpsLng !== undefined && (gpsLng < -180 || gpsLng > 180)) {
+      throw new BadRequestException('gpsLng must be between -180 and 180');
+    }
+    if (gpsRadiusKm !== undefined && (gpsRadiusKm <= 0 || gpsRadiusKm > 100)) {
+      throw new BadRequestException('gpsRadiusKm must be between 0 and 100');
+    }
+
+    // Sanitize weather array - only allow alphanumeric and basic characters
+    let sanitizedWeather: string[] | undefined;
+    if (weather) {
+      const validWeatherPattern = /^[a-zA-Z0-9\s-]+$/;
+      sanitizedWeather = weather.filter(
+        (w) => typeof w === 'string' && validWeatherPattern.test(w) && w.length <= 50
+      );
+    }
+
     return this.photosService.getPhotosByProject(projectId, user.orgId, {
       startDate,
       endDate,
       hasGps,
       take,
       skip,
+      search,
+      userId,
+      formType,
+      weather: sanitizedWeather,
+      gpsLat,
+      gpsLng,
+      gpsRadiusKm,
     });
   }
 
