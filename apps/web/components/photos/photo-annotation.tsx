@@ -2,7 +2,7 @@
 
 import { Annotorious, ImageAnnotator, useAnnotator } from '@annotorious/react';
 import '@annotorious/annotorious/annotorious.css';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Stack,
   Group,
@@ -22,8 +22,15 @@ import {
   IconArrowBackUp,
   IconArrowForwardUp,
   IconCheck,
+  IconAlertCircle,
 } from '@tabler/icons-react';
 import type { Photo } from './photo-gallery-grid';
+
+/**
+ * Maximum number of annotations allowed per photo
+ * Prevents performance issues and excessive data storage
+ */
+const MAX_ANNOTATIONS = 50;
 
 /**
  * Annotation type from Annotorious
@@ -67,6 +74,15 @@ interface PhotoAnnotationProps {
 }
 
 /**
+ * Helper to safely cast annotator return types
+ * Annotorious library returns unknown[] but we know the shape
+ */
+function getTypedAnnotations(anno: ReturnType<typeof useAnnotator>): Annotation[] {
+  if (!anno) return [];
+  return (anno.getAnnotations() || []) as Annotation[];
+}
+
+/**
  * Inner component that uses the annotator context
  */
 function AnnotationToolbar({
@@ -86,14 +102,26 @@ function AnnotationToolbar({
   const [savedLocally, setSavedLocally] = useState(false);
   const [undoStack, setUndoStack] = useState<Annotation[][]>([]);
   const [redoStack, setRedoStack] = useState<Annotation[][]>([]);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [hasReachedLimit, setHasReachedLimit] = useState(false);
+  const syncPendingRef = useRef(false);
 
-  // Update annotation count
+  // Update annotation count and check limits
   const updateAnnotationCount = useCallback(() => {
     if (anno) {
-      const annotations = anno.getAnnotations() || [];
+      const annotations = getTypedAnnotations(anno);
       setAnnotationCount(annotations.length);
+      setHasReachedLimit(annotations.length >= MAX_ANNOTATIONS);
     }
   }, [anno]);
+
+  /**
+   * Get localStorage key with orgId for multi-tenant isolation
+   * CRITICAL: Must include orgId to prevent cross-tenant data leakage
+   */
+  const getStorageKey = useCallback(() => {
+    return `photo-annotations-${photo.orgId}-${photo.id}`;
+  }, [photo.orgId, photo.id]);
 
   // Load initial annotations
   useEffect(() => {
@@ -103,28 +131,51 @@ function AnnotationToolbar({
     }
   }, [anno, initialAnnotations, updateAnnotationCount]);
 
-  // Set up event listeners
+  // Set up event listeners with complete undo/redo support
   useEffect(() => {
     if (!anno) return;
 
+    // Track previous state for undo
+    let previousState: Annotation[] = (anno.getAnnotations() || []) as Annotation[];
+
     const handleCreate = (_annotation: Annotation) => {
-      // Save current state to undo stack
-      const currentAnnotations = anno.getAnnotations() || [];
-      setUndoStack((prev) => [...prev, currentAnnotations]);
+      // Check annotation limit before proceeding
+      const currentCount = ((anno.getAnnotations() || []) as Annotation[]).length;
+      if (currentCount > MAX_ANNOTATIONS) {
+        // Remove the annotation that exceeds the limit
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (anno as any).removeAnnotation(_annotation.id);
+        setHasReachedLimit(true);
+        return;
+      }
+
+      // Save previous state to undo stack
+      setUndoStack((prev) => [...prev, previousState]);
       setRedoStack([]);
+      previousState = (anno.getAnnotations() || []) as Annotation[];
 
       updateAnnotationCount();
-      onAnnotationsChange?.(anno.getAnnotations() || []);
+      onAnnotationsChange?.((anno.getAnnotations() || []) as Annotation[]);
     };
 
     const handleUpdate = (_annotation: Annotation) => {
+      // Save previous state to undo stack for update operations
+      setUndoStack((prev) => [...prev, previousState]);
+      setRedoStack([]);
+      previousState = (anno.getAnnotations() || []) as Annotation[];
+
       updateAnnotationCount();
-      onAnnotationsChange?.(anno.getAnnotations() || []);
+      onAnnotationsChange?.((anno.getAnnotations() || []) as Annotation[]);
     };
 
     const handleDelete = (_annotation: Annotation) => {
+      // Save previous state to undo stack for delete operations
+      setUndoStack((prev) => [...prev, previousState]);
+      setRedoStack([]);
+      previousState = (anno.getAnnotations() || []) as Annotation[];
+
       updateAnnotationCount();
-      onAnnotationsChange?.(anno.getAnnotations() || []);
+      onAnnotationsChange?.((anno.getAnnotations() || []) as Annotation[]);
     };
 
     anno.on('createAnnotation', handleCreate);
@@ -141,37 +192,110 @@ function AnnotationToolbar({
   // Update drawing tool when selection changes
   useEffect(() => {
     if (anno) {
-      anno.setDrawingTool(tool);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (anno as any).setDrawingTool?.(tool);
     }
   }, [anno, tool]);
 
+  // Update annotation style when color changes (HIGH-1 fix)
+  useEffect(() => {
+    if (anno) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (anno as any).setStyle?.({
+        stroke: color,
+        strokeWidth: 2,
+      });
+    }
+  }, [anno, color]);
+
+  // Sync-on-reconnect mechanism (HIGH-3 fix)
+  useEffect(() => {
+    const handleOnline = async () => {
+      // Check if we have pending annotations to sync
+      const storageKey = getStorageKey();
+      const stored = localStorage.getItem(storageKey);
+      if (stored && syncPendingRef.current) {
+        try {
+          const data = JSON.parse(stored);
+          if (data.annotations && Array.isArray(data.annotations)) {
+            await onSave(data.annotations);
+            // Clear local storage after successful sync
+            localStorage.removeItem(storageKey);
+            syncPendingRef.current = false;
+            setSavedLocally(false);
+          }
+        } catch (error) {
+          console.error('Failed to sync annotations on reconnect:', error);
+          setSaveError('Failed to sync annotations. Please try saving again.');
+        }
+      }
+    };
+
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [getStorageKey, onSave]);
+
   /**
-   * Handle save annotations
+   * Handle save annotations with error handling and offline support
+   * MEDIUM-1 fix: Proper error handling for onSave failures
    */
   const handleSave = async () => {
     if (!anno) return;
 
     setIsSaving(true);
     setSavedLocally(false);
+    setSaveError(null);
 
     try {
-      const annotations = anno.getAnnotations() || [];
+      const annotations = getTypedAnnotations(anno);
+      const storageKey = getStorageKey();
 
-      // Check if offline
+      // Check if offline - store locally and mark for sync
       if (!navigator.onLine) {
-        // Queue for later sync
         setSavedLocally(true);
-        // Store in localStorage for offline persistence
+        syncPendingRef.current = true;
+        // Store in localStorage for offline persistence with orgId isolation
         localStorage.setItem(
-          `photo-annotations-${photo.id}`,
+          storageKey,
           JSON.stringify({
             annotations,
             timestamp: new Date().toISOString(),
+            photoId: photo.id,
+            orgId: photo.orgId,
           })
         );
+        // Still call onSave for local state management
+        await onSave(annotations);
+        return;
       }
 
+      // Online - save to backend
       await onSave(annotations);
+
+      // Clear any locally stored annotations on successful online save
+      localStorage.removeItem(storageKey);
+      syncPendingRef.current = false;
+    } catch (error) {
+      // MEDIUM-1: Handle save errors gracefully
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setSaveError(`Failed to save annotations: ${errorMessage}`);
+      console.error('Error saving annotations:', error);
+
+      // Store locally as fallback on error
+      const storageKey = getStorageKey();
+      const annotations = getTypedAnnotations(anno);
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          annotations,
+          timestamp: new Date().toISOString(),
+          photoId: photo.id,
+          orgId: photo.orgId,
+          error: errorMessage,
+        })
+      );
+      syncPendingRef.current = true;
+      setSavedLocally(true);
     } finally {
       setIsSaving(false);
     }
@@ -185,7 +309,7 @@ function AnnotationToolbar({
 
     if (showConfirmClear) {
       // Save to undo stack before clearing
-      const currentAnnotations = anno.getAnnotations() || [];
+      const currentAnnotations = getTypedAnnotations(anno);
       setUndoStack((prev) => [...prev, currentAnnotations]);
       setRedoStack([]);
 
@@ -206,7 +330,7 @@ function AnnotationToolbar({
   const handleUndo = () => {
     if (!anno || undoStack.length === 0) return;
 
-    const currentAnnotations = anno.getAnnotations() || [];
+    const currentAnnotations = getTypedAnnotations(anno);
     const previousState = undoStack[undoStack.length - 1];
 
     setRedoStack((prev) => [...prev, currentAnnotations]);
@@ -222,7 +346,7 @@ function AnnotationToolbar({
   const handleRedo = () => {
     if (!anno || redoStack.length === 0) return;
 
-    const currentAnnotations = anno.getAnnotations() || [];
+    const currentAnnotations = getTypedAnnotations(anno);
     const nextState = redoStack[redoStack.length - 1];
 
     setUndoStack((prev) => [...prev, currentAnnotations]);
@@ -366,6 +490,34 @@ function AnnotationToolbar({
             </Group>
           </Group>
         </Paper>
+      )}
+
+      {/* Error indicator */}
+      {saveError && (
+        <Alert
+          icon={<IconAlertCircle size={16} />}
+          color="red"
+          title="Save Error"
+          variant="light"
+          withCloseButton
+          onClose={() => setSaveError(null)}
+          data-testid="save-error-alert"
+        >
+          {saveError}
+        </Alert>
+      )}
+
+      {/* Annotation limit warning */}
+      {hasReachedLimit && (
+        <Alert
+          icon={<IconAlertCircle size={16} />}
+          color="orange"
+          title="Annotation limit reached"
+          variant="light"
+          data-testid="limit-warning-alert"
+        >
+          Maximum of {MAX_ANNOTATIONS} annotations allowed. Delete some annotations to add more.
+        </Alert>
       )}
 
       {/* Saved locally indicator */}

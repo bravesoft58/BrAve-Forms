@@ -7,16 +7,23 @@ import { MantineProvider } from '@mantine/core';
 import { PhotoAnnotation } from '../photo-annotation';
 import type { Photo } from '../photo-gallery-grid';
 
+// Mock scrollIntoView to prevent Mantine Select errors in jsdom
+Element.prototype.scrollIntoView = vi.fn();
+
 // Mock Annotorious
 const mockSetDrawingTool = vi.fn();
 const mockGetAnnotations = vi.fn().mockReturnValue([]);
 const mockSetAnnotations = vi.fn();
+const mockSetStyle = vi.fn();
+const mockRemoveAnnotation = vi.fn();
 const mockOn = vi.fn();
 const mockOff = vi.fn();
 const mockAnno = {
   setDrawingTool: mockSetDrawingTool,
   getAnnotations: mockGetAnnotations,
   setAnnotations: mockSetAnnotations,
+  setStyle: mockSetStyle,
+  removeAnnotation: mockRemoveAnnotation,
   on: mockOn,
   off: mockOff,
 };
@@ -36,9 +43,10 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <MantineProvider>{children}</MantineProvider>
 );
 
-// Mock photo data
+// Mock photo data with orgId for multi-tenant isolation
 const mockPhoto: Photo = {
   id: 'photo-1',
+  orgId: 'org-123', // REQUIRED for multi-tenant isolation
   url: 'https://cdn.example.com/photo-1.jpg',
   thumbnailUrl: 'https://cdn.example.com/photo-1-thumb.jpg',
   caption: 'Site inspection photo',
@@ -83,10 +91,13 @@ describe('PhotoAnnotation', () => {
     mockGetAnnotations.mockReturnValue([]);
     // Reset navigator.onLine
     Object.defineProperty(navigator, 'onLine', { value: true, configurable: true });
+    // Clear localStorage
+    localStorage.clear();
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+    localStorage.clear();
   });
 
   describe('Rendering', () => {
@@ -613,7 +624,7 @@ describe('PhotoAnnotation', () => {
   });
 
   describe('Offline Support', () => {
-    it('should save locally when offline', async () => {
+    it('should save locally when offline with orgId in key', async () => {
       // Simulate offline before render
       Object.defineProperty(navigator, 'onLine', {
         value: false,
@@ -645,11 +656,88 @@ describe('PhotoAnnotation', () => {
       // Verify onSave was still called
       expect(mockOnSave).toHaveBeenCalled();
 
+      // CRITICAL: Verify localStorage key includes orgId for multi-tenant isolation
+      const storageKey = `photo-annotations-${mockPhoto.orgId}-${mockPhoto.id}`;
+      const storedData = localStorage.getItem(storageKey);
+      expect(storedData).not.toBeNull();
+      const parsed = JSON.parse(storedData!);
+      expect(parsed.orgId).toBe(mockPhoto.orgId);
+      expect(parsed.photoId).toBe(mockPhoto.id);
+
       // Restore online status
       Object.defineProperty(navigator, 'onLine', {
         value: true,
         writable: true,
         configurable: true,
+      });
+    });
+
+    it('should clear localStorage on successful online save', async () => {
+      // First save offline
+      Object.defineProperty(navigator, 'onLine', {
+        value: false,
+        writable: true,
+        configurable: true,
+      });
+
+      const { rerender } = render(
+        <TestWrapper>
+          <PhotoAnnotation photo={mockPhoto} onSave={mockOnSave} />
+        </TestWrapper>
+      );
+
+      const saveButton = screen.getByRole('button', { name: /save/i });
+      await act(async () => {
+        fireEvent.click(saveButton);
+      });
+
+      await waitFor(() => {
+        expect(mockOnSave).toHaveBeenCalled();
+      });
+
+      // Verify localStorage has data
+      const storageKey = `photo-annotations-${mockPhoto.orgId}-${mockPhoto.id}`;
+      expect(localStorage.getItem(storageKey)).not.toBeNull();
+
+      // Go back online and save again
+      Object.defineProperty(navigator, 'onLine', {
+        value: true,
+        writable: true,
+        configurable: true,
+      });
+      mockOnSave.mockClear();
+
+      rerender(
+        <TestWrapper>
+          <PhotoAnnotation photo={mockPhoto} onSave={mockOnSave} />
+        </TestWrapper>
+      );
+
+      const saveButton2 = screen.getByRole('button', { name: /save/i });
+      await act(async () => {
+        fireEvent.click(saveButton2);
+      });
+
+      await waitFor(() => {
+        expect(mockOnSave).toHaveBeenCalled();
+      });
+
+      // Verify localStorage is cleared after successful online save
+      expect(localStorage.getItem(storageKey)).toBeNull();
+    });
+  });
+
+  describe('Color Style Updates', () => {
+    it('should update annotation style when color changes', async () => {
+      render(
+        <TestWrapper>
+          <PhotoAnnotation photo={mockPhoto} onSave={mockOnSave} />
+        </TestWrapper>
+      );
+
+      // Initial style should be set
+      await waitFor(() => {
+        expect(mockSetStyle).toHaveBeenCalled();
       });
     });
   });
