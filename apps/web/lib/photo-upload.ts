@@ -5,16 +5,20 @@
  * Supports both web (file input) and mobile (Capacitor Camera).
  *
  * Features:
- * - File compression using canvas (max 2000px, 80% quality)
+ * - File compression using canvas (max 2000px, 90% quality for construction detail)
  * - GPS extraction from device (fallback when EXIF unavailable)
  * - Upload to MinIO via GraphQL mutation
  * - Error handling for permissions, file size, and network issues
+ * - Offline queue for 30-day offline capability
  */
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30101';
+// Use same env var as rest of codebase for GraphQL endpoint
+const GRAPHQL_ENDPOINT =
+  process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:30101/graphql';
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_DIMENSION = 2000;
-const COMPRESSION_QUALITY = 0.8;
+// 90% quality for construction photos - preserves detail for compliance
+const COMPRESSION_QUALITY = 0.9;
 
 export interface PhotoUploadResult {
   id: string;
@@ -246,7 +250,10 @@ async function compressImage(dataUrl: string): Promise<CapturedPhoto> {
 /**
  * Get current GPS coordinates from device
  */
-export async function getCurrentLocation(): Promise<{ latitude: number; longitude: number } | null> {
+export async function getCurrentLocation(): Promise<{
+  latitude: number;
+  longitude: number;
+} | null> {
   if (typeof navigator === 'undefined' || !navigator.geolocation) {
     return null;
   }
@@ -286,15 +293,16 @@ export async function uploadPhoto(
 ): Promise<PhotoUploadResult | PhotoUploadError> {
   try {
     // Get GPS if not provided
-    let gps = metadata?.latitude && metadata?.longitude
-      ? { latitude: metadata.latitude, longitude: metadata.longitude }
-      : null;
+    let gps =
+      metadata?.latitude && metadata?.longitude
+        ? { latitude: metadata.latitude, longitude: metadata.longitude }
+        : null;
 
     if (!gps) {
       gps = await getCurrentLocation();
     }
 
-    const response = await fetch(`${BACKEND_URL}/graphql`, {
+    const response = await fetch(GRAPHQL_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -374,4 +382,281 @@ export function isCapturedPhoto(
   result: PhotoUploadResult | PhotoUploadError | CapturedPhoto
 ): result is CapturedPhoto {
   return 'base64' in result && 'format' in result;
+}
+
+// ============================================================================
+// OFFLINE QUEUE IMPLEMENTATION
+// Supports 30-day offline capability per CLAUDE.md requirements
+// ============================================================================
+
+const OFFLINE_QUEUE_DB_NAME = 'braveforms-photo-queue';
+const OFFLINE_QUEUE_STORE_NAME = 'photos';
+const OFFLINE_QUEUE_VERSION = 1;
+
+export interface QueuedPhoto {
+  id: string;
+  photo: CapturedPhoto;
+  metadata?: {
+    projectId?: string;
+    submissionId?: string;
+    fieldName?: string;
+    caption?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+  queuedAt: string;
+  retryCount: number;
+  lastError?: string;
+}
+
+/**
+ * Check if device is online
+ */
+export function isOnline(): boolean {
+  if (typeof navigator === 'undefined') {
+    return true; // Assume online for SSR
+  }
+  return navigator.onLine;
+}
+
+/**
+ * Open the offline queue database
+ */
+async function openQueueDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    if (typeof indexedDB === 'undefined') {
+      reject(new Error('IndexedDB not available'));
+      return;
+    }
+
+    const request = indexedDB.open(OFFLINE_QUEUE_DB_NAME, OFFLINE_QUEUE_VERSION);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+
+    request.onupgradeneeded = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      if (!db.objectStoreNames.contains(OFFLINE_QUEUE_STORE_NAME)) {
+        const store = db.createObjectStore(OFFLINE_QUEUE_STORE_NAME, { keyPath: 'id' });
+        store.createIndex('queuedAt', 'queuedAt', { unique: false });
+      }
+    };
+  });
+}
+
+/**
+ * Add a photo to the offline queue
+ */
+export async function queuePhotoForUpload(
+  photo: CapturedPhoto,
+  metadata?: QueuedPhoto['metadata']
+): Promise<string> {
+  const db = await openQueueDB();
+  const id = `queued_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
+  const queuedPhoto: QueuedPhoto = {
+    id,
+    photo,
+    metadata,
+    queuedAt: new Date().toISOString(),
+    retryCount: 0,
+  };
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([OFFLINE_QUEUE_STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(OFFLINE_QUEUE_STORE_NAME);
+    const request = store.add(queuedPhoto);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      db.close();
+      resolve(id);
+    };
+  });
+}
+
+/**
+ * Get all queued photos
+ */
+export async function getQueuedPhotos(): Promise<QueuedPhoto[]> {
+  const db = await openQueueDB();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([OFFLINE_QUEUE_STORE_NAME], 'readonly');
+    const store = transaction.objectStore(OFFLINE_QUEUE_STORE_NAME);
+    const request = store.getAll();
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      db.close();
+      resolve(request.result);
+    };
+  });
+}
+
+/**
+ * Remove a photo from the queue after successful upload
+ */
+export async function removeFromQueue(id: string): Promise<void> {
+  const db = await openQueueDB();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([OFFLINE_QUEUE_STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(OFFLINE_QUEUE_STORE_NAME);
+    const request = store.delete(id);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      db.close();
+      resolve();
+    };
+  });
+}
+
+/**
+ * Update retry count and last error for a queued photo
+ */
+export async function updateQueuedPhotoError(id: string, error: string): Promise<void> {
+  const db = await openQueueDB();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([OFFLINE_QUEUE_STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(OFFLINE_QUEUE_STORE_NAME);
+    const getRequest = store.get(id);
+
+    getRequest.onerror = () => reject(getRequest.error);
+    getRequest.onsuccess = () => {
+      const photo = getRequest.result as QueuedPhoto;
+      if (photo) {
+        photo.retryCount += 1;
+        photo.lastError = error;
+        const putRequest = store.put(photo);
+        putRequest.onerror = () => reject(putRequest.error);
+        putRequest.onsuccess = () => {
+          db.close();
+          resolve();
+        };
+      } else {
+        db.close();
+        resolve();
+      }
+    };
+  });
+}
+
+/**
+ * Get count of queued photos
+ */
+export async function getQueuedPhotoCount(): Promise<number> {
+  const db = await openQueueDB();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([OFFLINE_QUEUE_STORE_NAME], 'readonly');
+    const store = transaction.objectStore(OFFLINE_QUEUE_STORE_NAME);
+    const request = store.count();
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      db.close();
+      resolve(request.result);
+    };
+  });
+}
+
+/**
+ * Sync all queued photos to server
+ * Call this when device comes back online
+ *
+ * @param token - Auth token for uploads
+ * @param onProgress - Callback for progress updates
+ * @returns Summary of sync results
+ */
+export async function syncQueuedPhotos(
+  token: string,
+  onProgress?: (uploaded: number, total: number, current?: QueuedPhoto) => void
+): Promise<{
+  uploaded: number;
+  failed: number;
+  remaining: number;
+}> {
+  if (!isOnline()) {
+    return { uploaded: 0, failed: 0, remaining: await getQueuedPhotoCount() };
+  }
+
+  const queued = await getQueuedPhotos();
+  let uploaded = 0;
+  let failed = 0;
+
+  for (let i = 0; i < queued.length; i++) {
+    const item = queued[i];
+    onProgress?.(uploaded, queued.length, item);
+
+    // Skip items that have failed too many times
+    if (item.retryCount >= 5) {
+      failed++;
+      continue;
+    }
+
+    const result = await uploadPhoto(item.photo, token, item.metadata);
+
+    if (isPhotoUploadError(result)) {
+      await updateQueuedPhotoError(item.id, result.message);
+      failed++;
+    } else {
+      await removeFromQueue(item.id);
+      uploaded++;
+    }
+  }
+
+  const remaining = await getQueuedPhotoCount();
+  onProgress?.(uploaded, queued.length);
+
+  return { uploaded, failed, remaining };
+}
+
+/**
+ * Upload photo with automatic offline queue fallback
+ * Use this instead of uploadPhoto for offline-first behavior
+ */
+export async function uploadPhotoWithOfflineSupport(
+  photo: CapturedPhoto,
+  token: string,
+  metadata?: QueuedPhoto['metadata']
+): Promise<PhotoUploadResult | PhotoUploadError | { queued: true; queueId: string }> {
+  // If offline, queue the photo
+  if (!isOnline()) {
+    try {
+      const queueId = await queuePhotoForUpload(photo, metadata);
+      return { queued: true, queueId };
+    } catch (error) {
+      return {
+        code: 'UPLOAD_FAILED',
+        message: 'Failed to queue photo for offline upload',
+      };
+    }
+  }
+
+  // Try to upload directly
+  const result = await uploadPhoto(photo, token, metadata);
+
+  // If network error, queue for later
+  if (isPhotoUploadError(result) && result.code === 'NETWORK_ERROR') {
+    try {
+      const queueId = await queuePhotoForUpload(photo, metadata);
+      return { queued: true, queueId };
+    } catch {
+      return result;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Check if result is a queued response
+ */
+export function isQueuedResult(
+  result: PhotoUploadResult | PhotoUploadError | { queued: true; queueId: string }
+): result is { queued: true; queueId: string } {
+  return 'queued' in result && result.queued === true;
 }

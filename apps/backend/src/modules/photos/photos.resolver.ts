@@ -1,15 +1,11 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import { UseGuards, Logger, BadRequestException } from '@nestjs/common';
+import { UseGuards, Logger, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { ClerkAuthGuard } from '@/modules/auth/guards/clerk-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { PhotosService } from './photos.service';
-import {
-  Photo,
-  UploadPhotoInput,
-  UploadPhotoBase64Input,
-  PhotoUploadResult,
-} from './photos.types';
+import { Photo, UploadPhotoBase64Input, PhotoUploadResult } from './photos.types';
 import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '@/modules/database/prisma.service';
 
 @Resolver(() => Photo)
 @UseGuards(ClerkAuthGuard)
@@ -18,8 +14,39 @@ export class PhotosResolver {
 
   constructor(
     private readonly photosService: PhotosService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly prisma: PrismaService
   ) {}
+
+  /**
+   * Validate that projectId belongs to the user's organization
+   */
+  private async validateProjectOwnership(projectId: string, orgId: string): Promise<void> {
+    const project = await this.prisma.project.findFirst({
+      where: { id: projectId, orgId },
+      select: { id: true },
+    });
+    if (!project) {
+      throw new ForbiddenException(
+        `Project ${projectId} not found or does not belong to your organization`
+      );
+    }
+  }
+
+  /**
+   * Validate that submissionId belongs to the user's organization
+   */
+  private async validateSubmissionOwnership(submissionId: string, orgId: string): Promise<void> {
+    const submission = await this.prisma.formSubmission.findFirst({
+      where: { id: submissionId, orgId },
+      select: { id: true },
+    });
+    if (!submission) {
+      throw new ForbiddenException(
+        `Submission ${submissionId} not found or does not belong to your organization`
+      );
+    }
+  }
 
   @Query(() => [Photo])
   async photos(
@@ -81,6 +108,14 @@ export class PhotosResolver {
     const maxBase64Size = 14 * 1024 * 1024;
     if (base64Data.length > maxBase64Size) {
       throw new BadRequestException('Photo is too large. Maximum size is 10MB.');
+    }
+
+    // Cross-tenant validation: ensure projectId/submissionId belong to user's org
+    if (input.projectId) {
+      await this.validateProjectOwnership(input.projectId, user.orgId);
+    }
+    if (input.submissionId) {
+      await this.validateSubmissionOwnership(input.submissionId, user.orgId);
     }
 
     try {

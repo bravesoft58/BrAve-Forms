@@ -202,7 +202,8 @@ describe('photo-upload utility', () => {
       const mockResponse: PhotoUploadResult = {
         id: 'photo-uuid-123',
         url: 'http://localhost:9000/braveforms-photos/photos/org-123/photo-uuid-123.jpg',
-        thumbnailUrl: 'http://localhost:9000/braveforms-photos/photos/org-123/photo-uuid-123-thumb.jpg',
+        thumbnailUrl:
+          'http://localhost:9000/braveforms-photos/photos/org-123/photo-uuid-123-thumb.jpg',
         filename: 'photo-uuid-123.jpg',
         size: 54321,
         mimeType: 'image/jpeg',
@@ -406,6 +407,92 @@ describe('photo-upload utility', () => {
 
       expect(capturedWithDimensions.width).toBe(1920);
       expect(capturedWithDimensions.height).toBe(1080);
+    });
+  });
+
+  describe('isOnline', () => {
+    it('should return true when navigator.onLine is true', async () => {
+      const { isOnline } = await import('../photo-upload');
+      Object.defineProperty(navigator, 'onLine', {
+        value: true,
+        configurable: true,
+      });
+      expect(isOnline()).toBe(true);
+    });
+
+    it('should return false when navigator.onLine is false', async () => {
+      const { isOnline } = await import('../photo-upload');
+      Object.defineProperty(navigator, 'onLine', {
+        value: false,
+        configurable: true,
+      });
+      expect(isOnline()).toBe(false);
+    });
+  });
+
+  describe('isQueuedResult', () => {
+    it('should return true for queued results', async () => {
+      const { isQueuedResult } = await import('../photo-upload');
+      const result = { queued: true, queueId: 'queued_123' };
+      expect(isQueuedResult(result)).toBe(true);
+    });
+
+    it('should return false for PhotoUploadResult', async () => {
+      const { isQueuedResult } = await import('../photo-upload');
+      const result: PhotoUploadResult = {
+        id: 'photo-123',
+        url: 'http://example.com/photo.jpg',
+        thumbnailUrl: 'http://example.com/thumb.jpg',
+        filename: 'photo.jpg',
+        size: 1024,
+        mimeType: 'image/jpeg',
+      };
+      expect(isQueuedResult(result)).toBe(false);
+    });
+
+    it('should return false for PhotoUploadError', async () => {
+      const { isQueuedResult } = await import('../photo-upload');
+      const error: PhotoUploadError = {
+        code: 'NETWORK_ERROR',
+        message: 'Connection failed',
+      };
+      expect(isQueuedResult(error)).toBe(false);
+    });
+  });
+
+  describe('QueuedPhoto interface', () => {
+    it('should have correct structure', () => {
+      // Test that the QueuedPhoto structure works as expected
+      const queuedPhoto = {
+        id: 'queued_12345_abc',
+        photo: {
+          base64: 'test-base64',
+          format: 'jpeg',
+        },
+        metadata: {
+          projectId: 'project-123',
+          fieldName: 'site_photo',
+        },
+        queuedAt: '2025-11-27T12:00:00.000Z',
+        retryCount: 0,
+      };
+
+      expect(queuedPhoto.id).toMatch(/^queued_/);
+      expect(queuedPhoto.photo.base64).toBeTruthy();
+      expect(queuedPhoto.retryCount).toBe(0);
+    });
+
+    it('should support lastError field', () => {
+      const queuedPhoto = {
+        id: 'queued_failed_123',
+        photo: { base64: 'data', format: 'jpeg' },
+        queuedAt: '2025-11-27T12:00:00.000Z',
+        retryCount: 3,
+        lastError: 'Network error: Connection refused',
+      };
+
+      expect(queuedPhoto.retryCount).toBe(3);
+      expect(queuedPhoto.lastError).toContain('Network error');
     });
   });
 });

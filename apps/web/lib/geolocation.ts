@@ -59,12 +59,12 @@ export async function requestGeolocationPermission(): Promise<boolean> {
  * Get current GPS coordinates
  *
  * @param highAccuracy - Use high accuracy mode (slower, more battery)
- * @param timeout - Maximum time to wait for position (ms)
+ * @param timeout - Maximum time to wait for position (ms), default 60s for construction sites
  * @returns GPS coordinates or error
  */
 export async function getCurrentPosition(
   highAccuracy: boolean = true,
-  timeout: number = 30000
+  timeout: number = 60000
 ): Promise<GPSCoordinates | GeolocationError> {
   if (!isGeolocationAvailable()) {
     return {
@@ -156,4 +156,64 @@ export function getAccuracyColor(meters: number): 'green' | 'blue' | 'yellow' | 
   if (meters < 30) return 'blue';
   if (meters < 100) return 'yellow';
   return 'red';
+}
+
+/**
+ * Validate GPS coordinates
+ * Checks for valid ranges and null island detection
+ *
+ * @param latitude - Latitude in degrees (-90 to 90)
+ * @param longitude - Longitude in degrees (-180 to 180)
+ * @returns Validation result with error message if invalid
+ */
+export function validateCoordinates(
+  latitude: number,
+  longitude: number
+): { valid: boolean; error?: string } {
+  // Check for null/undefined
+  if (latitude === null || latitude === undefined) {
+    return { valid: false, error: 'Latitude is required' };
+  }
+  if (longitude === null || longitude === undefined) {
+    return { valid: false, error: 'Longitude is required' };
+  }
+
+  // Check for NaN
+  if (isNaN(latitude) || isNaN(longitude)) {
+    return { valid: false, error: 'Coordinates must be valid numbers' };
+  }
+
+  // Check latitude range (-90 to 90)
+  if (latitude < -90 || latitude > 90) {
+    return {
+      valid: false,
+      error: `Latitude ${latitude} is out of range. Must be between -90 and 90.`,
+    };
+  }
+
+  // Check longitude range (-180 to 180)
+  if (longitude < -180 || longitude > 180) {
+    return {
+      valid: false,
+      error: `Longitude ${longitude} is out of range. Must be between -180 and 180.`,
+    };
+  }
+
+  // Null Island detection (0,0 is often a GPS error/default)
+  // Allow small tolerance for actual locations near 0,0 (unlikely for construction)
+  if (Math.abs(latitude) < 0.001 && Math.abs(longitude) < 0.001) {
+    return {
+      valid: false,
+      error: 'Coordinates appear to be at null island (0,0). This may indicate a GPS error.',
+    };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Check if coordinates are valid (simple boolean check)
+ */
+export function areCoordinatesValid(latitude: number, longitude: number): boolean {
+  return validateCoordinates(latitude, longitude).valid;
 }

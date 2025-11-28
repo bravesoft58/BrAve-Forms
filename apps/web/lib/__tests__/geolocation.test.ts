@@ -7,6 +7,8 @@ import {
   formatAccuracy,
   getAccuracyColor,
   requestGeolocationPermission,
+  validateCoordinates,
+  areCoordinatesValid,
   GPSCoordinates,
   GeolocationError,
 } from '../geolocation';
@@ -313,6 +315,103 @@ describe('geolocation utilities', () => {
 
     it('returns red for poor accuracy', () => {
       expect(getAccuracyColor(150)).toBe('red');
+    });
+  });
+
+  describe('validateCoordinates', () => {
+    it('returns valid for correct coordinates', () => {
+      const result = validateCoordinates(40.7128, -74.006);
+      expect(result.valid).toBe(true);
+      expect(result.error).toBeUndefined();
+    });
+
+    it('returns valid for edge values at 90 latitude', () => {
+      const result = validateCoordinates(90, 0);
+      expect(result.valid).toBe(true);
+    });
+
+    it('returns valid for edge values at -90 latitude', () => {
+      const result = validateCoordinates(-90, 0);
+      expect(result.valid).toBe(true);
+    });
+
+    it('returns valid for edge values at 180 longitude', () => {
+      const result = validateCoordinates(0, 180);
+      expect(result.valid).toBe(true);
+    });
+
+    it('returns valid for edge values at -180 longitude', () => {
+      const result = validateCoordinates(0, -180);
+      expect(result.valid).toBe(true);
+    });
+
+    it('returns error for latitude > 90', () => {
+      const result = validateCoordinates(91, 0);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('Latitude');
+      expect(result.error).toContain('out of range');
+    });
+
+    it('returns error for latitude < -90', () => {
+      const result = validateCoordinates(-91, 0);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('Latitude');
+    });
+
+    it('returns error for longitude > 180', () => {
+      const result = validateCoordinates(0, 181);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('Longitude');
+      expect(result.error).toContain('out of range');
+    });
+
+    it('returns error for longitude < -180', () => {
+      const result = validateCoordinates(0, -181);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('Longitude');
+    });
+
+    it('returns error for null island (0,0)', () => {
+      const result = validateCoordinates(0, 0);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('null island');
+    });
+
+    it('returns error for very small coordinates near (0,0)', () => {
+      const result = validateCoordinates(0.0001, 0.0001);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('null island');
+    });
+
+    it('returns valid for coordinates far enough from (0,0)', () => {
+      const result = validateCoordinates(0.01, 0.01);
+      expect(result.valid).toBe(true);
+    });
+
+    it('returns error for NaN latitude', () => {
+      const result = validateCoordinates(NaN, -74.006);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('valid numbers');
+    });
+
+    it('returns error for NaN longitude', () => {
+      const result = validateCoordinates(40.7128, NaN);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('valid numbers');
+    });
+  });
+
+  describe('areCoordinatesValid', () => {
+    it('returns true for valid coordinates', () => {
+      expect(areCoordinatesValid(40.7128, -74.006)).toBe(true);
+    });
+
+    it('returns false for invalid coordinates', () => {
+      expect(areCoordinatesValid(91, 0)).toBe(false);
+    });
+
+    it('returns false for null island', () => {
+      expect(areCoordinatesValid(0, 0)).toBe(false);
     });
   });
 });

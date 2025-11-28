@@ -5,7 +5,7 @@
 **Created:** 2025-11-27
 **Completed:** 2025-11-27
 **Dependencies:** MinIO/S3 storage configured, Backend photo upload endpoint exists
-**Status:** COMPLETE
+**Status:** COMPLETE (Code Review Fixes Applied)
 
 ## Implementation Summary
 
@@ -14,6 +14,8 @@ Implemented real photo upload functionality to MinIO storage with the following 
 ### Backend Changes
 
 - **photos.resolver.ts**: Added `uploadPhoto` mutation accepting base64 input
+  - Added cross-tenant validation for projectId/submissionId (code review fix)
+  - Added PrismaService for ownership checks
 - **photos.service.ts**: Added `uploadPhotoFromBase64` method for form submissions
 - **photos.types.ts**: Added `UploadPhotoBase64Input` and `PhotoUploadResult` GraphQL types
 - **schema.prisma**: Made `inspectionId` optional, added `submissionId` and `fieldName` fields
@@ -21,14 +23,31 @@ Implemented real photo upload functionality to MinIO storage with the following 
 ### Frontend Changes
 
 - **photo-upload.ts**: New utility library with capturePhoto, selectPhoto, uploadPhoto functions
+  - Fixed BACKEND_URL to use NEXT_PUBLIC_GRAPHQL_ENDPOINT (code review fix)
+  - Increased compression quality from 0.8 to 0.9 for construction detail (code review fix)
+  - Added full offline queue implementation with IndexedDB (code review fix)
+  - Added uploadPhotoWithOfflineSupport for 30-day offline capability
 - **PhotoField.tsx**: Updated to use MinIO upload instead of base64 storage
+- **geolocation.ts**: Increased GPS timeout from 30s to 60s (code review fix)
+  - Added validateCoordinates and areCoordinatesValid functions (code review fix)
+  - Added null island detection (0,0 coordinate validation)
 - Includes progress bar, GPS display, error handling
 
-### Tests (70 passing)
+### Code Review Fixes Applied
 
-- photo-upload.test.ts: 23 tests for utility functions
+1. **CRITICAL-1**: Fixed hardcoded BACKEND_URL - now uses NEXT_PUBLIC_GRAPHQL_ENDPOINT
+2. **CRITICAL-2**: Added offline queue for 30-day offline capability (IndexedDB-based)
+3. **CRITICAL-3**: Verified StorageService.processAndStorePhoto exists
+4. **HIGH-6**: Added cross-tenant validation for projectId/submissionId ownership
+5. **HIGH-7**: Increased GPS timeout from 30s to 60s for construction sites
+6. **HIGH-8**: Added GPS coordinate validation with range checks and null island detection
+7. **HIGH-9**: Increased photo compression quality from 0.8 to 0.9
+
+### Tests (94 passing)
+
+- photo-upload.test.ts: 30 tests for utility functions (+7 for offline queue)
 - PhotoField.test.tsx: 21 tests for component
-- geolocation.test.ts: 26 tests (from ISSUE-166)
+- geolocation.test.ts: 43 tests (+17 for coordinate validation)
 
 ## What You'll Do
 
