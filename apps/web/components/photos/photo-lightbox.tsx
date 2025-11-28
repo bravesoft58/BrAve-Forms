@@ -7,6 +7,17 @@ import { Stack, Text, Group, Badge, ActionIcon, Tooltip } from '@mantine/core';
 import { IconDownload, IconShare, IconMapPin, IconCalendar, IconFile } from '@tabler/icons-react';
 import { useCallback } from 'react';
 import type { Photo } from './photo-gallery-grid';
+import { formatFileSize, formatDate } from '@/lib/format-utils';
+
+/**
+ * Icon size constants for consistent sizing
+ */
+const ICON_SIZES = {
+  /** Action button icons (download, share) */
+  ACTION: 18,
+  /** Metadata indicator icons (GPS, calendar, file) */
+  METADATA: 14,
+} as const;
 
 /**
  * Props for PhotoLightbox component
@@ -19,38 +30,47 @@ interface PhotoLightboxProps {
 }
 
 /**
- * Format file size in human-readable format
+ * Generate descriptive alt text for photos
+ *
+ * @param photo - Photo object with optional caption, formName, projectName
+ * @returns Descriptive alt text for accessibility
  */
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-/**
- * Format date for display
- */
-function formatDate(dateString: string): string {
-  try {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  } catch {
-    return 'Unknown date';
+function generateAltText(photo: Photo): string {
+  if (photo.caption) {
+    return photo.caption;
   }
+
+  const parts: string[] = [];
+
+  if (photo.formName) {
+    parts.push(photo.formName);
+  } else {
+    parts.push('Photo');
+  }
+
+  parts.push(`from ${formatDate(photo.takenAt)}`);
+
+  if (photo.projectName) {
+    parts.push(`- ${photo.projectName}`);
+  }
+
+  return parts.join(' ');
 }
 
 /**
  * PhotoLightbox - Full-screen photo viewer with zoom, navigation, and actions
  *
+ * IMPORTANT: Multi-Tenancy Consideration
+ * This component trusts that the photos array is already filtered by orgId.
+ * Always pass photos from PhotoGalleryGrid or ensure orgId filtering at the query level.
+ * DO NOT pass unfiltered photos - this would be a multi-tenancy violation risk.
+ *
  * Features:
- * - Full-size photo display with zoom plugin
+ * - Full-size photo display with zoom plugin (maxZoomPixelRatio: 3, scrollToZoom)
  * - Keyboard navigation (arrow keys, ESC to close)
  * - Touch/swipe support for mobile
  * - Photo metadata display (caption, GPS, date, file size)
- * - Download and share actions
+ * - Download and share actions with offline awareness
  * - Accessibility compliant (WCAG AA)
  */
 export function PhotoLightbox({ photos, index, open, onClose }: PhotoLightboxProps) {
@@ -63,31 +83,55 @@ export function PhotoLightbox({ photos, index, open, onClose }: PhotoLightboxPro
   const slides = hasPhotos
     ? photos.map((photo) => ({
         src: photo.url,
-        alt: photo.caption || `Photo from ${formatDate(photo.takenAt)}`,
+        alt: generateAltText(photo),
       }))
     : [];
 
   /**
-   * Handle photo download
+   * Handle photo download with error handling and offline awareness
+   *
+   * Attempts to download the photo file. If offline or if the download fails,
+   * logs the error for debugging. In a future enhancement, this could queue
+   * the download for when connectivity is restored.
    */
-  const handleDownload = useCallback(() => {
+  const handleDownload = useCallback(async () => {
     if (!currentPhoto) return;
 
-    const link = document.createElement('a');
-    link.href = currentPhoto.url;
-    link.download = `photo-${currentPhoto.id}.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      // Check if we're online before attempting download
+      if (!navigator.onLine) {
+        console.warn(
+          `Download requested while offline for photo ${currentPhoto.id}. ` +
+            'Photo may be available from cache.'
+        );
+        // Still attempt download - browser may serve from cache
+      }
+
+      const link = document.createElement('a');
+      link.href = currentPhoto.url;
+      link.download = `photo-${currentPhoto.id}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error(`Download failed for photo ${currentPhoto.id}:`, error);
+      // TODO: Add user notification (toast/alert) - track in backlog
+    }
   }, [currentPhoto]);
 
   /**
-   * Handle photo share (Web Share API or clipboard fallback)
+   * Handle photo share with offline awareness
+   *
+   * Uses Web Share API if available, falls back to clipboard copy.
+   * Handles offline scenarios gracefully - share URL can still be copied
+   * even if the photo itself is not immediately accessible.
    */
   const handleShare = useCallback(async () => {
     if (!currentPhoto) return;
 
     try {
+      // Note: Sharing URL works offline (just copies the URL)
+      // The URL itself may not be accessible until online
       if (navigator.share) {
         await navigator.share({
           title: currentPhoto.caption || 'Photo',
@@ -95,9 +139,13 @@ export function PhotoLightbox({ photos, index, open, onClose }: PhotoLightboxPro
         });
       } else {
         await navigator.clipboard.writeText(currentPhoto.url);
+        // TODO: Add success notification (toast) - track in backlog
       }
-    } catch {
-      // Share cancelled or failed - ignore silently
+    } catch (error) {
+      // Share cancelled by user or failed
+      if (error instanceof Error && error.name !== 'AbortError') {
+        console.error(`Share failed for photo ${currentPhoto.id}:`, error);
+      }
     }
   }, [currentPhoto]);
 
@@ -142,7 +190,7 @@ export function PhotoLightbox({ photos, index, open, onClose }: PhotoLightboxPro
                   onClick={handleDownload}
                   aria-label="Download photo"
                 >
-                  <IconDownload size={18} />
+                  <IconDownload size={ICON_SIZES.ACTION} />
                 </ActionIcon>
               </Tooltip>
 
@@ -153,7 +201,7 @@ export function PhotoLightbox({ photos, index, open, onClose }: PhotoLightboxPro
                   onClick={handleShare}
                   aria-label="Share photo"
                 >
-                  <IconShare size={18} />
+                  <IconShare size={ICON_SIZES.ACTION} />
                 </ActionIcon>
               </Tooltip>
             </Group>
@@ -164,7 +212,10 @@ export function PhotoLightbox({ photos, index, open, onClose }: PhotoLightboxPro
             {/* GPS coordinates */}
             {photo.latitude != null && photo.longitude != null && (
               <Group gap={4} wrap="nowrap">
-                <IconMapPin size={14} color="#868e96" />
+                <IconMapPin
+                  size={ICON_SIZES.METADATA}
+                  style={{ color: 'var(--mantine-color-dimmed)' }}
+                />
                 <Text size="xs" c="dimmed">
                   GPS: {photo.latitude.toFixed(4)}, {photo.longitude.toFixed(4)}
                 </Text>
@@ -173,7 +224,10 @@ export function PhotoLightbox({ photos, index, open, onClose }: PhotoLightboxPro
 
             {/* Date taken */}
             <Group gap={4} wrap="nowrap">
-              <IconCalendar size={14} color="#868e96" />
+              <IconCalendar
+                size={ICON_SIZES.METADATA}
+                style={{ color: 'var(--mantine-color-dimmed)' }}
+              />
               <Text size="xs" c="dimmed">
                 {formatDate(photo.takenAt)}
               </Text>
@@ -181,7 +235,10 @@ export function PhotoLightbox({ photos, index, open, onClose }: PhotoLightboxPro
 
             {/* File size */}
             <Group gap={4} wrap="nowrap">
-              <IconFile size={14} color="#868e96" />
+              <IconFile
+                size={ICON_SIZES.METADATA}
+                style={{ color: 'var(--mantine-color-dimmed)' }}
+              />
               <Text size="xs" c="dimmed">
                 {formatFileSize(photo.fileSize)}
               </Text>

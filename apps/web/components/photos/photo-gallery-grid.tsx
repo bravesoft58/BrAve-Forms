@@ -20,6 +20,7 @@ import { useEffect, useCallback, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { IconMapPin, IconAlertCircle, IconPhoto } from '@tabler/icons-react';
 import { PhotoLightbox } from './photo-lightbox';
+import { formatFileSize, formatDate } from '@/lib/format-utils';
 
 /**
  * Photo type matching backend GraphQL schema
@@ -111,30 +112,6 @@ async function fetchPhotos(
   }
 
   return response.json();
-}
-
-/**
- * Format file size in human-readable format
- */
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-/**
- * Format date for display
- */
-function formatDate(dateString: string): string {
-  try {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  } catch {
-    return 'Unknown date';
-  }
 }
 
 /**

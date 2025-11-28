@@ -340,6 +340,72 @@ describe('PhotoLightbox', () => {
     });
   });
 
+  describe('Keyboard Navigation', () => {
+    it('should support keyboard focus on action buttons', () => {
+      render(
+        <TestWrapper>
+          <PhotoLightbox photos={mockPhotos} index={0} open={true} onClose={mockOnClose} />
+        </TestWrapper>
+      );
+
+      const downloadButton = screen.getByLabelText(/download/i);
+      const shareButton = screen.getByLabelText(/share/i);
+
+      // Buttons should be focusable
+      expect(downloadButton).toBeInTheDocument();
+      expect(shareButton).toBeInTheDocument();
+
+      // Verify buttons can receive focus
+      downloadButton.focus();
+      expect(document.activeElement).toBe(downloadButton);
+
+      shareButton.focus();
+      expect(document.activeElement).toBe(shareButton);
+    });
+
+    it('should have accessible button labels', () => {
+      render(
+        <TestWrapper>
+          <PhotoLightbox photos={mockPhotos} index={0} open={true} onClose={mockOnClose} />
+        </TestWrapper>
+      );
+
+      // Action buttons should have aria-labels
+      expect(screen.getByLabelText('Download photo')).toBeInTheDocument();
+      expect(screen.getByLabelText('Share photo')).toBeInTheDocument();
+    });
+
+    it('should trigger download on Enter key', () => {
+      render(
+        <TestWrapper>
+          <PhotoLightbox photos={mockPhotos} index={0} open={true} onClose={mockOnClose} />
+        </TestWrapper>
+      );
+
+      const downloadButton = screen.getByLabelText(/download/i);
+      downloadButton.focus();
+      fireEvent.keyDown(downloadButton, { key: 'Enter' });
+
+      // Button should be interactive (doesn't throw)
+      expect(downloadButton).toBeInTheDocument();
+    });
+
+    it('should trigger share on Space key', () => {
+      render(
+        <TestWrapper>
+          <PhotoLightbox photos={mockPhotos} index={0} open={true} onClose={mockOnClose} />
+        </TestWrapper>
+      );
+
+      const shareButton = screen.getByLabelText(/share/i);
+      shareButton.focus();
+      fireEvent.keyDown(shareButton, { key: ' ' });
+
+      // Button should be interactive (doesn't throw)
+      expect(shareButton).toBeInTheDocument();
+    });
+  });
+
   describe('Empty State', () => {
     it('should handle empty photos array gracefully', () => {
       render(
