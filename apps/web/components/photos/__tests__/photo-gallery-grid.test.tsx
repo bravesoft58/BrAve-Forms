@@ -47,10 +47,11 @@ function TestWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Sample photo data for testing
+// Sample photo data for testing - includes orgId for multi-tenant isolation
 const mockPhotos = [
   {
     id: 'photo-1',
+    orgId: 'org_test123', // Matches mocked useAuth orgId
     url: 'https://cdn.example.com/photo-1.jpg',
     thumbnailUrl: 'https://cdn.example.com/photo-1-thumb.jpg',
     caption: 'Site entrance',
@@ -64,6 +65,7 @@ const mockPhotos = [
   },
   {
     id: 'photo-2',
+    orgId: 'org_test123', // Same org - can be paired
     url: 'https://cdn.example.com/photo-2.jpg',
     thumbnailUrl: 'https://cdn.example.com/photo-2-thumb.jpg',
     caption: 'Erosion control',
@@ -77,6 +79,7 @@ const mockPhotos = [
   },
   {
     id: 'photo-3',
+    orgId: 'org_test123',
     url: 'https://cdn.example.com/photo-3.jpg',
     thumbnailUrl: 'https://cdn.example.com/photo-3-thumb.jpg',
     caption: 'Storm drain',
@@ -89,6 +92,22 @@ const mockPhotos = [
     uploadedBy: 'user-1',
   },
 ];
+
+// Photo from a DIFFERENT organization - for cross-tenant testing
+const mockCrossTenantPhoto = {
+  id: 'photo-cross-tenant',
+  orgId: 'org_other456', // DIFFERENT org - should NOT be allowed to pair
+  url: 'https://cdn.example.com/photo-cross.jpg',
+  thumbnailUrl: 'https://cdn.example.com/photo-cross-thumb.jpg',
+  caption: 'Cross-tenant photo',
+  latitude: 34.0525,
+  longitude: -118.244,
+  takenAt: '2025-11-28T13:00:00Z',
+  uploadedAt: '2025-11-28T13:05:00Z',
+  fileSize: 768000,
+  mimeType: 'image/jpeg',
+  uploadedBy: 'user-other',
+};
 
 describe('PhotoGalleryGrid', () => {
   beforeEach(() => {
@@ -403,3 +422,245 @@ describe('PhotoGalleryGrid', () => {
 // Note: projectId=undefined test removed due to mock isolation issues
 // The component correctly omits projectId from the URL when undefined
 // This is verified by the fetchPhotos function implementation
+
+describe('Pairing Mode - Multi-tenant Isolation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Reset fetch mock completely to ensure clean state
+    (global.fetch as any).mockReset();
+    // Clear localStorage before each pairing test
+    localStorage.clear();
+  });
+
+  it('should reject pairing photos from different organizations', async () => {
+    // Mock photos including one from a different org
+    const photosWithCrossTenant = [mockPhotos[0], mockCrossTenantPhoto];
+
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        photos: photosWithCrossTenant,
+        hasMore: false,
+        totalCount: 2,
+      }),
+    });
+
+    const onPairCreated = vi.fn();
+
+    render(
+      <TestWrapper>
+        <PhotoGalleryGrid
+          projectId="project-123"
+          pairingMode={true}
+          onPairCreated={onPairCreated}
+        />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('photo-gallery-grid')).toBeInTheDocument();
+    });
+
+    // Select first photo (org_test123)
+    const photo1 = screen.getByTestId('photo-card-photo-1');
+    fireEvent.click(photo1);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('pairing-notification')).toBeInTheDocument();
+    });
+
+    // Select cross-tenant photo (org_other456) - should be rejected
+    const crossTenantPhoto = screen.getByTestId('photo-card-photo-cross-tenant');
+    fireEvent.click(crossTenantPhoto);
+
+    await waitFor(() => {
+      // Should show error notification
+      const notification = screen.getByTestId('pairing-notification');
+      expect(notification).toHaveTextContent(/different organizations/i);
+    });
+
+    // onPairCreated should NOT have been called - cross-tenant pairing rejected
+    expect(onPairCreated).not.toHaveBeenCalled();
+  });
+
+  it('should successfully pair photos from the same organization', async () => {
+    // Mock two photos from the same org
+    const sameOrgPhotos = [mockPhotos[0], mockPhotos[1]];
+
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        photos: sameOrgPhotos,
+        hasMore: false,
+        totalCount: 2,
+      }),
+    });
+
+    const onPairCreated = vi.fn().mockResolvedValue(undefined);
+    const onPairingModeChange = vi.fn();
+
+    render(
+      <TestWrapper>
+        <PhotoGalleryGrid
+          projectId="project-123"
+          pairingMode={true}
+          onPairCreated={onPairCreated}
+          onPairingModeChange={onPairingModeChange}
+        />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('photo-gallery-grid')).toBeInTheDocument();
+    });
+
+    // Select first photo
+    const photo1 = screen.getByTestId('photo-card-photo-1');
+    fireEvent.click(photo1);
+
+    // Select second photo (same org)
+    const photo2 = screen.getByTestId('photo-card-photo-2');
+    fireEvent.click(photo2);
+
+    await waitFor(() => {
+      // onPairCreated should be called with the photos
+      expect(onPairCreated).toHaveBeenCalledTimes(1);
+    });
+
+    // Verify the call was made with photo objects
+    expect(onPairCreated).toHaveBeenCalledWith(
+      expect.objectContaining({ orgId: 'org_test123' }),
+      expect.objectContaining({ orgId: 'org_test123' })
+    );
+  });
+});
+
+describe('Pairing Mode - Offline Queue', () => {
+  const originalOnLine = navigator.onLine;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Reset fetch mock completely to ensure clean state
+    (global.fetch as any).mockReset();
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    // Restore navigator.onLine
+    Object.defineProperty(navigator, 'onLine', {
+      value: originalOnLine,
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  it('should queue pairing operation when offline', async () => {
+    // Simulate offline mode
+    Object.defineProperty(navigator, 'onLine', {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
+
+    const sameOrgPhotos = [mockPhotos[0], mockPhotos[1]];
+
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        photos: sameOrgPhotos,
+        hasMore: false,
+        totalCount: 2,
+      }),
+    });
+
+    const onPairCreated = vi.fn();
+    const onPairingModeChange = vi.fn();
+
+    render(
+      <TestWrapper>
+        <PhotoGalleryGrid
+          projectId="project-123"
+          pairingMode={true}
+          onPairCreated={onPairCreated}
+          onPairingModeChange={onPairingModeChange}
+        />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('photo-gallery-grid')).toBeInTheDocument();
+    });
+
+    // Select first photo
+    const photo1 = screen.getByTestId('photo-card-photo-1');
+    fireEvent.click(photo1);
+
+    // Select second photo
+    const photo2 = screen.getByTestId('photo-card-photo-2');
+    fireEvent.click(photo2);
+
+    await waitFor(() => {
+      // Should show queued notification
+      const notification = screen.getByTestId('pairing-notification');
+      expect(notification).toHaveTextContent(/queued for sync/i);
+    });
+
+    // onPairCreated should NOT have been called (offline)
+    expect(onPairCreated).not.toHaveBeenCalled();
+
+    // Verify the operation was queued in localStorage
+    const offlineQueue = JSON.parse(localStorage.getItem('offline-pair-queue') || '[]');
+    expect(offlineQueue).toHaveLength(1);
+    expect(offlineQueue[0]).toMatchObject({
+      type: 'CREATE_PAIR',
+      orgId: 'org_test123',
+    });
+  });
+
+  it('should store all required data in offline queue', async () => {
+    // Simulate offline mode
+    Object.defineProperty(navigator, 'onLine', {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
+
+    const sameOrgPhotos = [mockPhotos[0], mockPhotos[1]];
+
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        photos: sameOrgPhotos,
+        hasMore: false,
+        totalCount: 2,
+      }),
+    });
+
+    render(
+      <TestWrapper>
+        <PhotoGalleryGrid projectId="project-123" pairingMode={true} />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('photo-gallery-grid')).toBeInTheDocument();
+    });
+
+    // Select both photos
+    fireEvent.click(screen.getByTestId('photo-card-photo-1'));
+    fireEvent.click(screen.getByTestId('photo-card-photo-2'));
+
+    await waitFor(() => {
+      const offlineQueue = JSON.parse(localStorage.getItem('offline-pair-queue') || '[]');
+      expect(offlineQueue).toHaveLength(1);
+    });
+
+    // Verify queue entry has all required fields for sync
+    const offlineQueue = JSON.parse(localStorage.getItem('offline-pair-queue') || '[]');
+    expect(offlineQueue[0]).toHaveProperty('type', 'CREATE_PAIR');
+    expect(offlineQueue[0]).toHaveProperty('beforePhotoId');
+    expect(offlineQueue[0]).toHaveProperty('afterPhotoId');
+    expect(offlineQueue[0]).toHaveProperty('orgId', 'org_test123');
+    expect(offlineQueue[0]).toHaveProperty('timestamp');
+  });
+});

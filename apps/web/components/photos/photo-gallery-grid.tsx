@@ -48,13 +48,22 @@ export interface Photo {
 
 /**
  * Photo pair for before/after comparison
+ * Used for construction progress tracking and compliance documentation
+ *
+ * IMPORTANT: Both photos MUST belong to same orgId (multi-tenant isolation)
+ * The pair maintains references to both before and after photos for
+ * side-by-side or fade comparison views.
  */
 export interface PhotoPair {
   id: string;
+  orgId: string; // REQUIRED for multi-tenant isolation
   beforePhoto: Photo;
   afterPhoto: Photo;
   createdAt: string;
 }
+
+/** Duration in ms to show pairing notifications before auto-dismiss */
+const NOTIFICATION_DURATION_MS = 2000;
 
 /**
  * Filter options for photo gallery
@@ -219,7 +228,7 @@ export function PhotoGalleryGrid({
 
   // Handle photo click - opens lightbox or handles pairing
   const handlePhotoClick = useCallback(
-    (photo: Photo, index: number) => {
+    async (photo: Photo, index: number) => {
       if (pairingMode) {
         // Handle pairing mode selection
         const isSelected = selectedForPairing.some((p) => p.id === photo.id);
@@ -234,29 +243,65 @@ export function PhotoGalleryGrid({
           setPairingNotification('Select the "After" photo to complete the pair');
         } else if (selectedForPairing.length === 1) {
           // Second photo selected - create the pair
-          const beforePhoto = selectedForPairing[0];
-          const afterPhoto = photo;
+          const firstPhoto = selectedForPairing[0];
+          const secondPhoto = photo;
 
-          // Determine which is before/after by date
-          const beforeDate = new Date(beforePhoto.takenAt);
-          const afterDate = new Date(afterPhoto.takenAt);
-
-          if (beforeDate <= afterDate) {
-            onPairCreated?.(beforePhoto, afterPhoto);
-          } else {
-            // Swap if the second photo is actually older
-            onPairCreated?.(afterPhoto, beforePhoto);
+          // CRITICAL: Multi-tenant validation - both photos must belong to same org
+          if (firstPhoto.orgId !== secondPhoto.orgId) {
+            setPairingNotification('Error: Cannot pair photos from different organizations');
+            setTimeout(() => setPairingNotification(null), NOTIFICATION_DURATION_MS);
+            return;
           }
 
-          // Clear selection and show success
-          setSelectedForPairing([]);
-          setPairingNotification('Pair created successfully!');
+          // Validate current user's org matches photo org
+          if (orgId && firstPhoto.orgId !== orgId) {
+            setPairingNotification('Error: Unauthorized - photos belong to another organization');
+            setTimeout(() => setPairingNotification(null), NOTIFICATION_DURATION_MS);
+            return;
+          }
 
-          // Clear notification after 2 seconds
-          setTimeout(() => setPairingNotification(null), 2000);
+          // Determine which is before/after by date
+          const firstDate = new Date(firstPhoto.takenAt);
+          const secondDate = new Date(secondPhoto.takenAt);
+          const beforePhoto = firstDate <= secondDate ? firstPhoto : secondPhoto;
+          const afterPhoto = firstDate <= secondDate ? secondPhoto : firstPhoto;
 
-          // Optionally exit pairing mode
-          onPairingModeChange?.(false);
+          try {
+            // Check if offline - queue for sync when online
+            if (!navigator.onLine) {
+              // Queue pairing operation for offline sync
+              const offlineQueue = JSON.parse(localStorage.getItem('offline-pair-queue') || '[]');
+              offlineQueue.push({
+                type: 'CREATE_PAIR',
+                beforePhotoId: beforePhoto.id,
+                afterPhotoId: afterPhoto.id,
+                orgId: beforePhoto.orgId,
+                timestamp: new Date().toISOString(),
+              });
+              localStorage.setItem('offline-pair-queue', JSON.stringify(offlineQueue));
+
+              setSelectedForPairing([]);
+              setPairingNotification('Pair queued for sync when online');
+              setTimeout(() => setPairingNotification(null), NOTIFICATION_DURATION_MS);
+              onPairingModeChange?.(false);
+              return;
+            }
+
+            // Online - create pair immediately
+            await onPairCreated?.(beforePhoto, afterPhoto);
+
+            // Clear selection and show success
+            setSelectedForPairing([]);
+            setPairingNotification('Pair created successfully!');
+            setTimeout(() => setPairingNotification(null), NOTIFICATION_DURATION_MS);
+            onPairingModeChange?.(false);
+          } catch (error) {
+            // Handle pair creation error
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+            setPairingNotification(`Error creating pair: ${errorMessage}`);
+            // Don't clear selection on error - allow retry
+            setTimeout(() => setPairingNotification(null), NOTIFICATION_DURATION_MS * 2);
+          }
         }
       } else {
         // Normal mode - open lightbox
@@ -264,7 +309,7 @@ export function PhotoGalleryGrid({
         onPhotoClick?.(photo);
       }
     },
-    [pairingMode, selectedForPairing, onPhotoClick, onPairCreated, onPairingModeChange]
+    [pairingMode, selectedForPairing, onPhotoClick, onPairCreated, onPairingModeChange, orgId]
   );
 
   // Handle keyboard navigation for photo cards
