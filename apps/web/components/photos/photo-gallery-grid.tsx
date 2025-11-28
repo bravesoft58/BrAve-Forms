@@ -14,11 +14,14 @@ import {
   Alert,
   Skeleton,
   Tooltip,
+  Overlay,
+  ActionIcon,
+  Notification,
 } from '@mantine/core';
 import { useInView } from 'react-intersection-observer';
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useMemo } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { IconMapPin, IconAlertCircle, IconPhoto } from '@tabler/icons-react';
+import { IconMapPin, IconAlertCircle, IconPhoto, IconCheck, IconLink } from '@tabler/icons-react';
 import { PhotoLightbox } from './photo-lightbox';
 import { formatFileSize, formatDate } from '@/lib/format-utils';
 
@@ -44,6 +47,16 @@ export interface Photo {
 }
 
 /**
+ * Photo pair for before/after comparison
+ */
+export interface PhotoPair {
+  id: string;
+  beforePhoto: Photo;
+  afterPhoto: Photo;
+  createdAt: string;
+}
+
+/**
  * Filter options for photo gallery
  */
 export interface PhotoFilters {
@@ -51,6 +64,7 @@ export interface PhotoFilters {
   dateRange?: [Date, Date];
   userId?: string;
   hasGps?: boolean;
+  onlyPaired?: boolean;
 }
 
 /**
@@ -71,6 +85,14 @@ interface PhotoGalleryGridProps {
   filters?: PhotoFilters;
   onPhotoClick?: (photo: Photo) => void;
   pageSize?: number;
+  /** Enable pairing mode for before/after comparison */
+  pairingMode?: boolean;
+  /** Callback when pairing mode changes */
+  onPairingModeChange?: (enabled: boolean) => void;
+  /** Callback when a pair is created */
+  onPairCreated?: (beforePhoto: Photo, afterPhoto: Photo) => void;
+  /** Existing photo pairs for visual indication */
+  pairs?: PhotoPair[];
 }
 
 /**
@@ -131,12 +153,37 @@ export function PhotoGalleryGrid({
   filters,
   onPhotoClick,
   pageSize = 20,
+  pairingMode = false,
+  onPairingModeChange,
+  onPairCreated,
+  pairs = [],
 }: PhotoGalleryGridProps) {
   // Get orgId for multi-tenant cache isolation
   const { orgId } = useAuth();
 
   // Lightbox state for full-screen photo viewing
   const [lightboxIndex, setLightboxIndex] = useState<number>(-1);
+
+  // Pairing mode state
+  const [selectedForPairing, setSelectedForPairing] = useState<Photo[]>([]);
+  const [pairingNotification, setPairingNotification] = useState<string | null>(null);
+
+  // Get set of paired photo IDs for quick lookup
+  const pairedPhotoIds = useMemo(() => {
+    const ids = new Set<string>();
+    pairs.forEach((pair) => {
+      ids.add(pair.beforePhoto.id);
+      ids.add(pair.afterPhoto.id);
+    });
+    return ids;
+  }, [pairs]);
+
+  // Clear selection when pairing mode is disabled
+  useEffect(() => {
+    if (!pairingMode) {
+      setSelectedForPairing([]);
+    }
+  }, [pairingMode]);
 
   const { ref, inView } = useInView({
     threshold: 0.1,
@@ -170,13 +217,54 @@ export function PhotoGalleryGrid({
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Handle photo click - opens lightbox and calls external handler
+  // Handle photo click - opens lightbox or handles pairing
   const handlePhotoClick = useCallback(
     (photo: Photo, index: number) => {
-      setLightboxIndex(index);
-      onPhotoClick?.(photo);
+      if (pairingMode) {
+        // Handle pairing mode selection
+        const isSelected = selectedForPairing.some((p) => p.id === photo.id);
+
+        if (isSelected) {
+          // Deselect if already selected
+          setSelectedForPairing((prev) => prev.filter((p) => p.id !== photo.id));
+          setPairingNotification(null);
+        } else if (selectedForPairing.length === 0) {
+          // First photo selected - mark as "before"
+          setSelectedForPairing([photo]);
+          setPairingNotification('Select the "After" photo to complete the pair');
+        } else if (selectedForPairing.length === 1) {
+          // Second photo selected - create the pair
+          const beforePhoto = selectedForPairing[0];
+          const afterPhoto = photo;
+
+          // Determine which is before/after by date
+          const beforeDate = new Date(beforePhoto.takenAt);
+          const afterDate = new Date(afterPhoto.takenAt);
+
+          if (beforeDate <= afterDate) {
+            onPairCreated?.(beforePhoto, afterPhoto);
+          } else {
+            // Swap if the second photo is actually older
+            onPairCreated?.(afterPhoto, beforePhoto);
+          }
+
+          // Clear selection and show success
+          setSelectedForPairing([]);
+          setPairingNotification('Pair created successfully!');
+
+          // Clear notification after 2 seconds
+          setTimeout(() => setPairingNotification(null), 2000);
+
+          // Optionally exit pairing mode
+          onPairingModeChange?.(false);
+        }
+      } else {
+        // Normal mode - open lightbox
+        setLightboxIndex(index);
+        onPhotoClick?.(photo);
+      }
     },
-    [onPhotoClick]
+    [pairingMode, selectedForPairing, onPhotoClick, onPairCreated, onPairingModeChange]
   );
 
   // Handle keyboard navigation for photo cards
@@ -194,6 +282,12 @@ export function PhotoGalleryGrid({
   const handleCloseLightbox = useCallback(() => {
     setLightboxIndex(-1);
   }, []);
+
+  // Check if a photo is selected for pairing
+  const isSelectedForPairing = useCallback(
+    (photoId: string) => selectedForPairing.some((p) => p.id === photoId),
+    [selectedForPairing]
+  );
 
   // Loading state with skeleton cards for better perceived performance
   if (isLoading) {
@@ -263,99 +357,168 @@ export function PhotoGalleryGrid({
 
   return (
     <Stack gap="lg">
+      {/* Pairing mode notification */}
+      {pairingMode && pairingNotification && (
+        <Notification
+          color={pairingNotification.includes('success') ? 'green' : 'blue'}
+          withCloseButton={false}
+          data-testid="pairing-notification"
+        >
+          {pairingNotification}
+        </Notification>
+      )}
+
+      {/* Pairing mode indicator */}
+      {pairingMode && !pairingNotification && (
+        <Alert color="blue" variant="light" data-testid="pairing-mode-indicator">
+          <Group gap="xs">
+            <IconLink size={16} />
+            <Text size="sm">
+              Pairing mode active. Select two photos to create a before/after comparison.
+              {selectedForPairing.length === 1 && ' (1 photo selected)'}
+            </Text>
+          </Group>
+        </Alert>
+      )}
+
       <SimpleGrid
         cols={{ base: 2, sm: 3, md: 4, lg: 5, xl: 6 }}
         spacing="md"
         data-testid="photo-gallery-grid"
         aria-label={`Photo gallery with ${totalCount} photos`}
       >
-        {photos.map((photo, index) => (
-          <Card
-            key={photo.id}
-            shadow="sm"
-            padding="xs"
-            radius="md"
-            withBorder
-            data-testid={`photo-card-${photo.id}`}
-            role="button"
-            tabIndex={0}
-            onClick={() => handlePhotoClick(photo, index)}
-            onKeyDown={(e) => handleKeyDown(e, photo, index)}
-            style={{
-              cursor: 'pointer',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-            }}
-            styles={{
-              root: {
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: 'var(--mantine-shadow-md)',
-                },
-                '&:focus-visible': {
-                  outline: '2px solid var(--mantine-color-blue-5)',
+        {photos.map((photo, index) => {
+          const isSelected = isSelectedForPairing(photo.id);
+          const isPaired = pairedPhotoIds.has(photo.id);
+
+          return (
+            <Card
+              key={photo.id}
+              shadow="sm"
+              padding="xs"
+              radius="md"
+              withBorder
+              data-testid={`photo-card-${photo.id}`}
+              data-selected={isSelected}
+              data-paired={isPaired}
+              role="button"
+              tabIndex={0}
+              onClick={() => handlePhotoClick(photo, index)}
+              onKeyDown={(e) => handleKeyDown(e, photo, index)}
+              style={{
+                cursor: 'pointer',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                ...(isSelected && {
+                  outline: '3px solid var(--mantine-color-blue-5)',
                   outlineOffset: '2px',
+                }),
+                ...(isPaired &&
+                  !pairingMode && {
+                    borderColor: 'var(--mantine-color-green-5)',
+                  }),
+              }}
+              styles={{
+                root: {
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: 'var(--mantine-shadow-md)',
+                  },
+                  '&:focus-visible': {
+                    outline: '2px solid var(--mantine-color-blue-5)',
+                    outlineOffset: '2px',
+                  },
                 },
-              },
-            }}
-          >
-            <Card.Section pos="relative">
-              <Image
-                src={photo.thumbnailUrl || photo.url}
-                alt={photo.caption || `Photo from ${formatDate(photo.takenAt)}`}
-                height={160}
-                fit="cover"
-                fallbackSrc="/images/photo-placeholder.png"
-                loading="lazy"
-              />
+              }}
+            >
+              <Card.Section pos="relative">
+                <Image
+                  src={photo.thumbnailUrl || photo.url}
+                  alt={photo.caption || `Photo from ${formatDate(photo.takenAt)}`}
+                  height={160}
+                  fit="cover"
+                  fallbackSrc="/images/photo-placeholder.png"
+                  loading="lazy"
+                />
 
-              {/* GPS Badge with coordinate tooltip for EPA compliance documentation */}
-              {photo.latitude != null && photo.longitude != null && (
-                <Tooltip
-                  label={`Lat: ${photo.latitude.toFixed(6)}, Lon: ${photo.longitude.toFixed(6)}`}
-                  position="bottom"
-                  withArrow
-                >
-                  <Badge
-                    size="xs"
-                    variant="filled"
-                    color="blue"
-                    leftSection={<IconMapPin size={10} />}
-                    pos="absolute"
-                    top={8}
-                    right={8}
-                    data-testid={`gps-badge-${photo.id}`}
-                    style={{ cursor: 'help' }}
+                {/* Selection overlay when in pairing mode */}
+                {isSelected && (
+                  <Overlay color="blue" opacity={0.3} data-testid={`selection-overlay-${photo.id}`}>
+                    <Center h="100%">
+                      <ActionIcon size="xl" variant="filled" color="blue" radius="xl">
+                        <IconCheck size={24} />
+                      </ActionIcon>
+                    </Center>
+                  </Overlay>
+                )}
+
+                {/* Paired indicator badge */}
+                {isPaired && !pairingMode && (
+                  <Tooltip label="Part of a before/after pair" position="bottom" withArrow>
+                    <Badge
+                      size="xs"
+                      variant="filled"
+                      color="green"
+                      leftSection={<IconLink size={10} />}
+                      pos="absolute"
+                      top={8}
+                      left={8}
+                      data-testid={`paired-badge-${photo.id}`}
+                      style={{ cursor: 'help' }}
+                    >
+                      Paired
+                    </Badge>
+                  </Tooltip>
+                )}
+
+                {/* GPS Badge with coordinate tooltip for EPA compliance documentation */}
+                {photo.latitude != null && photo.longitude != null && (
+                  <Tooltip
+                    label={`Lat: ${photo.latitude.toFixed(6)}, Lon: ${photo.longitude.toFixed(6)}`}
+                    position="bottom"
+                    withArrow
                   >
-                    GPS
-                  </Badge>
-                </Tooltip>
-              )}
-            </Card.Section>
+                    <Badge
+                      size="xs"
+                      variant="filled"
+                      color="blue"
+                      leftSection={<IconMapPin size={10} />}
+                      pos="absolute"
+                      top={8}
+                      right={8}
+                      data-testid={`gps-badge-${photo.id}`}
+                      style={{ cursor: 'help' }}
+                    >
+                      GPS
+                    </Badge>
+                  </Tooltip>
+                )}
+              </Card.Section>
 
-            <Stack gap={4} mt="xs">
-              {photo.caption && (
-                <Text size="sm" fw={500} lineClamp={1}>
-                  {photo.caption}
-                </Text>
-              )}
+              <Stack gap={4} mt="xs">
+                {photo.caption && (
+                  <Text size="sm" fw={500} lineClamp={1}>
+                    {photo.caption}
+                  </Text>
+                )}
 
-              <Group gap="xs" wrap="nowrap">
-                <Text size="xs" c="dimmed">
-                  {formatDate(photo.takenAt)}
-                </Text>
-                <Text size="xs" c="dimmed">
-                  {formatFileSize(photo.fileSize)}
-                </Text>
-              </Group>
+                <Group gap="xs" wrap="nowrap">
+                  <Text size="xs" c="dimmed">
+                    {formatDate(photo.takenAt)}
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    {formatFileSize(photo.fileSize)}
+                  </Text>
+                </Group>
 
-              {photo.formName && (
-                <Text size="xs" c="dimmed" lineClamp={1}>
-                  {photo.formName}
-                </Text>
-              )}
-            </Stack>
-          </Card>
-        ))}
+                {photo.formName && (
+                  <Text size="xs" c="dimmed" lineClamp={1}>
+                    {photo.formName}
+                  </Text>
+                )}
+              </Stack>
+            </Card>
+          );
+        })}
       </SimpleGrid>
 
       {/* Infinite scroll sentinel */}

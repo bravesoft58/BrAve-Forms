@@ -10,11 +10,19 @@ import {
   Paper,
   TextInput,
   MultiSelect,
+  Checkbox,
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import { useQuery } from '@tanstack/react-query';
-import { IconX, IconFilter, IconFilterOff, IconMapPin, IconSearch } from '@tabler/icons-react';
+import {
+  IconX,
+  IconFilter,
+  IconFilterOff,
+  IconMapPin,
+  IconSearch,
+  IconLink,
+} from '@tabler/icons-react';
 
 /**
  * Filter options for photo gallery
@@ -33,6 +41,8 @@ export interface PhotoFilters {
     lng: number;
     radiusKm: number;
   };
+  /** Show only photos that are part of a before/after pair */
+  onlyPaired?: boolean;
 }
 
 interface PhotoFiltersProps {
@@ -42,6 +52,8 @@ interface PhotoFiltersProps {
   showSearch?: boolean;
   showUserFilter?: boolean;
   showWeatherFilter?: boolean;
+  /** Show the paired photos filter checkbox */
+  showPairedFilter?: boolean;
 }
 
 /**
@@ -113,6 +125,7 @@ export function PhotoFilters({
   showSearch = false,
   showUserFilter = false,
   showWeatherFilter = false,
+  showPairedFilter = false,
 }: PhotoFiltersProps) {
   const [filtersOpen, { toggle: toggleFilters }] = useDisclosure(true);
 
@@ -285,6 +298,17 @@ export function PhotoFilters({
           >
             GPS Only
           </Button>
+
+          {/* Paired Photos Filter */}
+          {showPairedFilter && (
+            <Checkbox
+              label="Paired Only"
+              checked={filters.onlyPaired || false}
+              onChange={(e) => updateFilter('onlyPaired', e.currentTarget.checked || undefined)}
+              size="sm"
+              icon={({ ...props }) => <IconLink {...props} size={12} />}
+            />
+          )}
         </Group>
       </Collapse>
     </Paper>
