@@ -9,6 +9,7 @@ const GRAPHQL_ENDPOINT =
 
 /**
  * GraphQL query for fetching photos with filters
+ * Extended to support search, user, form type, weather, and GPS radius filters
  */
 const PHOTOS_BY_PROJECT_QUERY = `
   query PhotosByProject(
@@ -18,6 +19,13 @@ const PHOTOS_BY_PROJECT_QUERY = `
     $hasGps: Boolean
     $take: Int
     $skip: Int
+    $search: String
+    $userId: String
+    $formType: String
+    $weather: [String!]
+    $gpsLat: Float
+    $gpsLng: Float
+    $gpsRadiusKm: Float
   ) {
     photosByProject(
       projectId: $projectId
@@ -26,6 +34,13 @@ const PHOTOS_BY_PROJECT_QUERY = `
       hasGps: $hasGps
       take: $take
       skip: $skip
+      search: $search
+      userId: $userId
+      formType: $formType
+      weather: $weather
+      gpsLat: $gpsLat
+      gpsLng: $gpsLng
+      gpsRadiusKm: $gpsRadiusKm
     ) {
       id
       s3Key
@@ -38,6 +53,8 @@ const PHOTOS_BY_PROJECT_QUERY = `
       mimeType
       uploadedBy
       uploadedAt
+      weather
+      formType
     }
   }
 `;
@@ -53,6 +70,12 @@ const PHOTOS_BY_PROJECT_QUERY = `
  * - startDate: Filter by date range start
  * - endDate: Filter by date range end
  * - hasGps: Filter by GPS coordinates presence
+ * - search: Search by description/tags
+ * - userId: Filter by user who uploaded
+ * - weather: Filter by weather conditions (comma-separated)
+ * - gpsLat: GPS latitude for radius filter
+ * - gpsLng: GPS longitude for radius filter
+ * - gpsRadiusKm: GPS radius in kilometers
  *
  * Security:
  * - Requires valid Clerk JWT with orgId
@@ -85,10 +108,18 @@ export async function GET(request: NextRequest) {
     const skip = parseInt(searchParams.get('skip') || '0', 10);
     const take = parseInt(searchParams.get('take') || '20', 10);
     const projectId = searchParams.get('projectId');
-    // TODO: Add formType filter to GraphQL query (ISSUE-128 follow-up)
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
     const hasGps = searchParams.get('hasGps');
+
+    // New filter parameters
+    const search = searchParams.get('search');
+    const filterUserId = searchParams.get('userId');
+    const formType = searchParams.get('formType');
+    const weather = searchParams.get('weather');
+    const gpsLat = searchParams.get('gpsLat');
+    const gpsLng = searchParams.get('gpsLng');
+    const gpsRadiusKm = searchParams.get('gpsRadiusKm');
 
     // If no projectId, we need a different query to fetch all photos
     // For now, return empty if no projectId (to be implemented in backend)
@@ -115,6 +146,25 @@ export async function GET(request: NextRequest) {
     }
     if (hasGps === 'true') {
       variables.hasGps = true;
+    }
+
+    // Add new filter variables
+    if (search) {
+      variables.search = search;
+    }
+    if (filterUserId) {
+      variables.userId = filterUserId;
+    }
+    if (formType) {
+      variables.formType = formType;
+    }
+    if (weather) {
+      variables.weather = weather.split(',');
+    }
+    if (gpsLat && gpsLng && gpsRadiusKm) {
+      variables.gpsLat = parseFloat(gpsLat);
+      variables.gpsLng = parseFloat(gpsLng);
+      variables.gpsRadiusKm = parseFloat(gpsRadiusKm);
     }
 
     // Execute GraphQL query
@@ -174,6 +224,8 @@ export async function GET(request: NextRequest) {
       fileSize: photo.fileSize,
       mimeType: photo.mimeType,
       uploadedBy: photo.uploadedBy,
+      weather: photo.weather,
+      formType: photo.formType,
     }));
 
     return NextResponse.json({
