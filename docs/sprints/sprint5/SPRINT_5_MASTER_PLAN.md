@@ -90,31 +90,36 @@ Sprint 5 completes the production-ready MVP by addressing the 4 critical P0 gaps
 - Status: COMPLETE (November 2025)
 - Success: Forms page has clear path to Form Builder
 
-**ISSUE-165: Connect QR Inspector Portal to Backend (8h)** - P0
+**ISSUE-165: Connect QR Inspector Portal to Backend (8h)** - P0 - COMPLETE
 
 - Replace mock data in QR Inspector Portal with real GraphQL queries
 - Create inspector API helpers with time-limited JWT token validation
 - Create useInspectorPortal hooks for token validation and inspection data
 - Handle expired/invalid token states with user-friendly messages
 - Dependencies: ISSUE-162 complete, QR Portal UI complete
+- Status: COMPLETE (November 2025)
 - Success: Inspector portal displays real inspection data
 
-**ISSUE-166: Implement GPS Field Functionality (6h)** - P0
+**ISSUE-166: Implement GPS Field Functionality (6h)** - P0 - COMPLETE
 
 - Implement real GPS coordinate capture using Geolocation API (web) and Capacitor plugin (mobile)
 - Create geolocation.ts utility with getCurrentPosition, permission handling
 - Create functional GPSField component with capture button and accuracy indicator
 - Handle permission denied, timeout, and unavailable GPS gracefully
 - Dependencies: Form schema supports GPS field type
+- Status: COMPLETE (November 2025)
+- Code Review: Increased timeout to 60s, added coordinate validation with null island detection
 - Success: GPS fields capture real coordinates with accuracy display
 
-**ISSUE-167: Implement Photo Upload to Storage (8h)** - P0
+**ISSUE-167: Implement Photo Upload to Storage (8h)** - P0 - COMPLETE
 
 - Implement real photo upload to MinIO (local) or S3 (production)
 - Create photo-upload.ts service with compression, EXIF extraction
 - Create functional PhotoField component with capture, gallery, and upload
 - Handle file size limits, upload progress, and offline queue
 - Dependencies: MinIO/S3 configured, Backend upload mutation exists
+- Status: COMPLETE (November 2025)
+- Code Review: Fixed env var, added offline queue, cross-tenant validation, GPS validation
 - Success: Photos upload to real storage with thumbnails
 
 ### Phase 1: Photo Gallery (6 issues, 20h)
