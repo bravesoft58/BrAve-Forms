@@ -37,12 +37,10 @@ import {
   IconCheck,
   IconLoader,
   IconX,
+  IconTrash,
+  IconDownload,
 } from '@tabler/icons-react';
-import {
-  useSyncDashboard,
-  calculateOfflineDaysRemaining,
-  formatBytes,
-} from '@/hooks/useSyncStatus';
+import { useSyncDashboard, formatBytes } from '@/hooks/useSyncStatus';
 import { useQueryClient } from '@tanstack/react-query';
 
 /**
@@ -82,17 +80,6 @@ function getStatusIcon(status: string) {
 }
 
 /**
- * Get storage progress bar color based on usage percentage
- */
-function getStorageColor(used: number, available: number): string {
-  if (available === 0) return 'gray';
-  const percentage = used / available;
-  if (percentage > 0.9) return 'red';
-  if (percentage > 0.7) return 'yellow';
-  return 'green';
-}
-
-/**
  * Format date for display
  */
 function formatDateTime(dateString: string | null): string {
@@ -106,14 +93,8 @@ function formatDateTime(dateString: string | null): string {
 
 export default function SyncStatusPage() {
   const queryClient = useQueryClient();
-  const {
-    syncStatus,
-    stats,
-    storage,
-    offlineDaysRemaining,
-    isLoading,
-    isError,
-  } = useSyncDashboard();
+  const { syncStatus, stats, storage, offlineDaysRemaining, isLoading, isError } =
+    useSyncDashboard();
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['sync'] });
@@ -131,6 +112,48 @@ export default function SyncStatusPage() {
 
   const storageUsed = storage.data?.used ?? 0;
   const storageAvailable = storage.data?.available ?? 0;
+
+  // Calculate storage percentage and estimated days remaining
+  const storagePercentage = storageAvailable > 0 ? (storageUsed / storageAvailable) * 100 : 0;
+  const isStorageWarning = storagePercentage > 80;
+  const isStorageCritical = storagePercentage > 90;
+
+  // Estimate storage days remaining (assuming 30-day capacity)
+  const storageDaysRemaining = Math.max(0, Math.floor(30 - (storagePercentage / 100) * 30));
+
+  // Handler for cleanup navigation
+  const handleCleanupStorage = () => {
+    // Navigate to queue page to manage pending items
+    window.location.href = '/sync/queue';
+  };
+
+  // Handler for exporting old data
+  const handleExportData = async () => {
+    try {
+      // Export localStorage data as JSON
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        pendingQueue: localStorage.getItem('braveforms_pending_queue'),
+        failedQueue: localStorage.getItem('braveforms_failed_queue'),
+        settings: localStorage.getItem('braveforms_settings'),
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `braveforms-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to export data:', error);
+    }
+  };
 
   return (
     <PageContainer
@@ -158,11 +181,7 @@ export default function SyncStatusPage() {
 
         {/* Error state */}
         {isError && (
-          <Alert
-            icon={<IconAlertCircle size={16} />}
-            title="Error loading sync status"
-            color="red"
-          >
+          <Alert icon={<IconAlertCircle size={16} />} title="Error loading sync status" color="red">
             Unable to load sync status. Please try again.
           </Alert>
         )}
@@ -296,43 +315,103 @@ export default function SyncStatusPage() {
                       Local Storage
                     </Text>
                   </Group>
-                  <Text size="sm" c="dimmed">
+                  <Badge
+                    color={isStorageCritical ? 'red' : isStorageWarning ? 'yellow' : 'green'}
+                    size="lg"
+                  >
                     {formatBytes(storageUsed)} / {formatBytes(storageAvailable)}
-                  </Text>
+                  </Badge>
                 </Group>
 
                 <Progress
-                  value={
-                    storageAvailable > 0
-                      ? (storageUsed / storageAvailable) * 100
-                      : 0
-                  }
-                  color={getStorageColor(storageUsed, storageAvailable)}
+                  value={storagePercentage}
+                  color={isStorageCritical ? 'red' : isStorageWarning ? 'yellow' : 'green'}
                   size="lg"
                   radius="md"
+                  animated={isStorageCritical}
                 />
 
                 <Group justify="space-between">
                   <Text size="sm" c="dimmed">
-                    30-day offline capacity: {offlineDaysRemaining} days remaining
+                    Approximately {storageDaysRemaining} days of storage remaining
                   </Text>
                   {storageAvailable > 0 && (
                     <Text size="sm" c="dimmed">
-                      {((storageUsed / storageAvailable) * 100).toFixed(1)}% used
+                      {storagePercentage.toFixed(1)}% used
                     </Text>
                   )}
                 </Group>
+
+                <Text size="xs" c="dimmed">
+                  30-day offline sync capacity: {offlineDaysRemaining} days since last sync
+                </Text>
               </Stack>
             </Card>
 
-            {/* Low storage warning */}
-            {storageAvailable > 0 && storageUsed / storageAvailable > 0.9 && (
+            {/* Storage warning with cleanup suggestions (>80%) */}
+            {isStorageWarning && !isStorageCritical && (
+              <Alert icon={<IconAlertCircle size={16} />} title="Storage Warning" color="yellow">
+                <Stack gap="sm">
+                  <Text size="sm">
+                    Approaching storage limit ({storagePercentage.toFixed(1)}% used). Consider
+                    cleaning up old drafts or exporting data.
+                  </Text>
+                  <Group>
+                    <Button
+                      size="xs"
+                      variant="light"
+                      color="yellow"
+                      leftSection={<IconTrash size={14} />}
+                      onClick={handleCleanupStorage}
+                    >
+                      Clean Up Storage
+                    </Button>
+                    <Button
+                      size="xs"
+                      variant="light"
+                      leftSection={<IconDownload size={14} />}
+                      onClick={handleExportData}
+                    >
+                      Export Old Data
+                    </Button>
+                  </Group>
+                </Stack>
+              </Alert>
+            )}
+
+            {/* Critical storage warning (>90%) */}
+            {isStorageCritical && (
               <Alert
                 icon={<IconAlertCircle size={16} />}
-                title="Low Storage Warning"
+                title="Critical Storage Warning"
                 color="red"
               >
-                Your local storage is almost full. Consider syncing or clearing old data.
+                <Stack gap="sm">
+                  <Text size="sm">
+                    Less than {storageDaysRemaining} days of storage remaining! Clean up old data or
+                    export immediately to free space.
+                  </Text>
+                  <Group>
+                    <Button
+                      size="xs"
+                      variant="filled"
+                      color="red"
+                      leftSection={<IconTrash size={14} />}
+                      onClick={handleCleanupStorage}
+                    >
+                      Clean Up Now
+                    </Button>
+                    <Button
+                      size="xs"
+                      variant="light"
+                      color="red"
+                      leftSection={<IconDownload size={14} />}
+                      onClick={handleExportData}
+                    >
+                      Export Data
+                    </Button>
+                  </Group>
+                </Stack>
               </Alert>
             )}
 
@@ -343,8 +422,8 @@ export default function SyncStatusPage() {
                 title="Offline Sync Warning"
                 color="yellow"
               >
-                You have {offlineDaysRemaining} days remaining in your 30-day offline window.
-                Please sync soon to maintain EPA compliance data access.
+                You have {offlineDaysRemaining} days remaining in your 30-day offline window. Please
+                sync soon to maintain EPA compliance data access.
               </Alert>
             )}
 
@@ -355,8 +434,8 @@ export default function SyncStatusPage() {
                 title="Offline Period Expired"
                 color="red"
               >
-                Your 30-day offline period has expired. Please connect to the internet
-                and sync immediately to restore full functionality and maintain EPA compliance.
+                Your 30-day offline period has expired. Please connect to the internet and sync
+                immediately to restore full functionality and maintain EPA compliance.
               </Alert>
             )}
           </>
