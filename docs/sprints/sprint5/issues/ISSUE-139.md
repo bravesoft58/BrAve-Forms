@@ -224,3 +224,4 @@ Retry failed sync is complete when:
 ## Git Commits
 
 1. `2edf6c2` - feat(sync): implement retry failed sync component (ISSUE-139)
+2. `4570a81` - fix(sync): address code review issues for ISSUE-139 retry failed sync
