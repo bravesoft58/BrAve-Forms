@@ -186,4 +186,4 @@ syncOnWifiOnly: boolean;
 
 ## Git Commits
 
-1. `TBD` - feat(settings): implement profile and settings pages (ISSUE-136.5)
+1. `7229529` - feat(settings): implement profile and settings pages (ISSUE-136.5)
