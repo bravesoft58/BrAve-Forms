@@ -187,3 +187,17 @@ syncOnWifiOnly: boolean;
 ## Git Commits
 
 1. `7229529` - feat(settings): implement profile and settings pages (ISSUE-136.5)
+2. `c6e520e` - fix(profile): address code review findings for ISSUE-136.5
+
+## Code Review Fixes (c6e520e)
+
+**HIGH #1 - Fixed:** Moved state updates from render to useEffect hook
+
+- Problem: Direct setState calls in render function caused potential infinite loops
+- Solution: Wrapped in useEffect with proper dependencies
+
+**HIGH #2 - Fixed:** Phone number field handling
+
+- Problem: Phone field accepted input but didn't save
+- Solution: Made field read-only with note to use Security Settings
+- Reason: Clerk requires SMS verification for phone changes
