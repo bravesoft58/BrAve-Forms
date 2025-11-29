@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Title,
@@ -55,12 +55,19 @@ export default function ProfilePage() {
   const [saveError, setSaveError] = useState<string | null>(null);
 
   // Update form state when user data loads
-  if (isUserLoaded && user && firstName === '' && user.firstName) {
-    setFirstName(user.firstName);
-  }
-  if (isUserLoaded && user && lastName === '' && user.lastName) {
-    setLastName(user.lastName);
-  }
+  useEffect(() => {
+    if (isUserLoaded && user) {
+      if (user.firstName && firstName === '') {
+        setFirstName(user.firstName);
+      }
+      if (user.lastName && lastName === '') {
+        setLastName(user.lastName);
+      }
+      if (user.phoneNumbers?.[0]?.phoneNumber && phone === '') {
+        setPhone(user.phoneNumbers[0].phoneNumber);
+      }
+    }
+  }, [isUserLoaded, user, firstName, lastName, phone]);
 
   // Handle save profile
   const handleSaveProfile = async () => {
@@ -204,12 +211,11 @@ export default function ProfilePage() {
                 />
 
                 <TextInput
-                  label="Phone Number (Optional)"
-                  placeholder="Enter phone number"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  label="Phone Number"
+                  value={phone || 'Not set'}
+                  disabled
                   leftSection={<IconPhone size={16} />}
-                  description="For field notifications"
+                  description="Manage via Security Settings (requires verification)"
                 />
 
                 <Group justify="flex-end" mt="xs">
