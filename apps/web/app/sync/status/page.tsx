@@ -40,8 +40,13 @@ import {
   IconTrash,
   IconDownload,
 } from '@tabler/icons-react';
-import { useSyncDashboard, formatBytes } from '@/hooks/useSyncStatus';
+import {
+  useSyncDashboard,
+  formatBytes,
+  calculateStorageDaysRemaining,
+} from '@/hooks/useSyncStatus';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAppAuth } from '@/app/providers';
 
 /**
  * Get status badge color based on sync state
@@ -93,6 +98,8 @@ function formatDateTime(dateString: string | null): string {
 
 export default function SyncStatusPage() {
   const queryClient = useQueryClient();
+  const auth = useAppAuth();
+  const orgId = auth.orgId || 'default';
   const { syncStatus, stats, storage, offlineDaysRemaining, isLoading, isError } =
     useSyncDashboard();
 
@@ -118,8 +125,8 @@ export default function SyncStatusPage() {
   const isStorageWarning = storagePercentage > 80;
   const isStorageCritical = storagePercentage > 90;
 
-  // Estimate storage days remaining (assuming 30-day capacity)
-  const storageDaysRemaining = Math.max(0, Math.floor(30 - (storagePercentage / 100) * 30));
+  // Estimate storage days remaining (assuming 30-day capacity per EPA compliance)
+  const storageDaysRemaining = calculateStorageDaysRemaining(storagePercentage);
 
   // Handler for cleanup navigation
   const handleCleanupStorage = () => {
@@ -130,12 +137,26 @@ export default function SyncStatusPage() {
   // Handler for exporting old data
   const handleExportData = async () => {
     try {
-      // Export localStorage data as JSON
+      // Export localStorage data as JSON using org-scoped keys for multi-tenant isolation
+      const scopedPrefix = `braveforms_org_${orgId}_`;
+      const legacyPrefix = 'braveforms_';
+
+      // Try scoped keys first, fall back to legacy keys
       const exportData = {
         exportedAt: new Date().toISOString(),
-        pendingQueue: localStorage.getItem('braveforms_pending_queue'),
-        failedQueue: localStorage.getItem('braveforms_failed_queue'),
-        settings: localStorage.getItem('braveforms_settings'),
+        orgId,
+        pendingQueue:
+          localStorage.getItem(`${scopedPrefix}pending_queue`) ||
+          localStorage.getItem(`${legacyPrefix}pending_queue`),
+        failedQueue:
+          localStorage.getItem(`${scopedPrefix}failed_queue`) ||
+          localStorage.getItem(`${legacyPrefix}failed_queue`),
+        settings:
+          localStorage.getItem(`${scopedPrefix}settings`) ||
+          localStorage.getItem(`${legacyPrefix}settings`),
+        lastSync:
+          localStorage.getItem(`${scopedPrefix}last_sync`) ||
+          localStorage.getItem(`${legacyPrefix}last_sync`),
       };
 
       const blob = new Blob([JSON.stringify(exportData, null, 2)], {
@@ -144,7 +165,7 @@ export default function SyncStatusPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `braveforms-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `braveforms-${orgId}-export-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

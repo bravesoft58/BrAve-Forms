@@ -41,10 +41,27 @@ export interface StorageEstimate {
 
 // Constants for sync configuration
 const SYNC_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
-const LAST_SYNC_KEY = 'braveforms_last_sync';
-const PENDING_QUEUE_KEY = 'braveforms_pending_queue';
-const FAILED_QUEUE_KEY = 'braveforms_failed_queue';
-const SYNC_STATS_KEY = 'braveforms_sync_stats_today';
+const KEY_PREFIX = 'braveforms';
+
+/**
+ * Generate organization-scoped localStorage key
+ *
+ * All localStorage keys MUST be scoped by orgId for multi-tenant isolation.
+ * This prevents data leakage between organizations.
+ *
+ * @param baseKey - The base key name (e.g., 'last_sync')
+ * @param orgId - The organization ID from Clerk JWT
+ * @returns Scoped key (e.g., 'braveforms_org_123_last_sync')
+ */
+function getScopedKey(baseKey: string, orgId: string): string {
+  return `${KEY_PREFIX}_org_${orgId}_${baseKey}`;
+}
+
+// Legacy keys for backward compatibility during migration
+const LEGACY_LAST_SYNC_KEY = 'braveforms_last_sync';
+const LEGACY_PENDING_QUEUE_KEY = 'braveforms_pending_queue';
+const LEGACY_FAILED_QUEUE_KEY = 'braveforms_failed_queue';
+const LEGACY_SYNC_STATS_KEY = 'braveforms_sync_stats_today';
 
 /**
  * Get the start of today (midnight) for date comparisons
@@ -87,15 +104,33 @@ function safeParseJson<T>(jsonString: string | null, defaultValue: T): T {
  * Combines network status, localStorage timestamps, and pending queue state.
  *
  * @param _token - Clerk JWT token (unused for local-only data, kept for consistency)
+ * @param orgId - Organization ID for scoped localStorage keys
  * @returns Current sync status with timestamps
  *
+ * @security Uses orgId-scoped localStorage keys for multi-tenant isolation
  * @offline Works fully offline using localStorage
  */
-export async function fetchSyncStatus(_token: string | null): Promise<SyncStatus> {
+export async function fetchSyncStatus(
+  _token: string | null,
+  orgId: string = 'default'
+): Promise<SyncStatus> {
   const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
-  const lastSyncStr = safeGetLocalStorage(LAST_SYNC_KEY);
-  const pendingQueue = safeParseJson<unknown[]>(safeGetLocalStorage(PENDING_QUEUE_KEY), []);
-  const failedQueue = safeParseJson<unknown[]>(safeGetLocalStorage(FAILED_QUEUE_KEY), []);
+
+  // Use scoped keys for multi-tenant isolation
+  const lastSyncKey = getScopedKey('last_sync', orgId);
+  const pendingQueueKey = getScopedKey('pending_queue', orgId);
+  const failedQueueKey = getScopedKey('failed_queue', orgId);
+
+  // Try scoped keys first, fall back to legacy keys for backward compatibility
+  const lastSyncStr = safeGetLocalStorage(lastSyncKey) || safeGetLocalStorage(LEGACY_LAST_SYNC_KEY);
+  const pendingQueue = safeParseJson<unknown[]>(
+    safeGetLocalStorage(pendingQueueKey) || safeGetLocalStorage(LEGACY_PENDING_QUEUE_KEY),
+    []
+  );
+  const failedQueue = safeParseJson<unknown[]>(
+    safeGetLocalStorage(failedQueueKey) || safeGetLocalStorage(LEGACY_FAILED_QUEUE_KEY),
+    []
+  );
 
   // Determine sync status
   let status: SyncStatusType = 'synced';
@@ -133,18 +168,36 @@ export async function fetchSyncStatus(_token: string | null): Promise<SyncStatus
  * Gets today's sync activity from localStorage counters.
  *
  * @param _token - Clerk JWT token (unused for local-only data, kept for consistency)
+ * @param orgId - Organization ID for scoped localStorage keys
  * @returns Today's sync statistics
  *
+ * @security Uses orgId-scoped localStorage keys for multi-tenant isolation
  * @offline Works fully offline using localStorage
  */
-export async function fetchSyncStats(_token: string | null): Promise<SyncStats> {
-  const pendingQueue = safeParseJson<unknown[]>(safeGetLocalStorage(PENDING_QUEUE_KEY), []);
-  const failedQueue = safeParseJson<unknown[]>(safeGetLocalStorage(FAILED_QUEUE_KEY), []);
+export async function fetchSyncStats(
+  _token: string | null,
+  orgId: string = 'default'
+): Promise<SyncStats> {
+  // Use scoped keys for multi-tenant isolation
+  const pendingQueueKey = getScopedKey('pending_queue', orgId);
+  const failedQueueKey = getScopedKey('failed_queue', orgId);
+
+  const pendingQueue = safeParseJson<unknown[]>(
+    safeGetLocalStorage(pendingQueueKey) || safeGetLocalStorage(LEGACY_PENDING_QUEUE_KEY),
+    []
+  );
+  const failedQueue = safeParseJson<unknown[]>(
+    safeGetLocalStorage(failedQueueKey) || safeGetLocalStorage(LEGACY_FAILED_QUEUE_KEY),
+    []
+  );
 
   // Get today's stats from localStorage (reset daily)
-  const todayKey = `${SYNC_STATS_KEY}_${getStartOfToday().toISOString().split('T')[0]}`;
+  const todayStr = getStartOfToday().toISOString().split('T')[0];
+  const todayKey = getScopedKey(`sync_stats_${todayStr}`, orgId);
+  const legacyTodayKey = `${LEGACY_SYNC_STATS_KEY}_${todayStr}`;
+
   const todayStats = safeParseJson<{ forms: number; photos: number }>(
-    safeGetLocalStorage(todayKey),
+    safeGetLocalStorage(todayKey) || safeGetLocalStorage(legacyTodayKey),
     { forms: 0, photos: 0 }
   );
 
@@ -214,14 +267,36 @@ export function formatBytes(bytes: number): string {
 }
 
 /**
+ * Calculate estimated storage days remaining based on storage percentage
+ *
+ * Maps storage usage percentage to estimated days of offline capacity remaining,
+ * assuming a 30-day maximum offline window per EPA compliance requirements.
+ *
+ * @param storagePercentage - Current storage usage as percentage (0-100)
+ * @returns Days remaining (0-30)
+ */
+export function calculateStorageDaysRemaining(storagePercentage: number): number {
+  // Clamp percentage to valid range
+  const clampedPercentage = Math.max(0, Math.min(100, storagePercentage));
+  return Math.max(0, Math.floor(30 - (clampedPercentage / 100) * 30));
+}
+
+/**
  * Update last sync timestamp
  *
  * @param timestamp - ISO timestamp of sync completion
+ * @param orgId - Organization ID for scoped localStorage keys
+ *
+ * @security Uses orgId-scoped localStorage keys for multi-tenant isolation
  */
-export function updateLastSync(timestamp: string = new Date().toISOString()): void {
+export function updateLastSync(
+  timestamp: string = new Date().toISOString(),
+  orgId: string = 'default'
+): void {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(LAST_SYNC_KEY, timestamp);
+    const lastSyncKey = getScopedKey('last_sync', orgId);
+    localStorage.setItem(lastSyncKey, timestamp);
   } catch (error) {
     console.error('[Sync API] Failed to update last sync:', error);
   }
@@ -231,12 +306,16 @@ export function updateLastSync(timestamp: string = new Date().toISOString()): vo
  * Increment today's sync stats
  *
  * @param type - Type of item synced ('form' or 'photo')
+ * @param orgId - Organization ID for scoped localStorage keys
+ *
+ * @security Uses orgId-scoped localStorage keys for multi-tenant isolation
  */
-export function incrementSyncStat(type: 'form' | 'photo'): void {
+export function incrementSyncStat(type: 'form' | 'photo', orgId: string = 'default'): void {
   if (typeof window === 'undefined') return;
 
   try {
-    const todayKey = `${SYNC_STATS_KEY}_${getStartOfToday().toISOString().split('T')[0]}`;
+    const todayStr = getStartOfToday().toISOString().split('T')[0];
+    const todayKey = getScopedKey(`sync_stats_${todayStr}`, orgId);
     const todayStats = safeParseJson<{ forms: number; photos: number }>(
       safeGetLocalStorage(todayKey),
       { forms: 0, photos: 0 }

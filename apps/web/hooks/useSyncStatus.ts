@@ -21,6 +21,7 @@ import {
   fetchSyncStats,
   getStorageEstimate,
   calculateOfflineDaysRemaining,
+  calculateStorageDaysRemaining,
   formatBytes,
   SyncStatus,
   SyncStats,
@@ -46,7 +47,8 @@ export function useSyncStatus() {
     queryKey: ['sync', 'status', orgId],
     queryFn: async () => {
       const token = await getToken();
-      return fetchSyncStatus(token);
+      // Pass orgId for multi-tenant localStorage scoping
+      return fetchSyncStatus(token, orgId);
     },
     enabled: isSignedIn,
     staleTime: 10 * 1000, // 10 seconds - sync status should be fresh
@@ -76,7 +78,8 @@ export function useSyncStats() {
     queryKey: ['sync', 'stats', orgId],
     queryFn: async () => {
       const token = await getToken();
-      return fetchSyncStats(token);
+      // Pass orgId for multi-tenant localStorage scoping
+      return fetchSyncStats(token, orgId);
     },
     enabled: isSignedIn,
     staleTime: 30 * 1000, // 30 seconds
@@ -142,4 +145,4 @@ export function useSyncDashboard() {
 
 // Re-export types and utility functions for consumers
 export type { SyncStatus, SyncStats, StorageEstimate };
-export { calculateOfflineDaysRemaining, formatBytes };
+export { calculateOfflineDaysRemaining, calculateStorageDaysRemaining, formatBytes };
