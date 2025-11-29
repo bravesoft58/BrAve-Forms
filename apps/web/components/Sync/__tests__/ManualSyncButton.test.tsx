@@ -493,4 +493,170 @@ describe('ManualSyncButton', () => {
       expect(button).toBeInTheDocument();
     });
   });
+
+  // ==========================================================================
+  // Offline Scenario Tests (Code Review HIGH #6)
+  // ==========================================================================
+  describe('offline scenarios', () => {
+    it('should disable button when offline', () => {
+      vi.mocked(onlineStatusHook.useOnlineStatus).mockReturnValue(false);
+      testStore.queue.push(createTestItem({ status: 'pending' }));
+
+      render(
+        <TestWrapper>
+          <ManualSyncButton />
+        </TestWrapper>
+      );
+
+      const button = screen.getByRole('button', { name: /sync now/i });
+      expect(button).toBeDisabled();
+    });
+
+    it('should re-enable button when coming back online', () => {
+      // Start offline
+      vi.mocked(onlineStatusHook.useOnlineStatus).mockReturnValue(false);
+      testStore.queue.push(createTestItem({ status: 'pending' }));
+
+      const { rerender } = render(
+        <TestWrapper>
+          <ManualSyncButton />
+        </TestWrapper>
+      );
+
+      expect(screen.getByRole('button', { name: /sync now/i })).toBeDisabled();
+
+      // Come back online
+      vi.mocked(onlineStatusHook.useOnlineStatus).mockReturnValue(true);
+      rerender(
+        <TestWrapper>
+          <ManualSyncButton />
+        </TestWrapper>
+      );
+
+      expect(screen.getByRole('button', { name: /sync now/i })).not.toBeDisabled();
+    });
+
+    it('should handle large queue (30-day offline accumulation)', () => {
+      // Simulate 30 days of queued items (100 items)
+      const items = Array.from({ length: 100 }, (_, i) =>
+        createTestItem({ id: `item-${i}`, status: 'pending' })
+      );
+      testStore.queue.push(...items);
+
+      render(
+        <TestWrapper>
+          <ManualSyncButton showBadge />
+        </TestWrapper>
+      );
+
+      // Badge should show count (capped display or actual)
+      expect(screen.getByText('100')).toBeInTheDocument();
+    });
+  });
+
+  // ==========================================================================
+  // Multi-Tenant Isolation Tests (Code Review HIGH #7)
+  // ==========================================================================
+  describe('multi-tenant isolation', () => {
+    it('should only count items for current organization', () => {
+      testStore.queue.push(
+        createTestItem({ id: 'my-org-1', status: 'pending', orgId: 'test-org-123' }),
+        createTestItem({ id: 'my-org-2', status: 'pending', orgId: 'test-org-123' }),
+        createTestItem({ id: 'other-org-1', status: 'pending', orgId: 'other-org-456' })
+      );
+
+      render(
+        <TestWrapper>
+          <ManualSyncButton showBadge />
+        </TestWrapper>
+      );
+
+      // Should only show 2 (current org), not 3 (all)
+      expect(screen.getByText('2')).toBeInTheDocument();
+    });
+
+    it('should only process items for current organization during sync', async () => {
+      const processedIds: string[] = [];
+      vi.mocked(syncQueueStoreModule.removeFromQueue).mockImplementation(async (id) => {
+        processedIds.push(id);
+      });
+
+      testStore.queue.push(
+        createTestItem({ id: 'my-org-item', status: 'pending', orgId: 'test-org-123' }),
+        createTestItem({ id: 'other-org-item', status: 'pending', orgId: 'other-org-456' })
+      );
+
+      render(
+        <TestWrapper>
+          <ManualSyncButton />
+        </TestWrapper>
+      );
+
+      const button = screen.getByRole('button', { name: /sync now/i });
+      fireEvent.click(button);
+
+      // Wait for sync to process
+      await waitFor(
+        () => {
+          expect(processedIds).toContain('my-org-item');
+        },
+        { timeout: 3000 }
+      );
+
+      // Other org's item should NOT be processed
+      expect(processedIds).not.toContain('other-org-item');
+    });
+
+    it('should not leak data between organizations', () => {
+      // Add items for different orgs
+      testStore.queue.push(
+        createTestItem({
+          id: 'sensitive-data',
+          status: 'pending',
+          orgId: 'competitor-org',
+          type: 'form_submission',
+        })
+      );
+
+      render(
+        <TestWrapper>
+          <ManualSyncButton showBadge />
+        </TestWrapper>
+      );
+
+      // Button should be disabled (no items for current org)
+      const button = screen.getByRole('button', { name: /sync now/i });
+      expect(button).toBeDisabled();
+
+      // Badge should NOT appear (no pending items for current org)
+      expect(screen.queryByText('1')).not.toBeInTheDocument();
+    });
+  });
+
+  // ==========================================================================
+  // EPA Compliance Priority Tests (Code Review HIGH #8)
+  // ==========================================================================
+  describe('EPA compliance priority', () => {
+    it('should use priority-based queue ordering', async () => {
+      // getQueueByPriority is called in the component
+      testStore.queue.push(createTestItem({ status: 'pending' }));
+
+      render(
+        <TestWrapper>
+          <ManualSyncButton />
+        </TestWrapper>
+      );
+
+      const button = screen.getByRole('button', { name: /sync now/i });
+      fireEvent.click(button);
+
+      // Wait for sync modal to open (which triggers processSyncQueue)
+      await waitFor(() => {
+        expect(screen.getByText('Syncing Data')).toBeInTheDocument();
+      });
+
+      // Verify getQueueByPriority is used for ordering
+      expect(syncQueueStoreModule.getQueueByPriority).toHaveBeenCalled();
+    });
+  });
 });

@@ -69,19 +69,44 @@ interface ManualSyncButtonProps {
 }
 
 /**
- * Mock sync function for a single item
- * In production, this would call actual API endpoints
+ * Sync a single queue item to the backend
+ *
+ * TODO (ISSUE-XXX): Replace with real GraphQL API calls when backend sync endpoints are built
+ *
+ * Future implementation will:
+ * - Call GraphQL mutations based on item.type (form_submission, photo_upload, etc.)
+ * - Include Clerk JWT token in Authorization header
+ * - Handle specific error codes from backend
+ *
+ * Current implementation is a placeholder that simulates network behavior for UI testing.
+ *
+ * @param item - The queue item to sync
+ * @param _token - Clerk JWT token (unused until real API integration)
  */
-async function syncItem(item: SyncQueueItem): Promise<void> {
-  // Simulate network delay (200-500ms per item)
+async function syncItem(item: SyncQueueItem, _token?: string): Promise<void> {
+  // PLACEHOLDER: Simulate network delay (200-500ms per item)
+  // Replace with actual API call when backend endpoints are ready
   const delay = 200 + Math.random() * 300;
   await new Promise((resolve) => setTimeout(resolve, delay));
 
-  // Simulate occasional failures (5% failure rate for testing)
-  // In production, this would be actual API calls
+  // PLACEHOLDER: Simulate occasional failures (5% failure rate for testing)
+  // Replace with actual API error handling
   if (Math.random() < 0.05) {
     throw new Error(`Failed to sync ${item.type}: Network error`);
   }
+
+  // Future implementation example:
+  // const response = await fetch(GRAPHQL_ENDPOINT, {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //     'Authorization': `Bearer ${token}`,
+  //   },
+  //   body: JSON.stringify({
+  //     query: getSyncMutation(item.type),
+  //     variables: { input: item.data, orgId: item.orgId },
+  //   }),
+  // });
 }
 
 export function ManualSyncButton({
@@ -90,7 +115,7 @@ export function ManualSyncButton({
   showBadge = true,
 }: ManualSyncButtonProps) {
   const isOnline = useOnlineStatus();
-  const { orgId } = useAppAuth();
+  const { orgId, getToken } = useAppAuth();
   const snap = useSnapshot(syncQueueStore);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -105,8 +130,13 @@ export function ManualSyncButton({
   // Ref to track if sync was cancelled
   const cancelledRef = useRef(false);
 
-  // Get pending items for current organization
+  // Multi-tenant: Get pending items for current organization only
+  // WARNING: If orgId is missing (during SSR/loading), we use 'default' as fallback
+  // This is safe because the button is disabled when not signed in
   const currentOrgId = orgId || 'default';
+  if (!orgId && typeof window !== 'undefined') {
+    console.warn('[ManualSyncButton] Missing orgId from Clerk JWT - using default fallback');
+  }
   const pendingItems = snap.queue.filter(
     (item: SyncQueueItem) => item.orgId === currentOrgId && item.status === 'pending'
   );
@@ -114,13 +144,19 @@ export function ManualSyncButton({
 
   /**
    * Process sync queue items sequentially
+   * Items are processed in priority order (highest first) for EPA compliance
    */
   const processSyncQueue = useCallback(async () => {
     cancelledRef.current = false;
     setIsSyncing(true);
     setError(null);
 
+    // Get Clerk JWT token for API authentication
+    // Token will be used when real API endpoints are implemented
+    const token = getToken ? ((await getToken()) ?? undefined) : undefined;
+
     // Get items sorted by priority (highest first)
+    // This ensures EPA compliance items (priority 10) sync before photos (priority 5)
     const queue = getQueueByPriority().filter(
       (item) => item.orgId === currentOrgId && item.status === 'pending'
     );
@@ -162,8 +198,8 @@ export function ManualSyncButton({
       await updateItemStatus(item.id, 'syncing');
 
       try {
-        // Attempt to sync the item
-        await syncItem(item);
+        // Attempt to sync the item (pass token for future API integration)
+        await syncItem(item, token);
 
         // Success - remove from queue
         await removeFromQueue(item.id);
@@ -173,6 +209,14 @@ export function ManualSyncButton({
         const errorMessage = syncError instanceof Error ? syncError.message : 'Unknown error';
         await updateItemStatus(item.id, 'failed', errorMessage);
         failCount++;
+
+        // Log detailed error for debugging
+        console.error('[ManualSyncButton] Sync item failed', {
+          itemId: item.id,
+          itemType: item.type,
+          orgId: item.orgId,
+          error: errorMessage,
+        });
 
         // Set error state but continue with other items
         setError({
@@ -192,7 +236,7 @@ export function ManualSyncButton({
 
     setIsSyncing(false);
 
-    // Show completion notification
+    // Show completion notification with context for debugging
     if (cancelledRef.current) {
       notifications.show({
         title: 'Sync Cancelled',
@@ -203,9 +247,17 @@ export function ManualSyncButton({
     } else if (failCount > 0) {
       notifications.show({
         title: 'Sync Completed with Errors',
-        message: `${successCount} items synced, ${failCount} failed`,
+        message: `${successCount} items synced, ${failCount} failed. Check sync queue for details.`,
         color: 'orange',
         icon: <IconAlertCircle size={16} />,
+        autoClose: false, // Keep visible for user review
+      });
+      // Log summary for debugging
+      console.error('[ManualSyncButton] Sync completed with errors', {
+        successCount,
+        failCount,
+        orgId: currentOrgId,
+        failedItemsInQueue: queue.filter((item) => item.status === 'failed').length,
       });
     } else {
       notifications.show({
@@ -216,7 +268,7 @@ export function ManualSyncButton({
       });
       setIsModalOpen(false);
     }
-  }, [currentOrgId]);
+  }, [currentOrgId, getToken]);
 
   /**
    * Handle sync button click

@@ -13,6 +13,25 @@ import { syncQueueDB, IndexedDBError } from '@/lib/storage/indexed-db';
  *
  * @security Multi-tenant isolation via orgId on all items
  * @offline Items persist to IndexedDB for 30-day offline capability
+ *
+ * WARNING: iOS Storage Risk (CRITICAL for EPA Compliance)
+ *
+ * This store uses IndexedDB for persistence, which has known issues on iOS:
+ * - iOS WILL reclaim IndexedDB storage under low device space (<500MB free)
+ * - Storage may be reclaimed if unused for 7+ days
+ * - System memory pressure can trigger storage cleanup
+ *
+ * RISK: Field workers may lose queued compliance data before sync, which could
+ * result in EPA CGP violations ($25k-$50k/day fines) if inspection records are lost.
+ *
+ * TODO (Sprint 6): Migrate critical compliance data to SQLite
+ * - Use @capacitor-community/sqlite for persistent mobile storage
+ * - Keep IndexedDB for cache/performance data only
+ * - Implement hybrid storage strategy based on data criticality
+ * - Test iOS low-storage scenarios before production deployment
+ *
+ * @see CLAUDE.md iOS Storage Persistence section
+ * @see COMMON_PITFALLS.md "Using IndexedDB for critical data on iOS"
  */
 
 /**
@@ -30,11 +49,7 @@ export const MAX_RETRY_ATTEMPTS = 5;
 /**
  * Types of items that can be queued for sync
  */
-export type SyncQueueItemType =
-  | 'form_submission'
-  | 'photo_upload'
-  | 'annotation'
-  | 'form_update';
+export type SyncQueueItemType = 'form_submission' | 'photo_upload' | 'annotation' | 'form_update';
 
 /**
  * CRUD operations for sync items
@@ -154,9 +169,7 @@ export function calculatePriority(item: Partial<SyncQueueItem>): number {
  * @param item - Item to add (id optional, will be generated)
  * @throws Error if queue size limit exceeded
  */
-export async function addToQueue(
-  item: Omit<SyncQueueItem, 'id'> & { id?: string }
-): Promise<void> {
+export async function addToQueue(item: Omit<SyncQueueItem, 'id'> & { id?: string }): Promise<void> {
   syncQueueStore.isLoading = true;
   syncQueueStore.error = null;
 
@@ -225,7 +238,6 @@ export async function removeFromQueue(id: string): Promise<void> {
   try {
     // Find and remove from in-memory queue
     const index = syncQueueStore.queue.findIndex((item) => item.id === id);
-    const itemType = index !== -1 ? syncQueueStore.queue[index].type : 'unknown';
 
     if (index !== -1) {
       syncQueueStore.queue.splice(index, 1);
@@ -376,6 +388,7 @@ export async function loadQueueFromStorage(): Promise<void> {
   try {
     const items = await syncQueueDB.getAll();
     syncQueueStore.queue = items as SyncQueueItem[];
+    // eslint-disable-next-line no-console -- Intentional logging for sync debugging
     console.info(`[SyncQueue] Loaded ${items.length} items from IndexedDB`);
   } catch (error) {
     const errorMsg = `Failed to load queue from storage: ${error instanceof Error ? error.message : 'Unknown error'}`;
@@ -393,9 +406,8 @@ export async function loadQueueFromStorage(): Promise<void> {
  * @returns Count of pending items
  */
 export function getPendingCountByOrg(orgId: string): number {
-  return syncQueueStore.queue.filter(
-    (item) => item.orgId === orgId && item.status === 'pending'
-  ).length;
+  return syncQueueStore.queue.filter((item) => item.orgId === orgId && item.status === 'pending')
+    .length;
 }
 
 /**
