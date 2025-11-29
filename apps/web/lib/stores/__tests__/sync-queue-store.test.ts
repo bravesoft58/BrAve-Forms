@@ -76,9 +76,6 @@ import {
   getQueueByPriority,
   calculatePriority,
   SyncQueueItem,
-  SyncQueueItemType,
-  SyncOperation,
-  SyncItemStatus,
 } from '../sync-queue-store';
 
 // Mock data
@@ -265,10 +262,7 @@ describe('Sync Queue Store', () => {
 
   describe('clearQueue', () => {
     it('removes all items from queue', async () => {
-      syncQueueStore.queue = [
-        createMockItem({ id: 'item-1' }),
-        createMockItem({ id: 'item-2' }),
-      ];
+      syncQueueStore.queue = [createMockItem({ id: 'item-1' }), createMockItem({ id: 'item-2' })];
 
       await clearQueue();
 
@@ -374,7 +368,7 @@ describe('Sync Queue Store', () => {
         createMockItem({ id: 'org-b-item', orgId: 'org_b' }),
       ];
 
-      const orgAItems = syncQueueStore.queue.filter(i => i.orgId === 'org_a');
+      const orgAItems = syncQueueStore.queue.filter((i) => i.orgId === 'org_a');
 
       expect(orgAItems.length).toBe(1);
       expect(orgAItems[0].id).toBe('org-a-item');
