@@ -28,6 +28,7 @@ import {
 import { useClerk } from '@clerk/nextjs';
 import { toggleMobileMenu } from '@/lib/stores/navigation-store';
 import { useAppAuth } from '@/app/providers';
+import { ManualSyncButton } from '@/components/Sync';
 
 /**
  * Sync status type
@@ -290,6 +291,9 @@ export function AppHeader({
             <SyncIcon size={18} />
           </ActionIcon>
         </Tooltip>
+
+        {/* Manual Sync Button - shown on desktop */}
+        {!isMobile && <ManualSyncButton variant="subtle" size="compact-sm" showBadge />}
 
         {/* User Menu */}
         <Menu width={200} position="bottom-end" shadow="md" offset={4}>

@@ -1,33 +1,68 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useSnapshot } from 'valtio';
+import { syncQueueStore, loadQueueFromStorage, SyncQueueItem } from '@/lib/stores/sync-queue-store';
+import { useAppAuth } from '@/app/providers';
 
 /**
  * usePendingSyncCount Hook
  *
- * Returns the count of items waiting to sync when offline.
- * Currently a mock implementation - will be replaced with actual
- * offline sync engine integration in Sprint 4.
+ * Returns the count of items waiting to sync for the current organization.
+ * Uses Valtio syncQueueStore for reactive updates.
  *
- * TODO Sprint 4: Connect to IndexedDB sync queue
+ * @returns Count of pending sync items for current org
+ *
+ * @security Multi-tenant isolation via orgId filtering
+ * @offline Reads from IndexedDB-backed sync queue
  */
 export function usePendingSyncCount(): number {
-  const [pendingCount, setPendingCount] = useState<number>(0);
+  const { orgId } = useAppAuth();
+  const snap = useSnapshot(syncQueueStore);
 
   useEffect(() => {
-    // Mock implementation - returns 0 for now
-    // In Sprint 4, this will query IndexedDB for pending operations
-    setPendingCount(0);
+    // Load queue from IndexedDB on mount if not already loaded
+    if (snap.queue.length === 0 && !snap.isLoading) {
+      loadQueueFromStorage();
+    }
+  }, [snap.queue.length, snap.isLoading]);
 
-    // TODO Sprint 4: Implement actual sync queue monitoring
-    // const checkSyncQueue = async () => {
-    //   const queue = await getSyncQueue();
-    //   setPendingCount(queue.length);
-    // };
-    // checkSyncQueue();
-    // const interval = setInterval(checkSyncQueue, 5000);
-    // return () => clearInterval(interval);
-  }, []);
+  // Filter by orgId and count pending items
+  const pendingCount = snap.queue.filter(
+    (item: SyncQueueItem) => item.orgId === (orgId || 'default') && item.status === 'pending'
+  ).length;
 
   return pendingCount;
+}
+
+/**
+ * useSyncQueueStats Hook
+ *
+ * Returns detailed statistics about the sync queue for the current organization.
+ *
+ * @returns Object with pending, syncing, and failed counts
+ */
+export function useSyncQueueStats() {
+  const { orgId } = useAppAuth();
+  const snap = useSnapshot(syncQueueStore);
+
+  useEffect(() => {
+    // Load queue from IndexedDB on mount if not already loaded
+    if (snap.queue.length === 0 && !snap.isLoading) {
+      loadQueueFromStorage();
+    }
+  }, [snap.queue.length, snap.isLoading]);
+
+  const currentOrgId = orgId || 'default';
+
+  const orgItems = snap.queue.filter((item: SyncQueueItem) => item.orgId === currentOrgId);
+
+  return {
+    pending: orgItems.filter((item) => item.status === 'pending').length,
+    syncing: orgItems.filter((item) => item.status === 'syncing').length,
+    failed: orgItems.filter((item) => item.status === 'failed').length,
+    total: orgItems.length,
+    isLoading: snap.isLoading,
+    error: snap.error,
+  };
 }

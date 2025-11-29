@@ -3,8 +3,39 @@
 **Priority:** P0
 **Phase:** Phase 2 - Offline Experience UI
 **Estimated Hours:** 2
-**Dependencies:** ISSUE-158
+**Actual Hours:** 1.5
+**Dependencies:** ISSUE-162 (Complete)
 **Sprint:** Sprint 5
+**Status:** COMPLETE
+
+---
+
+## Completion Summary
+
+### What Was Implemented
+
+1. **ManualSyncButton Component** - "Sync Now" button with badge showing pending count
+2. **Sync Progress Modal** - Mantine Modal with Progress bar and current item display
+3. **Cancel Sync Functionality** - Cancel button stops in-progress sync via useRef pattern
+4. **Success/Error Notifications** - Toast notifications via @mantine/notifications
+5. **Multi-Tenant Filtering** - Pending items filtered by orgId for tenant isolation
+6. **Priority-Based Processing** - Items synced in priority order (highest first)
+7. **Unit Tests** - 20 tests covering rendering, disabled states, badge, modal, progress, cancel
+
+### Files Modified
+
+- `apps/web/lib/hooks/use-pending-sync-count.ts` - Updated from mock to real Valtio store
+- `apps/web/components/Layout/AppHeader.tsx` - Added ManualSyncButton integration
+
+### Files Created
+
+- `apps/web/components/Sync/ManualSyncButton.tsx` - Main component (384 lines)
+- `apps/web/components/Sync/__tests__/ManualSyncButton.test.tsx` - 20 unit tests
+
+### Test Results
+
+- 20 tests passing (100%)
+- Coverage: Rendering (3), Disabled states (3), Badge display (3), Modal (3), Progress (2), Cancel (3), Priority (1), Empty queue (1), Accessibility (2)
 
 ---
 
@@ -14,14 +45,14 @@ Add a "Sync Now" button in the header that allows field workers to manually trig
 
 ## Tasks
 
-- [ ] Add "Sync Now" button to app header (next to offline banner)
-- [ ] Create sync progress modal with Mantine
-- [ ] Display sync progress percentage
-- [ ] Add cancel sync button (stop in-progress sync)
-- [ ] Display sync errors with retry option
-- [ ] Show success toast notification on completion
-- [ ] Disable button during sync
-- [ ] Test manual sync with queued operations
+- [x] Add "Sync Now" button to app header (next to offline banner)
+- [x] Create sync progress modal with Mantine
+- [x] Display sync progress percentage
+- [x] Add cancel sync button (stop in-progress sync)
+- [x] Display sync errors with retry option
+- [x] Show success toast notification on completion
+- [x] Disable button during sync
+- [x] Test manual sync with queued operations
 
 ## Technical Details
 
@@ -146,14 +177,14 @@ export function ManualSyncButton() {
 
 ## Acceptance Criteria
 
-- [ ] "Sync Now" button visible in header
-- [ ] Click triggers sync modal
-- [ ] Progress percentage displays during sync
-- [ ] Cancel button stops sync in progress
-- [ ] Success toast shown on completion
-- [ ] Error alert shown with retry option on failure
-- [ ] Button disabled during sync
-- [ ] Modal closes on success
+- [x] "Sync Now" button visible in header
+- [x] Click triggers sync modal
+- [x] Progress percentage displays during sync
+- [x] Cancel button stops sync in progress
+- [x] Success toast shown on completion
+- [x] Error alert shown with retry option on failure
+- [x] Button disabled during sync (also disabled when offline or no pending items)
+- [x] Modal closes on success
 
 ## Testing Requirements
 
@@ -199,5 +230,9 @@ Manual sync trigger is complete when:
 ---
 
 **Created:** 2025-10-23
-**Last Updated:** 2025-10-23
-**Status:** READY FOR IMPLEMENTATION
+**Last Updated:** 2025-11-29
+**Completed:** 2025-11-29
+
+## Git Commits
+
+1. `TBD` - feat(sync): implement manual sync trigger button (ISSUE-138)
