@@ -519,4 +519,267 @@ describe('Conflict Store', () => {
       expect(conflictStore.conflicts[0].id).toBe('conflict_1');
     });
   });
+
+  describe('Multi-Tenant Isolation', () => {
+    const org1 = 'org_company_a';
+    const org2 = 'org_company_b';
+
+    const createTestVersion = (): ConflictVersion => ({
+      data: { name: 'Test Data' },
+      modifiedAt: '2025-11-28T10:00:00Z',
+      modifiedBy: 'user1',
+      version: 1,
+    });
+
+    it('should prevent org1 from seeing org2 conflicts via getPendingConflicts', () => {
+      const version = createTestVersion();
+
+      // Add conflicts for both orgs
+      addConflict('res1', 'form_submission', version, version, org1);
+      addConflict('res2', 'form_submission', version, version, org2);
+      addConflict('res3', 'form_submission', version, version, org1);
+
+      // org1 should only see their own conflicts
+      const org1Conflicts = getPendingConflicts(org1);
+      expect(org1Conflicts).toHaveLength(2);
+      org1Conflicts.forEach((conflict) => {
+        expect(conflict.orgId).toBe(org1);
+      });
+
+      // org2 should only see their own conflicts
+      const org2Conflicts = getPendingConflicts(org2);
+      expect(org2Conflicts).toHaveLength(1);
+      expect(org2Conflicts[0].orgId).toBe(org2);
+    });
+
+    it('should prevent org1 from seeing org2 conflicts via getResolvedConflicts', () => {
+      const version = createTestVersion();
+
+      // Add and resolve conflicts for both orgs
+      const conflict1 = addConflict('res1', 'form_submission', version, version, org1);
+      const conflict2 = addConflict('res2', 'form_submission', version, version, org2);
+
+      resolveConflict(conflict1.id, 'keep_local', 'user1');
+      resolveConflict(conflict2.id, 'keep_server', 'user2');
+
+      // org1 should only see their resolved conflicts
+      const org1Resolved = getResolvedConflicts(org1);
+      expect(org1Resolved).toHaveLength(1);
+      expect(org1Resolved[0].orgId).toBe(org1);
+
+      // org2 should only see their resolved conflicts
+      const org2Resolved = getResolvedConflicts(org2);
+      expect(org2Resolved).toHaveLength(1);
+      expect(org2Resolved[0].orgId).toBe(org2);
+    });
+
+    it('should return correct stats per organization via getConflictStats', () => {
+      const version = createTestVersion();
+
+      // Add multiple conflicts for each org
+      const conflict1 = addConflict('res1', 'form_submission', version, version, org1);
+      addConflict('res2', 'form_submission', version, version, org1);
+      addConflict('res3', 'form_submission', version, version, org2);
+      addConflict('res4', 'form_submission', version, version, org2);
+      addConflict('res5', 'form_submission', version, version, org2);
+
+      // Resolve one from each org
+      resolveConflict(conflict1.id, 'keep_local', 'user1');
+      const org2Pending = getPendingConflicts(org2);
+      resolveConflict(org2Pending[0].id, 'keep_server', 'user2');
+
+      // Check org1 stats
+      const org1Stats = getConflictStats(org1);
+      expect(org1Stats.pending).toBe(1);
+      expect(org1Stats.resolved).toBe(1);
+      expect(org1Stats.total).toBe(2);
+
+      // Check org2 stats
+      const org2Stats = getConflictStats(org2);
+      expect(org2Stats.pending).toBe(2);
+      expect(org2Stats.resolved).toBe(1);
+      expect(org2Stats.total).toBe(3);
+    });
+
+    it('should only clear resolved conflicts for specified org via clearResolvedConflicts', () => {
+      const version = createTestVersion();
+
+      // Add and resolve conflicts for both orgs
+      const conflict1 = addConflict('res1', 'form_submission', version, version, org1);
+      const conflict2 = addConflict('res2', 'form_submission', version, version, org2);
+
+      resolveConflict(conflict1.id, 'keep_local', 'user1');
+      resolveConflict(conflict2.id, 'keep_server', 'user2');
+
+      // Clear only org1's resolved conflicts
+      const cleared = clearResolvedConflicts(org1);
+      expect(cleared).toBe(1);
+
+      // org1 should have no resolved conflicts
+      expect(getResolvedConflicts(org1)).toHaveLength(0);
+
+      // org2 should still have their resolved conflict
+      expect(getResolvedConflicts(org2)).toHaveLength(1);
+    });
+  });
+
+  describe('Validation Error Handling', () => {
+    const createTestVersion = (): ConflictVersion => ({
+      data: { name: 'Test Data' },
+      modifiedAt: '2025-11-28T10:00:00Z',
+      modifiedBy: 'user1',
+      version: 1,
+    });
+
+    describe('orgId validation', () => {
+      it('should throw error when getPendingConflicts called with empty orgId', () => {
+        expect(() => getPendingConflicts('')).toThrow(
+          'orgId is required for multi-tenant isolation'
+        );
+      });
+
+      it('should throw error when getPendingConflicts called with whitespace orgId', () => {
+        expect(() => getPendingConflicts('   ')).toThrow(
+          'orgId is required for multi-tenant isolation'
+        );
+      });
+
+      it('should throw error when getResolvedConflicts called with empty orgId', () => {
+        expect(() => getResolvedConflicts('')).toThrow(
+          'orgId is required for multi-tenant isolation'
+        );
+      });
+
+      it('should throw error when clearResolvedConflicts called with empty orgId', () => {
+        expect(() => clearResolvedConflicts('')).toThrow(
+          'orgId is required for multi-tenant isolation'
+        );
+      });
+
+      it('should throw error when getConflictStats called with empty orgId', () => {
+        expect(() => getConflictStats('')).toThrow('orgId is required for multi-tenant isolation');
+      });
+    });
+
+    describe('addConflict validation', () => {
+      it('should throw error when addConflict called with empty orgId', () => {
+        const version = createTestVersion();
+        expect(() => addConflict('res1', 'form_submission', version, version, '')).toThrow(
+          'orgId is required for multi-tenant isolation'
+        );
+      });
+
+      it('should throw error when addConflict called with empty resourceId', () => {
+        const version = createTestVersion();
+        expect(() => addConflict('', 'form_submission', version, version, 'org_test')).toThrow(
+          'resourceId is required'
+        );
+      });
+
+      it('should throw error when addConflict called with whitespace resourceId', () => {
+        const version = createTestVersion();
+        expect(() => addConflict('   ', 'form_submission', version, version, 'org_test')).toThrow(
+          'resourceId is required'
+        );
+      });
+    });
+
+    describe('resolveConflict validation', () => {
+      it('should throw error when resolveConflict called with empty conflictId', () => {
+        expect(() => resolveConflict('', 'keep_local', 'user1')).toThrow('conflictId is required');
+      });
+
+      it('should throw error when resolveConflict called with empty resolvedBy', () => {
+        const version = createTestVersion();
+        const conflict = addConflict('res1', 'form_submission', version, version, testOrgId);
+
+        expect(() => resolveConflict(conflict.id, 'keep_local', '')).toThrow(
+          'resolvedBy is required for audit trail'
+        );
+      });
+
+      it('should throw error when resolveConflict called with merge strategy but no mergedData', () => {
+        const version = createTestVersion();
+        const conflict = addConflict('res1', 'form_submission', version, version, testOrgId);
+
+        expect(() => resolveConflict(conflict.id, 'merge', 'user1')).toThrow(
+          'mergedData is required when using merge strategy'
+        );
+      });
+
+      it('should succeed when resolveConflict called with merge strategy and mergedData', () => {
+        const version = createTestVersion();
+        const conflict = addConflict('res1', 'form_submission', version, version, testOrgId);
+
+        const resolved = resolveConflict(conflict.id, 'merge', 'user1', { name: 'Merged' });
+        expect(resolved).not.toBeNull();
+        expect(resolved?.resolution?.strategy).toBe('merge');
+        expect(resolved?.resolution?.mergedData).toEqual({ name: 'Merged' });
+      });
+    });
+  });
+
+  describe('localStorage Error Handling', () => {
+    it('should set store error when localStorage.setItem fails', () => {
+      const version: ConflictVersion = {
+        data: { name: 'Test' },
+        modifiedAt: '2025-11-28T10:00:00Z',
+        modifiedBy: 'user1',
+        version: 1,
+      };
+
+      // Mock localStorage to throw an error
+      const originalSetItem = localStorageMock.setItem;
+      localStorageMock.setItem.mockImplementation(() => {
+        throw new Error('QuotaExceededError');
+      });
+
+      // Adding a conflict should trigger saveConflicts which should fail
+      addConflict('res1', 'form_submission', version, version, testOrgId);
+
+      // Store error should be set
+      expect(conflictStore.error).toContain('Failed to save conflicts');
+      expect(conflictStore.error).toContain('QuotaExceededError');
+
+      // Restore original mock behavior
+      localStorageMock.setItem.mockRestore();
+      localStorageMock.setItem = originalSetItem;
+    });
+
+    it('should clear storage error on successful save', () => {
+      // Set an existing storage-related error (includes 'storage' keyword)
+      conflictStore.error = 'Failed to save: storage quota exceeded';
+
+      const version: ConflictVersion = {
+        data: { name: 'Test' },
+        modifiedAt: '2025-11-28T10:00:00Z',
+        modifiedBy: 'user1',
+        version: 1,
+      };
+
+      // This should succeed and clear the storage error
+      addConflict('res1', 'form_submission', version, version, testOrgId);
+
+      // Storage-related error should be cleared on successful save
+      expect(conflictStore.error).toBeNull();
+    });
+
+    it('should preserve non-storage errors on successful save', () => {
+      // Set a non-storage error (doesn't include 'storage' keyword)
+      conflictStore.error = 'Network connection failed';
+
+      const version: ConflictVersion = {
+        data: { name: 'Test' },
+        modifiedAt: '2025-11-28T10:00:00Z',
+        modifiedBy: 'user1',
+        version: 1,
+      };
+
+      // This should succeed but NOT clear the non-storage error
+      addConflict('res1', 'form_submission', version, version, testOrgId);
+
+      // Non-storage error should remain
+      expect(conflictStore.error).toBe('Network connection failed');
+    });
+  });
 });

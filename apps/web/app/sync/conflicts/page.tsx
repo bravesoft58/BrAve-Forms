@@ -122,11 +122,23 @@ export default function ConflictsPage() {
     loadConflicts();
   }, []);
 
-  // Get conflicts for current org
+  // CRITICAL: Fail-fast validation for multi-tenant isolation
+  if (!orgId || orgId.trim() === '') {
+    return (
+      <Container size="xl" py="md">
+        <Alert color="red" icon={<IconAlertTriangle size={16} />} title="Authentication Required">
+          Organization ID is required to view conflicts. Please ensure you are logged in with a
+          valid organization.
+        </Alert>
+      </Container>
+    );
+  }
+
+  // Get conflicts for current org (orgId is now guaranteed to be valid)
   const orgConflicts = state.conflicts.filter((c) => c.orgId === orgId);
   const pendingConflicts = orgConflicts.filter((c) => c.status === 'pending');
   const resolvedConflicts = orgConflicts.filter((c) => c.status === 'resolved');
-  const stats = getConflictStats(orgId || '');
+  const stats = getConflictStats(orgId);
 
   // Handle refresh
   const handleRefresh = () => {
@@ -135,10 +147,15 @@ export default function ConflictsPage() {
 
   // Handle view conflict
   const handleViewConflict = (conflictId: string) => {
-    const conflict = getConflictById(conflictId);
-    if (conflict) {
-      setSelectedConflict(conflict);
-      selectConflict(conflictId);
+    try {
+      const conflict = getConflictById(conflictId);
+      if (conflict) {
+        setSelectedConflict(conflict);
+        selectConflict(conflictId);
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to view conflict:', error);
     }
   };
 
@@ -148,20 +165,39 @@ export default function ConflictsPage() {
     strategy: ResolutionStrategy,
     mergedData?: Record<string, unknown>
   ) => {
-    resolveConflict(conflictId, strategy, userId || 'unknown', mergedData);
-    setSelectedConflict(null);
-    selectConflict(null);
+    // Validate userId for audit trail
+    if (!userId || userId.trim() === '') {
+      // eslint-disable-next-line no-console
+      console.error('Cannot resolve conflict: userId is required for audit trail');
+      return;
+    }
+    try {
+      resolveConflict(conflictId, strategy, userId, mergedData);
+      setSelectedConflict(null);
+      selectConflict(null);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to resolve conflict:', error);
+    }
   };
 
   // Handle delete conflict
   const handleDeleteConflict = (conflictId: string) => {
-    deleteConflict(conflictId);
+    try {
+      deleteConflict(conflictId);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to delete conflict:', error);
+    }
   };
 
   // Handle clear resolved
   const handleClearResolved = () => {
-    if (orgId) {
+    try {
       clearResolvedConflicts(orgId);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to clear resolved conflicts:', error);
     }
   };
 

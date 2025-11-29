@@ -42,7 +42,10 @@ interface ConflictComparisonModalProps {
 }
 
 /**
- * Format a value for display
+ * Format a value for display.
+ *
+ * SECURITY: Safe from XSS as long as rendered in Mantine <Text> or <Code>
+ * components which escape HTML by default. DO NOT use with dangerouslySetInnerHTML.
  */
 function formatValue(value: unknown): string {
   if (value === null || value === undefined) {
@@ -128,37 +131,52 @@ export function ConflictComparisonModal({
 
   // Handle Keep Local resolution
   const handleKeepLocal = () => {
-    onResolve(conflict.id, 'keep_local');
-    onClose();
+    try {
+      onResolve(conflict.id, 'keep_local');
+      onClose();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to resolve conflict with keep_local:', error);
+    }
   };
 
   // Handle Keep Server resolution
   const handleKeepServer = () => {
-    onResolve(conflict.id, 'keep_server');
-    onClose();
+    try {
+      onResolve(conflict.id, 'keep_server');
+      onClose();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to resolve conflict with keep_server:', error);
+    }
   };
 
   // Handle Merge resolution
   const handleMerge = () => {
-    // Build merged data from selections
-    const mergedData: Record<string, unknown> = { ...conflict.serverVersion.data };
+    try {
+      // Build merged data from selections
+      const mergedData: Record<string, unknown> = { ...conflict.serverVersion.data };
 
-    conflict.differences.forEach((diff) => {
-      if (fieldSelections[diff.fieldId] === 'local') {
-        // Use local value
-        if (diff.type === 'added' || diff.type === 'modified') {
-          mergedData[diff.fieldId] = diff.localValue;
+      conflict.differences.forEach((diff) => {
+        if (fieldSelections[diff.fieldId] === 'local') {
+          // Use local value
+          if (diff.type === 'added' || diff.type === 'modified') {
+            mergedData[diff.fieldId] = diff.localValue;
+          }
+        } else {
+          // Use server value (already in mergedData from spread)
+          if (diff.type === 'removed') {
+            delete mergedData[diff.fieldId];
+          }
         }
-      } else {
-        // Use server value (already in mergedData from spread)
-        if (diff.type === 'removed') {
-          delete mergedData[diff.fieldId];
-        }
-      }
-    });
+      });
 
-    onResolve(conflict.id, 'merge', mergedData);
-    onClose();
+      onResolve(conflict.id, 'merge', mergedData);
+      onClose();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to resolve conflict with merge:', error);
+    }
   };
 
   return (
@@ -303,22 +321,24 @@ export function ConflictComparisonModal({
                       <Group gap="xs">
                         <Tooltip label="Use Local">
                           <ActionIcon
-                            size="sm"
+                            size="lg"
                             variant={fieldSelections[diff.fieldId] === 'local' ? 'filled' : 'light'}
                             color="blue"
                             onClick={() => toggleFieldSelection(diff.fieldId)}
+                            aria-label={`Select local value for ${diff.fieldLabel}`}
                           >
                             L
                           </ActionIcon>
                         </Tooltip>
                         <Tooltip label="Use Server">
                           <ActionIcon
-                            size="sm"
+                            size="lg"
                             variant={
                               fieldSelections[diff.fieldId] === 'server' ? 'filled' : 'light'
                             }
                             color="green"
                             onClick={() => toggleFieldSelection(diff.fieldId)}
+                            aria-label={`Select server value for ${diff.fieldLabel}`}
                           >
                             S
                           </ActionIcon>

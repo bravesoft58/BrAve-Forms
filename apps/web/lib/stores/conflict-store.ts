@@ -156,7 +156,18 @@ export async function loadConflicts(): Promise<void> {
 }
 
 /**
+ * Validate orgId for multi-tenant isolation
+ * @throws Error if orgId is missing or empty
+ */
+function validateOrgId(orgId: string, context: string): void {
+  if (!orgId || orgId.trim() === '') {
+    throw new Error(`orgId is required for multi-tenant isolation (${context})`);
+  }
+}
+
+/**
  * Save conflicts to localStorage
+ * @security Updates store.error on failure to notify user
  */
 function saveConflicts(): void {
   try {
@@ -167,7 +178,17 @@ function saveConflicts(): void {
         savedAt: new Date().toISOString(),
       })
     );
+    // Clear any previous storage error on success
+    if (conflictStore.error?.includes('storage')) {
+      conflictStore.error = null;
+    }
   } catch (error) {
+    // Update store error state for user notification (CRITICAL for offline scenarios)
+    const errorMessage =
+      error instanceof Error
+        ? `Failed to save conflicts: ${error.message}. Check browser storage.`
+        : 'Failed to save conflicts due to storage error';
+    conflictStore.error = errorMessage;
     // eslint-disable-next-line no-console
     console.error('Failed to save conflicts:', error);
   }
@@ -278,6 +299,8 @@ export function detectDifferences(
 
 /**
  * Add a new conflict to the store
+ * @throws Error if orgId or resourceId is missing
+ * @security Validates orgId for multi-tenant isolation
  */
 export function addConflict(
   resourceId: string,
@@ -287,6 +310,12 @@ export function addConflict(
   orgId: string,
   fieldLabels: Record<string, string> = {}
 ): SyncConflict {
+  // Validate required parameters for multi-tenant isolation
+  validateOrgId(orgId, 'addConflict');
+  if (!resourceId || resourceId.trim() === '') {
+    throw new Error('resourceId is required');
+  }
+
   const differences = detectDifferences(localVersion.data, serverVersion.data, fieldLabels);
 
   const conflict: SyncConflict = {
@@ -309,6 +338,8 @@ export function addConflict(
 
 /**
  * Resolve a conflict with the specified strategy
+ * @throws Error if required parameters are missing
+ * @security Validates resolvedBy for audit trail
  */
 export function resolveConflict(
   conflictId: string,
@@ -316,6 +347,17 @@ export function resolveConflict(
   resolvedBy: string,
   mergedData?: Record<string, unknown>
 ): SyncConflict | null {
+  // Validate required parameters
+  if (!conflictId || conflictId.trim() === '') {
+    throw new Error('conflictId is required');
+  }
+  if (!resolvedBy || resolvedBy.trim() === '') {
+    throw new Error('resolvedBy is required for audit trail');
+  }
+  if (strategy === 'merge' && !mergedData) {
+    throw new Error('mergedData is required when using merge strategy');
+  }
+
   const conflictIndex = conflictStore.conflicts.findIndex((c) => c.id === conflictId);
 
   if (conflictIndex === -1) {
@@ -360,15 +402,21 @@ export function getResolvedData(conflict: SyncConflict): Record<string, unknown>
 
 /**
  * Get all pending conflicts for an organization
+ * @throws Error if orgId is missing
+ * @security Validates orgId for multi-tenant isolation
  */
 export function getPendingConflicts(orgId: string): SyncConflict[] {
+  validateOrgId(orgId, 'getPendingConflicts');
   return conflictStore.conflicts.filter((c) => c.orgId === orgId && c.status === 'pending');
 }
 
 /**
  * Get all resolved conflicts for an organization
+ * @throws Error if orgId is missing
+ * @security Validates orgId for multi-tenant isolation
  */
 export function getResolvedConflicts(orgId: string): SyncConflict[] {
+  validateOrgId(orgId, 'getResolvedConflicts');
   return conflictStore.conflicts.filter((c) => c.orgId === orgId && c.status === 'resolved');
 }
 
@@ -397,8 +445,12 @@ export function deleteConflict(conflictId: string): boolean {
 
 /**
  * Clear all resolved conflicts for an organization
+ * @throws Error if orgId is missing
+ * @security Validates orgId for multi-tenant isolation
  */
 export function clearResolvedConflicts(orgId: string): number {
+  validateOrgId(orgId, 'clearResolvedConflicts');
+
   const initialLength = conflictStore.conflicts.length;
 
   conflictStore.conflicts = conflictStore.conflicts.filter(
@@ -419,6 +471,8 @@ export function selectConflict(conflictId: string | null): void {
 
 /**
  * Get conflict statistics for an organization
+ * @throws Error if orgId is missing
+ * @security Validates orgId for multi-tenant isolation
  */
 export function getConflictStats(orgId: string): {
   pending: number;
@@ -426,6 +480,8 @@ export function getConflictStats(orgId: string): {
   total: number;
   resolvedToday: number;
 } {
+  validateOrgId(orgId, 'getConflictStats');
+
   const orgConflicts = conflictStore.conflicts.filter((c) => c.orgId === orgId);
   const today = new Date().toISOString().split('T')[0];
 
