@@ -11,6 +11,8 @@
  *
  * @security Multi-tenant isolation via useSyncQueue hook
  * @offline Works with cached data from Valtio store
+ * @warning iOS storage: Queue data in IndexedDB may be reclaimed by iOS
+ *          under low storage conditions. See sync-queue-store.ts for migration plan.
  */
 
 import { useState, useCallback } from 'react';
@@ -331,13 +333,25 @@ export function RetryFailedSync({
     let successCount = 0;
     let failCount = 0;
 
-    // Retry each item
+    // Retry each item (skip if already being retried individually)
     for (const item of retryableItems) {
+      // Check if item is already being retried individually to prevent race condition
+      if (retryingItems.has(item.id)) {
+        continue;
+      }
+
+      setRetryingItems((prev) => new Set(prev).add(item.id));
       try {
         await retryItem(item.id);
         successCount++;
       } catch {
         failCount++;
+      } finally {
+        setRetryingItems((prev) => {
+          const next = new Set(prev);
+          next.delete(item.id);
+          return next;
+        });
       }
     }
 
@@ -359,7 +373,7 @@ export function RetryFailedSync({
         icon: <IconAlertCircle size={16} />,
       });
     }
-  }, [failedItems, retryItem]);
+  }, [failedItems, retryItem, retryingItems]);
 
   // Hide when no failures (if hideWhenEmpty is true)
   if (hideWhenEmpty && failedCount === 0) {
