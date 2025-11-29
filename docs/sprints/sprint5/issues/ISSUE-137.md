@@ -18,20 +18,23 @@
 2. **Estimated Days Remaining** - Based on storage percentage (30-day capacity)
 3. **Cleanup Suggestions** - Clean Up Storage button navigates to queue management
 4. **Export Data Functionality** - Downloads localStorage data as JSON file
-5. **Unit Tests** - 26 tests covering all storage calculations
+5. **Unit Tests** - 42 tests covering all storage calculations
+6. **Multi-Tenant localStorage Scoping** - Keys scoped by orgId for tenant isolation
 
 ### Files Modified
 
 - `apps/web/app/sync/status/page.tsx` - Enhanced storage display with warnings and actions
+- `apps/web/lib/api/sync.ts` - Added org-scoped localStorage keys and utility functions
+- `apps/web/hooks/useSyncStatus.ts` - Pass orgId to sync functions
 
 ### Files Created
 
-- `apps/web/lib/api/__tests__/sync.test.ts` - 26 unit tests
+- `apps/web/lib/api/__tests__/sync.test.ts` - 42 unit tests
 
 ### Test Results
 
-- 26 tests passing (100%)
-- Coverage: calculateOfflineDaysRemaining (8), formatBytes (6), getStorageEstimate (4), thresholds (5), EPA compliance (3)
+- 42 tests passing (100%)
+- Coverage: calculateOfflineDaysRemaining (8), calculateStorageDaysRemaining (8), formatBytes (6), getStorageEstimate (4), thresholds (5), EPA compliance (3), offline scenarios (5), multi-tenant scoping (3)
 
 ---
 
@@ -225,3 +228,22 @@ Storage indicators are complete when:
 ## Git Commits
 
 1. `2bc1907` - feat(sync): implement offline storage indicators (ISSUE-137)
+2. `de15a87` - docs: mark ISSUE-137 as complete with implementation details
+3. `1a529e4` - fix(sync): address code review issues for ISSUE-137 storage indicators
+
+## Code Review Fixes (1a529e4)
+
+**HIGH #1 - Fixed:** Extract storageDaysRemaining calculation to utility function
+
+- Problem: Hardcoded calculation in page component
+- Solution: Added `calculateStorageDaysRemaining()` utility function to sync.ts with clamping
+
+**HIGH #2 - Fixed:** Scope localStorage keys by orgId for multi-tenant isolation
+
+- Problem: localStorage keys not scoped to organization (data leakage risk)
+- Solution: Added `getScopedKey()` helper, updated all sync functions with orgId parameter
+
+**HIGH #3 - Fixed:** Add offline scenario tests
+
+- Problem: Missing tests for offline network states
+- Solution: Added 8 new tests covering offline, timeout, SSR, and multi-tenant scenarios
