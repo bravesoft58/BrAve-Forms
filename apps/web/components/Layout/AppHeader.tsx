@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Group,
   ActionIcon,
@@ -24,7 +25,9 @@ import {
   IconLogout,
   IconUser,
 } from '@tabler/icons-react';
+import { useClerk } from '@clerk/nextjs';
 import { toggleMobileMenu } from '@/lib/stores/navigation-store';
+import { useAppAuth } from '@/app/providers';
 
 /**
  * Sync status type
@@ -35,16 +38,6 @@ import { toggleMobileMenu } from '@/lib/stores/navigation-store';
 type SyncStatus = 'synced' | 'syncing' | 'offline';
 
 interface AppHeaderProps {
-  /**
-   * Current user information
-   * TODO: Connect to Clerk auth in Sprint 4
-   */
-  user?: {
-    name: string;
-    email: string;
-    avatar?: string;
-  };
-
   /**
    * Sync status for offline indicator
    * Defaults to 'synced'
@@ -85,7 +78,6 @@ interface AppHeaderProps {
  * - Mobile (<768px): Hamburger + logo + sync + user
  */
 export function AppHeader({
-  user = { name: 'Q&D Construction', email: 'admin@qdconstruction.com' },
   syncStatus = 'synced',
   lastSyncTime = new Date(),
   onSearch,
@@ -94,6 +86,26 @@ export function AppHeader({
   const [searchQuery, setSearchQuery] = useState('');
   const theme = useMantineTheme();
   const isMobile = useMediaQuery('(max-width: 768px)');
+  const router = useRouter();
+  const { signOut } = useClerk();
+  const { firstName, lastName, email } = useAppAuth();
+
+  // Build user display info from Clerk data
+  const userName = firstName && lastName ? `${firstName} ${lastName}` : firstName || 'User';
+  const userEmail = email || '';
+
+  /**
+   * Handle sign out via Clerk
+   */
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      router.push('/sign-in');
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Sign out failed:', error);
+    }
+  };
 
   /**
    * Get sync icon and color based on status
@@ -283,24 +295,22 @@ export function AppHeader({
         <Menu width={200} position="bottom-end" shadow="md" offset={4}>
           <Menu.Target>
             <ActionIcon variant="subtle" size={48} radius="xl" aria-label="User menu">
-              {user.avatar ? (
-                <Avatar src={user.avatar} size={28} radius="xl" />
-              ) : (
-                <Avatar color="blue" size={28} radius="xl">
-                  {getUserInitials(user.name)}
-                </Avatar>
-              )}
+              <Avatar color="blue" size={28} radius="xl">
+                {getUserInitials(userName)}
+              </Avatar>
             </ActionIcon>
           </Menu.Target>
 
           <Menu.Dropdown>
             <Menu.Label style={{ padding: `${rem(6)} ${rem(8)}` }}>
               <Text style={{ fontSize: rem(11), fontWeight: 600, lineHeight: 1.2 }}>
-                {user.name}
+                {userName}
               </Text>
-              <Text style={{ fontSize: rem(10), lineHeight: 1.2 }} c="dimmed">
-                {user.email}
-              </Text>
+              {userEmail && (
+                <Text style={{ fontSize: rem(10), lineHeight: 1.2 }} c="dimmed">
+                  {userEmail}
+                </Text>
+              )}
             </Menu.Label>
 
             <Menu.Divider />
@@ -338,9 +348,7 @@ export function AppHeader({
             <Menu.Item
               color="red"
               leftSection={<IconLogout size={16} />}
-              onClick={() => {
-                // TODO: Implement sign out in Sprint 4 with Clerk
-              }}
+              onClick={handleSignOut}
               style={{
                 fontSize: rem(13),
                 minHeight: rem(32),
