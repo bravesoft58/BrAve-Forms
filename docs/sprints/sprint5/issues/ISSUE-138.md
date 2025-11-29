@@ -235,4 +235,4 @@ Manual sync trigger is complete when:
 
 ## Git Commits
 
-1. `TBD` - feat(sync): implement manual sync trigger button (ISSUE-138)
+1. `415916c` - feat(sync): implement manual sync trigger button (ISSUE-138)
