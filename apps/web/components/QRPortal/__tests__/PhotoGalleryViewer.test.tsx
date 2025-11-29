@@ -9,7 +9,7 @@ const renderWithMantine = (ui: React.ReactElement) => {
 
 describe('PhotoGalleryViewer', () => {
   it('should render component with photos count', () => {
-    renderWithMantine(<PhotoGalleryViewer projectId="project_123" />);
+    renderWithMantine(<PhotoGalleryViewer projectId="project_123" token="test-token" />);
 
     // Should display photos count text (may be broken into parts in DOM)
     expect(screen.getByText(/6/)).toBeInTheDocument();
@@ -17,14 +17,14 @@ describe('PhotoGalleryViewer', () => {
   });
 
   it('should display GPS Tagged badge in header', () => {
-    renderWithMantine(<PhotoGalleryViewer projectId="project_123" />);
+    renderWithMantine(<PhotoGalleryViewer projectId="project_123" token="test-token" />);
 
     // Should display GPS Tagged badge
     expect(screen.getByText(/GPS Tagged/i)).toBeInTheDocument();
   });
 
   it('should render photo grid with correct number of cards', () => {
-    renderWithMantine(<PhotoGalleryViewer projectId="project_123" />);
+    renderWithMantine(<PhotoGalleryViewer projectId="project_123" token="test-token" />);
 
     // Should display 6 photo cards (Paper components with cursor pointer)
     const photoCards = document.querySelectorAll('.mantine-Paper-root[style*="cursor: pointer"]');
@@ -32,7 +32,7 @@ describe('PhotoGalleryViewer', () => {
   });
 
   it('should display photo captions from mock data', () => {
-    renderWithMantine(<PhotoGalleryViewer projectId="project_123" />);
+    renderWithMantine(<PhotoGalleryViewer projectId="project_123" token="test-token" />);
 
     // Should display photo captions
     expect(screen.getByText(/Sediment basin/i)).toBeInTheDocument();
@@ -44,7 +44,7 @@ describe('PhotoGalleryViewer', () => {
   });
 
   it('should display GPS badges on photos with location data', () => {
-    renderWithMantine(<PhotoGalleryViewer projectId="project_123" />);
+    renderWithMantine(<PhotoGalleryViewer projectId="project_123" token="test-token" />);
 
     // Should display GPS badges (5 of 6 photos have GPS)
     const gpsBadges = screen.getAllByText('GPS');
@@ -52,7 +52,7 @@ describe('PhotoGalleryViewer', () => {
   });
 
   it('should display photo dates in card view', () => {
-    renderWithMantine(<PhotoGalleryViewer projectId="project_123" />);
+    renderWithMantine(<PhotoGalleryViewer projectId="project_123" token="test-token" />);
 
     // Should display shortened dates (2 photos on Nov 25)
     const nov25Dates = screen.getAllByText('Nov 25');
@@ -67,7 +67,7 @@ describe('PhotoGalleryViewer', () => {
   });
 
   it('should have clickable photo cards', () => {
-    renderWithMantine(<PhotoGalleryViewer projectId="project_123" />);
+    renderWithMantine(<PhotoGalleryViewer projectId="project_123" token="test-token" />);
 
     // Find clickable photo cards
     const photoCards = document.querySelectorAll('.mantine-Paper-root[style*="cursor: pointer"]');
@@ -78,7 +78,7 @@ describe('PhotoGalleryViewer', () => {
   });
 
   it('should show modal elements when photo card is clicked', () => {
-    renderWithMantine(<PhotoGalleryViewer projectId="project_123" />);
+    renderWithMantine(<PhotoGalleryViewer projectId="project_123" token="test-token" />);
 
     // Click first photo
     const photoCards = document.querySelectorAll('.mantine-Paper-root[style*="cursor: pointer"]');
@@ -89,7 +89,7 @@ describe('PhotoGalleryViewer', () => {
   });
 
   it('should render SimpleGrid for responsive layout', () => {
-    renderWithMantine(<PhotoGalleryViewer projectId="project_123" />);
+    renderWithMantine(<PhotoGalleryViewer projectId="project_123" token="test-token" />);
 
     // Should have SimpleGrid component
     const grid = document.querySelector('.mantine-SimpleGrid-root');
@@ -97,7 +97,7 @@ describe('PhotoGalleryViewer', () => {
   });
 
   it('should render photo icon placeholders in cards', () => {
-    renderWithMantine(<PhotoGalleryViewer projectId="project_123" />);
+    renderWithMantine(<PhotoGalleryViewer projectId="project_123" token="test-token" />);
 
     // Should have photo icons as placeholders
     const photoIcons = document.querySelectorAll('.tabler-icon-photo');
@@ -105,7 +105,7 @@ describe('PhotoGalleryViewer', () => {
   });
 
   it('should render calendar icons for dates', () => {
-    renderWithMantine(<PhotoGalleryViewer projectId="project_123" />);
+    renderWithMantine(<PhotoGalleryViewer projectId="project_123" token="test-token" />);
 
     // Should have calendar icons next to dates
     const calendarIcons = document.querySelectorAll('.tabler-icon-calendar');
@@ -113,7 +113,7 @@ describe('PhotoGalleryViewer', () => {
   });
 
   it('should render map pin icons for GPS photos', () => {
-    renderWithMantine(<PhotoGalleryViewer projectId="project_123" />);
+    renderWithMantine(<PhotoGalleryViewer projectId="project_123" token="test-token" />);
 
     // Should have map pin icons (header badge + 5 photo GPS badges)
     const mapPinIcons = document.querySelectorAll('.tabler-icon-map-pin');
@@ -121,7 +121,7 @@ describe('PhotoGalleryViewer', () => {
   });
 
   it('should have correct styling for photo cards', () => {
-    renderWithMantine(<PhotoGalleryViewer projectId="project_123" />);
+    renderWithMantine(<PhotoGalleryViewer projectId="project_123" token="test-token" />);
 
     // Cards should have pointer cursor and shadow
     const photoCards = document.querySelectorAll('.mantine-Paper-root[style*="cursor: pointer"]');

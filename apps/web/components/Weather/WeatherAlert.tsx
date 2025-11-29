@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert, Group, Text, Badge, Button, Skeleton, Loader } from '@mantine/core';
+import { Alert, Group, Text, Badge, Button, Skeleton } from '@mantine/core';
 import { IconDroplet, IconAlertTriangle, IconClock, IconWifi, IconWifiOff } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
@@ -14,7 +14,7 @@ import {
   type WeatherEvent,
   type WeatherAlert as WeatherAlertType
 } from '@/lib/graphql/weather.queries';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 // GraphQL fetcher for pending inspections
 async function fetchPendingInspections(token: string | null) {
@@ -55,12 +55,12 @@ interface WeatherAlertProps {
 
 export function WeatherAlert({ projectId, compact = false }: WeatherAlertProps) {
   const appState = useAppStore();
-  const { orgId, getToken } = useAuth();
+  const { getToken } = useAuth();
   const weatherUtils = useWeatherMonitoring();
-  const [latestAlert, setLatestAlert] = useState<WeatherAlertType | null>(null);
+  const [latestAlert] = useState<WeatherAlertType | null>(null);
 
   // Get pending inspections for the organization
-  const { data, isPending, error, refetch } = useQuery({
+  const { data, isPending, error } = useQuery({
     queryKey: queryKeys.complianceDeadlines,
     queryFn: async () => {
       const token = await getToken();
@@ -173,7 +173,7 @@ export function WeatherAlert({ projectId, compact = false }: WeatherAlertProps) 
           <div style={{ flex: 1 }}>
             <Group gap="xs" mb="xs">
               <Text size="sm" fw={700} c={`${isFailure ? 'orange' : 'red'}.7`}>
-                {alert.alertType.replace(/_/g, ' ')}
+                {(alert.alertType ?? 'ALERT').replace(/_/g, ' ')}
               </Text>
               <Badge color={isFailure ? 'orange' : 'red'} size="sm" variant="filled">
                 REAL-TIME
@@ -188,7 +188,7 @@ export function WeatherAlert({ projectId, compact = false }: WeatherAlertProps) 
               <Group gap="xs" mb="sm">
                 <IconDroplet size={16} />
                 <Text size="sm" fw={500}>
-                  {weatherUtils.formatPrecipitation(alert.precipitationAmount)} detected
+                  {weatherUtils.formatPrecipitation(alert.precipitationAmount ?? 0)} detected
                 </Text>
                 <Text size="sm" c="dimmed">({alert.source})</Text>
               </Group>
@@ -267,7 +267,7 @@ export function WeatherAlert({ projectId, compact = false }: WeatherAlertProps) 
           </Text>
           
           <Text size="sm" c="dimmed">
-            EPA CGP requires SWPPP inspection within 24 working hours of ≥0.25" precipitation
+            EPA CGP requires SWPPP inspection within 24 working hours of 0.25 inch precipitation or greater
           </Text>
           
           {appState.networkStatus === 'offline' && (

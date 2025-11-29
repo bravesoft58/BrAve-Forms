@@ -56,12 +56,16 @@ describe('DashboardPage', () => {
   it('should handle missing user gracefully', async () => {
     const { useAppAuth } = await import('@/app/providers');
     vi.mocked(useAppAuth).mockReturnValueOnce({
-      user: null,
       isLoaded: true,
       isSignedIn: false,
-      orgRole: null,
+      orgRole: '',
       userId: null,
-      orgId: null,
+      orgId: '',
+      orgSlug: '',
+      sessionId: null,
+      firstName: null,
+      lastName: null,
+      email: null,
     });
 
     renderWithMantine(<DashboardPage />);

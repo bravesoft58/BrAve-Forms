@@ -181,9 +181,13 @@ export function FormRenderer({
                 <NumberField
                   key={field.id}
                   field={field}
-                  register={register}
                   error={error}
                   disabled={readOnly}
+                  value={watch(field.id)}
+                  onChange={(value) => {
+                    const numValue = typeof value === 'number' ? value : undefined;
+                    setValue(field.id, numValue);
+                  }}
                 />
               );
             case 'date':
@@ -285,9 +289,14 @@ export function FormRenderer({
                 <FileField
                   key={field.id}
                   field={field}
-                  register={register}
                   error={error}
                   disabled={readOnly}
+                  onChange={(file) => {
+                    // Sprint 4: Will add file upload and set URL in form
+                    if (file) {
+                      setValue(field.id, file.name);
+                    }
+                  }}
                 />
               );
             case 'computed':

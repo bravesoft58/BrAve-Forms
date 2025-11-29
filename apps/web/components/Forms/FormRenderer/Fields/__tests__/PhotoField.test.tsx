@@ -8,7 +8,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useForm } from 'react-hook-form';
+import { useForm, FieldError } from 'react-hook-form';
 import { MantineProvider } from '@mantine/core';
 import { PhotoField } from '../PhotoField';
 import { FormField } from '../../types';
@@ -64,7 +64,7 @@ function TestWrapper({
 
   return (
     <MantineProvider>
-      <PhotoField field={field} control={control} error={errors[field.id]} disabled={disabled} />
+      <PhotoField field={field} control={control} error={errors[field.id] as FieldError | undefined} disabled={disabled} />
     </MantineProvider>
   );
 }

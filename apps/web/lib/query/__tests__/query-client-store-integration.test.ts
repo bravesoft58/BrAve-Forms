@@ -139,12 +139,13 @@ describe('Query Client + Valtio Store Integration', () => {
       // Clear queue
       appStore.offlineQueue = [];
 
-      // Simulate network error
-      const error = { code: 'NETWORK_ERROR', message: 'Network request failed' };
+      // Simulate network error - cast to satisfy TanStack Query error type
+      const error = { code: 'NETWORK_ERROR', message: 'Network request failed' } as unknown as Error;
       const variables = { formId: '123', data: { field: 'value' } };
       const context = {};
 
-      onError?.(error, variables, context);
+      // TanStack Query v5 mutation callbacks take 4 args: (error, variables, context, mutation)
+      onError?.(error, variables, context, undefined as never);
 
       // Verify added to queue
       expect(appStore.offlineQueue.length).toBe(1);
@@ -159,11 +160,12 @@ describe('Query Client + Valtio Store Integration', () => {
       // Clear queue
       appStore.offlineQueue = [];
 
-      // Simulate 400 error
-      const error = { response: { status: 400 }, message: 'Bad request' };
+      // Simulate 400 error - cast to satisfy TanStack Query error type
+      const error = { response: { status: 400 }, message: 'Bad request' } as unknown as Error;
       const variables = { formId: '123' };
 
-      onError?.(error, variables, {});
+      // TanStack Query v5 mutation callbacks take 4 args: (error, variables, context, mutation)
+      onError?.(error, variables, {}, undefined as never);
 
       // Queue should be empty (400 is client error, not network issue)
       expect(appStore.offlineQueue.length).toBe(0);
@@ -178,7 +180,8 @@ describe('Query Client + Valtio Store Integration', () => {
       // Reset sync status
       appStore.syncStatus = 'idle';
 
-      onSuccess?.(null, null, null);
+      // TanStack Query v5 mutation callbacks take 4 args: (data, variables, context, mutation)
+      onSuccess?.(null, null, null, undefined as never);
 
       expect(appStore.syncStatus).toBe('success');
     });
@@ -274,20 +277,23 @@ describe('Query Client + Valtio Store Integration', () => {
       expect(typeof retryDelay).toBe('function');
 
       if (typeof retryDelay === 'function') {
+        // TanStack Query v5 retryDelay takes 2 args: (attemptIndex, error)
+        const mockError = new Error('test');
+
         // First retry: 1000ms (2^0 * 1000)
-        expect(retryDelay(0)).toBe(1000);
+        expect(retryDelay(0, mockError)).toBe(1000);
 
         // Second retry: 2000ms (2^1 * 1000)
-        expect(retryDelay(1)).toBe(2000);
+        expect(retryDelay(1, mockError)).toBe(2000);
 
         // Third retry: 4000ms (2^2 * 1000)
-        expect(retryDelay(2)).toBe(4000);
+        expect(retryDelay(2, mockError)).toBe(4000);
 
         // Fourth retry: 8000ms (2^3 * 1000)
-        expect(retryDelay(3)).toBe(8000);
+        expect(retryDelay(3, mockError)).toBe(8000);
 
         // Max at 30000ms
-        expect(retryDelay(10)).toBe(30000);
+        expect(retryDelay(10, mockError)).toBe(30000);
       }
     });
   });

@@ -60,6 +60,7 @@ function TestWrapper({ children }: { children: React.ReactNode }) {
 const mockPhotos: Photo[] = [
   {
     id: 'photo-1',
+    orgId: 'org-1',
     url: 'https://cdn.example.com/photo-1.jpg',
     thumbnailUrl: 'https://cdn.example.com/photo-1-thumb.jpg',
     caption: 'Site entrance photo',
@@ -75,6 +76,7 @@ const mockPhotos: Photo[] = [
   },
   {
     id: 'photo-2',
+    orgId: 'org-1',
     url: 'https://cdn.example.com/photo-2.jpg',
     thumbnailUrl: 'https://cdn.example.com/photo-2-thumb.jpg',
     caption: 'Erosion control measures',
@@ -90,6 +92,7 @@ const mockPhotos: Photo[] = [
   },
   {
     id: 'photo-3',
+    orgId: 'org-1',
     url: 'https://cdn.example.com/photo-3.jpg',
     thumbnailUrl: 'https://cdn.example.com/photo-3-thumb.jpg',
     caption: 'Storm drain inspection',

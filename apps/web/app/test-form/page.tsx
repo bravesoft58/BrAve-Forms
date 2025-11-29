@@ -1,7 +1,7 @@
 'use client';
 
 import { FormRenderer } from '@/components/Forms/FormRenderer';
-import { FormTemplate } from '@/components/Forms/FormRenderer/types';
+import { FormTemplate, FormSubmissionData } from '@/components/Forms/FormRenderer/types';
 import { PageContainer } from '@/components/Layout/PageContainer';
 
 const testTemplate: FormTemplate = {
@@ -320,7 +320,7 @@ const validationTemplate: FormTemplate = {
 };
 
 export default function TestFormPage() {
-  const handleSubmit = (data: Record<string, unknown>) => {
+  const handleSubmit = (data: FormSubmissionData) => {
     // eslint-disable-next-line no-console
     console.log('Form submitted:', data);
     // eslint-disable-next-line no-alert

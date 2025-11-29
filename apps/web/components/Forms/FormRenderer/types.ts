@@ -58,6 +58,7 @@ export interface FieldValidation {
   maxLength?: number;
   pattern?: string;
   customMessage?: string;
+  step?: number;
 }
 
 /**

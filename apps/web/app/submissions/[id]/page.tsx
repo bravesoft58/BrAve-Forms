@@ -8,6 +8,17 @@ import { Container, Title, Text, Stack, Button, Group, Badge, Image, Paper } fro
 import { findSubmissionById } from '@/lib/api/submissions';
 import { UseAsTemplateDialog } from './UseAsTemplateDialog';
 
+// Type for schema sections from API response
+interface SchemaSection {
+  id: string;
+  title: string;
+  fields?: Array<{
+    id: string;
+    type: string;
+    label: string;
+  }>;
+}
+
 export default function SubmissionDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -110,14 +121,17 @@ export default function SubmissionDetailPage() {
         {/* Form Data */}
         {template?.schema?.sections ? (
           <Stack gap="lg">
-            {template.schema.sections.map((section: any) => (
+            {(template.schema.sections as SchemaSection[]).map((section) => (
               <Paper key={section.id} p="md" shadow="sm">
                 <Title order={2} size="h3" mb="md">
                   {section.title}
                 </Title>
                 <Stack gap="md">
-                  {section.fields?.map((field: any) => {
+                  {section.fields?.map((field) => {
                     const value = formData[field.id];
+                    const displayValue = typeof value === 'string' || typeof value === 'number'
+                      ? String(value)
+                      : null;
 
                     return (
                       <div key={field.id}>
@@ -125,18 +139,18 @@ export default function SubmissionDetailPage() {
                           {field.label}
                         </Text>
                         <div>
-                          {field.type === 'photo' && value ? (
+                          {field.type === 'photo' && displayValue ? (
                             <Image
-                              src={value}
+                              src={displayValue}
                               alt={field.label}
                               width={200}
                               height={200}
                               fit="cover"
                               radius="md"
                             />
-                          ) : field.type === 'signature' && value ? (
+                          ) : field.type === 'signature' && displayValue ? (
                             <Image
-                              src={value}
+                              src={displayValue}
                               alt="Signature"
                               width={300}
                               height={100}
@@ -144,8 +158,8 @@ export default function SubmissionDetailPage() {
                               radius="md"
                             />
                           ) : (
-                            <Text size="sm" c={value ? undefined : 'dimmed'}>
-                              {value || 'N/A'}
+                            <Text size="sm" c={displayValue ? undefined : 'dimmed'}>
+                              {displayValue || 'N/A'}
                             </Text>
                           )}
                         </div>

@@ -161,7 +161,12 @@ describe('QR Portal API', () => {
     it('should verify valid token', async () => {
       // Mock IndexedDB to return null (no cache)
       mockIndexedDB.open.mockImplementation(() => {
-        const request = {
+        const request: {
+          onerror: ((ev: Event) => void) | null;
+          onsuccess: ((ev: Event) => void) | null;
+          onupgradeneeded: ((ev: Event) => void) | null;
+          result: unknown;
+        } = {
           onerror: null,
           onsuccess: null,
           onupgradeneeded: null,
@@ -194,7 +199,11 @@ describe('QR Portal API', () => {
 
     it('should handle expired token error', async () => {
       mockIndexedDB.open.mockImplementation(() => {
-        const request = {
+        const request: {
+          onerror: ((ev: Event) => void) | null;
+          onsuccess: ((ev: Event) => void) | null;
+          result: unknown;
+        } = {
           onerror: null,
           onsuccess: null,
           result: {
@@ -303,7 +312,11 @@ describe('QR Portal API', () => {
     it('should get project info for valid token', async () => {
       // Mock IndexedDB to return null (no cache)
       mockIndexedDB.open.mockImplementation(() => {
-        const request = {
+        const request: {
+          onerror: ((ev: Event) => void) | null;
+          onsuccess: ((ev: Event) => void) | null;
+          result: unknown;
+        } = {
           onerror: null,
           onsuccess: null,
           result: {
@@ -345,7 +358,11 @@ describe('Offline Caching', () => {
   describe('hasValidOfflineToken', () => {
     it('should return false when no cached token exists', async () => {
       mockIndexedDB.open.mockImplementation(() => {
-        const request = {
+        const request: {
+          onerror: ((ev: Event) => void) | null;
+          onsuccess: ((ev: Event) => void) | null;
+          result: unknown;
+        } = {
           onerror: null,
           onsuccess: null,
           result: {
@@ -374,7 +391,11 @@ describe('Offline Caching', () => {
     it('should clear all cached data', async () => {
       const clearMock = vi.fn();
       mockIndexedDB.open.mockImplementation(() => {
-        const request = {
+        const request: {
+          onerror: ((ev: Event) => void) | null;
+          onsuccess: ((ev: Event) => void) | null;
+          result: unknown;
+        } = {
           onerror: null,
           onsuccess: null,
           result: {

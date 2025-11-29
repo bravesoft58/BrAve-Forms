@@ -24,10 +24,10 @@ import { useAppAuth } from '@/app/providers';
  * NO Route Segment Config exports (this is a Client Component)
  */
 export default function DashboardPage() {
-  const { user } = useAppAuth();
+  const { firstName } = useAppAuth();
 
   return (
-    <PageContainer title={`Welcome, ${user?.firstName || 'User'}`}>
+    <PageContainer title={`Welcome, ${firstName || 'User'}`}>
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
         <Stack gap="md">
           <QuickActions />

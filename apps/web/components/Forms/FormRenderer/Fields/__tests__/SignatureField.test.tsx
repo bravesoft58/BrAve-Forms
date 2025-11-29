@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useForm } from 'react-hook-form';
+import { useForm, FieldError } from 'react-hook-form';
 import { SignatureField } from '../SignatureField';
 import { FormField } from '../../types';
 import { notifications } from '@mantine/notifications';
@@ -27,7 +27,7 @@ function TestWrapper({ field, disabled = false }: { field: FormField; disabled?:
   } = useForm();
 
   return (
-    <SignatureField field={field} control={control} error={errors[field.id]} disabled={disabled} />
+    <SignatureField field={field} control={control} error={errors[field.id] as FieldError | undefined} disabled={disabled} />
   );
 }
 

@@ -1,10 +1,12 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ProjectDetailPage from '../page';
 
-// Mock useParams
+// Mock useParams - will be configured per test
+const mockUseParams = vi.fn();
+
 vi.mock('next/navigation', () => ({
-  useParams: () => ({ id: '1' }),
+  useParams: () => mockUseParams(),
   useRouter: () => ({
     push: vi.fn(),
     back: vi.fn(),
@@ -12,15 +14,20 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('ProjectDetailPage', () => {
+  beforeEach(() => {
+    // Default to project id '1'
+    mockUseParams.mockReturnValue({ id: '1' });
+  });
+
   it('should render project header with name and address', () => {
-    render(<ProjectDetailPage params={{ id: '1' }} />);
+    render(<ProjectDetailPage />);
 
     expect(screen.getByText('Mill Street Construction')).toBeInTheDocument();
     expect(screen.getByText('123 Main St, Reno NV')).toBeInTheDocument();
   });
 
   it('should render all 5 tabs', () => {
-    render(<ProjectDetailPage params={{ id: '1' }} />);
+    render(<ProjectDetailPage />);
 
     expect(screen.getByText('Forms')).toBeInTheDocument();
     expect(screen.getByText('Photos')).toBeInTheDocument();
@@ -30,7 +37,7 @@ describe('ProjectDetailPage', () => {
   });
 
   it('should switch tabs on click', () => {
-    render(<ProjectDetailPage params={{ id: '1' }} />);
+    render(<ProjectDetailPage />);
 
     const photosTab = screen.getByText('Photos');
     fireEvent.click(photosTab);
@@ -39,7 +46,7 @@ describe('ProjectDetailPage', () => {
   });
 
   it('should show breadcrumbs with correct hierarchy', () => {
-    render(<ProjectDetailPage params={{ id: '1' }} />);
+    render(<ProjectDetailPage />);
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Projects')).toBeInTheDocument();
@@ -47,13 +54,14 @@ describe('ProjectDetailPage', () => {
   });
 
   it('should render Edit Project button', () => {
-    render(<ProjectDetailPage params={{ id: '1' }} />);
+    render(<ProjectDetailPage />);
 
     expect(screen.getByText('Edit Project')).toBeInTheDocument();
   });
 
   it('should show not found message for invalid project ID', () => {
-    render(<ProjectDetailPage params={{ id: '999' }} />);
+    mockUseParams.mockReturnValue({ id: '999' });
+    render(<ProjectDetailPage />);
 
     expect(screen.getByText('Project Not Found')).toBeInTheDocument();
   });

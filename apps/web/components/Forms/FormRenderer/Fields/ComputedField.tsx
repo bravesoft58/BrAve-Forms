@@ -11,7 +11,7 @@ interface ComputedFieldProps {
   setValue?: UseFormSetValue<any>;
 }
 
-export function ComputedField({ field, error, computedValue, setValue }: ComputedFieldProps) {
+export function ComputedField({ field, error: _error, computedValue, setValue }: ComputedFieldProps) {
   // Update form value when computed value changes
   useEffect(() => {
     if (setValue && computedValue !== undefined) {
@@ -25,7 +25,6 @@ export function ComputedField({ field, error, computedValue, setValue }: Compute
       label={field.label}
       required={false}
       helpText={`Formula: ${field.computedValue || 'N/A'}`}
-      error={error}
     >
       <TextInput
         id={field.id}

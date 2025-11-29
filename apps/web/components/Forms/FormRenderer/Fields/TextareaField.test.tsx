@@ -3,16 +3,18 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MantineProvider } from '@mantine/core';
 import { vi } from 'vitest';
+import type { UseFormRegister } from 'react-hook-form';
 import { TextareaField } from './TextareaField';
 import { FormField } from '../types';
 
-// Mock React Hook Form register
-const mockRegister = vi.fn((name: string) => ({
+// Mock React Hook Form register - keep reference for mockClear
+const mockRegisterFn = vi.fn((name: string) => ({
   name,
   onChange: vi.fn(),
   onBlur: vi.fn(),
   ref: vi.fn(),
 }));
+const mockRegister = mockRegisterFn as unknown as UseFormRegister<Record<string, unknown>>;
 
 // Helper to render with Mantine provider
 const renderWithMantine = (component: React.ReactElement) => {
@@ -29,7 +31,7 @@ describe('TextareaField', () => {
   };
 
   beforeEach(() => {
-    mockRegister.mockClear();
+    mockRegisterFn.mockClear();
   });
 
   it('should render with label and placeholder', () => {

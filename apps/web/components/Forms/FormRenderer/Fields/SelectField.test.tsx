@@ -35,7 +35,7 @@ const TestWrapper = ({
 
 describe('SelectField', () => {
   it('should render with label and options', () => {
-    render(<TestWrapper>{null}</TestWrapper>);
+    render(<TestWrapper />);
 
     // Verify label is rendered
     expect(screen.getByText('Test Select')).toBeInTheDocument();
@@ -46,7 +46,7 @@ describe('SelectField', () => {
   });
 
   it('should display placeholder text', () => {
-    render(<TestWrapper>{null}</TestWrapper>);
+    render(<TestWrapper />);
 
     // Verify placeholder is displayed
     expect(screen.getByPlaceholderText('Select an option')).toBeInTheDocument();
@@ -55,14 +55,14 @@ describe('SelectField', () => {
   it('should display error message when validation fails', () => {
     const error = { type: 'required', message: 'Selection is required' };
 
-    render(<TestWrapper error={error}>{null}</TestWrapper>);
+    render(<TestWrapper error={error} />);
 
     // Verify error message is displayed
     expect(screen.getByText('Selection is required')).toBeInTheDocument();
   });
 
   it('should be disabled when disabled prop is true', () => {
-    render(<TestWrapper disabled={true}>{null}</TestWrapper>);
+    render(<TestWrapper disabled={true} />);
 
     const input = screen.getByRole('textbox');
 

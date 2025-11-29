@@ -13,23 +13,17 @@ import {
   Button,
   Group,
   Divider,
-  Tabs,
-  Accordion,
   Alert,
   Badge,
   ActionIcon,
-  Text,
   Collapse,
   Box,
-  Checkbox,
 } from '@mantine/core';
 import {
   IconSettings,
   IconTrash,
   IconAlertTriangle,
   IconShieldCheck,
-  IconMapPin,
-  IconCamera,
   IconPlus,
   IconX,
   IconChevronDown,
@@ -227,8 +221,11 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
             ]}
             {...form.getInputProps('width')}
             onChange={(value) => {
-              form.setFieldValue('width', value);
-              handleFormChange({ ...form.values, width: value });
+              if (value) {
+                const widthValue = value as 'full' | 'half' | 'third' | 'quarter';
+                form.setFieldValue('width', widthValue);
+                handleFormChange({ ...form.values, width: widthValue });
+              }
             }}
           />
 
@@ -258,8 +255,9 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
                     min={0}
                     {...form.getInputProps('minLength')}
                     onChange={(value) => {
-                      form.setFieldValue('minLength', value);
-                      handleFormChange({ ...form.values, minLength: value });
+                      const numValue = typeof value === 'number' ? value : undefined;
+                      form.setFieldValue('minLength', numValue);
+                      handleFormChange({ ...form.values, minLength: numValue });
                     }}
                   />
                   <NumberInput
@@ -268,8 +266,9 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
                     min={0}
                     {...form.getInputProps('maxLength')}
                     onChange={(value) => {
-                      form.setFieldValue('maxLength', value);
-                      handleFormChange({ ...form.values, maxLength: value });
+                      const numValue = typeof value === 'number' ? value : undefined;
+                      form.setFieldValue('maxLength', numValue);
+                      handleFormChange({ ...form.values, maxLength: numValue });
                     }}
                   />
                 </>
@@ -282,8 +281,9 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
                     placeholder="Min value"
                     {...form.getInputProps('min')}
                     onChange={(value) => {
-                      form.setFieldValue('min', value);
-                      handleFormChange({ ...form.values, min: value });
+                      const numValue = typeof value === 'number' ? value : undefined;
+                      form.setFieldValue('min', numValue);
+                      handleFormChange({ ...form.values, min: numValue });
                     }}
                   />
                   <NumberInput
@@ -291,8 +291,9 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
                     placeholder="Max value"
                     {...form.getInputProps('max')}
                     onChange={(value) => {
-                      form.setFieldValue('max', value);
-                      handleFormChange({ ...form.values, max: value });
+                      const numValue = typeof value === 'number' ? value : undefined;
+                      form.setFieldValue('max', numValue);
+                      handleFormChange({ ...form.values, max: numValue });
                     }}
                   />
                   <NumberInput
@@ -302,13 +303,14 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
                     decimalScale={2}
                     {...form.getInputProps('step')}
                     onChange={(value) => {
-                      form.setFieldValue('step', value);
-                      handleFormChange({ ...form.values, step: value });
+                      const numValue = typeof value === 'number' ? value : undefined;
+                      form.setFieldValue('step', numValue);
+                      handleFormChange({ ...form.values, step: numValue });
                     }}
                   />
                   
                   {field.name === 'rainfallAmount' && (
-                    <Alert icon={<IconAlertTriangle size={16} />} color="yellow" size="sm">
+                    <Alert icon={<IconAlertTriangle size={16} />} color="yellow">
                       EPA CGP requires exactly 0.25 inches for inspection trigger
                     </Alert>
                   )}
@@ -370,7 +372,6 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
                   <Switch
                     label="Require GPS Location"
                     description="Embed GPS coordinates in photo EXIF data"
-                    icon={<IconMapPin size={16} />}
                     {...form.getInputProps('gpsRequired')}
                     onChange={(event) => {
                       form.getInputProps('gpsRequired').onChange(event);
@@ -386,8 +387,11 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
                     ]}
                     {...form.getInputProps('photoQuality')}
                     onChange={(value) => {
-                      form.setFieldValue('photoQuality', value);
-                      handleFormChange({ ...form.values, photoQuality: value });
+                      if (value) {
+                        const qualityValue = value as 'high' | 'medium' | 'low';
+                        form.setFieldValue('photoQuality', qualityValue);
+                        handleFormChange({ ...form.values, photoQuality: qualityValue });
+                      }
                     }}
                   />
                 </>
@@ -458,8 +462,8 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
                 ]}
                 {...form.getInputProps('units')}
                 onChange={(value) => {
-                  form.setFieldValue('units', value);
-                  handleFormChange({ ...form.values, units: value });
+                  form.setFieldValue('units', value || '');
+                  handleFormChange({ ...form.values, units: value || '' });
                 }}
               />
             </Stack>

@@ -131,13 +131,11 @@ export async function fetchDashboardStats(token: string | null): Promise<Dashboa
   // Parse org stats (returned as JSON string from resolver)
   let orgStats: OrganizationStatsResponse | null = null;
   if (orgStatsResult.organizationStats) {
-    orgStats =
-      typeof orgStatsResult.organizationStats === 'string'
-        ? safeParseJson<OrganizationStatsResponse>(
-            orgStatsResult.organizationStats,
-            'organizationStats'
-          )
-        : orgStatsResult.organizationStats;
+    // organizationStats is returned as a JSON string from GraphQL resolver
+    orgStats = safeParseJson<OrganizationStatsResponse>(
+      orgStatsResult.organizationStats,
+      'organizationStats'
+    );
   }
 
   // Count submissions from today
@@ -235,13 +233,11 @@ export async function fetchPendingTasks(token: string | null): Promise<PendingTa
   // Parse org stats to get recent activity (inspections)
   let orgStats: OrganizationStatsResponse | null = null;
   if (data.organizationStats) {
-    orgStats =
-      typeof data.organizationStats === 'string'
-        ? safeParseJson<OrganizationStatsResponse>(
-            data.organizationStats,
-            'pendingTasks.organizationStats'
-          )
-        : data.organizationStats;
+    // organizationStats is returned as a JSON string from GraphQL resolver
+    orgStats = safeParseJson<OrganizationStatsResponse>(
+      data.organizationStats,
+      'pendingTasks.organizationStats'
+    );
   }
 
   // Filter to pending/in-progress inspections as tasks

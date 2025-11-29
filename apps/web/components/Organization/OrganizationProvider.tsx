@@ -213,7 +213,7 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
     userRole,
     isLoading: !authLoaded || isPending,
     error: contextError || error?.message || null,
-    refetch,
+    refetch: async () => { await refetch(); },
     ...permissions,
     hasFeatureAccess,
   };

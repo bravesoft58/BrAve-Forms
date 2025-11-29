@@ -2,6 +2,21 @@
 
 import { Annotorious, ImageAnnotator, useAnnotator } from '@annotorious/react';
 import '@annotorious/annotorious/annotorious.css';
+
+/**
+ * Extended Annotator type with methods used in this component
+ * The library's TypeScript definitions are incomplete
+ */
+interface ExtendedAnnotator {
+  getAnnotations: () => unknown[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  on: (event: string, callback: (...args: any[]) => void) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  off: (event: string, callback: (...args: any[]) => void) => void;
+  setDrawingTool?: (tool: string) => void;
+  setAnnotations?: (annotations: unknown[]) => void;
+  clearAnnotations?: () => void;
+}
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Stack,
@@ -77,7 +92,7 @@ interface PhotoAnnotationProps {
  * Helper to safely cast annotator return types
  * Annotorious library returns unknown[] but we know the shape
  */
-function getTypedAnnotations(anno: ReturnType<typeof useAnnotator>): Annotation[] {
+function getTypedAnnotations(anno: ExtendedAnnotator | null): Annotation[] {
   if (!anno) return [];
   return (anno.getAnnotations() || []) as Annotation[];
 }
@@ -93,7 +108,7 @@ function AnnotationToolbar({
   readOnly,
   showMetadata,
 }: PhotoAnnotationProps) {
-  const anno = useAnnotator();
+  const anno = useAnnotator() as ExtendedAnnotator | null;
   const [tool, setTool] = useState<DrawingTool>('rect');
   const [color, setColor] = useState('#ff0000');
   const [isSaving, setIsSaving] = useState(false);
@@ -126,7 +141,7 @@ function AnnotationToolbar({
   // Load initial annotations
   useEffect(() => {
     if (anno && initialAnnotations && initialAnnotations.length > 0) {
-      anno.setAnnotations(initialAnnotations);
+      anno.setAnnotations?.(initialAnnotations);
       updateAnnotationCount();
     }
   }, [anno, initialAnnotations, updateAnnotationCount]);
@@ -313,7 +328,7 @@ function AnnotationToolbar({
       setUndoStack((prev) => [...prev, currentAnnotations]);
       setRedoStack([]);
 
-      anno.setAnnotations([]);
+      anno.setAnnotations?.([]);
       setShowConfirmClear(false);
       updateAnnotationCount();
       onAnnotationsChange?.([]);
@@ -336,7 +351,7 @@ function AnnotationToolbar({
     setRedoStack((prev) => [...prev, currentAnnotations]);
     setUndoStack((prev) => prev.slice(0, -1));
 
-    anno.setAnnotations(previousState);
+    anno.setAnnotations?.(previousState);
     updateAnnotationCount();
   };
 
@@ -352,7 +367,7 @@ function AnnotationToolbar({
     setUndoStack((prev) => [...prev, currentAnnotations]);
     setRedoStack((prev) => prev.slice(0, -1));
 
-    anno.setAnnotations(nextState);
+    anno.setAnnotations?.(nextState);
     updateAnnotationCount();
   };
 
@@ -532,7 +547,7 @@ function AnnotationToolbar({
         <ImageAnnotator
           tool={tool}
           style={{
-            stroke: color,
+            stroke: color as unknown as undefined, // Color type workaround
             strokeWidth: 2,
           }}
         >

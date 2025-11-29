@@ -17,7 +17,7 @@ import {
 import { IconSearch, IconPlus, IconFolderOff } from '@tabler/icons-react';
 import { PageContainer } from '@/components/Layout/PageContainer';
 import { Breadcrumbs } from '@/components/Layout/Breadcrumbs';
-import { ProjectCard } from '@/components/Projects/ProjectCard';
+import { ProjectCard } from '@/components/projects/ProjectCard';
 import { getMockProjects, filterProjectsByStatus, searchProjects } from '@/lib/mock-data/projects';
 
 /**

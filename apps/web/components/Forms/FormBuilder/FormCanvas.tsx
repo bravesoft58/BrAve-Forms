@@ -221,7 +221,6 @@ function SortableField({ field, isSelected, onSelect, onDelete, onDuplicate }: S
         <Alert
           icon={<IconAlertTriangle size={16} />}
           color="yellow"
-          size="xs"
           mt="xs"
         >
           <Text size="xs">

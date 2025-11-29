@@ -106,8 +106,64 @@ async function fetchOrganizationDashboard() {
   return json.data;
 }
 
+// GraphQL Response Types
+interface ProjectCompliance {
+  overallScore: number;
+  requiresAttention: boolean;
+  overdueInspections: number;
+}
+
+interface RecentInspection {
+  id: string;
+  type: string;
+  status: string;
+  overdue: boolean;
+  inspectionDate: string;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  status: string;
+  compliance: ProjectCompliance;
+  recentInspections: RecentInspection[];
+}
+
+interface UsersByRole {
+  role: string;
+  count: number;
+}
+
+interface InspectionStats {
+  type: string;
+  total: number;
+  compliant: number;
+  overdue: number;
+}
+
+interface OrgStats {
+  totalProjects: number;
+  activeProjects: number;
+  totalInspections: number;
+  pendingInspections: number;
+  complianceRate: number;
+  totalUsers: number;
+  usersByRole: UsersByRole[];
+  projectsByStatus: { status: string; count: number }[];
+  inspectionStats: InspectionStats[];
+}
+
+interface Organization {
+  id: string;
+  name: string;
+  plan: string;
+  stats: OrgStats;
+}
+
+type OrgRole = 'OWNER' | 'ADMIN' | 'MANAGER' | 'MEMBER' | 'INSPECTOR';
+
 interface OrganizationDashboardProps {
-  userRole: 'OWNER' | 'ADMIN' | 'MANAGER' | 'MEMBER' | 'INSPECTOR';
+  userRole: OrgRole;
 }
 
 export function OrganizationDashboard({ userRole }: OrganizationDashboardProps) {
@@ -189,7 +245,7 @@ export function OrganizationDashboard({ userRole }: OrganizationDashboardProps) 
   const complianceColor =
     stats?.complianceRate >= 90 ? 'green' : stats?.complianceRate >= 70 ? 'yellow' : 'red';
   const overdueTotal = projects.reduce(
-    (sum: number, p: Record<string, never>) => sum + (p.compliance?.overdueInspections || 0),
+    (sum: number, p: Project) => sum + (p.compliance?.overdueInspections || 0),
     0
   );
 
@@ -214,7 +270,7 @@ export function OrganizationDashboard({ userRole }: OrganizationDashboardProps) 
           </ActionIcon>
 
           {/* Management Actions - Only for ADMIN and above */}
-          {(['OWNER', 'ADMIN'] as const).includes(userRole) && (
+          {(userRole === 'OWNER' || userRole === 'ADMIN') && (
             <Menu position="bottom-end" withArrow>
               <Menu.Target>
                 <Button variant="light" leftSection={<IconSettings size={16} />}>
@@ -349,7 +405,7 @@ export function OrganizationDashboard({ userRole }: OrganizationDashboardProps) 
             </Group>
 
             <Stack gap="md">
-              {projects.slice(0, 6).map((project: Record<string, never>) => (
+              {projects.slice(0, 6).map((project: Project) => (
                 <Card key={project.id} withBorder padding="md">
                   <Group justify="space-between">
                     <Stack gap={4}>
@@ -401,13 +457,13 @@ export function OrganizationDashboard({ userRole }: OrganizationDashboardProps) 
         {/* Team & Analytics - Management Only */}
         <Grid.Col span={{ base: 12, lg: 4 }}>
           <Stack gap="md" h="100%">
-            {(['OWNER', 'ADMIN', 'MANAGER'] as const).includes(userRole) && (
+            {(userRole === 'OWNER' || userRole === 'ADMIN' || userRole === 'MANAGER') && (
               <Card shadow="sm" padding="lg">
                 <Title order={4} mb="md">
                   Team Distribution
                 </Title>
                 <Stack gap="sm">
-                  {stats.usersByRole.map((roleData: Record<string, never>) => (
+                  {stats.usersByRole.map((roleData: UsersByRole) => (
                     <Group key={roleData.role} justify="space-between">
                       <Text size="sm" tt="capitalize">
                         {roleData.role.toLowerCase()}s
@@ -427,7 +483,7 @@ export function OrganizationDashboard({ userRole }: OrganizationDashboardProps) 
                 Inspection Types
               </Title>
               <Stack gap="sm">
-                {stats.inspectionStats.map((inspectionType: Record<string, never>) => (
+                {stats.inspectionStats.map((inspectionType: InspectionStats) => (
                   <div key={inspectionType.type}>
                     <Group justify="space-between" mb={4}>
                       <Text size="sm" tt="capitalize">

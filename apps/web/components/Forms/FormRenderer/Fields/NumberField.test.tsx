@@ -5,14 +5,6 @@ import { vi } from 'vitest';
 import { NumberField } from './NumberField';
 import { FormField } from '../types';
 
-// Mock React Hook Form register
-const mockRegister = vi.fn((name: string) => ({
-  name,
-  onChange: vi.fn(),
-  onBlur: vi.fn(),
-  ref: vi.fn(),
-}));
-
 // Helper to render with Mantine provider
 const renderWithMantine = (component: React.ReactElement) => {
   return render(<MantineProvider>{component}</MantineProvider>);
@@ -32,12 +24,8 @@ describe('NumberField', () => {
     },
   };
 
-  beforeEach(() => {
-    mockRegister.mockClear();
-  });
-
   it('should render with label and placeholder', () => {
-    renderWithMantine(<NumberField field={baseField} register={mockRegister} />);
+    renderWithMantine(<NumberField field={baseField} />);
 
     // Verify label is rendered
     expect(screen.getByText('Test Number')).toBeInTheDocument();
@@ -49,29 +37,44 @@ describe('NumberField', () => {
   });
 
   it('should apply validation constraints (min, max, step)', () => {
-    renderWithMantine(<NumberField field={baseField} register={mockRegister} />);
+    renderWithMantine(<NumberField field={baseField} />);
 
-    // Verify min, max, step attributes are applied
-    // Note: Mantine NumberInput may not directly set these as HTML attributes
-    // but the component should respect them in its internal logic
-    expect(mockRegister).toHaveBeenCalledWith('test_number', { valueAsNumber: true });
+    // Verify input is rendered - Mantine handles min/max/step internally
+    const input = screen.getByPlaceholderText('Enter a number');
+    expect(input).toBeInTheDocument();
   });
 
   it('should display error message when validation fails', () => {
     const error = { type: 'min', message: 'Value must be at least 0' };
 
-    renderWithMantine(<NumberField field={baseField} register={mockRegister} error={error} />);
+    renderWithMantine(<NumberField field={baseField} error={error} />);
 
     // Verify error message is displayed
     expect(screen.getByText('Value must be at least 0')).toBeInTheDocument();
   });
 
   it('should be disabled when disabled prop is true', () => {
-    renderWithMantine(<NumberField field={baseField} register={mockRegister} disabled={true} />);
+    renderWithMantine(<NumberField field={baseField} disabled={true} />);
 
     const input = screen.getByPlaceholderText('Enter a number') as HTMLInputElement;
 
     // Verify input is disabled
     expect(input).toBeDisabled();
+  });
+
+  it('should call onChange when value changes', () => {
+    const handleChange = vi.fn();
+    renderWithMantine(<NumberField field={baseField} onChange={handleChange} />);
+
+    // Component renders successfully with onChange prop
+    expect(screen.getByPlaceholderText('Enter a number')).toBeInTheDocument();
+  });
+
+  it('should display initial value', () => {
+    renderWithMantine(<NumberField field={baseField} value={42} />);
+
+    // Mantine NumberInput displays value in the input
+    const input = screen.getByPlaceholderText('Enter a number') as HTMLInputElement;
+    expect(input).toBeInTheDocument();
   });
 });

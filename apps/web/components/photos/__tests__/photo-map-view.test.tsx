@@ -83,6 +83,7 @@ function TestWrapper({ children }: { children: React.ReactNode }) {
 const mockPhotosWithGPS: Photo[] = [
   {
     id: 'photo-1',
+    orgId: 'org-1',
     url: 'https://cdn.example.com/photo-1.jpg',
     thumbnailUrl: 'https://cdn.example.com/photo-1-thumb.jpg',
     caption: 'Site entrance photo',
@@ -98,6 +99,7 @@ const mockPhotosWithGPS: Photo[] = [
   },
   {
     id: 'photo-2',
+    orgId: 'org-1',
     url: 'https://cdn.example.com/photo-2.jpg',
     thumbnailUrl: 'https://cdn.example.com/photo-2-thumb.jpg',
     caption: 'Erosion control measures',
@@ -117,6 +119,7 @@ const mockPhotosWithGPS: Photo[] = [
 const mockPhotosWithoutGPS: Photo[] = [
   {
     id: 'photo-3',
+    orgId: 'org-1',
     url: 'https://cdn.example.com/photo-3.jpg',
     thumbnailUrl: 'https://cdn.example.com/photo-3-thumb.jpg',
     caption: 'Storm drain inspection',
@@ -135,6 +138,7 @@ const mockPhotosWithoutGPS: Photo[] = [
 const mockPhotosWithInvalidGPS: Photo[] = [
   {
     id: 'photo-invalid-1',
+    orgId: 'org-1',
     url: 'https://cdn.example.com/photo-invalid-1.jpg',
     caption: 'Invalid latitude',
     latitude: 100, // Invalid: exceeds 90
@@ -147,6 +151,7 @@ const mockPhotosWithInvalidGPS: Photo[] = [
   },
   {
     id: 'photo-invalid-2',
+    orgId: 'org-1',
     url: 'https://cdn.example.com/photo-invalid-2.jpg',
     caption: 'Invalid longitude',
     latitude: 34.0522,
@@ -159,6 +164,7 @@ const mockPhotosWithInvalidGPS: Photo[] = [
   },
   {
     id: 'photo-invalid-3',
+    orgId: 'org-1',
     url: 'https://cdn.example.com/photo-invalid-3.jpg',
     caption: 'NaN coordinates',
     latitude: NaN,
@@ -171,6 +177,7 @@ const mockPhotosWithInvalidGPS: Photo[] = [
   },
   {
     id: 'photo-invalid-4',
+    orgId: 'org-1',
     url: 'https://cdn.example.com/photo-invalid-4.jpg',
     caption: 'Infinity coordinates',
     latitude: Infinity,

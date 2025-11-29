@@ -433,7 +433,7 @@ describe('photo-upload utility', () => {
   describe('isQueuedResult', () => {
     it('should return true for queued results', async () => {
       const { isQueuedResult } = await import('../photo-upload');
-      const result = { queued: true, queueId: 'queued_123' };
+      const result = { queued: true as const, queueId: 'queued_123' };
       expect(isQueuedResult(result)).toBe(true);
     });
 
