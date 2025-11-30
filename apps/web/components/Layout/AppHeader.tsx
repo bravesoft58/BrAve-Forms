@@ -24,6 +24,7 @@ import {
   IconSettings,
   IconLogout,
   IconUser,
+  IconHelp,
 } from '@tabler/icons-react';
 import { useClerk } from '@clerk/nextjs';
 import { toggleMobileMenu } from '@/lib/stores/navigation-store';
@@ -345,6 +346,20 @@ export function AppHeader({
               }}
             >
               Settings
+            </Menu.Item>
+
+            <Menu.Item
+              leftSection={<IconHelp size={16} />}
+              component={Link}
+              href="/help"
+              style={{
+                fontSize: rem(13),
+                minHeight: rem(32),
+                height: rem(32),
+                padding: `${rem(6)} ${rem(10)}`,
+              }}
+            >
+              Help & Support
             </Menu.Item>
 
             <Menu.Divider />

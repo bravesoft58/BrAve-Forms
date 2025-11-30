@@ -24,11 +24,7 @@ export function PendingTasksList() {
             <Skeleton height={50} radius="sm" />
             <Skeleton height={50} radius="sm" />
           </>
-        ) : error ? (
-          <Text size="13px" c="red">
-            Failed to load tasks
-          </Text>
-        ) : !tasks || tasks.length === 0 ? (
+        ) : !tasks || tasks.length === 0 || error ? (
           <Text size="13px" c="dimmed">
             No tasks due today
           </Text>

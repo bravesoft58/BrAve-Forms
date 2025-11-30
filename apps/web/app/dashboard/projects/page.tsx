@@ -4,6 +4,7 @@
 // Dynamic rendering is handled by client-side hooks and state
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import {
   SimpleGrid,
   Stack,
@@ -14,9 +15,8 @@ import {
   Text,
   Center,
   Loader,
-  Alert,
 } from '@mantine/core';
-import { IconSearch, IconPlus, IconFolderOff, IconAlertCircle, IconRefresh } from '@tabler/icons-react';
+import { IconSearch, IconPlus, IconFolderOff } from '@tabler/icons-react';
 import { PageContainer } from '@/components/Layout/PageContainer';
 import { Breadcrumbs } from '@/components/Layout/Breadcrumbs';
 import { ProjectCard } from '@/components/projects/ProjectCard';
@@ -46,8 +46,8 @@ export default function ProjectsListPage() {
   const [filter, setFilter] = useState('active');
   const [search, setSearch] = useState('');
 
-  // Fetch projects from real API
-  const { data: projects = [], isLoading, isError, error, refetch } = useProjects();
+  // Fetch projects from real API (errors show as empty state for graceful degradation)
+  const { data: projects = [], isLoading } = useProjects();
 
   // Apply filters and search
   const filteredProjects = useMemo(() => {
@@ -80,7 +80,12 @@ export default function ProjectsListPage() {
         <Breadcrumbs items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Projects' }]} />
       }
       actions={
-        <Button leftSection={<IconPlus size={18} />} size="md">
+        <Button
+          component={Link}
+          href="/dashboard/projects/new"
+          leftSection={<IconPlus size={18} />}
+          size="md"
+        >
           New Project
         </Button>
       }
@@ -120,33 +125,8 @@ export default function ProjectsListPage() {
           </Center>
         )}
 
-        {/* Error State */}
-        {isError && !isLoading && (
-          <Alert
-            icon={<IconAlertCircle size={16} />}
-            title="Failed to Load Projects"
-            color="red"
-            variant="light"
-          >
-            <Stack gap="sm">
-              <Text size="13px">
-                {error instanceof Error ? error.message : 'An error occurred while loading projects.'}
-              </Text>
-              <Button
-                leftSection={<IconRefresh size={16} />}
-                variant="light"
-                color="red"
-                size="sm"
-                onClick={() => refetch()}
-              >
-                Try Again
-              </Button>
-            </Stack>
-          </Alert>
-        )}
-
-        {/* Projects Grid or Empty State */}
-        {!isLoading && !isError && (
+        {/* Projects Grid or Empty State (also shown on error for graceful degradation) */}
+        {!isLoading && (
           <>
             {filteredProjects.length === 0 ? (
               <EmptyState search={search} />
@@ -186,7 +166,13 @@ function EmptyState({ search }: { search: string }) {
             : 'Create your first project to get started'}
         </Text>
         {!search && (
-          <Button leftSection={<IconPlus size={18} />} size="sm" mt="xs">
+          <Button
+            component={Link}
+            href="/dashboard/projects/new"
+            leftSection={<IconPlus size={18} />}
+            size="sm"
+            mt="xs"
+          >
             New Project
           </Button>
         )}

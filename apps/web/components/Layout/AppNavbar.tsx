@@ -3,7 +3,14 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Stack, NavLink, rem, useMantineTheme } from '@mantine/core';
-import { IconLayoutDashboard, IconFolder, IconFiles, IconSettings } from '@tabler/icons-react';
+import {
+  IconLayoutDashboard,
+  IconFolder,
+  IconFiles,
+  IconSettings,
+  IconTemplate,
+  IconHelp,
+} from '@tabler/icons-react';
 
 /**
  * Navigation item type
@@ -56,9 +63,19 @@ export function AppNavbar() {
       icon: IconFiles,
     },
     {
+      label: 'Form Builder',
+      href: '/dashboard/forms/builder',
+      icon: IconTemplate,
+    },
+    {
       label: 'Settings',
-      href: '/dashboard/settings',
+      href: '/settings',
       icon: IconSettings,
+    },
+    {
+      label: 'Help & Support',
+      href: '/help',
+      icon: IconHelp,
     },
   ];
 

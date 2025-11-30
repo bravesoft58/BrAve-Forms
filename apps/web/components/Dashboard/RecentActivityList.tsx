@@ -58,11 +58,7 @@ export function RecentActivityList({ limit = 5 }: RecentActivityListProps) {
             <Skeleton height={60} radius="sm" />
             <Skeleton height={60} radius="sm" />
           </>
-        ) : error ? (
-          <Text size="13px" c="red">
-            Failed to load activity
-          </Text>
-        ) : !activities || activities.length === 0 ? (
+        ) : !activities || activities.length === 0 || error ? (
           <Text size="13px" c="dimmed">
             No recent activity
           </Text>
