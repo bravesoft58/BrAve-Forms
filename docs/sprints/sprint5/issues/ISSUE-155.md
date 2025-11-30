@@ -4,7 +4,31 @@
 **Time:** 10 hours | **Complexity:** Large
 **Created:** 2025-10-23
 **Dependencies:** ISSUE-154 (Conditional Logic Builder)
-**Status:** READY FOR IMPLEMENTATION
+**Status:** COMPLETE
+**Completed:** 2025-11-30
+
+## Completion Notes
+
+Installed expr-eval and created CalculatedFieldEditor.tsx with full functionality:
+
+- Custom Parser with additional functions: SUM, AVG, MIN, MAX, COUNT, ROUND, ABS, IF
+- Formula editor with syntax validation
+- Field reference insertion via button clicks
+- Function insertion for quick formula building
+- Live preview with test values table
+- Circular dependency detection
+- Unit formatting: number, currency, percentage, decimal, integer
+- Decimal places configuration
+- Topological sort for evaluation order
+- Helper functions: evaluateCalculatedField, evaluateAllCalculatedFields
+
+Files created:
+
+- apps/web/components/Forms/FormBuilder/CalculatedFieldEditor.tsx (500+ lines)
+
+Dependencies added:
+
+- expr-eval ^2.0.2
 
 ## What You'll Do
 

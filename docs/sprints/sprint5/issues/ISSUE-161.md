@@ -5,6 +5,59 @@
 **Estimated Hours:** 4
 **Dependencies:** All Phase 5 issues (ISSUE-150 through ISSUE-160)
 **Sprint:** Sprint 5
+**Status:** COMPLETE
+**Completed:** 2025-11-30
+
+---
+
+## Completion Notes
+
+Created comprehensive unit tests and keyboard shortcuts for Form Builder:
+
+**Tests Created (110 total tests):**
+
+1. **form-builder-store.test.ts** (47 tests)
+   - Field Management: addField, updateField, removeField, duplicateField, reorderFields
+   - Field Selection: selectField, getSelectedField
+   - Form Metadata: setFormName, setFormDescription, setFormCategory
+   - Undo/Redo: undo, redo, canUndo, canRedo
+   - Form Lifecycle: initializeNewForm, loadForm, resetFormBuilder
+   - Utility Functions: getFieldById, getAllFieldIds, getFieldCount, hasUnsavedChanges
+
+2. **ConditionalLogicBuilder.test.ts** (39 tests)
+   - All Operators: equals, not_equals, contains, not_contains, greater_than, greater_than_or_equals, less_than, less_than_or_equals, is_empty, is_not_empty
+   - Logic Types: AND, OR
+   - Field Visibility: show, hide, require actions
+   - Circular Dependency Detection
+   - EPA CGP 0.25 inch threshold validation
+
+3. **CalculatedFieldEditor.test.ts** (24 tests)
+   - Basic Arithmetic: addition, subtraction, multiplication, division
+   - Built-in Functions: SUM, AVG, MIN, MAX, ROUND, ABS, IF
+   - Error Handling: invalid formulas, missing values
+   - EPA Compliance: total rainfall calculations, compliance percentages
+   - Dependency Order: topological sort with multiple calculated fields
+
+**Keyboard Shortcuts (useFormBuilderHotkeys.ts):**
+
+- Ctrl+S: Save form
+- Ctrl+Z: Undo last action
+- Ctrl+Y: Redo action
+- Ctrl+P: Toggle preview mode
+- Delete: Remove selected field
+- Ctrl+D: Duplicate selected field
+- Escape: Deselect field
+
+**Files Created:**
+
+- apps/web/components/Forms/FormBuilder/**tests**/form-builder-store.test.ts
+- apps/web/components/Forms/FormBuilder/**tests**/ConditionalLogicBuilder.test.ts
+- apps/web/components/Forms/FormBuilder/**tests**/CalculatedFieldEditor.test.ts
+- apps/web/components/Forms/FormBuilder/useFormBuilderHotkeys.ts
+
+**Files Modified:**
+
+- apps/web/components/Forms/FormBuilder/index.ts (added keyboard shortcuts export)
 
 ---
 

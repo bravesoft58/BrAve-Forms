@@ -5,6 +5,38 @@
 **Estimated Hours:** 5
 **Dependencies:** ISSUE-158
 **Sprint:** Sprint 5
+**Status:** COMPLETE
+**Completed:** 2025-11-30
+
+---
+
+## Completion Notes
+
+Created comprehensive unit tests for the FieldProperties component:
+
+**Test File:** `apps/web/components/Forms/FormBuilder/__tests__/FieldProperties.test.tsx`
+
+**Tests Created (50 tests):**
+
+- Component Rendering: title, field type badge, delete button
+- Basic Settings Section: heading, Field Label input, Field Name input, Description input, Placeholder input, Field Width dropdown, Required Field switch
+- Field Update Callbacks: label changes, description changes, placeholder changes, name changes, required toggle
+- Delete Action: onDelete callback when delete button clicked
+- Text Field Validation: validation section, min/max length inputs
+- Number Field Validation: validation section, min/max/step inputs
+- Selection Field Options: Options section, option inputs, Add Option button, Remove Option button
+- EPA Compliance Settings: EPA Compliance section for photo/signature/weather/swpppTrigger/bmpChecklist fields, GPS Required switch, Photo Quality dropdown, Digital Certificate switch, EPA Critical Field switch, EPA Regulation input, Section Reference input
+- Measurement Settings: Measurement Settings section, Units dropdown
+- Advanced Settings: Advanced Settings button, CSS Classes input, Field ID input, Custom Validation textarea
+- Field Width Options: Full Width option presence
+
+**Key Implementation Details:**
+
+- Uses MantineProvider wrapper for component testing
+- Tests use getByText for Mantine Switch labels (no accessible label set)
+- Tests use getAllByLabelText for elements with duplicate labels
+- Tests use document.querySelector for Tabler icon elements (delete button)
+- Validates field-type-specific settings (text vs number vs photo vs EPA compliance)
 
 ---
 

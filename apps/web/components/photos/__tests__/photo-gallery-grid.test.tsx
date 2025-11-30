@@ -13,6 +13,18 @@ vi.mock('@clerk/nextjs', () => ({
   useAuth: vi.fn(() => ({
     orgId: 'org_test123',
     userId: 'user_test123',
+    sessionId: 'sess_test123',
+    isLoaded: true,
+    isSignedIn: true,
+    getToken: vi.fn().mockResolvedValue('mock-jwt-token'),
+  })),
+  useUser: vi.fn(() => ({
+    user: {
+      id: 'user_test123',
+      firstName: 'Test',
+      lastName: 'User',
+      primaryEmailAddress: { emailAddress: 'test@example.com' },
+    },
     isLoaded: true,
     isSignedIn: true,
   })),

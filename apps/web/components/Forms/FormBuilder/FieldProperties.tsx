@@ -97,13 +97,13 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
         ...(updates.signatureCertificate && { signatureCertificate: updates.signatureCertificate }),
         ...(updates.weatherSource && { weatherSource: updates.weatherSource }),
         ...(updates.units && { units: updates.units }),
-        ...(updates.epaRegulation || updates.epaSection || updates.epaCritical) && {
+        ...((updates.epaRegulation || updates.epaSection || updates.epaCritical) && {
           epaCompliance: {
             regulation: updates.epaRegulation,
             section: updates.epaSection,
             criticalField: updates.epaCritical,
           },
-        },
+        }),
       },
     };
 
@@ -137,7 +137,9 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
     }
   };
 
-  const isEpaField = ['weather', 'swpppTrigger', 'bmpChecklist', 'violationCode'].includes(field.type);
+  const isEpaField = ['weather', 'swpppTrigger', 'bmpChecklist', 'violationCode'].includes(
+    field.type
+  );
   const isPhotoField = field.type === 'photo';
   const isSignatureField = field.type === 'signature';
   const isMeasurementField = field.type === 'measurement';
@@ -154,7 +156,7 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
             <IconSettings size={18} />
             <Title order={5}>Field Properties</Title>
           </Group>
-          <ActionIcon color="red" variant="light" onClick={onDelete}>
+          <ActionIcon color="red" variant="light" onClick={onDelete} aria-label="Delete field">
             <IconTrash size={16} />
           </ActionIcon>
         </Group>
@@ -168,7 +170,7 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
         {/* Basic Properties */}
         <Stack gap="xs">
           <Title order={6}>Basic Settings</Title>
-          
+
           <TextInput
             label="Field Label"
             placeholder="Enter field label"
@@ -246,7 +248,7 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
             <Divider />
             <Stack gap="xs">
               <Title order={6}>Validation</Title>
-              
+
               {isTextField && (
                 <>
                   <NumberInput
@@ -273,7 +275,7 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
                   />
                 </>
               )}
-              
+
               {isNumberField && (
                 <>
                   <NumberInput
@@ -308,7 +310,7 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
                       handleFormChange({ ...form.values, step: numValue });
                     }}
                   />
-                  
+
                   {field.name === 'rainfallAmount' && (
                     <Alert icon={<IconAlertTriangle size={16} />} color="yellow">
                       EPA CGP requires exactly 0.25 inches for inspection trigger
@@ -331,7 +333,7 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
                   Add Option
                 </Button>
               </Group>
-              
+
               {form.values.options?.map((option, index) => (
                 <Paper key={index} p="xs" withBorder>
                   <Group>
@@ -347,7 +349,12 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
                       onChange={(event) => updateOption(index, 'value', event.currentTarget.value)}
                       style={{ flex: 1 }}
                     />
-                    <ActionIcon color="red" size="sm" onClick={() => removeOption(index)}>
+                    <ActionIcon
+                      color="red"
+                      size="sm"
+                      onClick={() => removeOption(index)}
+                      aria-label="Remove option"
+                    >
                       <IconX size={14} />
                     </ActionIcon>
                   </Group>
@@ -375,7 +382,10 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
                     {...form.getInputProps('gpsRequired')}
                     onChange={(event) => {
                       form.getInputProps('gpsRequired').onChange(event);
-                      handleFormChange({ ...form.values, gpsRequired: event.currentTarget.checked });
+                      handleFormChange({
+                        ...form.values,
+                        gpsRequired: event.currentTarget.checked,
+                      });
                     }}
                   />
                   <Select
@@ -404,7 +414,10 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
                   {...form.getInputProps('signatureCertificate')}
                   onChange={(event) => {
                     form.getInputProps('signatureCertificate').onChange(event);
-                    handleFormChange({ ...form.values, signatureCertificate: event.currentTarget.checked });
+                    handleFormChange({
+                      ...form.values,
+                      signatureCertificate: event.currentTarget.checked,
+                    });
                   }}
                 />
               )}
@@ -475,13 +488,15 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
           <Button
             variant="light"
             size="sm"
-            rightSection={showAdvanced ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+            rightSection={
+              showAdvanced ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />
+            }
             onClick={() => setShowAdvanced(!showAdvanced)}
             fullWidth
           >
             Advanced Settings
           </Button>
-          
+
           <Collapse in={showAdvanced}>
             <Stack gap="xs" mt="md">
               <TextInput
@@ -489,13 +504,13 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
                 placeholder="custom-class another-class"
                 description="Custom CSS classes for styling"
               />
-              
+
               <TextInput
                 label="Field ID"
                 placeholder="custom-id"
                 description="Custom HTML ID attribute"
               />
-              
+
               <Textarea
                 label="Custom Validation"
                 placeholder="JavaScript validation function"

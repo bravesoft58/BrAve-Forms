@@ -5,6 +5,35 @@
 **Estimated Hours:** 5
 **Dependencies:** ISSUE-161, ISSUE-162
 **Sprint:** Sprint 5
+**Status:** COMPLETE
+**Completed:** 2025-11-30
+
+---
+
+## Completion Notes
+
+Created comprehensive unit tests for the FormCanvas component:
+
+**Test File:** `apps/web/components/Forms/FormBuilder/__tests__/FormCanvas.test.tsx`
+
+**Tests Created (42 tests):**
+
+- Empty State: empty state message, helpful instructions, EPA SWPPP template mention, disabled preview button
+- With Fields: field count (singular/plural), canvas title, drag to reorder badge, field label/type/name/width/description rendering
+- Field Badges: Required badge, EPA Critical badge, GPS badge
+- EPA Compliance Alert: Critical EPA field warning message
+- Field Selection: onSelectField callback when field clicked
+- Field Actions: onDeleteField callback, onDuplicateField callback, multiple action buttons
+- Field Types: All 15 field types with correct display labels (text, textarea, number, date, time, select, multiSelect, radio, checkbox, photo, signature, gpsLocation, swpppTrigger, bmpChecklist, violationCode)
+- Field Ordering: fields render in correct order based on order property
+- Add Field Hint: hint text for adding more fields
+- Action Icons: copy/trash/settings/grip-vertical icons presence
+
+**Key Implementation Details:**
+
+- Uses MantineProvider + DndContext wrapper for testing
+- Tests use document.querySelector for Tabler icon elements (Mantine Tooltip doesn't set aria-label)
+- Validates EPA compliance badges and warnings
 
 ---
 

@@ -574,7 +574,8 @@ describe('Sync Queue Integration', () => {
 
       // Photos with compliance metadata should have elevated priority
       expect(syncQueueStore.queue[0].priority).toBe(8);
-      expect(syncQueueStore.queue[0].data.gps.latitude).toBe(36.1699);
+      const photoData = syncQueueStore.queue[0].data as { gps: { latitude: number } };
+      expect(photoData.gps.latitude).toBe(36.1699);
     });
   });
 });

@@ -5,6 +5,29 @@
 **Estimated Hours:** 3
 **Dependencies:** ISSUE-155
 **Sprint:** Sprint 5
+**Status:** COMPLETE
+**Completed:** 2025-11-30
+
+---
+
+## Completion Notes
+
+Created ValidationRulesEditor.tsx with full functionality:
+
+- ValidationRulesEditor component with rule management
+- ValidationRuleCard for individual rule editing
+- Supports rule types: required, minLength, maxLength, min, max, pattern, email, phone, url, custom
+- Custom error message editing for each rule
+- Enable/disable toggle for each rule
+- EPA Compliance Templates for inspector, rainfall, GPS fields
+- Common regex patterns dropdown for construction compliance
+- Validation helper functions: validateFieldValue, validateForm
+- Integration with FieldDefinition.validation schema
+- Syncs to Valtio form builder store
+
+Files created:
+
+- apps/web/components/Forms/FormBuilder/ValidationRulesEditor.tsx (550+ lines)
 
 ---
 

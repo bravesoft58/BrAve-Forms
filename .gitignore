@@ -148,3 +148,4 @@ RANCHER_PORT_SCAN_RESULTS.md
 *.local.yaml
 secrets-local.yaml# Playwright MCP screenshots
 .playwright-mcp/
+apps/web/test-output.txt

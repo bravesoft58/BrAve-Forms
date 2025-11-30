@@ -17,7 +17,21 @@ vi.mock('next/navigation', () => ({
 vi.mock('@clerk/nextjs', () => ({
   useAuth: vi.fn(() => ({
     isLoaded: true,
+    isSignedIn: true,
+    userId: 'user-123',
+    sessionId: 'session-123',
     getToken: vi.fn().mockResolvedValue('mock-token'),
+  })),
+  useUser: vi.fn(() => ({
+    user: {
+      id: 'user-123',
+      firstName: 'Test',
+      lastName: 'User',
+      fullName: 'Test User',
+      primaryEmailAddress: { emailAddress: 'test@example.com' },
+    },
+    isLoaded: true,
+    isSignedIn: true,
   })),
 }));
 

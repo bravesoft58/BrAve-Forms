@@ -15,6 +15,14 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@clerk/nextjs', () => ({
   useAuth: vi.fn(),
+  useUser: vi.fn(() => ({
+    user: {
+      id: 'user_test123',
+      firstName: 'Test',
+      lastName: 'User',
+      primaryEmailAddress: { emailAddress: 'test@example.com' },
+    },
+  })),
 }));
 
 vi.mock('@mantine/notifications', () => ({

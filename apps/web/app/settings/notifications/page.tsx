@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Container,
   Title,
@@ -10,6 +11,8 @@ import {
   Switch,
   Divider,
   Button,
+  TextInput,
+  Alert,
 } from '@mantine/core';
 import {
   IconMail,
@@ -19,21 +22,40 @@ import {
   IconFileDescription,
   IconChartBar,
   IconRefresh,
+  IconMoon,
+  IconSend,
+  IconCheck,
 } from '@tabler/icons-react';
 import { useSnapshot } from 'valtio';
 import {
   settingsStore,
   updateNotificationSetting,
   resetNotificationSettings,
+  setQuietHoursEnabled,
+  setQuietHoursStartTime,
+  setQuietHoursEndTime,
 } from '@/lib/stores/settings-store';
 
 /**
  * Notifications Settings Page
  *
- * Configure email and push notification preferences.
+ * Configure email and push notification preferences with quiet hours support.
  */
 export default function NotificationsPage() {
   const settings = useSnapshot(settingsStore);
+  const [testSent, setTestSent] = useState(false);
+
+  /**
+   * Send a test notification to verify settings are working
+   * STUB: Backend notification service not yet implemented.
+   * This will be connected when the notification delivery system is built.
+   */
+  const sendTestNotification = async () => {
+    // STUB: Backend API not yet implemented
+    // TODO: Connect to POST /api/notifications/test when backend is ready
+    setTestSent(true);
+    setTimeout(() => setTestSent(false), 3000);
+  };
 
   return (
     <Container size="md" py="xl">
@@ -48,14 +70,37 @@ export default function NotificationsPage() {
               Configure how you receive alerts and updates
             </Text>
           </div>
-          <Button
-            variant="subtle"
-            leftSection={<IconRefresh size={16} />}
-            onClick={resetNotificationSettings}
-          >
-            Reset to Defaults
-          </Button>
+          <Group>
+            <Button
+              variant="outline"
+              leftSection={<IconSend size={16} />}
+              onClick={sendTestNotification}
+              disabled={testSent}
+            >
+              {testSent ? 'Test Sent' : 'Test Notification'}
+            </Button>
+            <Button
+              variant="subtle"
+              leftSection={<IconRefresh size={16} />}
+              onClick={resetNotificationSettings}
+            >
+              Reset
+            </Button>
+          </Group>
         </Group>
+
+        {/* Test Notification Alert */}
+        {testSent && (
+          <Alert
+            icon={<IconCheck size={16} />}
+            title="Test notification sent"
+            color="green"
+            withCloseButton
+            onClose={() => setTestSent(false)}
+          >
+            Check your email and device for the test notification.
+          </Alert>
+        )}
 
         {/* Email Notifications */}
         <Paper p="lg" withBorder>
@@ -210,6 +255,65 @@ export default function NotificationsPage() {
                 }
               />
             </Group>
+          </Stack>
+        </Paper>
+
+        {/* Quiet Hours */}
+        <Paper p="lg" withBorder>
+          <Stack gap="md">
+            <Group gap="xs">
+              <IconMoon size={20} />
+              <Title order={3} size="h4">
+                Quiet Hours
+              </Title>
+            </Group>
+            <Text size="sm" c="dimmed">
+              Pause non-critical notifications during off-hours. Critical compliance alerts (weather
+              events, inspection deadlines) will always be delivered.
+            </Text>
+
+            <Divider />
+
+            <Group justify="space-between" wrap="nowrap">
+              <div>
+                <Text fw={500}>Enable Quiet Hours</Text>
+                <Text size="xs" c="dimmed">
+                  Suppress notifications during specified hours
+                </Text>
+              </div>
+              <Switch
+                size="lg"
+                checked={settings.notifications.quietHours.enabled}
+                onChange={(e) => setQuietHoursEnabled(e.currentTarget.checked)}
+              />
+            </Group>
+
+            {settings.notifications.quietHours.enabled && (
+              <>
+                <Divider />
+
+                <Group grow>
+                  <TextInput
+                    label="Start Time"
+                    description="When quiet hours begin"
+                    type="time"
+                    value={settings.notifications.quietHours.startTime}
+                    onChange={(e) => setQuietHoursStartTime(e.currentTarget.value)}
+                  />
+                  <TextInput
+                    label="End Time"
+                    description="When quiet hours end"
+                    type="time"
+                    value={settings.notifications.quietHours.endTime}
+                    onChange={(e) => setQuietHoursEndTime(e.currentTarget.value)}
+                  />
+                </Group>
+
+                <Text size="xs" c="dimmed">
+                  Example: 10:00 PM to 7:00 AM means no non-critical notifications overnight.
+                </Text>
+              </>
+            )}
           </Stack>
         </Paper>
 

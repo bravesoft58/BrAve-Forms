@@ -13,7 +13,22 @@ import * as qrPortalApi from '@/lib/api/qr-portal';
 // Mock Clerk auth
 vi.mock('@clerk/nextjs', () => ({
   useAuth: () => ({
+    isLoaded: true,
+    isSignedIn: true,
+    userId: 'user_test123',
+    sessionId: 'sess_test123',
+    orgId: 'org_test123',
     getToken: vi.fn().mockResolvedValue('mock_auth_token'),
+  }),
+  useUser: () => ({
+    user: {
+      id: 'user_test123',
+      firstName: 'Test',
+      lastName: 'User',
+      primaryEmailAddress: { emailAddress: 'test@example.com' },
+    },
+    isLoaded: true,
+    isSignedIn: true,
   }),
 }));
 
@@ -53,7 +68,11 @@ describe('ProjectQRCode', () => {
     id: 'token_123',
     projectId: 'project_123',
     token: 'qr_token_abc123xyz789',
-    permissions: ['VIEW_SUBMISSIONS', 'VIEW_PHOTOS', 'VIEW_PROJECT_INFO'] as qrPortalApi.TokenPermission[],
+    permissions: [
+      'VIEW_SUBMISSIONS',
+      'VIEW_PHOTOS',
+      'VIEW_PROJECT_INFO',
+    ] as qrPortalApi.TokenPermission[],
     expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     revokedAt: undefined,
     generatedBy: 'user_456',
@@ -67,7 +86,9 @@ describe('ProjectQRCode', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (qrPortalApi.isOnline as unknown as ReturnType<typeof vi.fn>).mockReturnValue(true);
-    (qrPortalApi.generateQRToken as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(mockQRToken);
+    (qrPortalApi.generateQRToken as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockQRToken
+    );
   });
 
   afterEach(() => {
@@ -203,7 +224,9 @@ describe('ProjectQRCode', () => {
   describe('Token Regeneration', () => {
     it('should regenerate token on button click', async () => {
       const revokeResult = { revokedCount: 1, success: true };
-      (qrPortalApi.revokeAllProjectTokens as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(revokeResult);
+      (qrPortalApi.revokeAllProjectTokens as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
+        revokeResult
+      );
 
       renderWithMantine(<ProjectQRCode {...defaultProps} />);
 

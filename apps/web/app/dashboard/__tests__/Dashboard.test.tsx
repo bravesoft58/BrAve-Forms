@@ -6,14 +6,17 @@ import { MantineProvider } from '@mantine/core';
 // Mock the auth provider
 vi.mock('@/app/providers', () => ({
   useAppAuth: vi.fn(() => ({
-    user: {
-      id: 'test-user-id',
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-    },
+    userId: 'test-user-id',
+    orgId: 'test-org-id',
+    orgRole: 'ADMIN',
+    orgSlug: 'test-org',
     isLoaded: true,
     isSignedIn: true,
+    sessionId: 'test-session-id',
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'john@example.com',
+    getToken: vi.fn().mockResolvedValue('mock-token'),
   })),
 }));
 

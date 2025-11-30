@@ -13,6 +13,7 @@ import {
   Card,
   Tooltip,
   Alert,
+  Skeleton,
 } from '@mantine/core';
 import {
   IconGripVertical,
@@ -37,6 +38,7 @@ interface FormCanvasProps {
   onSelectField: (fieldId: string) => void;
   onDeleteField: (fieldId: string) => void;
   onDuplicateField: (fieldId: string) => void;
+  isLoading?: boolean;
 }
 
 interface SortableFieldProps {
@@ -48,14 +50,9 @@ interface SortableFieldProps {
 }
 
 function SortableField({ field, isSelected, onSelect, onDelete, onDuplicate }: SortableFieldProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: field.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: field.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -90,7 +87,7 @@ function SortableField({ field, isSelected, onSelect, onDelete, onDuplicate }: S
       calculation: { icon: IconForms, color: 'violet', label: 'Calculation' },
       fileUpload: { icon: IconForms, color: 'indigo', label: 'File Upload' },
     };
-    
+
     return typeMap[type] || { icon: IconForms, color: 'gray', label: type };
   };
 
@@ -131,10 +128,14 @@ function SortableField({ field, isSelected, onSelect, onDelete, onDuplicate }: S
           <Box style={{ flex: 1, minWidth: 0 }}>
             <Group gap="xs" mb="xs">
               <Icon size={18} color={`var(--mantine-color-${typeInfo.color}-6)`} />
-              <Text size="sm" fw={500} style={{ color: `var(--mantine-color-${typeInfo.color}-7)` }}>
+              <Text
+                size="sm"
+                fw={500}
+                style={{ color: `var(--mantine-color-${typeInfo.color}-7)` }}
+              >
                 {typeInfo.label}
               </Text>
-              
+
               {/* Badges */}
               {isRequired && (
                 <Badge size="xs" color="red" variant="light">
@@ -152,17 +153,17 @@ function SortableField({ field, isSelected, onSelect, onDelete, onDuplicate }: S
                 </Badge>
               )}
             </Group>
-            
+
             <Text size="sm" fw={600} truncate>
               {field.label}
             </Text>
-            
+
             {field.description && (
               <Text size="xs" c="dimmed" truncate>
                 {field.description}
               </Text>
             )}
-            
+
             <Group gap="xs" mt="xs">
               <Text size="xs" c="dimmed">
                 Name: {field.name}
@@ -181,6 +182,7 @@ function SortableField({ field, isSelected, onSelect, onDelete, onDuplicate }: S
               variant="subtle"
               size="sm"
               color="blue"
+              aria-label="Duplicate field"
               onClick={(e) => {
                 e.stopPropagation();
                 onDuplicate();
@@ -189,12 +191,13 @@ function SortableField({ field, isSelected, onSelect, onDelete, onDuplicate }: S
               <IconCopy size={14} />
             </ActionIcon>
           </Tooltip>
-          
+
           <Tooltip label="Delete field">
             <ActionIcon
               variant="subtle"
               size="sm"
               color="red"
+              aria-label="Delete field"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();
@@ -203,38 +206,72 @@ function SortableField({ field, isSelected, onSelect, onDelete, onDuplicate }: S
               <IconTrash size={14} />
             </ActionIcon>
           </Tooltip>
-          
+
           <Tooltip label="Field settings">
             <ActionIcon
               variant="filled"
               size="sm"
               color={isSelected ? 'blue' : 'gray'}
+              aria-label="Field settings"
             >
               <IconSettings size={14} />
             </ActionIcon>
           </Tooltip>
         </Group>
       </Group>
-      
+
       {/* EPA Compliance Warning */}
       {isEpaCompliant && (
-        <Alert
-          icon={<IconAlertTriangle size={16} />}
-          color="yellow"
-          mt="xs"
-        >
-          <Text size="xs">
-            Critical EPA field - modifications may affect compliance
-          </Text>
+        <Alert icon={<IconAlertTriangle size={16} />} color="yellow" mt="xs">
+          <Text size="xs">Critical EPA field - modifications may affect compliance</Text>
         </Alert>
       )}
     </Card>
   );
 }
 
-export function FormCanvas({ fields, selectedField, onSelectField, onDeleteField, onDuplicateField }: FormCanvasProps) {
+export function FormCanvas({
+  fields,
+  selectedField,
+  onSelectField,
+  onDeleteField,
+  onDuplicateField,
+  isLoading = false,
+}: FormCanvasProps) {
   const sortedFields = [...fields].sort((a, b) => a.order - b.order);
-  
+
+  // Show skeleton loading state when form is being loaded
+  if (isLoading) {
+    return (
+      <Paper withBorder p="md" style={{ minHeight: '400px' }}>
+        <Stack gap="md">
+          <Group justify="space-between" mb="md">
+            <Skeleton height={24} width={200} />
+            <Skeleton height={24} width={80} />
+          </Group>
+          {[1, 2, 3].map((i) => (
+            <Card key={i} withBorder p="md">
+              <Group justify="space-between">
+                <Group gap="sm">
+                  <Skeleton height={20} width={20} radius="sm" />
+                  <Stack gap="xs">
+                    <Skeleton height={16} width={150} />
+                    <Skeleton height={12} width={100} />
+                  </Stack>
+                </Group>
+                <Group gap="xs">
+                  <Skeleton height={24} width={24} radius="sm" />
+                  <Skeleton height={24} width={24} radius="sm" />
+                  <Skeleton height={24} width={24} radius="sm" />
+                </Group>
+              </Group>
+            </Card>
+          ))}
+        </Stack>
+      </Paper>
+    );
+  }
+
   if (fields.length === 0) {
     return (
       <Paper withBorder p="xl" style={{ textAlign: 'center', minHeight: '400px' }}>
@@ -244,8 +281,8 @@ export function FormCanvas({ fields, selectedField, onSelectField, onDeleteField
             No fields added yet
           </Text>
           <Text size="sm" c="dimmed" maw={300}>
-            Start building your form by selecting field types from the palette on the left.
-            For EPA compliance, use the SWPPP template.
+            Start building your form by selecting field types from the palette on the left. For EPA
+            compliance, use the SWPPP template.
           </Text>
           <Button variant="light" leftSection={<IconEye size={16} />} disabled>
             Preview will appear here
@@ -273,7 +310,7 @@ export function FormCanvas({ fields, selectedField, onSelectField, onDeleteField
         </Group>
 
         <SortableContext
-          items={sortedFields.map(field => field.id)}
+          items={sortedFields.map((field) => field.id)}
           strategy={verticalListSortingStrategy}
         >
           <Stack gap="sm">
@@ -291,11 +328,15 @@ export function FormCanvas({ fields, selectedField, onSelectField, onDeleteField
         </SortableContext>
 
         {/* Add Field Hint */}
-        <Box mt="md" p="md" style={{ 
-          border: '2px dashed var(--mantine-color-gray-3)', 
-          borderRadius: 'var(--mantine-radius-md)',
-          textAlign: 'center'
-        }}>
+        <Box
+          mt="md"
+          p="md"
+          style={{
+            border: '2px dashed var(--mantine-color-gray-3)',
+            borderRadius: 'var(--mantine-radius-md)',
+            textAlign: 'center',
+          }}
+        >
           <Text size="sm" c="dimmed">
             Add more fields from the palette or drag to reorder
           </Text>

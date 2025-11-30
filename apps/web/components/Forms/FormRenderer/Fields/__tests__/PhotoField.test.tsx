@@ -24,7 +24,22 @@ vi.mock('@mantine/notifications', () => ({
 // Mock Clerk useAuth
 vi.mock('@clerk/nextjs', () => ({
   useAuth: () => ({
+    isLoaded: true,
+    isSignedIn: true,
+    userId: 'user_test123',
+    sessionId: 'sess_test123',
+    orgId: 'org_test123',
     getToken: vi.fn().mockResolvedValue('mock-jwt-token'),
+  }),
+  useUser: () => ({
+    user: {
+      id: 'user_test123',
+      firstName: 'Test',
+      lastName: 'User',
+      primaryEmailAddress: { emailAddress: 'test@example.com' },
+    },
+    isLoaded: true,
+    isSignedIn: true,
   }),
 }));
 
@@ -33,7 +48,9 @@ vi.mock('@/lib/photo-upload', () => ({
   capturePhoto: vi.fn(),
   selectPhoto: vi.fn(),
   uploadPhoto: vi.fn(),
-  isPhotoUploadError: vi.fn((result) => 'code' in result && 'message' in result && !('url' in result)),
+  isPhotoUploadError: vi.fn(
+    (result) => 'code' in result && 'message' in result && !('url' in result)
+  ),
   isCapturedPhoto: vi.fn((result) => 'base64' in result && 'format' in result),
 }));
 
@@ -64,7 +81,12 @@ function TestWrapper({
 
   return (
     <MantineProvider>
-      <PhotoField field={field} control={control} error={errors[field.id] as FieldError | undefined} disabled={disabled} />
+      <PhotoField
+        field={field}
+        control={control}
+        error={errors[field.id] as FieldError | undefined}
+        disabled={disabled}
+      />
     </MantineProvider>
   );
 }

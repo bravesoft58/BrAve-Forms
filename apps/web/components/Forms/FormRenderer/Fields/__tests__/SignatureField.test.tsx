@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm, FieldError } from 'react-hook-form';
+import { MantineProvider } from '@mantine/core';
 import { SignatureField } from '../SignatureField';
 import { FormField } from '../../types';
 import { notifications } from '@mantine/notifications';
@@ -27,9 +28,19 @@ function TestWrapper({ field, disabled = false }: { field: FormField; disabled?:
   } = useForm();
 
   return (
-    <SignatureField field={field} control={control} error={errors[field.id] as FieldError | undefined} disabled={disabled} />
+    <MantineProvider>
+      <SignatureField
+        field={field}
+        control={control}
+        error={errors[field.id] as FieldError | undefined}
+        disabled={disabled}
+      />
+    </MantineProvider>
   );
 }
+
+// Store original createElement before any spying
+const originalCreateElement = document.createElement.bind(document);
 
 describe('SignatureField', () => {
   const mockField: FormField = {
@@ -87,11 +98,12 @@ describe('SignatureField', () => {
     } as any;
 
     // Mock document.createElement for canvas
+    // Uses originalCreateElement defined outside describe block to avoid infinite recursion
     vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
       if (tagName === 'canvas') {
         return mockCanvas;
       }
-      return document.createElement(tagName);
+      return originalCreateElement(tagName);
     });
 
     // Mock Image constructor
@@ -548,11 +560,13 @@ describe('SignatureField', () => {
         });
 
         return (
-          <SignatureField
-            field={fieldWithError}
-            control={control}
-            error={{ type: 'required', message: 'Signature is required for approval' }}
-          />
+          <MantineProvider>
+            <SignatureField
+              field={fieldWithError}
+              control={control}
+              error={{ type: 'required', message: 'Signature is required for approval' }}
+            />
+          </MantineProvider>
         );
       };
 

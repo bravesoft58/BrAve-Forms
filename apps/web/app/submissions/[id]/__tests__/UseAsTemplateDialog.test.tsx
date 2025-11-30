@@ -12,6 +12,23 @@ vi.mock('next/navigation', () => ({
   })),
 }));
 
+// Mock app providers
+vi.mock('@/app/providers', () => ({
+  useAppAuth: vi.fn(() => ({
+    userId: 'test-user-id',
+    orgId: 'test-org-id',
+    orgRole: 'ADMIN',
+    orgSlug: 'test-org',
+    isLoaded: true,
+    isSignedIn: true,
+    sessionId: 'test-session-id',
+    firstName: 'Test',
+    lastName: 'User',
+    email: 'test@example.com',
+    getToken: vi.fn().mockResolvedValue('dev-token-123'),
+  })),
+}));
+
 // Mock submissions API
 vi.mock('@/lib/api/submissions', () => ({
   cloneSubmission: vi.fn(),

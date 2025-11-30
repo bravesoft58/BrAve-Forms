@@ -42,8 +42,8 @@ export function UseAsTemplateDialog({
     },
   });
 
-  const handleClone = async () => {
-    await cloneMutation.mutateAsync(selectedMode);
+  const handleClone = () => {
+    cloneMutation.mutate(selectedMode);
   };
 
   return (

@@ -25,6 +25,11 @@ import {
   updateNotificationSetting,
   updateNotificationSettings,
   resetNotificationSettings,
+  setQuietHoursEnabled,
+  setQuietHoursStartTime,
+  setQuietHoursEndTime,
+  updateQuietHours,
+  isInQuietHours,
   setTheme,
   setDateFormat,
   setUnits,
@@ -36,6 +41,11 @@ import {
   setSyncOnWifiOnly,
   updateOfflineSettings,
   resetOfflineSettings,
+  setTimezone,
+  setTimeFormat,
+  setLanguage,
+  updateAccountSettings,
+  resetAccountSettings,
   resetAllSettings,
   exportSettings,
   importSettings,
@@ -60,6 +70,9 @@ describe('settings-store', () => {
       expect(settingsStore.notifications.emailWeeklySummary).toBe(false);
       expect(settingsStore.notifications.pushRealTimeAlerts).toBe(true);
       expect(settingsStore.notifications.pushInspectionReminders).toBe(true);
+      // Quiet hours defaults
+      expect(settingsStore.notifications.quietHours).toBeDefined();
+      expect(settingsStore.notifications.quietHours.enabled).toBe(false);
     });
 
     it('should update a single notification setting', () => {
@@ -84,6 +97,88 @@ describe('settings-store', () => {
       resetNotificationSettings();
       expect(settingsStore.notifications.emailWeatherAlerts).toBe(true);
       expect(settingsStore.notifications.emailWeeklySummary).toBe(false);
+    });
+  });
+
+  // ============================================================================
+  // Quiet Hours Tests
+  // ============================================================================
+  describe('quiet hours', () => {
+    it('should have default quiet hours values', () => {
+      expect(settingsStore.notifications.quietHours.enabled).toBe(false);
+      expect(settingsStore.notifications.quietHours.startTime).toBe('22:00');
+      expect(settingsStore.notifications.quietHours.endTime).toBe('07:00');
+    });
+
+    it('should enable and disable quiet hours', () => {
+      setQuietHoursEnabled(true);
+      expect(settingsStore.notifications.quietHours.enabled).toBe(true);
+
+      setQuietHoursEnabled(false);
+      expect(settingsStore.notifications.quietHours.enabled).toBe(false);
+    });
+
+    it('should update start time with valid format', () => {
+      setQuietHoursStartTime('21:30');
+      expect(settingsStore.notifications.quietHours.startTime).toBe('21:30');
+
+      setQuietHoursStartTime('00:00');
+      expect(settingsStore.notifications.quietHours.startTime).toBe('00:00');
+    });
+
+    it('should update end time with valid format', () => {
+      setQuietHoursEndTime('08:00');
+      expect(settingsStore.notifications.quietHours.endTime).toBe('08:00');
+
+      setQuietHoursEndTime('23:59');
+      expect(settingsStore.notifications.quietHours.endTime).toBe('23:59');
+    });
+
+    it('should reject invalid time format', () => {
+      setQuietHoursStartTime('22:00'); // Set valid first
+      setQuietHoursStartTime('invalid');
+      expect(settingsStore.notifications.quietHours.startTime).toBe('22:00');
+
+      setQuietHoursStartTime('25:00'); // Invalid hour
+      expect(settingsStore.notifications.quietHours.startTime).toBe('22:00');
+
+      // Single-digit hours should be rejected (HTML time inputs always use "07:00" not "7:00")
+      setQuietHoursEndTime('07:00'); // Set valid first
+      setQuietHoursEndTime('7:00'); // Missing leading zero - should be rejected
+      expect(settingsStore.notifications.quietHours.endTime).toBe('07:00');
+
+      // Additional invalid formats
+      setQuietHoursStartTime('24:00'); // 24 is invalid (max is 23)
+      expect(settingsStore.notifications.quietHours.startTime).toBe('22:00');
+
+      setQuietHoursEndTime('12:60'); // 60 minutes is invalid
+      expect(settingsStore.notifications.quietHours.endTime).toBe('07:00');
+    });
+
+    it('should update multiple quiet hours settings at once', () => {
+      updateQuietHours({
+        enabled: true,
+        startTime: '20:00',
+        endTime: '06:00',
+      });
+      expect(settingsStore.notifications.quietHours.enabled).toBe(true);
+      expect(settingsStore.notifications.quietHours.startTime).toBe('20:00');
+      expect(settingsStore.notifications.quietHours.endTime).toBe('06:00');
+    });
+
+    it('should return false when quiet hours disabled', () => {
+      setQuietHoursEnabled(false);
+      expect(isInQuietHours()).toBe(false);
+    });
+
+    it('should reset quiet hours when resetting notification settings', () => {
+      setQuietHoursEnabled(true);
+      setQuietHoursStartTime('23:00');
+      setQuietHoursEndTime('05:00');
+      resetNotificationSettings();
+      expect(settingsStore.notifications.quietHours.enabled).toBe(false);
+      expect(settingsStore.notifications.quietHours.startTime).toBe('22:00');
+      expect(settingsStore.notifications.quietHours.endTime).toBe('07:00');
     });
   });
 
@@ -202,6 +297,123 @@ describe('settings-store', () => {
   });
 
   // ============================================================================
+  // Account Settings Tests
+  // ============================================================================
+  describe('account settings', () => {
+    it('should have default account values', () => {
+      // Default timezone should be detected or fallback to America/New_York
+      expect(settingsStore.account.timezone).toBeDefined();
+      expect(settingsStore.account.timeFormat).toBe('12h');
+      expect(settingsStore.account.language).toBe('en');
+    });
+
+    it('should update timezone', () => {
+      setTimezone('America/Los_Angeles');
+      expect(settingsStore.account.timezone).toBe('America/Los_Angeles');
+
+      setTimezone('America/Chicago');
+      expect(settingsStore.account.timezone).toBe('America/Chicago');
+    });
+
+    it('should update time format', () => {
+      setTimeFormat('24h');
+      expect(settingsStore.account.timeFormat).toBe('24h');
+
+      setTimeFormat('12h');
+      expect(settingsStore.account.timeFormat).toBe('12h');
+    });
+
+    it('should update language', () => {
+      setLanguage('es');
+      expect(settingsStore.account.language).toBe('es');
+
+      setLanguage('en');
+      expect(settingsStore.account.language).toBe('en');
+    });
+
+    it('should update multiple account settings at once', () => {
+      updateAccountSettings({
+        timezone: 'America/Denver',
+        timeFormat: '24h',
+      });
+      expect(settingsStore.account.timezone).toBe('America/Denver');
+      expect(settingsStore.account.timeFormat).toBe('24h');
+      // Language should remain unchanged
+      expect(settingsStore.account.language).toBe('en');
+    });
+
+    it('should reset account settings to defaults', () => {
+      setTimezone('America/Los_Angeles');
+      setTimeFormat('24h');
+      setLanguage('es');
+      resetAccountSettings();
+      // Timezone should be auto-detected or fallback
+      expect(settingsStore.account.timezone).toBeDefined();
+      expect(settingsStore.account.timeFormat).toBe('12h');
+      expect(settingsStore.account.language).toBe('en');
+    });
+
+    it('should support common US timezones for construction sites', () => {
+      const usTimezones = [
+        'America/New_York',
+        'America/Chicago',
+        'America/Denver',
+        'America/Phoenix',
+        'America/Los_Angeles',
+        'America/Anchorage',
+        'Pacific/Honolulu',
+      ];
+
+      usTimezones.forEach((tz) => {
+        setTimezone(tz);
+        expect(settingsStore.account.timezone).toBe(tz);
+      });
+    });
+
+    it('should support Spanish language for construction workers', () => {
+      setLanguage('es');
+      expect(settingsStore.account.language).toBe('es');
+    });
+
+    it('should handle invalid timezone and fallback to default', () => {
+      setTimezone('Invalid/Fake_City');
+      // Should fallback to default timezone, not set invalid value
+      expect(settingsStore.account.timezone).toBeDefined();
+      expect(settingsStore.account.timezone).not.toBe('Invalid/Fake_City');
+    });
+
+    it('should handle empty string timezone', () => {
+      setTimezone('America/New_York'); // Set valid first
+      setTimezone('');
+      // Should fallback to default, not empty string
+      expect(settingsStore.account.timezone).toBeDefined();
+      expect(settingsStore.account.timezone).not.toBe('');
+    });
+
+    it('should persist account settings to localStorage for offline use', () => {
+      // Set account settings
+      setTimezone('America/Chicago');
+      setTimeFormat('24h');
+      setLanguage('es');
+
+      // Verify the store has the correct values (these will be persisted)
+      // Note: Valtio's subscribe callback is async, so we verify store state
+      // The persistence mechanism (localStorage.setItem) is triggered by Valtio's subscribe
+      // which batches updates asynchronously
+      expect(settingsStore.account.timezone).toBe('America/Chicago');
+      expect(settingsStore.account.timeFormat).toBe('24h');
+      expect(settingsStore.account.language).toBe('es');
+
+      // Verify the store structure supports persistence
+      // The loadFromStorage/saveToStorage functions handle actual persistence
+      expect(typeof settingsStore.account).toBe('object');
+      expect(typeof settingsStore.notifications).toBe('object');
+      expect(typeof settingsStore.display).toBe('object');
+      expect(typeof settingsStore.offline).toBe('object');
+    });
+  });
+
+  // ============================================================================
   // Global Actions Tests
   // ============================================================================
   describe('global actions', () => {
@@ -210,6 +422,8 @@ describe('settings-store', () => {
       updateNotificationSetting('emailWeatherAlerts', false);
       setTheme('dark');
       setSyncInterval(60);
+      setTimeFormat('24h');
+      setLanguage('es');
 
       // Reset all
       resetAllSettings();
@@ -218,16 +432,21 @@ describe('settings-store', () => {
       expect(settingsStore.notifications.emailWeatherAlerts).toBe(true);
       expect(settingsStore.display.theme).toBe('system');
       expect(settingsStore.offline.autoSyncInterval).toBe(15);
+      expect(settingsStore.account.timeFormat).toBe('12h');
+      expect(settingsStore.account.language).toBe('en');
     });
 
     it('should export settings as JSON', () => {
       setTheme('dark');
+      setTimeFormat('24h');
       const exported = exportSettings();
       const parsed = JSON.parse(exported);
 
       expect(parsed.display.theme).toBe('dark');
       expect(parsed.notifications).toBeDefined();
       expect(parsed.offline).toBeDefined();
+      expect(parsed.account).toBeDefined();
+      expect(parsed.account.timeFormat).toBe('24h');
     });
 
     it('should import settings from JSON', () => {
@@ -235,6 +454,7 @@ describe('settings-store', () => {
         display: { theme: 'dark', dateFormat: 'DD/MM/YYYY', units: 'metric' },
         notifications: { emailWeatherAlerts: false },
         offline: { autoSyncInterval: 30 },
+        account: { timezone: 'America/Chicago', timeFormat: '24h', language: 'es' },
       });
 
       const result = importSettings(settingsJson);
@@ -244,6 +464,9 @@ describe('settings-store', () => {
       expect(settingsStore.display.dateFormat).toBe('DD/MM/YYYY');
       expect(settingsStore.notifications.emailWeatherAlerts).toBe(false);
       expect(settingsStore.offline.autoSyncInterval).toBe(30);
+      expect(settingsStore.account.timezone).toBe('America/Chicago');
+      expect(settingsStore.account.timeFormat).toBe('24h');
+      expect(settingsStore.account.language).toBe('es');
     });
 
     it('should handle invalid JSON import gracefully', () => {

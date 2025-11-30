@@ -10,7 +10,9 @@ import {
   IconBell,
   IconPalette,
   IconCloudUpload,
+  IconWorld,
   IconArrowLeft,
+  IconDeviceMobile,
 } from '@tabler/icons-react';
 
 interface SettingsLayoutProps {
@@ -26,6 +28,8 @@ interface SettingsLayoutProps {
  * - Notifications
  * - Display
  * - Offline & Sync
+ * - Account
+ * - App
  */
 export default function SettingsLayout({ children }: SettingsLayoutProps) {
   const pathname = usePathname();
@@ -54,6 +58,18 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
       description: 'Sync settings and storage',
       href: '/settings/offline',
       icon: IconCloudUpload,
+    },
+    {
+      label: 'Account',
+      description: 'Timezone and language',
+      href: '/settings/account',
+      icon: IconWorld,
+    },
+    {
+      label: 'App',
+      description: 'Storage and version info',
+      href: '/settings/app',
+      icon: IconDeviceMobile,
     },
   ];
 

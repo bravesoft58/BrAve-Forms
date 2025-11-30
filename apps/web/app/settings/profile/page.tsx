@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+export const dynamic = 'force-dynamic';
+
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Container,
   Title,
@@ -15,6 +17,10 @@ import {
   Alert,
   Loader,
   SimpleGrid,
+  Progress,
+  FileButton,
+  Modal,
+  ThemeIcon,
 } from '@mantine/core';
 import {
   IconUser,
@@ -26,9 +32,57 @@ import {
   IconTrash,
   IconCheck,
   IconAlertTriangle,
+  IconUpload,
 } from '@tabler/icons-react';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { useAppAuth } from '@/app/providers';
+
+/**
+ * Calculate profile completion percentage based on user data
+ * Criteria:
+ * - First name (20%)
+ * - Last name (20%)
+ * - Profile image (20%)
+ * - Email verified (20%)
+ * - Phone number (20%)
+ */
+export function calculateProfileCompletion(user: {
+  firstName?: string | null;
+  lastName?: string | null;
+  imageUrl?: string | null;
+  hasImage?: boolean;
+  primaryEmailAddress?: { verification?: { status: string | null } | null } | null;
+  phoneNumbers?: Array<{ phoneNumber?: string }> | null;
+}): number {
+  let score = 0;
+
+  // First name (20%)
+  if (user.firstName && user.firstName.trim() !== '') {
+    score += 20;
+  }
+
+  // Last name (20%)
+  if (user.lastName && user.lastName.trim() !== '') {
+    score += 20;
+  }
+
+  // Profile image (20%) - check hasImage or if imageUrl is not the default Clerk avatar
+  if (user.hasImage || (user.imageUrl && !user.imageUrl.includes('img.clerk.com/default'))) {
+    score += 20;
+  }
+
+  // Email verified (20%)
+  if (user.primaryEmailAddress?.verification?.status === 'verified') {
+    score += 20;
+  }
+
+  // Phone number (20%)
+  if (user.phoneNumbers && user.phoneNumbers.length > 0 && user.phoneNumbers[0]?.phoneNumber) {
+    score += 20;
+  }
+
+  return score;
+}
 
 /**
  * Profile Page
@@ -45,6 +99,7 @@ export default function ProfilePage() {
   const { user, isLoaded: isUserLoaded } = useUser();
   const { openUserProfile } = useClerk();
   const { orgId, orgRole, isLoaded: isAuthLoaded } = useAppAuth();
+  const resetRef = useRef<() => void>(null);
 
   // Form state
   const [firstName, setFirstName] = useState(user?.firstName || '');
@@ -53,6 +108,15 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Avatar upload state
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+
+  // Delete account modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Update form state when user data loads
   useEffect(() => {
@@ -85,8 +149,9 @@ export default function ProfilePage() {
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       // eslint-disable-next-line no-console
-      console.error('Failed to update profile:', error);
+      console.error(`Failed to update profile for user ${user.id}, org ${orgId}:`, errorMessage);
       setSaveError('Failed to update profile. Please try again.');
     } finally {
       setIsSaving(false);
@@ -97,6 +162,84 @@ export default function ProfilePage() {
   const handleOpenSecuritySettings = () => {
     openUserProfile();
   };
+
+  // Handle avatar upload
+  const handleAvatarUpload = async (file: File | null) => {
+    if (!file || !user) return;
+
+    // Validate file exists and has content
+    if (file.size === 0) {
+      setAvatarError('Please select a valid image file');
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setAvatarError('Please select an image file (JPEG, PNG, GIF, WebP)');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setAvatarError(
+        `Image must be less than 10MB (current: ${Math.round(file.size / 1024 / 1024)}MB)`
+      );
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    setAvatarError(null);
+
+    try {
+      await user.setProfileImage({ file });
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+      resetRef.current?.();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      // eslint-disable-next-line no-console
+      console.error(
+        `Failed to upload avatar for user ${user.id}: ` +
+          `fileSize=${file.size}, fileType=${file.type}, error=${errorMessage}`
+      );
+      setAvatarError('Failed to upload avatar. Please try again.');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  // Handle delete account
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE' || !user) return;
+
+    setIsDeleting(true);
+
+    try {
+      await user.delete();
+      // User will be automatically signed out and redirected
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      // eslint-disable-next-line no-console
+      console.error(`Failed to delete account for user ${user.id}, org ${orgId}:`, errorMessage);
+      setSaveError('Failed to delete account. Please try again or contact support.');
+      setDeleteModalOpen(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Calculate profile completion (memoized)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- only recompute when specific fields change
+  const profileCompletion = useMemo(() => {
+    return user ? calculateProfileCompletion(user) : 0;
+  }, [
+    user?.firstName,
+    user?.lastName,
+    user?.hasImage,
+    user?.imageUrl,
+    user?.primaryEmailAddress?.verification?.status,
+    user?.phoneNumbers,
+  ]);
 
   // Get role display name
   const getRoleDisplay = (role: string): { label: string; color: string } => {
@@ -142,8 +285,8 @@ export default function ProfilePage() {
   return (
     <Container size="md" py="xl">
       <Stack gap="lg">
-        {/* Page Header */}
-        <Group justify="space-between" align="center">
+        {/* Page Header with Profile Completion */}
+        <Group justify="space-between" align="flex-start">
           <div>
             <Title order={1} size="h2">
               Profile
@@ -152,6 +295,29 @@ export default function ProfilePage() {
               Manage your account information
             </Text>
           </div>
+          <Paper p="md" withBorder style={{ minWidth: 200 }}>
+            <Stack gap="xs">
+              <Group justify="space-between">
+                <Text size="sm" fw={500}>
+                  Profile Completion
+                </Text>
+                <Text size="sm" fw={600} c={profileCompletion === 100 ? 'green' : 'blue'}>
+                  {profileCompletion}%
+                </Text>
+              </Group>
+              <Progress
+                value={profileCompletion}
+                color={profileCompletion === 100 ? 'green' : 'blue'}
+                size="sm"
+                radius="xl"
+              />
+              {profileCompletion < 100 && (
+                <Text size="xs" c="dimmed">
+                  Complete your profile for better team visibility
+                </Text>
+              )}
+            </Stack>
+          </Paper>
         </Group>
 
         {/* Success/Error Alerts */}
@@ -177,11 +343,32 @@ export default function ProfilePage() {
             </Group>
 
             <Group align="flex-start" gap="lg">
-              {/* Avatar */}
-              <Avatar src={user.imageUrl} size={80} radius="xl" color="blue">
-                {user.firstName?.[0]}
-                {user.lastName?.[0]}
-              </Avatar>
+              {/* Avatar with Upload */}
+              <Stack align="center" gap="xs">
+                <Avatar src={user.imageUrl} size={100} radius="xl" color="blue">
+                  {user.firstName?.[0]}
+                  {user.lastName?.[0]}
+                </Avatar>
+                <FileButton resetRef={resetRef} onChange={handleAvatarUpload} accept="image/*">
+                  {(props) => (
+                    <Button
+                      {...props}
+                      variant="light"
+                      size="md"
+                      leftSection={<IconUpload size={16} />}
+                      loading={isUploadingAvatar}
+                      style={{ minHeight: '44px', minWidth: '44px' }}
+                    >
+                      Upload Photo
+                    </Button>
+                  )}
+                </FileButton>
+                {avatarError && (
+                  <Text size="xs" c="red">
+                    {avatarError}
+                  </Text>
+                )}
+              </Stack>
 
               {/* Form Fields */}
               <Stack gap="sm" style={{ flex: 1 }}>
@@ -190,15 +377,19 @@ export default function ProfilePage() {
                     label="First Name"
                     placeholder="Enter first name"
                     value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    onChange={(e) => setFirstName(e.target.value.slice(0, 50))}
                     leftSection={<IconUser size={16} />}
+                    maxLength={50}
+                    error={firstName.length >= 50 ? 'Maximum 50 characters' : undefined}
                   />
                   <TextInput
                     label="Last Name"
                     placeholder="Enter last name"
                     value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    onChange={(e) => setLastName(e.target.value.slice(0, 50))}
                     leftSection={<IconUser size={16} />}
+                    maxLength={50}
+                    error={lastName.length >= 50 ? 'Maximum 50 characters' : undefined}
                   />
                 </SimpleGrid>
 
@@ -324,7 +515,7 @@ export default function ProfilePage() {
                 variant="outline"
                 color="red"
                 leftSection={<IconTrash size={16} />}
-                onClick={handleOpenSecuritySettings}
+                onClick={() => setDeleteModalOpen(true)}
               >
                 Delete Account
               </Button>
@@ -332,6 +523,80 @@ export default function ProfilePage() {
           </Stack>
         </Paper>
       </Stack>
+
+      {/* Delete Account Confirmation Modal */}
+      <Modal
+        opened={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setDeleteConfirmText('');
+        }}
+        title={
+          <Group gap="xs">
+            <ThemeIcon color="red" variant="light" size="lg">
+              <IconAlertTriangle size={20} />
+            </ThemeIcon>
+            <Text fw={600}>Delete Account</Text>
+          </Group>
+        }
+        centered
+      >
+        <Stack gap="md">
+          <Alert color="red" variant="light" icon={<IconAlertTriangle size={16} />}>
+            This action is permanent and cannot be undone.
+          </Alert>
+
+          <Text size="sm">Deleting your account will:</Text>
+
+          <Stack gap="xs" pl="md">
+            <Text size="sm" c="dimmed">
+              - Remove all your personal data
+            </Text>
+            <Text size="sm" c="dimmed">
+              - Remove you from your organization
+            </Text>
+            <Text size="sm" c="dimmed">
+              - Delete all your form submissions (if not required for compliance)
+            </Text>
+            <Text size="sm" c="dimmed">
+              - Revoke access to all projects
+            </Text>
+          </Stack>
+
+          <TextInput
+            label="Type DELETE to confirm"
+            placeholder="DELETE"
+            value={deleteConfirmText}
+            onChange={(e) => setDeleteConfirmText(e.target.value)}
+            error={
+              deleteConfirmText.length > 0 && deleteConfirmText !== 'DELETE'
+                ? 'Please type DELETE exactly'
+                : undefined
+            }
+          />
+
+          <Group justify="flex-end" gap="sm">
+            <Button
+              variant="default"
+              onClick={() => {
+                setDeleteModalOpen(false);
+                setDeleteConfirmText('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="red"
+              onClick={handleDeleteAccount}
+              loading={isDeleting}
+              disabled={deleteConfirmText !== 'DELETE'}
+              leftSection={<IconTrash size={16} />}
+            >
+              Delete My Account
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Container>
   );
 }
