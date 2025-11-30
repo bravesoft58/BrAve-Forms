@@ -5,7 +5,18 @@
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Tabs, Button, Text, Stack, Paper, Group, Badge } from '@mantine/core';
+import {
+  Tabs,
+  Button,
+  Text,
+  Stack,
+  Paper,
+  Group,
+  Badge,
+  Center,
+  Loader,
+  Alert,
+} from '@mantine/core';
 import {
   IconEdit,
   IconForms,
@@ -13,10 +24,12 @@ import {
   IconUsers,
   IconCloudRain,
   IconCheck,
+  IconAlertCircle,
+  IconRefresh,
 } from '@tabler/icons-react';
 import { PageContainer } from '@/components/Layout/PageContainer';
 import { Breadcrumbs } from '@/components/Layout/Breadcrumbs';
-import { getMockProjectById } from '@/lib/mock-data/projects';
+import { useProject } from '@/hooks/useProjects';
 import { ProjectFormsTab } from '@/components/projects/ProjectFormsTab';
 import { ProjectPhotosTab } from '@/components/projects/ProjectPhotosTab';
 import { ProjectTeamTab } from '@/components/projects/ProjectTeamTab';
@@ -25,10 +38,12 @@ import { ProjectComplianceTab } from '@/components/projects/ProjectComplianceTab
 import { ProjectQRCode } from '@/components/QRPortal/ProjectQRCode';
 
 /**
- * Project Detail Page - Sprint 3 ISSUE-087
+ * Project Detail Page - Sprint 3 ISSUE-087, Updated Sprint 6 ISSUE-170
  *
  * Displays project information with tabs for Forms, Photos, Team, Weather, Compliance.
  * Mobile uses swipeable tabs for field optimization.
+ *
+ * ISSUE-170: Replaced mock data with real GraphQL API calls
  *
  * Features:
  * - Project header (name, address, edit button)
@@ -37,25 +52,94 @@ import { ProjectQRCode } from '@/components/QRPortal/ProjectQRCode';
  * - Mobile: Swipeable tabs
  * - Desktop: Click tabs
  * - Tab content loads on demand
+ * - Loading, error, and not-found states
  *
  * Uses aggressive compact design with explicit pixel font sizes
  * NO Route Segment Config exports (this is a Client Component)
- *
- * Sprint 4: Replace mock data with real GraphQL API calls
  */
 export default function ProjectDetailPage() {
   const params = useParams();
   const projectId = params.id as string;
-  const project = getMockProjectById(projectId);
+
+  // Fetch project from real API
+  const { data: project, isLoading, isError, error, refetch } = useProject(projectId);
 
   // Default to forms tab
   const [activeTab, setActiveTab] = useState<string>('forms');
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <PageContainer title="Loading...">
+        <Center h={300}>
+          <Stack align="center" gap="md">
+            <Loader size="lg" />
+            <Text c="dimmed" size="14px">
+              Loading project...
+            </Text>
+          </Stack>
+        </Center>
+      </PageContainer>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <PageContainer
+        title="Error"
+        breadcrumbs={
+          <Breadcrumbs
+            items={[
+              { label: 'Dashboard', href: '/dashboard' },
+              { label: 'Projects', href: '/dashboard/projects' },
+              { label: 'Error' },
+            ]}
+          />
+        }
+      >
+        <Alert
+          icon={<IconAlertCircle size={16} />}
+          title="Failed to Load Project"
+          color="red"
+          variant="light"
+        >
+          <Stack gap="sm">
+            <Text size="13px">
+              {error instanceof Error ? error.message : 'An error occurred while loading the project.'}
+            </Text>
+            <Button
+              leftSection={<IconRefresh size={16} />}
+              variant="light"
+              color="red"
+              size="sm"
+              onClick={() => refetch()}
+            >
+              Try Again
+            </Button>
+          </Stack>
+        </Alert>
+      </PageContainer>
+    );
+  }
+
+  // Not found state
   if (!project) {
     return (
-      <PageContainer title="Project Not Found">
+      <PageContainer
+        title="Project Not Found"
+        breadcrumbs={
+          <Breadcrumbs
+            items={[
+              { label: 'Dashboard', href: '/dashboard' },
+              { label: 'Projects', href: '/dashboard/projects' },
+              { label: 'Not Found' },
+            ]}
+          />
+        }
+      >
         <Text size="14px" c="dimmed">
-          The project you&apos;re looking for doesn&apos;t exist.
+          The project you&apos;re looking for doesn&apos;t exist or you don&apos;t have permission to view it.
         </Text>
       </PageContainer>
     );
@@ -98,15 +182,20 @@ export default function ProjectDetailPage() {
               <Badge
                 size="sm"
                 variant="light"
-                color={project.status === 'ACTIVE' ? 'blue' : 'gray'}
+                color={project.status === 'ACTIVE' ? 'blue' : project.status === 'CLOSED' ? 'gray' : 'yellow'}
               >
                 {project.status}
               </Badge>
-              {project.compliance.pendingInspections > 0 && (
+              {project.compliance.overdueInspections > 0 && (
+                <Badge size="sm" variant="light" color="red">
+                  {project.compliance.overdueInspections} overdue
+                </Badge>
+              )}
+              {project.compliance.pendingInspections > 0 && project.compliance.overdueInspections === 0 && (
                 <Badge
                   size="sm"
                   variant="light"
-                  color={project.compliance.requiresAttention ? 'red' : 'yellow'}
+                  color={project.compliance.requiresAttention ? 'orange' : 'yellow'}
                 >
                   {project.compliance.pendingInspections} pending
                 </Badge>
@@ -148,11 +237,11 @@ export default function ProjectDetailPage() {
           </Tabs.Panel>
 
           <Tabs.Panel value="weather" pt="md">
-            <ProjectWeatherTab projectId={projectId} />
+            <ProjectWeatherTab projectId={projectId} project={project} />
           </Tabs.Panel>
 
           <Tabs.Panel value="compliance" pt="md">
-            <ProjectComplianceTab projectId={projectId} />
+            <ProjectComplianceTab projectId={projectId} project={project} />
           </Tabs.Panel>
         </Tabs>
       </Stack>

@@ -5,8 +5,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MantineProvider } from '@mantine/core';
 import { PhotoGalleryGrid } from '../photo-gallery-grid';
 
-// Mock the fetch function
-global.fetch = vi.fn();
+// Mock the usePhotos hook - ISSUE-171: GraphQL migration
+const mockUsePhotosByProject = vi.fn();
+vi.mock('@/hooks/usePhotos', () => ({
+  usePhotosByProject: (...args: unknown[]) => mockUsePhotosByProject(...args),
+}));
 
 // Mock Clerk useAuth hook for multi-tenant testing
 vi.mock('@clerk/nextjs', () => ({
@@ -121,14 +124,57 @@ const mockCrossTenantPhoto = {
   uploadedBy: 'user-other',
 };
 
+// Helper to create mock hook response for loading state
+function createLoadingHookResponse() {
+  return {
+    data: undefined,
+    isLoading: true,
+    isError: false,
+    error: null,
+    fetchNextPage: vi.fn(),
+    hasNextPage: false,
+    isFetchingNextPage: false,
+  };
+}
+
+// Helper to create mock hook response with data
+function createDataHookResponse(photos: typeof mockPhotos, hasMore = false) {
+  return {
+    data: {
+      pages: [{ photos, hasMore, totalCount: photos.length }],
+      pageParams: [0],
+    },
+    isLoading: false,
+    isError: false,
+    error: null,
+    fetchNextPage: vi.fn(),
+    hasNextPage: hasMore,
+    isFetchingNextPage: false,
+  };
+}
+
+// Helper to create mock hook response for error state
+function createErrorHookResponse(error: Error) {
+  return {
+    data: undefined,
+    isLoading: false,
+    isError: true,
+    error,
+    fetchNextPage: vi.fn(),
+    hasNextPage: false,
+    isFetchingNextPage: false,
+  };
+}
+
 describe('PhotoGalleryGrid', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUsePhotosByProject.mockReset();
   });
 
   describe('Rendering', () => {
     it('should render loading state initially', () => {
-      (global.fetch as any).mockImplementation(() => new Promise(() => {}));
+      mockUsePhotosByProject.mockReturnValue(createLoadingHookResponse());
 
       render(
         <TestWrapper>
@@ -140,10 +186,7 @@ describe('PhotoGalleryGrid', () => {
     });
 
     it('should display photos in grid layout after loading', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ photos: mockPhotos, hasMore: false, totalCount: 3 }),
-      });
+      mockUsePhotosByProject.mockReturnValue(createDataHookResponse(mockPhotos));
 
       render(
         <TestWrapper>
@@ -161,10 +204,7 @@ describe('PhotoGalleryGrid', () => {
     });
 
     it('should display photo thumbnails with correct alt text', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ photos: mockPhotos, hasMore: false, totalCount: 3 }),
-      });
+      mockUsePhotosByProject.mockReturnValue(createDataHookResponse(mockPhotos));
 
       render(
         <TestWrapper>
@@ -180,10 +220,7 @@ describe('PhotoGalleryGrid', () => {
     });
 
     it('should display empty state when no photos exist', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ photos: [], hasMore: false, totalCount: 0 }),
-      });
+      mockUsePhotosByProject.mockReturnValue(createDataHookResponse([]));
 
       render(
         <TestWrapper>
@@ -198,7 +235,7 @@ describe('PhotoGalleryGrid', () => {
     });
 
     it('should display error state on fetch failure', async () => {
-      (global.fetch as any).mockRejectedValueOnce(new Error('Network error'));
+      mockUsePhotosByProject.mockReturnValue(createErrorHookResponse(new Error('Network error')));
 
       render(
         <TestWrapper>
@@ -214,10 +251,7 @@ describe('PhotoGalleryGrid', () => {
 
   describe('Responsive Grid', () => {
     it('should use SimpleGrid with responsive columns', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ photos: mockPhotos, hasMore: false, totalCount: 3 }),
-      });
+      mockUsePhotosByProject.mockReturnValue(createDataHookResponse(mockPhotos));
 
       render(
         <TestWrapper>
@@ -235,10 +269,7 @@ describe('PhotoGalleryGrid', () => {
 
   describe('Photo Card Content', () => {
     it('should display photo date and caption', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ photos: [mockPhotos[0]], hasMore: false, totalCount: 1 }),
-      });
+      mockUsePhotosByProject.mockReturnValue(createDataHookResponse([mockPhotos[0]]));
 
       render(
         <TestWrapper>
@@ -254,10 +285,7 @@ describe('PhotoGalleryGrid', () => {
     });
 
     it('should display GPS badge for photos with coordinates', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ photos: [mockPhotos[0]], hasMore: false, totalCount: 1 }),
-      });
+      mockUsePhotosByProject.mockReturnValue(createDataHookResponse([mockPhotos[0]]));
 
       render(
         <TestWrapper>
@@ -274,10 +302,7 @@ describe('PhotoGalleryGrid', () => {
     });
 
     it('should not display GPS badge for photos without coordinates', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ photos: [mockPhotos[2]], hasMore: false, totalCount: 1 }),
-      });
+      mockUsePhotosByProject.mockReturnValue(createDataHookResponse([mockPhotos[2]]));
 
       render(
         <TestWrapper>
@@ -296,10 +321,7 @@ describe('PhotoGalleryGrid', () => {
   describe('Photo Selection', () => {
     it('should call onClick handler when photo card is clicked', async () => {
       const onPhotoClick = vi.fn();
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ photos: [mockPhotos[0]], hasMore: false, totalCount: 1 }),
-      });
+      mockUsePhotosByProject.mockReturnValue(createDataHookResponse([mockPhotos[0]]));
 
       render(
         <TestWrapper>
@@ -320,10 +342,7 @@ describe('PhotoGalleryGrid', () => {
 
     it('should support keyboard navigation (Enter key)', async () => {
       const onPhotoClick = vi.fn();
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ photos: [mockPhotos[0]], hasMore: false, totalCount: 1 }),
-      });
+      mockUsePhotosByProject.mockReturnValue(createDataHookResponse([mockPhotos[0]]));
 
       render(
         <TestWrapper>
@@ -345,40 +364,8 @@ describe('PhotoGalleryGrid', () => {
   });
 
   describe('Infinite Scroll', () => {
-    it('should fetch next page when sentinel comes into view', async () => {
-      const { useInView } = await import('react-intersection-observer');
-      const triggerInView: { current: () => void } = { current: () => {} };
-
-      (useInView as any).mockImplementation(() => {
-        const ref = vi.fn();
-        return {
-          ref,
-          inView: false,
-          // Allow triggering inView change
-          __triggerInView: () => {
-            triggerInView.current();
-          },
-        };
-      });
-
-      (global.fetch as any)
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            photos: mockPhotos.slice(0, 2),
-            hasMore: true,
-            totalCount: 3,
-            nextCursor: 2,
-          }),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            photos: [mockPhotos[2]],
-            hasMore: false,
-            totalCount: 3,
-          }),
-        });
+    it('should display load more sentinel when hasNextPage is true', async () => {
+      mockUsePhotosByProject.mockReturnValue(createDataHookResponse(mockPhotos.slice(0, 2), true));
 
       render(
         <TestWrapper>
@@ -390,21 +377,12 @@ describe('PhotoGalleryGrid', () => {
         expect(screen.getByTestId('photo-gallery-grid')).toBeInTheDocument();
       });
 
-      // Initial fetch completed
-      expect(global.fetch).toHaveBeenCalledTimes(1);
+      // Load more sentinel should be present
+      expect(screen.getByTestId('load-more-sentinel')).toBeInTheDocument();
     });
 
-    // Note: Infinite scroll load more tests removed due to mock isolation issues
-    // The infinite scroll functionality is tested via integration tests
-    // Core hasNextPage logic is implemented in the component
-  });
-
-  describe('Filtering', () => {
-    it('should pass filters to fetch request', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ photos: [], hasMore: false, totalCount: 0 }),
-      });
+    it('should call hook with correct projectId and filters', async () => {
+      mockUsePhotosByProject.mockReturnValue(createDataHookResponse([]));
 
       const filters = {
         formType: 'daily-log',
@@ -417,12 +395,40 @@ describe('PhotoGalleryGrid', () => {
         </TestWrapper>
       );
 
-      await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalled();
-      });
+      // Verify hook was called with correct arguments
+      expect(mockUsePhotosByProject).toHaveBeenCalledWith(
+        'project-123',
+        expect.objectContaining({ formType: 'daily-log' }),
+        20 // default pageSize
+      );
+    });
+  });
 
-      const fetchCall = (global.fetch as any).mock.calls[0][0];
-      expect(fetchCall).toContain('formType=daily-log');
+  describe('Filtering', () => {
+    it('should pass filters to hook', async () => {
+      mockUsePhotosByProject.mockReturnValue(createDataHookResponse([]));
+
+      const filters = {
+        formType: 'daily-log',
+        dateRange: [new Date('2025-11-01'), new Date('2025-11-30')] as [Date, Date],
+      };
+
+      render(
+        <TestWrapper>
+          <PhotoGalleryGrid projectId="project-123" filters={filters} />
+        </TestWrapper>
+      );
+
+      // Verify hook was called with the filters
+      expect(mockUsePhotosByProject).toHaveBeenCalledWith(
+        'project-123',
+        expect.objectContaining({
+          formType: 'daily-log',
+          startDate: filters.dateRange[0],
+          endDate: filters.dateRange[1],
+        }),
+        20
+      );
     });
   });
 
@@ -438,8 +444,7 @@ describe('PhotoGalleryGrid', () => {
 describe('Pairing Mode - Multi-tenant Isolation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset fetch mock completely to ensure clean state
-    (global.fetch as any).mockReset();
+    mockUsePhotosByProject.mockReset();
     // Clear localStorage before each pairing test
     localStorage.clear();
   });
@@ -447,15 +452,7 @@ describe('Pairing Mode - Multi-tenant Isolation', () => {
   it('should reject pairing photos from different organizations', async () => {
     // Mock photos including one from a different org
     const photosWithCrossTenant = [mockPhotos[0], mockCrossTenantPhoto];
-
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        photos: photosWithCrossTenant,
-        hasMore: false,
-        totalCount: 2,
-      }),
-    });
+    mockUsePhotosByProject.mockReturnValue(createDataHookResponse(photosWithCrossTenant));
 
     const onPairCreated = vi.fn();
 
@@ -498,15 +495,7 @@ describe('Pairing Mode - Multi-tenant Isolation', () => {
   it('should successfully pair photos from the same organization', async () => {
     // Mock two photos from the same org
     const sameOrgPhotos = [mockPhotos[0], mockPhotos[1]];
-
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        photos: sameOrgPhotos,
-        hasMore: false,
-        totalCount: 2,
-      }),
-    });
+    mockUsePhotosByProject.mockReturnValue(createDataHookResponse(sameOrgPhotos));
 
     const onPairCreated = vi.fn().mockResolvedValue(undefined);
     const onPairingModeChange = vi.fn();
@@ -552,8 +541,7 @@ describe('Pairing Mode - Offline Queue', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset fetch mock completely to ensure clean state
-    (global.fetch as any).mockReset();
+    mockUsePhotosByProject.mockReset();
     localStorage.clear();
   });
 
@@ -575,15 +563,7 @@ describe('Pairing Mode - Offline Queue', () => {
     });
 
     const sameOrgPhotos = [mockPhotos[0], mockPhotos[1]];
-
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        photos: sameOrgPhotos,
-        hasMore: false,
-        totalCount: 2,
-      }),
-    });
+    mockUsePhotosByProject.mockReturnValue(createDataHookResponse(sameOrgPhotos));
 
     const onPairCreated = vi.fn();
     const onPairingModeChange = vi.fn();
@@ -638,15 +618,7 @@ describe('Pairing Mode - Offline Queue', () => {
     });
 
     const sameOrgPhotos = [mockPhotos[0], mockPhotos[1]];
-
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        photos: sameOrgPhotos,
-        hasMore: false,
-        totalCount: 2,
-      }),
-    });
+    mockUsePhotosByProject.mockReturnValue(createDataHookResponse(sameOrgPhotos));
 
     render(
       <TestWrapper>

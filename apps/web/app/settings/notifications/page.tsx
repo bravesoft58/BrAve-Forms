@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Title,
@@ -13,6 +13,7 @@ import {
   Button,
   TextInput,
   Alert,
+  Loader,
 } from '@mantine/core';
 import {
   IconMail,
@@ -25,6 +26,7 @@ import {
   IconMoon,
   IconSend,
   IconCheck,
+  IconCloudUpload,
 } from '@tabler/icons-react';
 import { useSnapshot } from 'valtio';
 import {
@@ -34,21 +36,79 @@ import {
   setQuietHoursEnabled,
   setQuietHoursStartTime,
   setQuietHoursEndTime,
+  type NotificationSettings,
 } from '@/lib/stores/settings-store';
+import {
+  useMyPreferences,
+  useUpdateNotificationPreferences,
+  getNotificationPrefsFromBackend,
+} from '@/hooks/useUserPreferences';
+import type { NotificationPreferencesInput } from '@/lib/api/user-preferences';
 
 /**
  * Notifications Settings Page
  *
- * Configure email and push notification preferences with quiet hours support.
+ * ISSUE-173: Configure email and push notification preferences with quiet hours support.
+ * Settings sync to backend for cross-device consistency.
  */
 export default function NotificationsPage() {
   const settings = useSnapshot(settingsStore);
   const [testSent, setTestSent] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
+
+  // Backend sync hooks
+  const { data: backendPrefs, isLoading: loadingPrefs } = useMyPreferences();
+  const updateBackendMutation = useUpdateNotificationPreferences();
+
+  // Sync local store with backend on initial load
+  useEffect(() => {
+    if (backendPrefs) {
+      const backendNotifs = getNotificationPrefsFromBackend(backendPrefs);
+      // Update local store with backend values
+      updateNotificationSetting('emailWeatherAlerts', backendNotifs.emailWeatherAlerts ?? true);
+      updateNotificationSetting('emailInspectionReminders', backendNotifs.emailInspectionReminders ?? true);
+      updateNotificationSetting('emailFormConfirmations', backendNotifs.emailFormConfirmations ?? true);
+      updateNotificationSetting('emailWeeklySummary', backendNotifs.emailWeeklySummary ?? false);
+      updateNotificationSetting('pushRealTimeAlerts', backendNotifs.pushRealTimeAlerts ?? true);
+      updateNotificationSetting('pushInspectionReminders', backendNotifs.pushInspectionReminders ?? true);
+      setQuietHoursEnabled(backendNotifs.quietHoursEnabled ?? false);
+      if (backendNotifs.quietHoursStart) setQuietHoursStartTime(backendNotifs.quietHoursStart);
+      if (backendNotifs.quietHoursEnd) setQuietHoursEndTime(backendNotifs.quietHoursEnd);
+    }
+  }, [backendPrefs]);
+
+  /**
+   * Sync current local settings to backend
+   */
+  const syncToBackend = useCallback(async () => {
+    setSyncing(true);
+    setSyncError(null);
+
+    const input: NotificationPreferencesInput = {
+      emailWeatherAlerts: settings.notifications.emailWeatherAlerts,
+      emailInspectionReminders: settings.notifications.emailInspectionReminders,
+      emailFormConfirmations: settings.notifications.emailFormConfirmations,
+      emailWeeklySummary: settings.notifications.emailWeeklySummary,
+      pushRealTimeAlerts: settings.notifications.pushRealTimeAlerts,
+      pushInspectionReminders: settings.notifications.pushInspectionReminders,
+      quietHoursEnabled: settings.notifications.quietHours.enabled,
+      quietHoursStart: settings.notifications.quietHours.startTime,
+      quietHoursEnd: settings.notifications.quietHours.endTime,
+    };
+
+    try {
+      await updateBackendMutation.mutateAsync(input);
+    } catch (error) {
+      setSyncError('Failed to sync settings to server. Changes saved locally.');
+    } finally {
+      setSyncing(false);
+    }
+  }, [settings.notifications, updateBackendMutation]);
 
   /**
    * Send a test notification to verify settings are working
    * STUB: Backend notification service not yet implemented.
-   * This will be connected when the notification delivery system is built.
    */
   const sendTestNotification = async () => {
     // STUB: Backend API not yet implemented
@@ -56,6 +116,18 @@ export default function NotificationsPage() {
     setTestSent(true);
     setTimeout(() => setTestSent(false), 3000);
   };
+
+  // Show loading state while fetching preferences
+  if (loadingPrefs) {
+    return (
+      <Container size="md" py="xl">
+        <Stack gap="lg" align="center">
+          <Loader size="lg" />
+          <Text c="dimmed">Loading preferences...</Text>
+        </Stack>
+      </Container>
+    );
+  }
 
   return (
     <Container size="md" py="xl">
@@ -71,6 +143,14 @@ export default function NotificationsPage() {
             </Text>
           </div>
           <Group>
+            <Button
+              variant="filled"
+              leftSection={syncing ? <Loader size={14} color="white" /> : <IconCloudUpload size={16} />}
+              onClick={syncToBackend}
+              disabled={syncing}
+            >
+              {syncing ? 'Syncing...' : 'Sync to Cloud'}
+            </Button>
             <Button
               variant="outline"
               leftSection={<IconSend size={16} />}
@@ -88,6 +168,18 @@ export default function NotificationsPage() {
             </Button>
           </Group>
         </Group>
+
+        {/* Sync Error Alert */}
+        {syncError && (
+          <Alert
+            color="orange"
+            title="Sync Warning"
+            withCloseButton
+            onClose={() => setSyncError(null)}
+          >
+            {syncError}
+          </Alert>
+        )}
 
         {/* Test Notification Alert */}
         {testSent && (

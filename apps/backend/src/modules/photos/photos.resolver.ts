@@ -3,7 +3,7 @@ import { UseGuards, Logger, BadRequestException, ForbiddenException } from '@nes
 import { ClerkAuthGuard } from '@/modules/auth/guards/clerk-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { PhotosService } from './photos.service';
-import { Photo, UploadPhotoBase64Input, PhotoUploadResult } from './photos.types';
+import { Photo, UploadPhotoBase64Input, PhotoUploadResult, PhotoPair, CreatePhotoPairInput } from './photos.types';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/modules/database/prisma.service';
 
@@ -236,6 +236,92 @@ export class PhotosResolver {
   @Mutation(() => Boolean)
   async deletePhoto(@Args('id') id: string, @CurrentUser() user: any): Promise<boolean> {
     await this.photosService.deletePhoto(id, user.orgId);
+    return true;
+  }
+
+  // ISSUE-172: Photo Pairing for Before/After Comparison
+
+  /**
+   * Get photo pairs for a project
+   * Used for construction progress tracking and EPA compliance documentation
+   */
+  @Query(() => [PhotoPair], {
+    description: 'Get photo pairs for a project (before/after comparisons)',
+  })
+  async photoPairsByProject(
+    @Args('projectId') projectId: string,
+    @CurrentUser() user: { userId: string; orgId: string }
+  ): Promise<PhotoPair[]> {
+    await this.validateProjectOwnership(projectId, user.orgId);
+    return this.photosService.getPhotoPairsByProject(projectId, user.orgId);
+  }
+
+  /**
+   * Create a photo pair for before/after comparison
+   * Validates that both photos exist and belong to the user's org
+   */
+  @Mutation(() => PhotoPair, {
+    description: 'Create a before/after photo pair for progress tracking',
+  })
+  async createPhotoPair(
+    @Args('input') input: CreatePhotoPairInput,
+    @CurrentUser() user: { userId: string; orgId: string }
+  ): Promise<PhotoPair> {
+    // Validate project ownership
+    await this.validateProjectOwnership(input.projectId, user.orgId);
+
+    // Validate both photos exist and belong to user's org
+    const [beforePhoto, afterPhoto] = await Promise.all([
+      this.prisma.photo.findFirst({
+        where: { id: input.beforePhotoId, orgId: user.orgId },
+        select: { id: true, takenAt: true },
+      }),
+      this.prisma.photo.findFirst({
+        where: { id: input.afterPhotoId, orgId: user.orgId },
+        select: { id: true, takenAt: true },
+      }),
+    ]);
+
+    if (!beforePhoto) {
+      throw new BadRequestException(
+        `Before photo ${input.beforePhotoId} not found or does not belong to your organization`
+      );
+    }
+    if (!afterPhoto) {
+      throw new BadRequestException(
+        `After photo ${input.afterPhotoId} not found or does not belong to your organization`
+      );
+    }
+
+    // Warn if "before" photo is actually newer than "after" photo
+    if (beforePhoto.takenAt > afterPhoto.takenAt) {
+      this.logger.warn(
+        `Photo pair created with before photo (${beforePhoto.takenAt}) newer than after photo (${afterPhoto.takenAt})`,
+        { beforePhotoId: input.beforePhotoId, afterPhotoId: input.afterPhotoId }
+      );
+    }
+
+    return this.photosService.createPhotoPair({
+      orgId: user.orgId,
+      projectId: input.projectId,
+      beforePhotoId: input.beforePhotoId,
+      afterPhotoId: input.afterPhotoId,
+      description: input.description,
+      createdBy: user.userId,
+    });
+  }
+
+  /**
+   * Delete a photo pair
+   */
+  @Mutation(() => Boolean, {
+    description: 'Delete a photo pair',
+  })
+  async deletePhotoPair(
+    @Args('id') id: string,
+    @CurrentUser() user: { userId: string; orgId: string }
+  ): Promise<boolean> {
+    await this.photosService.deletePhotoPair(id, user.orgId);
     return true;
   }
 }

@@ -57,6 +57,7 @@ model Project {
   weatherEvents   WeatherEvent[]
   formSubmissions FormSubmission[]
   qrTokens        QRToken[]
+  photoPairs      PhotoPair[]
 
   @@index([orgId])
   @@index([latitude, longitude])
@@ -303,4 +304,78 @@ enum WeatherSource {
   NOAA
   OPENWEATHER
   MANUAL
+}
+
+// ISSUE-172: Photo Pairing for Before/After Comparison
+// Used for construction progress tracking and EPA compliance documentation
+model PhotoPair {
+  id            String   @id @default(uuid())
+  orgId         String   @map("org_id")
+  projectId     String   @map("project_id")
+  beforePhotoId String   @map("before_photo_id")
+  afterPhotoId  String   @map("after_photo_id")
+  description   String?
+  createdBy     String   @map("created_by")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([projectId])
+  @@index([beforePhotoId])
+  @@index([afterPhotoId])
+  @@map("photo_pairs")
+}
+
+// ISSUE-173: User Preferences for cross-device sync
+// CRITICAL: Timezone affects EPA compliance deadline calculations
+model UserPreferences {
+  id     String @id @default(uuid())
+  userId String @unique @map("user_id")
+  orgId  String @map("org_id")
+
+  // Notification preferences (sync to backend)
+  emailWeatherAlerts       Boolean @default(true) @map("email_weather_alerts")
+  emailInspectionReminders Boolean @default(true) @map("email_inspection_reminders")
+  emailFormConfirmations   Boolean @default(true) @map("email_form_confirmations")
+  emailWeeklySummary       Boolean @default(false) @map("email_weekly_summary")
+  pushRealTimeAlerts       Boolean @default(true) @map("push_real_time_alerts")
+  pushInspectionReminders  Boolean @default(true) @map("push_inspection_reminders")
+  quietHoursEnabled        Boolean @default(false) @map("quiet_hours_enabled")
+  quietHoursStart          String  @default("22:00") @map("quiet_hours_start")
+  quietHoursEnd            String  @default("07:00") @map("quiet_hours_end")
+
+  // Account/Regional preferences (sync to backend - affects compliance)
+  timezone   String @default("America/Los_Angeles")
+  timeFormat String @default("12h") @map("time_format")
+  language   String @default("en")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@map("user_preferences")
+}
+
+// ISSUE-174: Support Requests for help/feedback system
+// Stores support requests submitted via Contact Support form
+model SupportRequest {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  orgId       String   @map("org_id")
+  type        String   // bug, feature, help, feedback
+  subject     String
+  description String
+  status      String   @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  priority    String   @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  response    String?  // Admin response
+  respondedAt DateTime? @map("responded_at")
+  respondedBy String?  @map("responded_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([userId])
+  @@index([status])
+  @@map("support_requests")
 }

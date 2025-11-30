@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Title,
@@ -10,8 +11,17 @@ import {
   SegmentedControl,
   Select,
   Button,
+  Alert,
+  Loader,
 } from '@mantine/core';
-import { IconWorld, IconClock, IconLanguage, IconRefresh } from '@tabler/icons-react';
+import {
+  IconWorld,
+  IconClock,
+  IconLanguage,
+  IconRefresh,
+  IconCloudUpload,
+  IconAlertTriangle,
+} from '@tabler/icons-react';
 import { useSnapshot } from 'valtio';
 import {
   settingsStore,
@@ -22,6 +32,12 @@ import {
   type TimeFormat,
   type Language,
 } from '@/lib/stores/settings-store';
+import {
+  useMyPreferences,
+  useUpdateAccountPreferences,
+  getAccountPrefsFromBackend,
+} from '@/hooks/useUserPreferences';
+import type { AccountPreferencesInput } from '@/lib/api/user-preferences';
 
 /**
  * Common US timezones for construction sites
@@ -40,10 +56,50 @@ const timezoneOptions = [
 /**
  * Account Settings Page
  *
- * Configure timezone, time format, and language preferences.
+ * ISSUE-173: Configure timezone, time format, and language preferences.
+ * CRITICAL: Timezone affects EPA compliance deadline calculations.
+ * Settings sync to backend for cross-device consistency.
  */
 export default function AccountPage() {
   const settings = useSnapshot(settingsStore);
+  const [syncing, setSyncing] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
+
+  // Backend sync hooks
+  const { data: backendPrefs, isLoading: loadingPrefs } = useMyPreferences();
+  const updateBackendMutation = useUpdateAccountPreferences();
+
+  // Sync local store with backend on initial load
+  useEffect(() => {
+    if (backendPrefs) {
+      const backendAccount = getAccountPrefsFromBackend(backendPrefs);
+      if (backendAccount.timezone) setTimezone(backendAccount.timezone);
+      if (backendAccount.timeFormat) setTimeFormat(backendAccount.timeFormat as TimeFormat);
+      if (backendAccount.language) setLanguage(backendAccount.language as Language);
+    }
+  }, [backendPrefs]);
+
+  /**
+   * Sync current local settings to backend
+   */
+  const syncToBackend = useCallback(async () => {
+    setSyncing(true);
+    setSyncError(null);
+
+    const input: AccountPreferencesInput = {
+      timezone: settings.account.timezone,
+      timeFormat: settings.account.timeFormat,
+      language: settings.account.language,
+    };
+
+    try {
+      await updateBackendMutation.mutateAsync(input);
+    } catch (error) {
+      setSyncError('Failed to sync settings to server. Changes saved locally.');
+    } finally {
+      setSyncing(false);
+    }
+  }, [settings.account, updateBackendMutation]);
 
   const timeFormatOptions = [
     { value: '12h', label: '12-hour (1:30 PM)' },
@@ -73,6 +129,18 @@ export default function AccountPage() {
     }
   };
 
+  // Show loading state while fetching preferences
+  if (loadingPrefs) {
+    return (
+      <Container size="md" py="xl">
+        <Stack gap="lg" align="center">
+          <Loader size="lg" />
+          <Text c="dimmed">Loading preferences...</Text>
+        </Stack>
+      </Container>
+    );
+  }
+
   return (
     <Container size="md" py="xl">
       <Stack gap="lg">
@@ -86,14 +154,46 @@ export default function AccountPage() {
               Configure regional and language preferences
             </Text>
           </div>
-          <Button
-            variant="subtle"
-            leftSection={<IconRefresh size={16} />}
-            onClick={resetAccountSettings}
-          >
-            Reset to Defaults
-          </Button>
+          <Group>
+            <Button
+              variant="filled"
+              leftSection={syncing ? <Loader size={14} color="white" /> : <IconCloudUpload size={16} />}
+              onClick={syncToBackend}
+              disabled={syncing}
+            >
+              {syncing ? 'Syncing...' : 'Sync to Cloud'}
+            </Button>
+            <Button
+              variant="subtle"
+              leftSection={<IconRefresh size={16} />}
+              onClick={resetAccountSettings}
+            >
+              Reset to Defaults
+            </Button>
+          </Group>
         </Group>
+
+        {/* Critical Warning - Timezone affects EPA compliance */}
+        <Alert
+          icon={<IconAlertTriangle size={16} />}
+          color="orange"
+          variant="light"
+        >
+          Timezone setting affects EPA compliance deadline calculations.
+          Ensure your timezone matches your primary work location.
+        </Alert>
+
+        {/* Sync Error Alert */}
+        {syncError && (
+          <Alert
+            color="orange"
+            title="Sync Warning"
+            withCloseButton
+            onClose={() => setSyncError(null)}
+          >
+            {syncError}
+          </Alert>
+        )}
 
         {/* Timezone */}
         <Paper p="lg" withBorder>

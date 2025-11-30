@@ -133,3 +133,49 @@ export class PhotoUploadResult {
   @Field({ nullable: true, description: 'When the photo was taken (from EXIF or current time)' })
   takenAt?: Date;
 }
+
+/**
+ * ISSUE-172: Photo Pair for before/after comparison
+ * Used for construction progress tracking and EPA compliance documentation
+ */
+@ObjectType()
+export class PhotoPair {
+  @Field(() => ID)
+  id: string;
+
+  @Field()
+  orgId: string;
+
+  @Field()
+  projectId: string;
+
+  @Field()
+  beforePhotoId: string;
+
+  @Field()
+  afterPhotoId: string;
+
+  @Field({ nullable: true })
+  description?: string;
+
+  @Field()
+  createdBy: string;
+
+  @Field()
+  createdAt: Date;
+}
+
+@InputType()
+export class CreatePhotoPairInput {
+  @Field({ description: 'Project ID for the photo pair' })
+  projectId: string;
+
+  @Field({ description: 'ID of the before photo (earlier in time)' })
+  beforePhotoId: string;
+
+  @Field({ description: 'ID of the after photo (later in time)' })
+  afterPhotoId: string;
+
+  @Field({ nullable: true, description: 'Optional description of the pair' })
+  description?: string;
+}

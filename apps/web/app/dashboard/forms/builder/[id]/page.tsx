@@ -1,12 +1,14 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
+import { notifications } from '@mantine/notifications';
 import { PageContainer } from '@/components/Layout/PageContainer';
 import { Breadcrumbs } from '@/components/Layout/Breadcrumbs';
 import { FormBuilder } from '@/components/Forms/FormBuilder';
-import { Center, Loader, Alert, Stack, Text } from '@mantine/core';
-import { IconAlertCircle } from '@tabler/icons-react';
+import { Center, Loader, Alert, Stack, Text, Button, Group } from '@mantine/core';
+import { IconAlertCircle, IconArrowLeft } from '@tabler/icons-react';
+import { useFormTemplate, useUpdateFormTemplate } from '@/hooks/useFormTemplates';
 import type { FormTemplate } from '@brave-forms/types';
 
 /**
@@ -14,59 +16,84 @@ import type { FormTemplate } from '@brave-forms/types';
  *
  * Loads and edits an existing form template.
  * Route: /dashboard/forms/builder/[id]
+ *
+ * ISSUE-169: Wired to backend GraphQL formTemplate query and updateFormTemplate mutation
  */
 export default function EditFormBuilderPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
-  const [template, setTemplate] = useState<FormTemplate | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Fetch template from backend
+  const {
+    data: template,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useFormTemplate(id);
 
-  // Load existing form template
-  useEffect(() => {
-    async function loadTemplate() {
-      try {
-        setLoading(true);
-        setError(null);
+  // Update mutation
+  const { mutateAsync: updateTemplate, isPending: isSaving } = useUpdateFormTemplate();
 
-        // TODO: Implement GraphQL query to load form template
-        // query GetFormTemplate($id: ID!) {
-        //   formTemplate(id: $id) { id name description category fields ... }
-        // }
-        console.log('Loading form template:', id);
+  // Convert backend schema format to frontend format for FormBuilder
+  const formBuilderTemplate = useMemo((): Partial<FormTemplate> | null => {
+    if (!template) return null;
 
-        // Simulate API call for now
-        await new Promise((resolve) => setTimeout(resolve, 500));
+    // Backend stores: { schema: { fields: [], logic: [], ... } }
+    // Frontend expects: { fields: [], logic: [], ... }
+    const schema = template.schema as { fields?: unknown[]; logic?: unknown[]; calculations?: unknown[]; version?: string } | undefined;
 
-        // Placeholder - will be replaced with actual GraphQL query
-        // For now, return null to show "template not found" state
-        setTemplate(null);
-      } catch (err) {
-        console.error('Failed to load form template:', err);
-        setError('Failed to load form template. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    if (id) {
-      loadTemplate();
-    }
-  }, [id]);
+    return {
+      id: template.id,
+      name: template.name,
+      description: template.description,
+      category: template.category,
+      fields: schema?.fields as FormTemplate['fields'],
+      logic: schema?.logic as FormTemplate['logic'],
+      calculations: schema?.calculations as FormTemplate['calculations'],
+      version: template.version,
+      isActive: template.isActive,
+      // Convert string dates from API to Date objects
+      createdAt: template.createdAt ? new Date(template.createdAt) : undefined,
+      updatedAt: template.updatedAt ? new Date(template.updatedAt) : undefined,
+    };
+  }, [template]);
 
   const handleSave = async (updatedTemplate: Partial<FormTemplate>) => {
-    // TODO: Implement GraphQL mutation to update form template
-    // mutation UpdateFormTemplate($id: ID!, $input: UpdateFormTemplateInput!) {
-    //   updateFormTemplate(id: $id, input: $input) { id name }
-    // }
-    console.log('Updating form template:', id, updatedTemplate);
+    if (!id) return;
 
-    // Simulate API call for now
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      // Convert frontend format back to backend format
+      const input = {
+        name: updatedTemplate.name,
+        description: updatedTemplate.description || undefined,
+        schema: {
+          fields: updatedTemplate.fields || [],
+          logic: updatedTemplate.logic || [],
+          calculations: updatedTemplate.calculations || [],
+          version: '1.0',
+        },
+        isActive: updatedTemplate.isActive,
+      };
 
-    // Navigate back to forms list after save
-    router.push('/dashboard/forms');
+      await updateTemplate({ id, input });
+
+      notifications.show({
+        title: 'Template Updated',
+        message: `"${input.name}" has been saved successfully.`,
+        color: 'green',
+      });
+
+      // Navigate back to forms list after save
+      router.push('/dashboard/forms');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to update form template';
+      notifications.show({
+        title: 'Error Updating Template',
+        message,
+        color: 'red',
+      });
+    }
   };
 
   const handleCancel = () => {
@@ -74,7 +101,7 @@ export default function EditFormBuilderPage() {
   };
 
   // Loading state
-  if (loading) {
+  if (isLoading) {
     return (
       <PageContainer title="Loading...">
         <Center h={400}>
@@ -88,7 +115,8 @@ export default function EditFormBuilderPage() {
   }
 
   // Error state
-  if (error) {
+  if (isError) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to load form template';
     return (
       <PageContainer
         title="Error"
@@ -102,15 +130,27 @@ export default function EditFormBuilderPage() {
           />
         }
       >
-        <Alert icon={<IconAlertCircle size={16} />} title="Failed to Load Template" color="red">
-          {error}
-        </Alert>
+        <Stack gap="md">
+          <Alert icon={<IconAlertCircle size={16} />} title="Failed to Load Template" color="red">
+            {errorMessage}
+          </Alert>
+          <Group>
+            <Button
+              variant="light"
+              leftSection={<IconArrowLeft size={16} />}
+              onClick={() => router.push('/dashboard/forms')}
+            >
+              Back to Forms
+            </Button>
+            <Button onClick={() => refetch()}>Try Again</Button>
+          </Group>
+        </Stack>
       </PageContainer>
     );
   }
 
-  // Template not found state (until GraphQL is implemented)
-  if (!template) {
+  // Template not found state
+  if (!template || !formBuilderTemplate) {
     return (
       <PageContainer
         title="Template Not Found"
@@ -124,10 +164,19 @@ export default function EditFormBuilderPage() {
           />
         }
       >
-        <Alert icon={<IconAlertCircle size={16} />} title="Template Not Found" color="yellow">
-          The form template with ID &quot;{id}&quot; was not found. This may be because GraphQL
-          integration is not yet implemented.
-        </Alert>
+        <Stack gap="md">
+          <Alert icon={<IconAlertCircle size={16} />} title="Template Not Found" color="yellow">
+            The form template with ID &quot;{id}&quot; was not found. It may have been deleted or you
+            may not have permission to view it.
+          </Alert>
+          <Button
+            variant="light"
+            leftSection={<IconArrowLeft size={16} />}
+            onClick={() => router.push('/dashboard/forms')}
+          >
+            Back to Forms
+          </Button>
+        </Stack>
       </PageContainer>
     );
   }
@@ -145,7 +194,12 @@ export default function EditFormBuilderPage() {
         />
       }
     >
-      <FormBuilder template={template} onSave={handleSave} onCancel={handleCancel} />
+      <FormBuilder
+        template={formBuilderTemplate as FormTemplate | undefined}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        loading={isSaving}
+      />
     </PageContainer>
   );
 }
