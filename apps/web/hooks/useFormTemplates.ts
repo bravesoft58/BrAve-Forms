@@ -7,14 +7,20 @@
  * @offline Cached in TanStack Query for offline access
  */
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useAppAuth } from '@/app/providers';
 import {
   getFormTemplates,
   getFormTemplateById,
+  createFormTemplate,
+  updateFormTemplate,
+  deleteFormTemplate,
+  duplicateFormTemplate,
   FormTemplate,
   FormCategory,
   GetFormTemplatesParams,
+  CreateFormTemplateInput,
+  UpdateFormTemplateInput,
 } from '@/lib/api/forms';
 
 // Query keys for cache management
@@ -140,5 +146,128 @@ export function useInvalidateTemplates() {
   };
 }
 
+// ============================================================================
+// Mutation Hooks (ISSUE-168)
+// ============================================================================
+
+/**
+ * Hook to create a new form template
+ *
+ * @returns Mutation result with create function
+ *
+ * @example
+ * const { mutate: createTemplate, isPending } = useCreateFormTemplate();
+ * createTemplate({
+ *   name: 'Daily Log',
+ *   category: 'DAILY_LOG',
+ *   schema: { fields: [...] }
+ * });
+ *
+ * @security Requires authentication - template associated with user's org
+ */
+export function useCreateFormTemplate() {
+  const queryClient = useQueryClient();
+  const { getToken } = useAppAuth();
+
+  return useMutation({
+    mutationFn: async (input: CreateFormTemplateInput) => {
+      const token = getToken ? await getToken() : null;
+      return createFormTemplate(input, token);
+    },
+    onSuccess: () => {
+      // Invalidate list queries to show new template
+      queryClient.invalidateQueries({ queryKey: formTemplateKeys.all });
+    },
+  });
+}
+
+/**
+ * Hook to update an existing form template
+ *
+ * @returns Mutation result with update function
+ *
+ * @example
+ * const { mutate: updateTemplate, isPending } = useUpdateFormTemplate();
+ * updateTemplate({
+ *   id: 'template-123',
+ *   input: { name: 'Updated Name' }
+ * });
+ *
+ * @security Backend validates user can only update templates from their org
+ */
+export function useUpdateFormTemplate() {
+  const queryClient = useQueryClient();
+  const { getToken } = useAppAuth();
+
+  return useMutation({
+    mutationFn: async ({ id, input }: { id: string; input: UpdateFormTemplateInput }) => {
+      const token = getToken ? await getToken() : null;
+      return updateFormTemplate(id, input, token);
+    },
+    onSuccess: (data, variables) => {
+      // Update the specific template in cache
+      queryClient.setQueryData(formTemplateKeys.detail(variables.id), data);
+      // Invalidate list queries
+      queryClient.invalidateQueries({ queryKey: formTemplateKeys.lists() });
+    },
+  });
+}
+
+/**
+ * Hook to delete a form template
+ *
+ * @returns Mutation result with delete function
+ *
+ * @example
+ * const { mutate: deleteTemplate, isPending } = useDeleteFormTemplate();
+ * deleteTemplate('template-123');
+ *
+ * @security Backend validates user can only delete templates from their org
+ */
+export function useDeleteFormTemplate() {
+  const queryClient = useQueryClient();
+  const { getToken } = useAppAuth();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const token = getToken ? await getToken() : null;
+      return deleteFormTemplate(id, token);
+    },
+    onSuccess: (_, deletedId) => {
+      // Remove from cache
+      queryClient.removeQueries({ queryKey: formTemplateKeys.detail(deletedId) });
+      // Invalidate list queries
+      queryClient.invalidateQueries({ queryKey: formTemplateKeys.lists() });
+    },
+  });
+}
+
+/**
+ * Hook to duplicate a form template
+ *
+ * @returns Mutation result with duplicate function
+ *
+ * @example
+ * const { mutate: duplicateTemplate, isPending } = useDuplicateFormTemplate();
+ * duplicateTemplate('template-123');
+ *
+ * @security Creates copy in user's org
+ */
+export function useDuplicateFormTemplate() {
+  const queryClient = useQueryClient();
+  const { getToken } = useAppAuth();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const token = getToken ? await getToken() : null;
+      return duplicateFormTemplate(id, token);
+    },
+    onSuccess: () => {
+      // Invalidate list queries to show new template
+      queryClient.invalidateQueries({ queryKey: formTemplateKeys.lists() });
+    },
+  });
+}
+
 // Re-export types for convenience
-export type { FormTemplate, FormCategory, GetFormTemplatesParams };
+export type { FormTemplate, FormCategory, GetFormTemplatesParams, CreateFormTemplateInput, UpdateFormTemplateInput };

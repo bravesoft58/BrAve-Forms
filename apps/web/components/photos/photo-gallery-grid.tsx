@@ -1,6 +1,5 @@
 'use client';
 
-import { useInfiniteQuery } from '@tanstack/react-query';
 import {
   SimpleGrid,
   Card,
@@ -24,9 +23,11 @@ import { useAuth } from '@clerk/nextjs';
 import { IconMapPin, IconAlertCircle, IconPhoto, IconCheck, IconLink } from '@tabler/icons-react';
 import { PhotoLightbox } from './photo-lightbox';
 import { formatFileSize, formatDate } from '@/lib/format-utils';
+import { usePhotosByProject, type Photo as ApiPhoto } from '@/hooks/usePhotos';
 
 /**
- * Photo type matching backend GraphQL schema
+ * Photo type for gallery display
+ * Maps from backend GraphQL schema to component-friendly format
  * CRITICAL: orgId is required for multi-tenant data isolation
  */
 export interface Photo {
@@ -47,18 +48,42 @@ export interface Photo {
 }
 
 /**
+ * Map API photo to gallery photo format
+ */
+function mapApiPhotoToGalleryPhoto(apiPhoto: ApiPhoto): Photo {
+  return {
+    id: apiPhoto.id,
+    orgId: apiPhoto.orgId,
+    url: apiPhoto.url || '',
+    thumbnailUrl: apiPhoto.thumbnailUrl,
+    caption: apiPhoto.caption,
+    latitude: apiPhoto.latitude ?? null,
+    longitude: apiPhoto.longitude ?? null,
+    takenAt: apiPhoto.takenAt,
+    uploadedAt: apiPhoto.uploadedAt,
+    fileSize: apiPhoto.fileSize,
+    mimeType: apiPhoto.mimeType,
+    uploadedBy: apiPhoto.uploadedBy,
+    formName: apiPhoto.formType,
+    projectName: undefined, // Not returned from API
+  };
+}
+
+/**
  * Photo pair for before/after comparison
- * Used for construction progress tracking and compliance documentation
+ * ISSUE-172: Updated to match backend GraphQL schema
  *
  * IMPORTANT: Both photos MUST belong to same orgId (multi-tenant isolation)
- * The pair maintains references to both before and after photos for
- * side-by-side or fade comparison views.
+ * Used for construction progress tracking and EPA compliance documentation.
  */
 export interface PhotoPair {
   id: string;
   orgId: string; // REQUIRED for multi-tenant isolation
-  beforePhoto: Photo;
-  afterPhoto: Photo;
+  projectId: string;
+  beforePhotoId: string;
+  afterPhotoId: string;
+  description?: string;
+  createdBy: string;
   createdAt: string;
 }
 
@@ -77,16 +102,6 @@ export interface PhotoFilters {
 }
 
 /**
- * API response for paginated photos
- */
-interface PhotosResponse {
-  photos: Photo[];
-  hasMore: boolean;
-  totalCount: number;
-  nextCursor?: number;
-}
-
-/**
  * Props for PhotoGalleryGrid component
  */
 interface PhotoGalleryGridProps {
@@ -102,49 +117,6 @@ interface PhotoGalleryGridProps {
   onPairCreated?: (beforePhoto: Photo, afterPhoto: Photo) => void;
   /** Existing photo pairs for visual indication */
   pairs?: PhotoPair[];
-}
-
-/**
- * Fetch photos from API with pagination and filters
- */
-async function fetchPhotos(
-  projectId: string | undefined,
-  cursor: number,
-  pageSize: number,
-  filters?: PhotoFilters
-): Promise<PhotosResponse> {
-  const params = new URLSearchParams();
-  params.set('skip', String(cursor));
-  params.set('take', String(pageSize));
-
-  if (projectId) {
-    params.set('projectId', projectId);
-  }
-
-  if (filters?.formType) {
-    params.set('formType', filters.formType);
-  }
-
-  if (filters?.userId) {
-    params.set('userId', filters.userId);
-  }
-
-  if (filters?.hasGps !== undefined) {
-    params.set('hasGps', String(filters.hasGps));
-  }
-
-  if (filters?.dateRange) {
-    params.set('startDate', filters.dateRange[0].toISOString());
-    params.set('endDate', filters.dateRange[1].toISOString());
-  }
-
-  const response = await fetch(`/api/photos?${params.toString()}`);
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch photos: ${response.statusText}`);
-  }
-
-  return response.json();
 }
 
 /**
@@ -178,11 +150,12 @@ export function PhotoGalleryGrid({
   const [pairingNotification, setPairingNotification] = useState<string | null>(null);
 
   // Get set of paired photo IDs for quick lookup
+  // ISSUE-172: Updated to use photo ID fields from backend schema
   const pairedPhotoIds = useMemo(() => {
     const ids = new Set<string>();
     pairs.forEach((pair) => {
-      ids.add(pair.beforePhoto.id);
-      ids.add(pair.afterPhoto.id);
+      ids.add(pair.beforePhotoId);
+      ids.add(pair.afterPhotoId);
     });
     return ids;
   }, [pairs]);
@@ -199,25 +172,21 @@ export function PhotoGalleryGrid({
     triggerOnce: false,
   });
 
+  // Map local filters to API filter format
+  const apiFilters = useMemo(() => {
+    if (!filters) return undefined;
+    return {
+      formType: filters.formType,
+      userId: filters.userId,
+      hasGps: filters.hasGps,
+      startDate: filters.dateRange?.[0],
+      endDate: filters.dateRange?.[1],
+    };
+  }, [filters]);
+
+  // ISSUE-171: Use GraphQL hook instead of REST endpoint
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, error } =
-    useInfiniteQuery({
-      // Include orgId in queryKey for multi-tenant cache isolation
-      queryKey: ['photos', orgId, projectId, filters],
-      queryFn: async ({ pageParam = 0 }) => {
-        return fetchPhotos(projectId, pageParam, pageSize, filters);
-      },
-      getNextPageParam: (lastPage, allPages) => {
-        if (!lastPage.hasMore) return undefined;
-        // Calculate next cursor based on all loaded photos
-        const totalLoaded = allPages.reduce((acc, page) => acc + page.photos.length, 0);
-        return totalLoaded;
-      },
-      initialPageParam: 0,
-      // Offline-first configuration for 30-day capability
-      networkMode: 'offlineFirst',
-      staleTime: 1000 * 60 * 60, // 1 hour - photos rarely change
-      gcTime: 1000 * 60 * 60 * 24 * 30, // 30 days - EPA compliance requirement
-    });
+    usePhotosByProject(projectId, apiFilters, pageSize);
 
   // Trigger fetch when sentinel comes into view
   useEffect(() => {
@@ -377,8 +346,9 @@ export function PhotoGalleryGrid({
     );
   }
 
-  // Flatten all pages into single array
-  const photos = data?.pages.flatMap((page) => page.photos) || [];
+  // Flatten all pages into single array and map to gallery format
+  // ISSUE-171: Map API photos to local Photo type for gallery display
+  const photos = data?.pages.flatMap((page) => page.photos.map(mapApiPhotoToGalleryPhoto)) || [];
   const totalCount = data?.pages[0]?.totalCount || 0;
 
   // Empty state

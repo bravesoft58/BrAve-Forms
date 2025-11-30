@@ -188,3 +188,203 @@ export async function getFormTemplateCategories(
     count,
   }));
 }
+
+// ============================================================================
+// Form Template Mutations (ISSUE-168)
+// ============================================================================
+
+export interface CreateFormTemplateInput {
+  name: string;
+  description?: string;
+  category: string;
+  schema: Record<string, unknown>;
+  compliance?: Record<string, unknown>;
+}
+
+export interface UpdateFormTemplateInput {
+  name?: string;
+  description?: string;
+  schema?: Record<string, unknown>;
+  compliance?: Record<string, unknown>;
+  isActive?: boolean;
+}
+
+/**
+ * Create a new form template
+ *
+ * @param input - Template data (name, category, schema, etc.)
+ * @param token - Clerk JWT token
+ * @returns Promise resolving to created template
+ * @throws {Error} If authentication fails
+ * @throws {Error} If validation fails
+ *
+ * @example
+ * const { getToken } = useAuth();
+ * const token = await getToken();
+ * const template = await createFormTemplate({ name: 'Daily Log', ... }, token);
+ *
+ * @security Requires valid Clerk JWT with orgId claim
+ * @multi-tenancy Template automatically associated with user's organization
+ */
+export async function createFormTemplate(
+  input: CreateFormTemplateInput,
+  token: string | null
+): Promise<FormTemplate> {
+  // Input validation
+  if (!input.name || typeof input.name !== 'string' || input.name.trim() === '') {
+    throw new Error('Invalid name: must be a non-empty string');
+  }
+
+  if (!input.category) {
+    throw new Error('Invalid category: must be specified');
+  }
+
+  if (!input.schema || typeof input.schema !== 'object') {
+    throw new Error('Invalid schema: must be an object');
+  }
+
+  const data = await makeAuthenticatedRequest<{ createFormTemplate: FormTemplate }>(
+    {
+      query: `
+        mutation CreateFormTemplate($input: CreateFormTemplateInput!) {
+          createFormTemplate(input: $input) {
+            id
+            name
+            description
+            category
+            version
+            isActive
+            schema
+            compliance
+            createdAt
+            updatedAt
+          }
+        }
+      `,
+      variables: { input },
+    },
+    token
+  );
+
+  return data.createFormTemplate;
+}
+
+/**
+ * Update an existing form template
+ *
+ * @param id - Template ID
+ * @param input - Fields to update
+ * @param token - Clerk JWT token
+ * @returns Promise resolving to updated template
+ * @throws {Error} If template not found
+ * @throws {Error} If user lacks permission
+ *
+ * @security Backend validates user can only update templates from their organization
+ */
+export async function updateFormTemplate(
+  id: string,
+  input: UpdateFormTemplateInput,
+  token: string | null
+): Promise<FormTemplate> {
+  if (!id || typeof id !== 'string' || id.trim() === '') {
+    throw new Error('Invalid template ID: must be a non-empty string');
+  }
+
+  const data = await makeAuthenticatedRequest<{ updateFormTemplate: FormTemplate }>(
+    {
+      query: `
+        mutation UpdateFormTemplate($id: String!, $input: UpdateFormTemplateInput!) {
+          updateFormTemplate(id: $id, input: $input) {
+            id
+            name
+            description
+            category
+            version
+            isActive
+            schema
+            compliance
+            createdAt
+            updatedAt
+          }
+        }
+      `,
+      variables: { id, input },
+    },
+    token
+  );
+
+  return data.updateFormTemplate;
+}
+
+/**
+ * Delete a form template
+ *
+ * @param id - Template ID
+ * @param token - Clerk JWT token
+ * @returns Promise resolving to true on success
+ * @throws {Error} If template not found
+ * @throws {Error} If user lacks permission
+ */
+export async function deleteFormTemplate(
+  id: string,
+  token: string | null
+): Promise<boolean> {
+  if (!id || typeof id !== 'string' || id.trim() === '') {
+    throw new Error('Invalid template ID: must be a non-empty string');
+  }
+
+  const data = await makeAuthenticatedRequest<{ deleteFormTemplate: boolean }>(
+    {
+      query: `
+        mutation DeleteFormTemplate($id: String!) {
+          deleteFormTemplate(id: $id)
+        }
+      `,
+      variables: { id },
+    },
+    token
+  );
+
+  return data.deleteFormTemplate;
+}
+
+/**
+ * Duplicate a form template
+ *
+ * @param id - Template ID to duplicate
+ * @param token - Clerk JWT token
+ * @returns Promise resolving to new duplicated template
+ */
+export async function duplicateFormTemplate(
+  id: string,
+  token: string | null
+): Promise<FormTemplate> {
+  if (!id || typeof id !== 'string' || id.trim() === '') {
+    throw new Error('Invalid template ID: must be a non-empty string');
+  }
+
+  const data = await makeAuthenticatedRequest<{ duplicateFormTemplate: FormTemplate }>(
+    {
+      query: `
+        mutation DuplicateFormTemplate($id: String!) {
+          duplicateFormTemplate(id: $id) {
+            id
+            name
+            description
+            category
+            version
+            isActive
+            schema
+            compliance
+            createdAt
+            updatedAt
+          }
+        }
+      `,
+      variables: { id },
+    },
+    token
+  );
+
+  return data.duplicateFormTemplate;
+}

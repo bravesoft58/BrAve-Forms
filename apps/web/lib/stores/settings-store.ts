@@ -1,5 +1,74 @@
 import { proxy, subscribe } from 'valtio';
 
+// ============================================================================
+// Storage Constants (exported for testing and external use)
+// ============================================================================
+
+/**
+ * localStorage key for user settings
+ */
+export const SETTINGS_STORAGE_KEY = 'braveforms_settings';
+
+/**
+ * Valid time format regex pattern (HH:mm with leading zeros)
+ * HTML time inputs always produce this format (e.g., "07:00" not "7:00")
+ */
+export const VALID_TIME_FORMAT_PATTERN = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
+
+/**
+ * Default timezone fallback
+ */
+export const DEFAULT_TIMEZONE = 'America/New_York';
+
+// ============================================================================
+// Preference Key Constants (for type-safe access)
+// ============================================================================
+
+/**
+ * Notification preference keys
+ */
+export const NOTIFICATION_KEYS = {
+  EMAIL_WEATHER_ALERTS: 'emailWeatherAlerts',
+  EMAIL_INSPECTION_REMINDERS: 'emailInspectionReminders',
+  EMAIL_FORM_CONFIRMATIONS: 'emailFormConfirmations',
+  EMAIL_WEEKLY_SUMMARY: 'emailWeeklySummary',
+  PUSH_REAL_TIME_ALERTS: 'pushRealTimeAlerts',
+  PUSH_INSPECTION_REMINDERS: 'pushInspectionReminders',
+  QUIET_HOURS: 'quietHours',
+} as const;
+
+/**
+ * Display preference keys
+ */
+export const DISPLAY_KEYS = {
+  THEME: 'theme',
+  DATE_FORMAT: 'dateFormat',
+  UNITS: 'units',
+} as const;
+
+/**
+ * Offline preference keys
+ */
+export const OFFLINE_KEYS = {
+  AUTO_SYNC_INTERVAL: 'autoSyncInterval',
+  DATA_RETENTION: 'dataRetention',
+  PHOTO_QUALITY: 'photoQuality',
+  SYNC_ON_WIFI_ONLY: 'syncOnWifiOnly',
+} as const;
+
+/**
+ * Account preference keys
+ */
+export const ACCOUNT_KEYS = {
+  TIMEZONE: 'timezone',
+  TIME_FORMAT: 'timeFormat',
+  LANGUAGE: 'language',
+} as const;
+
+// ============================================================================
+// Type Definitions
+// ============================================================================
+
 /**
  * Theme options
  */
@@ -151,10 +220,10 @@ function getDefaultTimezone(): string {
     try {
       return Intl.DateTimeFormat().resolvedOptions().timeZone;
     } catch {
-      return 'America/New_York';
+      return DEFAULT_TIMEZONE;
     }
   }
-  return 'America/New_York';
+  return DEFAULT_TIMEZONE;
 }
 
 /**
@@ -166,17 +235,8 @@ const defaultAccount: AccountSettings = {
   language: 'en',
 };
 
-/**
- * localStorage key for settings
- */
-const STORAGE_KEY = 'braveforms_settings';
-
-/**
- * Validate time format (HH:mm with leading zeros required)
- * HTML time inputs always produce this format (e.g., "07:00" not "7:00")
- * Defined here for use in loadFromStorage validation
- */
-const VALID_TIME_FORMAT = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
+// Use exported constants for storage key and time format validation
+// See SETTINGS_STORAGE_KEY and VALID_TIME_FORMAT_PATTERN at top of file
 
 /**
  * Load settings from localStorage with validation
@@ -188,17 +248,17 @@ function loadFromStorage(): Partial<SettingsState> {
   }
 
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
 
       // Validate quiet hours times - fallback to defaults if corrupted
       if (parsed.notifications?.quietHours) {
         const qh = parsed.notifications.quietHours;
-        if (qh.startTime && !VALID_TIME_FORMAT.test(qh.startTime)) {
+        if (qh.startTime && !VALID_TIME_FORMAT_PATTERN.test(qh.startTime)) {
           qh.startTime = defaultQuietHours.startTime;
         }
-        if (qh.endTime && !VALID_TIME_FORMAT.test(qh.endTime)) {
+        if (qh.endTime && !VALID_TIME_FORMAT_PATTERN.test(qh.endTime)) {
           qh.endTime = defaultQuietHours.endTime;
         }
       }
@@ -222,7 +282,7 @@ function saveToStorage(state: SettingsState): void {
   }
 
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(state));
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Failed to save settings to localStorage:', error);
@@ -311,7 +371,7 @@ export function setQuietHoursEnabled(enabled: boolean): void {
  * @param time - HH:mm format with leading zeros (e.g., "22:00", "07:00")
  */
 export function setQuietHoursStartTime(time: string): void {
-  if (VALID_TIME_FORMAT.test(time)) {
+  if (VALID_TIME_FORMAT_PATTERN.test(time)) {
     settingsStore.notifications.quietHours.startTime = time;
   }
 }
@@ -321,7 +381,7 @@ export function setQuietHoursStartTime(time: string): void {
  * @param time - HH:mm format with leading zeros (e.g., "07:00", "22:00")
  */
 export function setQuietHoursEndTime(time: string): void {
-  if (VALID_TIME_FORMAT.test(time)) {
+  if (VALID_TIME_FORMAT_PATTERN.test(time)) {
     settingsStore.notifications.quietHours.endTime = time;
   }
 }

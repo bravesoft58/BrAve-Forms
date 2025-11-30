@@ -1,22 +1,23 @@
 'use client';
 
 import { Paper, Stack, Group, Text, Badge } from '@mantine/core';
-import { IconCloudRain } from '@tabler/icons-react';
-import type { MockProject } from '@/lib/mock-data/projects';
+import { IconCloudRain, IconAlertTriangle } from '@tabler/icons-react';
+import type { Project } from '@/lib/api/projects';
 
 interface ProjectCardProps {
-  project: MockProject;
+  project: Project;
 }
 
 /**
- * ProjectCard Component (ISSUE-086)
+ * ProjectCard Component (ISSUE-086, Updated ISSUE-170)
  *
  * Displays project information in a clickable card with:
  * - Project name, address, status
- * - Weather alert icon when rainfall >= 0.25" (EPA CGP threshold)
- * - Compliance badges for pending inspections
- * - Favorite star indicator
+ * - Weather alert based on compliance data
+ * - Compliance badges for pending/overdue inspections
  * - Navigation to project detail page
+ *
+ * ISSUE-170: Updated to use real GraphQL API Project type
  *
  * Field Optimization:
  * - Large touch targets for glove-friendly use
@@ -24,8 +25,9 @@ interface ProjectCardProps {
  * - Adequate spacing between elements
  */
 export function ProjectCard({ project }: ProjectCardProps) {
-  // EPA CGP threshold: 0.25 inches triggers inspection requirement
-  const hasWeatherAlert = project.recentRainfall >= 0.25;
+  // Check for compliance attention needed (replaces recentRainfall check)
+  const hasComplianceAlert = project.compliance.requiresAttention;
+  const hasOverdueInspections = project.compliance.overdueInspections > 0;
 
   return (
     <Paper
@@ -42,27 +44,30 @@ export function ProjectCard({ project }: ProjectCardProps) {
       className="hover:shadow-md"
     >
       <Stack gap="xs">
-        {/* Project Name + Weather Alert Icon - EXPLICIT PIXEL STRINGS */}
+        {/* Project Name + Alert Icon - EXPLICIT PIXEL STRINGS */}
         <Group justify="space-between" wrap="nowrap">
           <Text fw={600} size="14px" lineClamp={1}>
             {project.name}
           </Text>
 
-          {/* Weather Alert Icon (EPA CGP 0.25" threshold) */}
-          {hasWeatherAlert && (
+          {/* Overdue Alert Icon (EPA CGP compliance) */}
+          {hasOverdueInspections && (
+            <IconAlertTriangle
+              size={20}
+              color="red"
+              data-testid="overdue-alert-icon"
+              style={{ flexShrink: 0 }}
+            />
+          )}
+
+          {/* Weather/Compliance Alert Icon */}
+          {!hasOverdueInspections && hasComplianceAlert && (
             <IconCloudRain
               size={20}
               color="orange"
               data-testid="weather-alert-icon"
               style={{ flexShrink: 0 }}
             />
-          )}
-
-          {/* Favorite Star */}
-          {!hasWeatherAlert && project.isFavorite && (
-            <Text size="16px" style={{ flexShrink: 0 }}>
-              ⭐
-            </Text>
           )}
         </Group>
 
@@ -73,17 +78,34 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
         {/* Status and Compliance Badges */}
         <Group gap="xs" mt="xs">
-          <Badge size="sm" variant="light" color={project.status === 'ACTIVE' ? 'blue' : 'gray'}>
+          <Badge
+            size="sm"
+            variant="light"
+            color={project.status === 'ACTIVE' ? 'blue' : project.status === 'CLOSED' ? 'gray' : 'yellow'}
+          >
             {project.status}
           </Badge>
 
-          {project.compliance.pendingInspections > 0 && (
+          {project.compliance.overdueInspections > 0 && (
+            <Badge size="sm" variant="light" color="red">
+              {project.compliance.overdueInspections} overdue
+            </Badge>
+          )}
+
+          {project.compliance.pendingInspections > 0 && project.compliance.overdueInspections === 0 && (
             <Badge
               size="sm"
               variant="light"
-              color={project.compliance.requiresAttention ? 'red' : 'yellow'}
+              color={project.compliance.requiresAttention ? 'orange' : 'yellow'}
             >
               {project.compliance.pendingInspections} pending
+            </Badge>
+          )}
+
+          {/* Compliance Score Badge */}
+          {project.compliance.overallScore < 80 && (
+            <Badge size="sm" variant="light" color="red">
+              {Math.round(project.compliance.overallScore)}% score
             </Badge>
           )}
         </Group>

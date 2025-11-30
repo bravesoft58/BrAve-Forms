@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '@/modules/database/prisma.service';
 import { StorageType } from '@prisma/client';
 import { ExifService } from './exif.service';
@@ -398,5 +398,76 @@ export class PhotosService {
       longitude: photo.longitude || undefined,
       takenAt: photo.takenAt,
     };
+  }
+
+  // ISSUE-172: Photo Pairing for Before/After Comparison
+
+  /**
+   * Get all photo pairs for a project
+   */
+  async getPhotoPairsByProject(projectId: string, orgId: string) {
+    return this.prisma.photoPair.findMany({
+      where: {
+        projectId,
+        orgId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  /**
+   * Get a single photo pair by ID
+   */
+  async getPhotoPair(id: string, orgId: string) {
+    const photoPair = await this.prisma.photoPair.findFirst({
+      where: {
+        id,
+        orgId,
+      },
+    });
+
+    if (!photoPair) {
+      throw new NotFoundException('Photo pair not found');
+    }
+
+    return photoPair;
+  }
+
+  /**
+   * Create a new photo pair
+   */
+  async createPhotoPair(data: {
+    orgId: string;
+    projectId: string;
+    beforePhotoId: string;
+    afterPhotoId: string;
+    description?: string;
+    createdBy: string;
+  }) {
+    return this.prisma.photoPair.create({
+      data: {
+        orgId: data.orgId,
+        projectId: data.projectId,
+        beforePhotoId: data.beforePhotoId,
+        afterPhotoId: data.afterPhotoId,
+        description: data.description,
+        createdBy: data.createdBy,
+      },
+    });
+  }
+
+  /**
+   * Delete a photo pair
+   */
+  async deletePhotoPair(id: string, orgId: string) {
+    const photoPair = await this.getPhotoPair(id, orgId);
+
+    await this.prisma.photoPair.delete({
+      where: {
+        id: photoPair.id,
+      },
+    });
   }
 }

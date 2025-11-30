@@ -3,7 +3,7 @@
 // Note: Route segment config (dynamic, revalidate, etc.) cannot be used in Client Components
 // Dynamic rendering is handled by client-side hooks and state
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   SimpleGrid,
   Stack,
@@ -13,40 +13,65 @@ import {
   Button,
   Text,
   Center,
+  Loader,
+  Alert,
 } from '@mantine/core';
-import { IconSearch, IconPlus, IconFolderOff } from '@tabler/icons-react';
+import { IconSearch, IconPlus, IconFolderOff, IconAlertCircle, IconRefresh } from '@tabler/icons-react';
 import { PageContainer } from '@/components/Layout/PageContainer';
 import { Breadcrumbs } from '@/components/Layout/Breadcrumbs';
 import { ProjectCard } from '@/components/projects/ProjectCard';
-import { getMockProjects, filterProjectsByStatus, searchProjects } from '@/lib/mock-data/projects';
+import { useProjects } from '@/hooks/useProjects';
 
 /**
- * Projects List Page - Sprint 3 ISSUE-085
+ * Projects List Page - Sprint 3 ISSUE-085, Updated Sprint 6 ISSUE-170
  *
- * Grid view of all projects with filters (Active, Favorites, Archived),
+ * Grid view of all projects with filters (Active, Archived),
  * search by name/address, and New Project button.
+ *
+ * ISSUE-170: Replaced mock data with real GraphQL API calls
  *
  * Features:
  * - Responsive grid (1 col mobile, 2-3 cols desktop)
- * - Filter tabs (Active, Favorites, Archived)
+ * - Filter tabs (Active, All, Archived)
  * - Search by project name or address
+ * - Loading state while fetching
+ * - Error state with retry button
  * - Empty state when no projects match
  * - New Project button
  *
  * Uses aggressive compact design with explicit pixel font sizes
  * NO Route Segment Config exports (this is a Client Component)
- *
- * Sprint 4: Replace mock data with real GraphQL API calls
  */
 export default function ProjectsListPage() {
   const [filter, setFilter] = useState('active');
   const [search, setSearch] = useState('');
 
-  // Get all projects
-  const allProjects = getMockProjects();
+  // Fetch projects from real API
+  const { data: projects = [], isLoading, isError, error, refetch } = useProjects();
 
   // Apply filters and search
-  const filteredProjects = searchProjects(filterProjectsByStatus(allProjects, filter), search);
+  const filteredProjects = useMemo(() => {
+    let result = projects;
+
+    // Filter by status
+    if (filter === 'active') {
+      result = result.filter((p) => p.status === 'ACTIVE');
+    } else if (filter === 'archived') {
+      result = result.filter((p) => p.status === 'ARCHIVED' || p.status === 'CLOSED');
+    }
+
+    // Filter by search
+    if (search.trim()) {
+      const searchLower = search.toLowerCase();
+      result = result.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchLower) ||
+          p.address.toLowerCase().includes(searchLower)
+      );
+    }
+
+    return result;
+  }, [projects, filter, search]);
 
   return (
     <PageContainer
@@ -68,7 +93,7 @@ export default function ProjectsListPage() {
             onChange={setFilter}
             data={[
               { label: 'Active', value: 'active' },
-              { label: 'Favorites', value: 'favorites' },
+              { label: 'All', value: 'all' },
               { label: 'Archived', value: 'archived' },
             ]}
             size="sm"
@@ -83,15 +108,56 @@ export default function ProjectsListPage() {
           />
         </Group>
 
+        {/* Loading State */}
+        {isLoading && (
+          <Center h={300}>
+            <Stack align="center" gap="md">
+              <Loader size="lg" />
+              <Text c="dimmed" size="14px">
+                Loading projects...
+              </Text>
+            </Stack>
+          </Center>
+        )}
+
+        {/* Error State */}
+        {isError && !isLoading && (
+          <Alert
+            icon={<IconAlertCircle size={16} />}
+            title="Failed to Load Projects"
+            color="red"
+            variant="light"
+          >
+            <Stack gap="sm">
+              <Text size="13px">
+                {error instanceof Error ? error.message : 'An error occurred while loading projects.'}
+              </Text>
+              <Button
+                leftSection={<IconRefresh size={16} />}
+                variant="light"
+                color="red"
+                size="sm"
+                onClick={() => refetch()}
+              >
+                Try Again
+              </Button>
+            </Stack>
+          </Alert>
+        )}
+
         {/* Projects Grid or Empty State */}
-        {filteredProjects.length === 0 ? (
-          <EmptyState search={search} />
-        ) : (
-          <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-            {filteredProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
-            ))}
-          </SimpleGrid>
+        {!isLoading && !isError && (
+          <>
+            {filteredProjects.length === 0 ? (
+              <EmptyState search={search} />
+            ) : (
+              <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
+                {filteredProjects.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+              </SimpleGrid>
+            )}
+          </>
         )}
       </Stack>
     </PageContainer>

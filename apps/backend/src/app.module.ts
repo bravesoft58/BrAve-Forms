@@ -19,6 +19,7 @@ import { HealthModule } from './modules/health/health.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { SubmissionsModule } from './modules/submissions/submissions.module';
+import { SupportModule } from './modules/support/support.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { SubmissionsModule } from './modules/submissions/submissions.module';
     HealthModule,
     OrganizationsModule,
     WebhooksModule,
+    SupportModule,
   ],
   controllers: [],
   providers: [],

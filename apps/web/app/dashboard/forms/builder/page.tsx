@@ -1,9 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { notifications } from '@mantine/notifications';
 import { PageContainer } from '@/components/Layout/PageContainer';
 import { Breadcrumbs } from '@/components/Layout/Breadcrumbs';
 import { FormBuilder } from '@/components/Forms/FormBuilder';
+import { useCreateFormTemplate } from '@/hooks/useFormTemplates';
 import type { FormTemplate } from '@brave-forms/types';
 
 /**
@@ -11,22 +13,47 @@ import type { FormTemplate } from '@brave-forms/types';
  *
  * Creates a new form template using the drag-and-drop form builder.
  * Route: /dashboard/forms/builder
+ *
+ * ISSUE-168: Wired to backend GraphQL createFormTemplate mutation
  */
 export default function NewFormBuilderPage() {
   const router = useRouter();
+  const { mutateAsync: createTemplate, isPending } = useCreateFormTemplate();
 
   const handleSave = async (template: Partial<FormTemplate>) => {
-    // TODO: Implement GraphQL mutation to save form template
-    // mutation CreateFormTemplate($input: CreateFormTemplateInput!) {
-    //   createFormTemplate(input: $input) { id name }
-    // }
-    console.log('Saving new form template:', template);
+    try {
+      // Convert frontend format to backend format
+      // Frontend uses fields[], backend expects schema JSONB
+      const input = {
+        name: template.name || 'Untitled Form',
+        description: template.description || undefined,
+        category: template.category || 'CUSTOM',
+        schema: {
+          fields: template.fields || [],
+          logic: template.logic || [],
+          calculations: template.calculations || [],
+          version: '1.0',
+        },
+      };
 
-    // Simulate API call for now
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      await createTemplate(input);
 
-    // Navigate back to forms list after save
-    router.push('/dashboard/forms');
+      notifications.show({
+        title: 'Form Template Created',
+        message: `"${input.name}" has been saved successfully.`,
+        color: 'green',
+      });
+
+      // Navigate back to forms list after save
+      router.push('/dashboard/forms');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save form template';
+      notifications.show({
+        title: 'Error Saving Template',
+        message,
+        color: 'red',
+      });
+    }
   };
 
   const handleCancel = () => {
@@ -46,7 +73,7 @@ export default function NewFormBuilderPage() {
         />
       }
     >
-      <FormBuilder onSave={handleSave} onCancel={handleCancel} />
+      <FormBuilder onSave={handleSave} onCancel={handleCancel} loading={isPending} />
     </PageContainer>
   );
 }

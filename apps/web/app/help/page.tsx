@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Container,
   Title,
@@ -19,6 +19,8 @@ import {
   Alert,
   SegmentedControl,
   Anchor,
+  Select,
+  Loader,
 } from '@mantine/core';
 import {
   IconSearch,
@@ -33,6 +35,8 @@ import {
   IconCategory,
   IconQuestionMark,
   IconAlertCircle,
+  IconHistory,
+  IconCloudUpload,
 } from '@tabler/icons-react';
 import {
   faqs,
@@ -44,6 +48,18 @@ import {
   type FAQCategory,
 } from '@/lib/help/help-data';
 import { searchFAQs, filterByCategory } from '@/lib/help/help-search';
+import {
+  useCreateSupportRequest,
+  useMySupportRequests,
+  syncOfflineSupportRequests,
+} from '@/hooks/useSupportRequest';
+import { useAppAuth } from '@/app/providers';
+import {
+  type SupportRequestType,
+  SUPPORT_REQUEST_TYPES,
+  SUPPORT_REQUEST_TYPE_LABELS,
+  SUPPORT_REQUEST_STATUS_LABELS,
+} from '@/lib/api/support';
 
 /**
  * Help & Documentation Page
@@ -56,10 +72,34 @@ export default function HelpPage() {
   const [categoryFilter, setCategoryFilter] = useState<FAQCategory | 'all'>('all');
 
   // Contact form state
+  const [contactType, setContactType] = useState<SupportRequestType>(SUPPORT_REQUEST_TYPES.HELP);
   const [contactSubject, setContactSubject] = useState('');
   const [contactMessage, setContactMessage] = useState('');
   const [contactSubmitted, setContactSubmitted] = useState(false);
   const [contactError, setContactError] = useState('');
+
+  // Backend hooks
+  const { getToken } = useAppAuth();
+  const createSupportMutation = useCreateSupportRequest();
+  const { data: myRequests, isLoading: loadingRequests } = useMySupportRequests();
+
+  // Sync offline requests when coming back online
+  useEffect(() => {
+    const handleOnline = async () => {
+      const result = await syncOfflineSupportRequests(getToken);
+      if (result.synced > 0) {
+        console.log(`Synced ${result.synced} offline support requests`);
+      }
+      if (result.deadLettered > 0) {
+        console.warn(
+          `${result.deadLettered} support requests moved to dead letter queue after max retries`
+        );
+      }
+    };
+
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [getToken]);
 
   // Fuzzy search FAQs
   const filteredFAQs = useMemo(() => {
@@ -84,7 +124,7 @@ export default function HelpPage() {
     return groups;
   }, [filteredFAQs]);
 
-  // Handle contact form submission with offline support
+  // Handle contact form submission with backend sync and offline support
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setContactError('');
@@ -99,42 +139,34 @@ export default function HelpPage() {
       return;
     }
 
-    const supportRequest = {
-      id: `support-${Date.now()}`,
-      subject: contactSubject.trim(),
-      message: contactMessage.trim(),
-      timestamp: new Date().toISOString(),
-    };
-
-    // Queue for offline sync - support requests stored in IndexedDB
-    // and synced when online (see ISSUE-146 for backend API implementation)
     try {
-      // Store in IndexedDB for offline support
-      const db = await new Promise<IDBDatabase>((resolve, reject) => {
-        const request = indexedDB.open('braveforms-support', 1);
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => resolve(request.result);
-        request.onupgradeneeded = (event) => {
-          const database = (event.target as IDBOpenDBRequest).result;
-          if (!database.objectStoreNames.contains('requests')) {
-            database.createObjectStore('requests', { keyPath: 'id' });
-          }
-        };
+      // ISSUE-174: Submit to backend via GraphQL mutation
+      // If offline, the hook will queue for later sync
+      await createSupportMutation.mutateAsync({
+        type: contactType,
+        subject: contactSubject.trim(),
+        description: contactMessage.trim(),
       });
 
-      const transaction = db.transaction(['requests'], 'readwrite');
-      const store = transaction.objectStore('requests');
-      store.add(supportRequest);
-      db.close();
-    } catch {
-      // IndexedDB not available - form still submitted UI-side
-      console.warn('IndexedDB not available for offline queue');
+      setContactSubmitted(true);
+      setContactType(SUPPORT_REQUEST_TYPES.HELP);
+      setContactSubject('');
+      setContactMessage('');
+      setTimeout(() => setContactSubmitted(false), 5000);
+    } catch (error) {
+      // Provide user-friendly error message with offline queue indication
+      const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+      if (isOffline) {
+        setContactError(
+          'You appear to be offline. Your message has been saved and will be sent when you reconnect.'
+        );
+      } else {
+        setContactError(
+          'Unable to submit your request right now. Please try again in a few moments, or contact support@braveforms.com directly.'
+        );
+      }
+      console.error('Support request error:', error);
     }
-
-    setContactSubmitted(true);
-    setContactSubject('');
-    setContactMessage('');
-    setTimeout(() => setContactSubmitted(false), 5000);
   };
 
   return (
@@ -379,7 +411,7 @@ export default function HelpPage() {
               )}
 
               {contactError && (
-                <Alert icon={<IconAlertCircle size={16} />} title="Validation Error" color="red">
+                <Alert icon={<IconAlertCircle size={16} />} title="Error" color="red">
                   {contactError}
                 </Alert>
               )}
@@ -387,6 +419,27 @@ export default function HelpPage() {
               <Paper p="lg" withBorder>
                 <form onSubmit={handleContactSubmit}>
                   <Stack gap="md">
+                    <Select
+                      label="Request Type"
+                      placeholder="Select type"
+                      required
+                      value={contactType}
+                      onChange={(value) =>
+                        setContactType((value as SupportRequestType) || SUPPORT_REQUEST_TYPES.HELP)
+                      }
+                      data={[
+                        { value: SUPPORT_REQUEST_TYPES.HELP, label: SUPPORT_REQUEST_TYPE_LABELS.help },
+                        { value: SUPPORT_REQUEST_TYPES.BUG, label: SUPPORT_REQUEST_TYPE_LABELS.bug },
+                        {
+                          value: SUPPORT_REQUEST_TYPES.FEATURE,
+                          label: SUPPORT_REQUEST_TYPE_LABELS.feature,
+                        },
+                        {
+                          value: SUPPORT_REQUEST_TYPES.FEEDBACK,
+                          label: SUPPORT_REQUEST_TYPE_LABELS.feedback,
+                        },
+                      ]}
+                    />
                     <TextInput
                       label="Subject"
                       placeholder="What do you need help with?"
@@ -413,13 +466,80 @@ export default function HelpPage() {
                       }
                     />
                     <Group justify="flex-end">
-                      <Button type="submit" leftSection={<IconMail size={16} />}>
-                        Send Message
+                      <Button
+                        type="submit"
+                        leftSection={
+                          createSupportMutation.isPending ? (
+                            <Loader size={14} color="white" />
+                          ) : (
+                            <IconCloudUpload size={16} />
+                          )
+                        }
+                        disabled={createSupportMutation.isPending}
+                      >
+                        {createSupportMutation.isPending ? 'Sending...' : 'Send Message'}
                       </Button>
                     </Group>
                   </Stack>
                 </form>
               </Paper>
+
+              {/* Previous Support Requests */}
+              {myRequests && myRequests.length > 0 && (
+                <Paper p="md" withBorder>
+                  <Group gap="xs" mb="md">
+                    <IconHistory size={18} />
+                    <Text fw={500}>Your Previous Requests</Text>
+                  </Group>
+                  <Stack gap="sm">
+                    {loadingRequests ? (
+                      <Group justify="center" py="md">
+                        <Loader size="sm" />
+                        <Text size="sm" c="dimmed">
+                          Loading requests...
+                        </Text>
+                      </Group>
+                    ) : (
+                      myRequests.slice(0, 5).map((request) => (
+                        <Paper key={request.id} p="sm" withBorder>
+                          <Group justify="space-between" mb="xs">
+                            <Text size="sm" fw={500}>
+                              {request.subject}
+                            </Text>
+                            <Badge
+                              size="sm"
+                              color={
+                                request.status === 'OPEN'
+                                  ? 'blue'
+                                  : request.status === 'IN_PROGRESS'
+                                    ? 'yellow'
+                                    : request.status === 'RESOLVED'
+                                      ? 'green'
+                                      : 'gray'
+                              }
+                            >
+                              {SUPPORT_REQUEST_STATUS_LABELS[request.status] || request.status}
+                            </Badge>
+                          </Group>
+                          <Text size="xs" c="dimmed">
+                            {new Date(request.createdAt).toLocaleDateString()}
+                            {' - '}
+                            {SUPPORT_REQUEST_TYPE_LABELS[request.type] || request.type}
+                          </Text>
+                          {request.response && (
+                            <Paper p="xs" bg="gray.1" mt="xs">
+                              <Text size="xs" fw={500}>
+                                Response:
+                              </Text>
+                              <Text size="xs">{request.response}</Text>
+                            </Paper>
+                          )}
+                        </Paper>
+                      ))
+                    )}
+                  </Stack>
+                </Paper>
+              )}
 
               <Paper p="md" withBorder>
                 <Text fw={500} mb="xs">
