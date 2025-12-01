@@ -1,0 +1,374 @@
+CLAUDE.md rules understood, Developer.
+
+Let me explore the codebase to gather comprehensive information about BrAve Forms for your landing page brief.
+
+[6 tools called]
+
+Now I have all the information needed. Here's a comprehensive landing page brief for your web developer, Developer:
+
+---
+
+# BrAve Forms - Landing Page Creative Brief
+
+## Product Overview
+
+**BrAve Forms** is a **mobile-first construction forms management platform** that reduces daily documentation time from 2-3 hours to under 30 minutes. The platform includes offline capability for remote job sites and bonus EPA/OSHA compliance automation features.
+
+### The One-Liner
+> "Replace 3 hours of paperwork with 30 minutes of mobile forms."
+
+### Supporting Headline
+> "Construction forms management built for the field - works offline, photos auto-attach, and includes EPA/OSHA compliance."
+
+---
+
+## The Problem We Solve
+
+Construction foremen waste **2-3 hours daily** on paperwork - time that should be spent managing crews. The current reality:
+
+- Paper forms get lost or damaged on job sites (rain, mud, equipment)
+- Excel spreadsheets are time-consuming and error-prone (90% contain errors)
+- Photos are separate from forms requiring manual organization
+- Can't complete forms when connectivity is poor
+- 70% of construction disputes stem from poor documentation
+- **$177.5B lost annually** to administrative tasks across construction
+
+---
+
+## Target Market & Personas
+
+### Primary Market
+- **Small to mid-size general contractors** (5-50 employees)
+- Annual revenue: $5M-$250M
+- 919,000+ US construction establishments
+- 93% smartphone adoption among construction workers
+
+### Three Key Personas
+
+#### 1. "Forms Manager Frank" - Construction Foreman (Primary User)
+- Age: 35-50, 10+ years experience
+- Works in challenging conditions: dust, mud, rain, sun, cold
+- Currently spends 2-3 hours daily on paperwork
+- Takes 20-50 photos daily
+- Often at remote sites with poor/no cell connectivity
+- **Pain:** "I spend more time on paperwork than managing my crew"
+
+#### 2. "Manager Mike" - Project Manager
+- Oversees multiple projects/foremen
+- Needs real-time visibility into project documentation
+- Responsible for client deliverables and audit trails
+- **Pain:** "I can't track if forms are being completed on time"
+
+#### 3. "Safety Sam" - Safety/Compliance Coordinator
+- Manages OSHA and EPA compliance across projects
+- Needs standardized inspection processes
+- Interfaces with government inspectors
+- **Pain:** "We missed an EPA inspection deadline after that rain event"
+
+---
+
+## Value Propositions (In Priority Order)
+
+### Primary (80% of messaging):
+
+1. **Time Savings**
+   - 70% faster form completion vs paper/Excel
+   - Save $37,500 annually per foreman in time costs
+   - Complete daily logs in 10 minutes, not 45
+
+2. **Photo Documentation Made Easy**
+   - Photos capture within forms (no separate camera/email workflow)
+   - Automatic GPS tagging and timestamps
+   - Unlimited storage with auto-compression
+   - Before/after photo pairing
+
+3. **Works Offline for 30 Days**
+   - True offline-first architecture
+   - Fill forms, capture photos, get signatures - all without internet
+   - Automatic sync when connectivity returns
+
+4. **Construction-Specific Templates**
+   - 50+ pre-built templates (daily logs, safety, quality, equipment)
+   - Start using immediately without creating forms from scratch
+   - Built for construction workflows, not generic inspections
+
+5. **Digital Signatures**
+   - Multi-signer workflows
+   - ESIGN Act compliant
+   - Professional PDF exports
+
+### Secondary (20% of messaging - Bonus Features):
+
+6. **Weather-Triggered Compliance**
+   - Automatic 0.25" rain alerts for EPA SWPPP inspections
+   - Never miss compliance deadlines
+
+7. **QR Inspector Portal**
+   - Inspectors scan QR code for instant access
+   - No app installation required
+
+8. **EPA & OSHA Templates**
+   - Pre-built regulatory compliance forms
+
+---
+
+## Competitive Positioning
+
+### Tagline
+> "The construction-native forms platform that Procore users wish they had for $39/month instead of $375/month."
+
+### Positioning Matrix
+
+| Competitor | Price | Our Advantage |
+|------------|-------|---------------|
+| **Procore** | $375-549/mo | 5-10x cheaper, forms-focused |
+| **SafetyCulture** | $24/user | Construction-specific + compliance |
+| **PlanGrid** | $165/user | 3x cheaper, better offline |
+| **GoCanvas** | $49+ | Construction-native templates |
+| **Paper/Excel** | "Free" | 70% faster, never lose forms |
+
+---
+
+## Key Statistics & Proof Points
+
+### Industry Stats
+- 93% of construction workers use smartphones
+- 2-3 hours daily spent on forms by foremen
+- 70% of disputes stem from poor documentation
+- $177.5B lost annually to administrative tasks
+- 12-15% of project costs attributed to rework
+
+### ROI Numbers (Use Prominently)
+- **$37,500** saved annually per foreman
+- **64-130x** return on investment
+- **4-8 day** payback period
+- **70%** reduction in form completion time
+
+### Compliance Risk
+- EPA fines: $25,000-$50,000 per day
+- OSHA penalties: Up to $165,514 per willful violation
+
+---
+
+## Pricing
+
+### User Types
+- **Field User:** $39/month (form creation, mobile, offline)
+- **Office User:** $19/month (view-only, reports, web access)
+- **Inspector Portal:** FREE (QR code access, time-limited)
+
+### Volume Discounts
+- 11-25 users: 15% off
+- 26-50 users: 25% off
+- 51+ users: Custom pricing
+
+---
+
+## Brand Identity
+
+### Brand Personality
+- **Practical** (not flashy or over-engineered)
+- **Field-tested** (not theoretical)
+- **No-nonsense** (not corporate)
+- **Reliable** (not experimental)
+- **Construction-native** (not generic)
+
+### Voice & Tone
+- **Direct:** Say what it does, how it helps
+- **Authentic:** Real construction language, not marketing jargon
+- **Conversational:** Easy to understand
+- **Professional but approachable**
+
+### Color Palette
+- **Primary:** Construction Orange (energy, action, visibility on job sites)
+- **Secondary:** Deep Blue (trust, reliability, professional)
+- **Accent:** Clean White/Gray (simplicity, clarity)
+
+### Design Principles
+- **High Contrast:** Readable in bright sunlight metaphor
+- **Large Touch Targets:** Glove-friendly aesthetic (big buttons)
+- **Clean Layout:** Minimal clutter, obvious CTAs
+- **Mobile-First:** Designed for phones, adapts to desktop
+- **Photo-Forward:** Visual documentation emphasized
+
+### What NOT to Do
+- No corporate buzzwords ("synergy," "leverage," "paradigm")
+- No overly technical jargon
+- No fear-based compliance messaging (compliance is a BONUS, not the lead)
+- No generic "works for any industry" positioning
+
+---
+
+## Landing Page Structure (Recommended)
+
+### Hero Section
+- **Headline:** "Replace 3 Hours of Paperwork with 30 Minutes of Mobile Forms"
+- **Subhead:** "Construction forms management that works offline, auto-attaches photos, and includes EPA/OSHA compliance."
+- **CTA:** "Start Free 30-Day Trial" (no credit card)
+- **Hero Image:** Foreman on job site using phone/tablet (NOT stock photo - gritty, real)
+
+### Problem Section
+- "Construction foremen waste 2-3 hours daily on paperwork"
+- Visual: Paper forms blowing away, rain-damaged clipboard vs phone app
+
+### Solution/Features Section
+- 4-5 key features with icons and brief descriptions
+- Time savings, Photo integration, Offline capability, Templates, Digital signatures
+
+### How It Works
+- Simple 3-step process:
+  1. Choose a template (50+ construction forms)
+  2. Fill on your phone (works offline)
+  3. Photos auto-attach with GPS
+
+### ROI Calculator (Interactive)
+- Input: Number of foremen
+- Output: Annual savings ($37,500 × foremen)
+- Show payback period
+
+### Social Proof
+- Customer testimonials (construction-specific)
+- Industry statistics
+- Customer logos (when available)
+
+### Pricing Section
+- Simple three-column layout
+- Field User | Office User | Enterprise
+- Emphasize "Free Inspector Portal"
+
+### FAQ Section
+- "Does it work offline?" (Yes, 30 days)
+- "Do I need to create forms from scratch?" (No, 50+ templates)
+- "How is this different from Procore?" (5-10x cheaper, forms-focused)
+- "What about EPA compliance?" (Bonus feature included)
+
+### Final CTA
+- "Start Your Free 30-Day Trial"
+- "No credit card required"
+- Phone number for questions
+
+---
+
+## Technical Recommendations for Landing Page
+
+### Recommended Stack
+
+**Option A: Next.js + TypeScript (Recommended)**
+```
+- Framework: Next.js 14 (App Router)
+- Language: TypeScript
+- Styling: Tailwind CSS
+- Animations: Framer Motion
+- Forms: React Hook Form (for contact/trial signup)
+- Analytics: PostHog or Plausible
+- Deployment: Vercel
+```
+
+**Pros:** 
+- SEO-optimized with SSG/SSR
+- Fast performance
+- Easy to integrate with future app
+- Component reusability
+- Great developer experience
+
+**Option B: Astro + TypeScript (Lighter Alternative)**
+```
+- Framework: Astro 4.x
+- Language: TypeScript
+- Styling: Tailwind CSS
+- Interactivity: Minimal JS (Astro islands)
+- Deployment: Vercel/Netlify
+```
+
+**Pros:**
+- Ultra-fast (ships zero JS by default)
+- Perfect for content-focused landing pages
+- Lower complexity
+- Can add React components where needed
+
+### Performance Requirements
+- **Lighthouse Score:** 90+ on all metrics
+- **First Contentful Paint:** < 1.5s
+- **Time to Interactive:** < 3s
+- Mobile-first responsive design
+- Optimize images (WebP/AVIF)
+
+### SEO Targets
+- Keywords: "construction forms software," "digital daily logs," "SWPPP inspection app," "construction documentation"
+- Schema markup for software/SaaS
+- Open Graph tags for social sharing
+
+---
+
+## Assets Needed
+
+### Photography/Imagery
+- Construction site photos (real, not stock)
+- Foreman using mobile device on job site
+- Hard hats, safety vests, muddy boots aesthetic
+- Weather conditions: sun glare, rain, dust
+- Before/after: paper chaos vs organized digital
+
+### Icons
+- Forms/documents
+- Camera/photo
+- Offline/cloud sync
+- Clock/time savings
+- Shield/compliance
+- Mobile phone
+- GPS/location pin
+
+### Video (Optional but High-Impact)
+- 60-90 second product demo
+- Day-in-the-life of foreman using app
+- Before/after time comparison
+
+---
+
+## Success Metrics
+
+The landing page should be optimized for:
+- **Primary:** Trial signups (30-day free trial)
+- **Secondary:** Demo requests
+- **Tertiary:** Newsletter signups
+
+Track:
+- Conversion rate (target: 3-5%)
+- Time on page
+- Scroll depth
+- CTA click-through rates
+- Mobile vs desktop performance
+
+---
+
+## Key Differentiators to Emphasize
+
+1. **30-day offline** (competitors offer limited or undefined offline)
+2. **Construction-specific** (not generic forms adapted to construction)
+3. **Photo-first workflow** (photos attach directly in forms with GPS)
+4. **Weather triggers** (automatic compliance reminders - unique feature)
+5. **QR Inspector Portal** (inspectors access without app install)
+6. **5-10x cheaper than Procore** for forms functionality
+
+---
+
+## Sample Copy
+
+### Headline Options
+- "Replace 3 Hours of Paperwork with 30 Minutes of Mobile Forms"
+- "Construction Forms That Work Where You Work"
+- "Stop Wasting Time on Paperwork. Start Managing Your Crew."
+- "The $39 Solution to Your $37,500 Problem"
+
+### Subhead Options
+- "50+ construction templates. 30-day offline. GPS-tagged photos. Compliance automation included."
+- "Digital forms for construction teams that work offline, attach photos automatically, and keep you compliant."
+
+### CTA Options
+- "Start Free 30-Day Trial"
+- "Try Free for 30 Days"
+- "Get Your Time Back"
+
+---
+
+This brief should give your web developer everything they need to create an effective, conversion-focused landing page that speaks directly to construction professionals. The key is maintaining that **practical, field-tested, no-nonsense** tone while highlighting the massive time savings ROI.
