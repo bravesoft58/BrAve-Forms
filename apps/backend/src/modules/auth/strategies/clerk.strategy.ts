@@ -46,9 +46,9 @@ export class ClerkStrategy extends PassportStrategy(Strategy, 'clerk') {
         email: 'developer@braveforms.test',
         firstName: 'Dev',
         lastName: 'User',
-        orgId: '1d1e2121-cfd7-4784-bd5a-d86439c9b793', // Database UUID for org_qd_default
-        orgRole: 'admin',
-        orgSlug: 'dev-construction-co',
+        orgId: DEFAULT_ORG_ID, // 'org_qd_default' - matches clerk_org_id in database
+        orgRole: 'ADMIN', // UPPERCASE to match ROLE_HIERARCHY in roles.decorator.ts
+        orgSlug: DEFAULT_ORG_SLUG, // Consistent with DEFAULT_ORG_ID
         sessionId: 'dev-session-123',
 
         // Additional security context
@@ -82,7 +82,7 @@ export class ClerkStrategy extends PassportStrategy(Strategy, 'clerk') {
 
       // Single-tenant mode: Always use DEFAULT_ORG_ID
       // Note: Organizations feature disabled in Clerk Dashboard
-      // Multi-tenant migration planned for Sprint 5-6
+      // Multi-tenant migration planned for Sprint 8
       const orgId = DEFAULT_ORG_ID;
       const orgSlug = DEFAULT_ORG_SLUG;
       // Extract role from token if available, otherwise default to 'member'
@@ -90,8 +90,10 @@ export class ClerkStrategy extends PassportStrategy(Strategy, 'clerk') {
       const orgRole = verifiedToken.org_role || verifiedToken.o?.rol || 'member';
 
       // Validate organization role for access control
-      const validRoles = ['admin', 'owner', 'manager', 'member', 'inspector'];
-      if (orgRole && !validRoles.includes(orgRole.toLowerCase())) {
+      // Normalize to uppercase to match ROLE_HIERARCHY in roles.decorator.ts
+      const validRoles = ['ADMIN', 'OWNER', 'MANAGER', 'MEMBER', 'INSPECTOR'];
+      const normalizedRole = orgRole?.toUpperCase() || 'MEMBER';
+      if (!validRoles.includes(normalizedRole)) {
         throw new UnauthorizedException(`Invalid organization role: ${orgRole}`);
       }
 
@@ -101,7 +103,7 @@ export class ClerkStrategy extends PassportStrategy(Strategy, 'clerk') {
         firstName: verifiedToken.given_name,
         lastName: verifiedToken.family_name,
         orgId,
-        orgRole: orgRole?.toLowerCase() || 'member',
+        orgRole: normalizedRole, // UPPERCASE to match ROLE_HIERARCHY
         orgSlug,
         sessionId: verifiedToken.sid,
 

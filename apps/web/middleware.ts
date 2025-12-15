@@ -1,7 +1,13 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
+
+// Check if auth should be skipped (local development)
+const skipAuth =
+  process.env.NEXT_PUBLIC_SKIP_CLERK_AUTH === 'true' || process.env.SKIP_CLERK_AUTH === 'true';
 
 // Define public routes that don't require authentication
 const isPublicRoute = createRouteMatcher([
+  '/', // Landing page
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/inspector/(.*)', // QR code inspector portal is public
@@ -9,6 +15,11 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
+  // Skip all auth in local development mode
+  if (skipAuth) {
+    return NextResponse.next();
+  }
+
   // Protect all routes except public ones
   if (!isPublicRoute(request)) {
     await auth.protect();

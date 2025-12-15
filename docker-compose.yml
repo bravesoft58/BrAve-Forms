@@ -83,9 +83,9 @@ services:
       AWS_REGION: us-east-1
       S3_ENDPOINT: http://minio:9000
       S3_BUCKET_NAME: brave-forms-uploads
-      SKIP_CLERK_AUTH: 'true'
-      CLERK_SECRET_KEY: sk_test_placeholder_for_local_dev
-      CLERK_PUBLISHABLE_KEY: pk_test_placeholder_for_local_dev
+      SKIP_CLERK_AUTH: 'false'
+      CLERK_SECRET_KEY: sk_test_ukrcGObFIAn9XhIrhalKVKBSG90MqO8rPeRyXlIFjY
+      CLERK_PUBLISHABLE_KEY: pk_test_c2VsZWN0ZWQtcHVtYS05OC5jbGVyay5hY2NvdW50cy5kZXYk
       CORS_ORIGIN: http://localhost:3000
     ports:
       - '4000:4000'
@@ -108,11 +108,13 @@ services:
       args:
         NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://localhost:4000/graphql
         NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_c2VsZWN0ZWQtcHVtYS05OC5jbGVyay5hY2NvdW50cy5kZXYk
+        NEXT_PUBLIC_SKIP_CLERK_AUTH: 'false'
+        SKIP_CLERK_AUTH: 'false'
     container_name: braveforms-web
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://localhost:4000/graphql
-      NEXT_PUBLIC_SKIP_CLERK_AUTH: 'true'
+      NEXT_PUBLIC_SKIP_CLERK_AUTH: 'false'
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_c2VsZWN0ZWQtcHVtYS05OC5jbGVyay5hY2NvdW50cy5kZXYk
       CLERK_SECRET_KEY: sk_test_ukrcGObFIAn9XhIrhalKVKBSG90MqO8rPeRyXlIFjY
     ports:

@@ -154,11 +154,32 @@ export function useCreateProject() {
 
   return useMutation({
     mutationFn: async (input: CreateProjectInput) => {
-      const token = getToken ? await getToken() : null;
+      console.log('[useCreateProject] Starting mutation with input:', input);
+      console.log('[useCreateProject] getToken function available:', !!getToken);
+
+      let token: string | null = null;
+      try {
+        token = getToken ? await getToken() : null;
+        console.log(
+          '[useCreateProject] Token retrieved:',
+          token ? `${token.substring(0, 20)}...` : 'null'
+        );
+      } catch (tokenError) {
+        console.error('[useCreateProject] Error getting token:', tokenError);
+        throw new Error(
+          `Failed to get authentication token: ${tokenError instanceof Error ? tokenError.message : 'Unknown error'}`
+        );
+      }
+
+      console.log('[useCreateProject] Calling createProject API...');
       return createProject(input, token);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('[useCreateProject] Mutation succeeded, invalidating queries:', data);
       queryClient.invalidateQueries({ queryKey: projectKeys.all });
+    },
+    onError: (error) => {
+      console.error('[useCreateProject] Mutation failed:', error);
     },
   });
 }

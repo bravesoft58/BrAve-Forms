@@ -31,7 +31,8 @@ export function useAppAuth(): AppAuthData {
   const { user } = useUser();
 
   // Default org ID for now - will be replaced with Clerk Organizations later
-  const orgId = '1d1e2121-cfd7-4784-bd5a-d86439c9b793';
+  // This must match the clerk_org_id in the database, not the database id
+  const orgId = 'org_qd_default';
 
   return {
     userId: userId || null,

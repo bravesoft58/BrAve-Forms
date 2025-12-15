@@ -137,10 +137,7 @@ export async function getProjects(
  *
  * @security Backend validates user can access project
  */
-export async function getProjectById(
-  id: string,
-  token: string | null
-): Promise<Project> {
+export async function getProjectById(id: string, token: string | null): Promise<Project> {
   if (!id || typeof id !== 'string' || id.trim() === '') {
     throw new Error('Invalid project ID: must be a non-empty string');
   }
@@ -230,53 +227,65 @@ export async function createProject(
   input: CreateProjectInput,
   token: string | null
 ): Promise<Project> {
+  console.log('[createProject] Called with input:', JSON.stringify(input, null, 2));
+  console.log('[createProject] Token provided:', token ? 'yes' : 'no');
+
   if (!input.name || typeof input.name !== 'string' || input.name.trim() === '') {
+    console.error('[createProject] Validation failed: invalid name');
     throw new Error('Invalid name: must be a non-empty string');
   }
 
-  const data = await makeAuthenticatedRequest<{ createProject: Project }>(
-    {
-      query: `
-        mutation CreateProject($input: CreateProjectInput!) {
-          createProject(input: $input) {
-            id
-            name
-            address
-            latitude
-            longitude
-            permitNumber
-            startDate
-            endDate
-            disturbedAcres
-            status
-            createdAt
-            updatedAt
-            recentInspections {
+  console.log('[createProject] Validation passed, making authenticated request...');
+
+  try {
+    const data = await makeAuthenticatedRequest<{ createProject: Project }>(
+      {
+        query: `
+          mutation CreateProject($input: CreateProjectInput!) {
+            createProject(input: $input) {
               id
-              type
+              name
+              address
+              latitude
+              longitude
+              permitNumber
+              startDate
+              endDate
+              disturbedAcres
               status
-              inspectionDate
-              submittedAt
-              weatherTriggered
-              overdue
-            }
-            compliance {
-              overallScore
-              pendingInspections
-              overdueInspections
-              lastInspection
-              nextDeadline
-              requiresAttention
+              createdAt
+              updatedAt
+              recentInspections {
+                id
+                type
+                status
+                inspectionDate
+                submittedAt
+                weatherTriggered
+                overdue
+              }
+              compliance {
+                overallScore
+                pendingInspections
+                overdueInspections
+                lastInspection
+                nextDeadline
+                requiresAttention
+              }
             }
           }
-        }
-      `,
-      variables: { input },
-    },
-    token
-  );
+        `,
+        variables: { input },
+      },
+      token
+    );
 
-  return data.createProject;
+    console.log('[createProject] Success, project created:', data.createProject?.id);
+    return data.createProject;
+  } catch (error) {
+    console.error('[createProject] API request failed:', error);
+    throw error;
+  }
 }
 
 /**
@@ -352,10 +361,7 @@ export async function updateProject(
  *
  * @security Requires ADMIN role or above
  */
-export async function deleteProject(
-  id: string,
-  token: string | null
-): Promise<boolean> {
+export async function deleteProject(id: string, token: string | null): Promise<boolean> {
   if (!id || typeof id !== 'string' || id.trim() === '') {
     throw new Error('Invalid project ID: must be a non-empty string');
   }

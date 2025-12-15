@@ -184,88 +184,8 @@ describe('OrganizationsResolver', () => {
     });
   });
 
-  describe('projects Query', () => {
-    it('should return all projects for organization without filter', async () => {
-      mockPrismaService.project.findMany.mockResolvedValue(mockProjects);
-
-      const result = await resolver.projects(mockUser);
-
-      expect(result).toHaveLength(2);
-      expect(result[0].name).toBe('Site A Construction');
-      expect(mockPrismaService.project.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({ orgId: expect.any(String) }),
-          include: expect.objectContaining({
-            inspections: expect.any(Object),
-          }),
-        })
-      );
-    });
-
-    it('should filter projects by status ACTIVE', async () => {
-      const activeProjects = mockProjects.filter((p) => p.status === ProjectStatus.ACTIVE);
-      mockPrismaService.project.findMany.mockResolvedValue(activeProjects);
-
-      const result = await resolver.projects(mockUser, { status: ProjectStatus.ACTIVE });
-
-      expect(result).toHaveLength(2);
-      expect(mockPrismaService.project.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            orgId: expect.any(String),
-            status: ProjectStatus.ACTIVE,
-          }),
-        })
-      );
-    });
-
-    it('should filter projects by name search', async () => {
-      const filteredProjects = [mockProjects[1]]; // "Bridge Repair Project"
-      mockPrismaService.project.findMany.mockResolvedValue(filteredProjects);
-
-      const result = await resolver.projects(mockUser, { search: 'Bridge' });
-
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('Bridge Repair Project');
-      expect(mockPrismaService.project.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            orgId: expect.any(String),
-            OR: expect.any(Array),
-          }),
-        })
-      );
-    });
-
-    it('should return projects with nested inspections', async () => {
-      mockPrismaService.project.findMany.mockResolvedValue(mockProjects);
-
-      const result = await resolver.projects(mockUser);
-
-      expect(result[0].inspections).toHaveLength(2); // proj_1 has 2 inspections
-      expect(result[1].inspections).toHaveLength(0); // proj_2 has no inspections
-      expect(result[0].name).toBe('Site A Construction');
-      expect(result[1].name).toBe('Bridge Repair Project');
-    });
-
-    it('should return empty array when no projects found', async () => {
-      mockPrismaService.project.findMany.mockResolvedValue([]);
-
-      const result = await resolver.projects(mockUser);
-
-      expect(result).toEqual([]);
-    });
-
-    it('should enforce multi-tenant isolation by orgId', async () => {
-      mockPrismaService.project.findMany.mockResolvedValue(mockProjects);
-
-      await resolver.projects(mockUser);
-
-      expect(mockPrismaService.project.findMany).toHaveBeenCalled();
-      // Verified by getOrganizationByClerkId which filters by user.orgId
-      expect(mockPrismaService.organization.findUnique).toHaveBeenCalled();
-    });
-  });
+  // NOTE: projects Query tests moved to projects.resolver.spec.ts
+  // The projects query is now handled by ProjectsResolver with ProjectWithComplianceGQL type;
 
   describe('organizationDashboard Query', () => {
     it('should return comprehensive organization statistics', async () => {
@@ -407,10 +327,7 @@ describe('OrganizationsResolver', () => {
         })
       );
 
-      // Test projects
-      mockPrismaService.project.findMany.mockResolvedValue([]);
-      await resolver.projects(mockUser);
-      expect(mockPrismaService.project.findMany).toHaveBeenCalled();
+      // NOTE: projects query test moved to projects.resolver.spec.ts
 
       // Test organizationDashboard
       mockPrismaService.project.count.mockResolvedValue(0);
@@ -423,26 +340,7 @@ describe('OrganizationsResolver', () => {
   });
 
   describe('Edge Cases and Error Scenarios', () => {
-    it('should handle projects with empty arrays gracefully', async () => {
-      const edgeCaseProject = {
-        id: 'proj_edge',
-        orgId: 'org_abc',
-        name: 'Edge Case Project',
-        location: 'Test',
-        status: ProjectStatus.ACTIVE,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        inspections: [],
-      };
-
-      mockPrismaService.project.findMany.mockResolvedValue([edgeCaseProject]);
-
-      const result = await resolver.projects(mockUser);
-
-      expect(result[0].inspections).toEqual([]);
-      expect(result[0].status).toBe(ProjectStatus.ACTIVE);
-      expect(result[0].name).toBe('Edge Case Project');
-    });
+    // NOTE: "should handle projects with empty arrays gracefully" test moved to projects.resolver.spec.ts
 
     it('should handle very large organization stats', async () => {
       mockPrismaService.project.count.mockResolvedValue(10000);

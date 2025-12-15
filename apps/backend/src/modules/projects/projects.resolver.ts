@@ -1,5 +1,7 @@
 import { Resolver, Query, Mutation, Args, Field, ObjectType, InputType } from '@nestjs/graphql';
 import { UseGuards, Logger } from '@nestjs/common';
+import { IsString, IsNumber, IsOptional, IsDate, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ClerkAuthGuard } from '../auth/guards/clerk-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -7,9 +9,9 @@ import { ManagementAccess, TeamAccess, AdminAccess } from '../../common/decorato
 import { ProjectsService } from './projects.service';
 import { PrismaService } from '../database/prisma.service';
 
-// GraphQL Types for Project Management (order matters for circular references)
-@ObjectType('Inspection')
-export class InspectionGQL {
+// GraphQL Types for Project Management (unique names to avoid conflicts with organizations.resolver)
+@ObjectType('InspectionSummary')
+export class InspectionSummaryGQL {
   @Field()
   id: string;
 
@@ -53,8 +55,8 @@ export class ProjectComplianceGQL {
   requiresAttention: boolean;
 }
 
-@ObjectType('Project')
-export class ProjectGQL {
+@ObjectType('ProjectWithCompliance')
+export class ProjectWithComplianceGQL {
   @Field()
   id: string;
 
@@ -91,8 +93,8 @@ export class ProjectGQL {
   @Field()
   updatedAt: Date;
 
-  @Field(() => [InspectionGQL])
-  recentInspections: InspectionGQL[];
+  @Field(() => [InspectionSummaryGQL])
+  recentInspections: InspectionSummaryGQL[];
 
   @Field(() => ProjectComplianceGQL)
   compliance: ProjectComplianceGQL;
@@ -102,61 +104,95 @@ export class ProjectGQL {
 @InputType()
 export class CreateProjectInput {
   @Field()
+  @IsString()
   name: string;
 
   @Field()
+  @IsString()
   address: string;
 
   @Field()
+  @IsNumber()
   latitude: number;
 
   @Field()
+  @IsNumber()
   longitude: number;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   permitNumber?: string;
 
   @Field()
+  @Type(() => Date)
+  @IsDate()
   startDate: Date;
 
   @Field({ nullable: true })
+  @Type(() => Date)
+  @IsDate()
+  @IsOptional()
   endDate?: Date;
 
   @Field()
+  @IsNumber()
+  @Min(0)
   disturbedAcres: number;
 }
 
 @InputType()
 export class UpdateProjectInput {
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   name?: string;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   address?: string;
 
   @Field({ nullable: true })
+  @IsNumber()
+  @IsOptional()
   latitude?: number;
 
   @Field({ nullable: true })
+  @IsNumber()
+  @IsOptional()
   longitude?: number;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   permitNumber?: string;
 
   @Field({ nullable: true })
+  @Type(() => Date)
+  @IsDate()
+  @IsOptional()
   startDate?: Date;
 
   @Field({ nullable: true })
+  @Type(() => Date)
+  @IsDate()
+  @IsOptional()
   endDate?: Date;
 
   @Field({ nullable: true })
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
   disturbedAcres?: number;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   status?: string;
 }
 
-@Resolver(() => ProjectGQL)
+@Resolver(() => ProjectWithComplianceGQL)
 export class ProjectsResolver {
   private readonly logger = new Logger(ProjectsResolver.name);
 
@@ -165,10 +201,10 @@ export class ProjectsResolver {
     private readonly prisma: PrismaService
   ) {}
 
-  @Query(() => [ProjectGQL])
+  @Query(() => [ProjectWithComplianceGQL])
   @UseGuards(ClerkAuthGuard, RolesGuard)
   @TeamAccess()
-  async projects(@CurrentUser() user: any): Promise<ProjectGQL[]> {
+  async projects(@CurrentUser() user: any): Promise<ProjectWithComplianceGQL[]> {
     const org = await this.getOrganizationByClerkId(user.orgId);
 
     // Get projects with role-based filtering
@@ -181,10 +217,13 @@ export class ProjectsResolver {
     }));
   }
 
-  @Query(() => ProjectGQL)
+  @Query(() => ProjectWithComplianceGQL)
   @UseGuards(ClerkAuthGuard, RolesGuard)
   @TeamAccess()
-  async project(@CurrentUser() user: any, @Args('id') id: string): Promise<ProjectGQL> {
+  async project(
+    @CurrentUser() user: any,
+    @Args('id') id: string
+  ): Promise<ProjectWithComplianceGQL> {
     // Verify project access through organization
     const project = await this.prisma.project.findFirst({
       where: {
@@ -212,47 +251,66 @@ export class ProjectsResolver {
     };
   }
 
-  @Mutation(() => ProjectGQL)
+  @Mutation(() => ProjectWithComplianceGQL)
   @UseGuards(ClerkAuthGuard, RolesGuard)
   @ManagementAccess() // Managers and above can create projects
   async createProject(
     @CurrentUser() user: any,
     @Args('input') input: CreateProjectInput
-  ): Promise<ProjectGQL> {
-    const org = await this.getOrganizationByClerkId(user.orgId);
+  ): Promise<ProjectWithComplianceGQL> {
+    this.logger.log('createProject mutation called', {
+      userId: user.userId,
+      orgId: user.orgId,
+      orgRole: user.orgRole,
+      input: JSON.stringify(input),
+    });
 
-    const project = await this.prisma.project.create({
-      data: {
-        ...input,
+    try {
+      const org = await this.getOrganizationByClerkId(user.orgId);
+      this.logger.log(`Organization found: ${org.id} (${org.name})`);
+
+      const project = await this.prisma.project.create({
+        data: {
+          ...input,
+          orgId: org.id,
+          bmps: [], // Initialize empty BMP array
+        },
+        include: {
+          inspections: true,
+        },
+      });
+
+      this.logger.log(`Project created: ${project.name}`, {
+        projectId: project.id,
         orgId: org.id,
-        bmps: [], // Initialize empty BMP array
-      },
-      include: {
-        inspections: true,
-      },
-    });
+        createdBy: user.userId,
+      });
 
-    this.logger.log(`Project created: ${project.name}`, {
-      projectId: project.id,
-      orgId: org.id,
-      createdBy: user.userId,
-    });
-
-    return {
-      ...project,
-      recentInspections: [],
-      compliance: this.calculateProjectCompliance(project),
-    };
+      return {
+        ...project,
+        recentInspections: [],
+        compliance: this.calculateProjectCompliance(project),
+      };
+    } catch (error) {
+      this.logger.error('createProject mutation failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: user.userId,
+        orgId: user.orgId,
+        input: JSON.stringify(input),
+      });
+      throw error;
+    }
   }
 
-  @Mutation(() => ProjectGQL)
+  @Mutation(() => ProjectWithComplianceGQL)
   @UseGuards(ClerkAuthGuard, RolesGuard)
   @ManagementAccess() // Managers and above can update projects
   async updateProject(
     @CurrentUser() user: any,
     @Args('id') id: string,
     @Args('input') input: UpdateProjectInput
-  ): Promise<ProjectGQL> {
+  ): Promise<ProjectWithComplianceGQL> {
     // Verify project belongs to user's organization
     const existingProject = await this.prisma.project.findFirst({
       where: {
@@ -336,7 +394,7 @@ export class ProjectsResolver {
     return org;
   }
 
-  private mapInspection(inspection: any): InspectionGQL {
+  private mapInspection(inspection: any): InspectionSummaryGQL {
     // Calculate if inspection is overdue (EPA 24-hour rule)
     const deadline = new Date(inspection.inspectionDate);
     deadline.setHours(deadline.getHours() + 24);

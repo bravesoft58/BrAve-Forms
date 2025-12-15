@@ -2,11 +2,55 @@
 
 import { PageContainer } from '@/components/Layout/PageContainer';
 import { Breadcrumbs } from '@/components/Layout/Breadcrumbs';
-import { Text, Stack, TextInput, Textarea, Select, Button, Group, Paper } from '@mantine/core';
-import { IconChevronLeft, IconDeviceFloppy } from '@tabler/icons-react';
+import {
+  Text,
+  Stack,
+  TextInput,
+  Textarea,
+  Select,
+  Button,
+  Group,
+  Paper,
+  NumberInput,
+} from '@mantine/core';
+import { notifications } from '@mantine/notifications';
+import { IconChevronLeft, IconDeviceFloppy, IconMapPin } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useCreateProject } from '@/hooks/useProjects';
+
+/**
+ * Geocode an address using OpenStreetMap Nominatim API (free, no API key)
+ */
+async function geocodeAddress(address: string): Promise<{ lat: number; lon: number } | null> {
+  try {
+    const encodedAddress = encodeURIComponent(address);
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`,
+      {
+        headers: {
+          'User-Agent': 'BrAveForms/1.0 (construction-compliance-app)',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Geocoding request failed');
+    }
+
+    const data = await response.json();
+    if (data && data.length > 0) {
+      return {
+        lat: parseFloat(data[0].lat),
+        lon: parseFloat(data[0].lon),
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error('Geocoding error:', error);
+    return null;
+  }
+}
 
 /**
  * New Project Page - Sprint 6 Enhancement
@@ -25,14 +69,55 @@ import { useCreateProject } from '@/hooks/useProjects';
 export default function NewProjectPage() {
   const router = useRouter();
   const createProjectMutation = useCreateProject();
+  const [isGeocoding, setIsGeocoding] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
     address: '',
+    latitude: 0,
+    longitude: 0,
+    disturbedAcres: 0,
     description: '',
     status: 'PENDING',
     startDate: '',
   });
+
+  const handleLookupCoordinates = async () => {
+    if (!formData.address.trim()) {
+      notifications.show({
+        title: 'Address Required',
+        message: 'Please enter an address before looking up coordinates',
+        color: 'yellow',
+      });
+      return;
+    }
+
+    setIsGeocoding(true);
+    try {
+      const coords = await geocodeAddress(formData.address);
+      if (coords) {
+        setFormData((prev) => ({
+          ...prev,
+          latitude: coords.lat,
+          longitude: coords.lon,
+        }));
+        notifications.show({
+          title: 'Coordinates Found',
+          message: `Latitude: ${coords.lat.toFixed(6)}, Longitude: ${coords.lon.toFixed(6)}`,
+          color: 'green',
+        });
+      } else {
+        notifications.show({
+          title: 'Address Not Found',
+          message:
+            'Could not find coordinates for this address. Please enter manually or try a more specific address.',
+          color: 'yellow',
+        });
+      }
+    } finally {
+      setIsGeocoding(false);
+    }
+  };
 
   const handleChange = (field: string) => (value: string | null) => {
     setFormData((prev) => ({ ...prev, [field]: value || '' }));
@@ -46,21 +131,48 @@ export default function NewProjectPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Convert date string to full ISO DateTime (GraphQL DateTime scalar requires full ISO format)
+    const startDateISO = formData.startDate
+      ? new Date(formData.startDate).toISOString()
+      : new Date().toISOString();
+
+    const submitData = {
+      name: formData.name,
+      address: formData.address,
+      latitude: formData.latitude,
+      longitude: formData.longitude,
+      disturbedAcres: formData.disturbedAcres,
+      startDate: startDateISO,
+    };
+
+    console.log('[NewProject] Submitting form with data:', submitData);
+    console.log('[NewProject] GraphQL endpoint:', process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT);
+
     try {
-      await createProjectMutation.mutateAsync({
-        name: formData.name,
-        address: formData.address,
-        description: formData.description || undefined,
-        status: formData.status,
-        startDate: formData.startDate || undefined,
+      console.log('[NewProject] Calling createProjectMutation.mutateAsync...');
+      const result = await createProjectMutation.mutateAsync(submitData);
+      console.log('[NewProject] Mutation succeeded:', result);
+      notifications.show({
+        title: 'Project Created',
+        message: `${formData.name} has been created successfully`,
+        color: 'green',
       });
       router.push('/dashboard/projects');
     } catch (error) {
-      console.error('Failed to create project:', error);
+      console.error('[NewProject] Failed to create project:', error);
+      console.error('[NewProject] Error type:', error?.constructor?.name);
+      console.error('[NewProject] Error stack:', error instanceof Error ? error.stack : 'N/A');
+      notifications.show({
+        title: 'Failed to Create Project',
+        message:
+          error instanceof Error ? error.message : 'An error occurred while creating the project',
+        color: 'red',
+      });
     }
   };
 
-  const isFormValid = formData.name.trim() && formData.address.trim();
+  const isFormValid =
+    formData.name.trim() !== '' && formData.address.trim() !== '' && formData.disturbedAcres > 0;
 
   return (
     <PageContainer
@@ -94,12 +206,66 @@ export default function NewProjectPage() {
               size="sm"
             />
 
-            <TextInput
-              label="Project Address"
-              placeholder="Enter project address"
+            <Group align="flex-end" gap="sm">
+              <TextInput
+                label="Project Address"
+                placeholder="Enter project address"
+                required
+                value={formData.address}
+                onChange={handleInputChange('address')}
+                size="sm"
+                style={{ flex: 1 }}
+              />
+              <Button
+                variant="light"
+                leftSection={<IconMapPin size={16} />}
+                onClick={handleLookupCoordinates}
+                loading={isGeocoding}
+                size="sm"
+              >
+                Lookup
+              </Button>
+            </Group>
+
+            <Group grow>
+              <NumberInput
+                label="Latitude"
+                placeholder="Auto-filled from address"
+                description={
+                  formData.latitude !== 0 ? 'Auto-filled' : 'Enter address and click Lookup'
+                }
+                decimalScale={6}
+                value={formData.latitude}
+                onChange={(val) => setFormData((prev) => ({ ...prev, latitude: Number(val) || 0 }))}
+                size="sm"
+              />
+              <NumberInput
+                label="Longitude"
+                placeholder="Auto-filled from address"
+                description={
+                  formData.longitude !== 0 ? 'Auto-filled' : 'Enter address and click Lookup'
+                }
+                decimalScale={6}
+                value={formData.longitude}
+                onChange={(val) =>
+                  setFormData((prev) => ({ ...prev, longitude: Number(val) || 0 }))
+                }
+                size="sm"
+              />
+            </Group>
+
+            <NumberInput
+              label="Disturbed Acres"
+              description="Total acres of land disturbance for EPA compliance"
+              placeholder="e.g., 5.5"
               required
-              value={formData.address}
-              onChange={handleInputChange('address')}
+              min={0}
+              step={0.1}
+              decimalScale={2}
+              value={formData.disturbedAcres}
+              onChange={(val) =>
+                setFormData((prev) => ({ ...prev, disturbedAcres: Number(val) || 0 }))
+              }
               size="sm"
             />
 

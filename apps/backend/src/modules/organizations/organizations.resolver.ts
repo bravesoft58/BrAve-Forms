@@ -3,12 +3,7 @@ import { UseGuards, Logger } from '@nestjs/common';
 import { ClerkAuthGuard } from '../auth/guards/clerk-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import {
-  AdminAccess,
-  ManagementAccess,
-  TeamAccess,
-  AllRoles,
-} from '../../common/decorators/roles.decorator';
+import { AdminAccess, ManagementAccess, AllRoles } from '../../common/decorators/roles.decorator';
 import { OrganizationsService } from './organizations.service';
 import { PrismaService } from '../database/prisma.service';
 
@@ -329,51 +324,10 @@ export class OrganizationsResolver {
     };
   }
 
-  @Query(() => [ProjectGQL])
-  @UseGuards(ClerkAuthGuard, RolesGuard)
-  @TeamAccess() // All team members can see projects (filtered by role in service)
-  async projects(
-    @CurrentUser() user: any,
-    @Args('filter', { nullable: true }) filter?: ProjectFilterInput
-  ): Promise<ProjectGQL[]> {
-    const org = await this.getOrganizationByClerkId(user.orgId);
-
-    const projects = await this.prisma.project.findMany({
-      where: {
-        orgId: org.id,
-        ...(filter?.status && { status: filter.status as any }),
-        ...(filter?.search && {
-          OR: [
-            { name: { contains: filter.search, mode: 'insensitive' } },
-            { address: { contains: filter.search, mode: 'insensitive' } },
-            { permitNumber: { contains: filter.search, mode: 'insensitive' } },
-          ],
-        }),
-      },
-      include: {
-        inspections: {
-          orderBy: { inspectionDate: 'desc' },
-          include: {
-            photos: true,
-          },
-        },
-      },
-      orderBy: { updatedAt: 'desc' },
-      take: filter?.limit || 50,
-      skip: filter?.offset || 0,
-    });
-
-    // TODO: Apply role-based project filtering
-    // INSPECTORS: Only assigned projects
-    // MEMBERS: Only projects they're part of
-    // MANAGERS+: All org projects
-
-    return projects.map((project) => ({
-      ...project,
-      inspections: project.inspections,
-      stats: this.calculateProjectStats(project),
-    })) as ProjectGQL[];
-  }
+  // NOTE: The projects query is now handled by ProjectsResolver in projects.resolver.ts
+  // It returns ProjectWithComplianceGQL type with recentInspections and compliance fields
+  // which is what the frontend expects. This resolver still provides organization-level
+  // project access via currentOrganization.projects
 
   @Query(() => OrganizationStatsGQL)
   @UseGuards(ClerkAuthGuard, RolesGuard)
