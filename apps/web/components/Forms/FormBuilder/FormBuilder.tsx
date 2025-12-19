@@ -8,43 +8,41 @@ import {
   Title,
   Button,
   Group,
-  ActionIcon,
   Text,
   Badge,
   Stack,
   ScrollArea,
-  Divider,
-  Tabs,
   Modal,
   TextInput,
   Textarea,
   Select,
-  Notification,
   LoadingOverlay,
 } from '@mantine/core';
 import {
-  IconGripVertical,
   IconTrash,
   IconCopy,
   IconEye,
   IconDeviceFloppy,
-  IconPlus,
   IconSettings,
   IconForms,
-  IconPalette,
-  IconCode,
   IconCheck,
   IconX,
   IconAlertTriangle,
 } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 
 import type { FieldDefinition, FormTemplate } from '@brave-forms/types';
-import { FieldTypes } from '@brave-forms/types';
 
 import { FieldPalette } from './FieldPalette';
 import { FormCanvas } from './FormCanvas';
@@ -69,12 +67,11 @@ export function FormBuilder({ template, onSave, onCancel, loading = false }: For
       calculations: [],
     }
   );
-  
+
   const [selectedField, setSelectedField] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>('builder');
   const [showPreview, setShowPreview] = useState(false);
   const [saving, setSaving] = useState(false);
-  
+
   // Form validation
   const form = useForm({
     initialValues: {
@@ -100,53 +97,56 @@ export function FormBuilder({ template, onSave, onCancel, loading = false }: For
   );
 
   // Add a new field to the form
-  const handleAddField = useCallback((fieldType: string) => {
-    const newField: FieldDefinition = {
-      id: generateId(),
-      type: fieldType as any,
-      label: `New ${fieldType} Field`,
-      name: `field_${Date.now()}`,
-      description: '',
-      placeholder: '',
-      defaultValue: undefined,
-      validation: { required: false },
-      order: formSchema.fields?.length || 0,
-      width: 'full',
-    };
-
-    // Set default options for select/radio fields
-    if (['select', 'multiSelect', 'radio'].includes(fieldType)) {
-      newField.options = [
-        { label: 'Option 1', value: 'option1' },
-        { label: 'Option 2', value: 'option2' },
-      ];
-    }
-
-    // Set default validation for EPA compliance fields
-    if (fieldType === 'number') {
-      newField.validation = {
-        required: false,
-        min: 0,
-        step: 0.01,
+  const handleAddField = useCallback(
+    (fieldType: string) => {
+      const newField: FieldDefinition = {
+        id: generateId(),
+        type: fieldType as any,
+        label: `New ${fieldType} Field`,
+        name: `field_${Date.now()}`,
+        description: '',
+        placeholder: '',
+        defaultValue: undefined,
+        validation: { required: false },
+        order: formSchema.fields?.length || 0,
+        width: 'full',
       };
-    }
 
-    setFormSchema((prev) => ({
-      ...prev,
-      fields: [...(prev.fields || []), newField],
-    }));
+      // Set default options for select/radio fields
+      if (['select', 'multiSelect', 'radio'].includes(fieldType)) {
+        newField.options = [
+          { label: 'Option 1', value: 'option1' },
+          { label: 'Option 2', value: 'option2' },
+        ];
+      }
 
-    // Auto-select the new field
-    setSelectedField(newField.id);
-    
-    notifications.show({
-      title: 'Field Added',
-      message: `${fieldType} field added successfully`,
-      color: 'green',
-      icon: <IconCheck size={16} />,
-      autoClose: 2000,
-    });
-  }, [formSchema.fields]);
+      // Set default validation for EPA compliance fields
+      if (fieldType === 'number') {
+        newField.validation = {
+          required: false,
+          min: 0,
+          step: 0.01,
+        };
+      }
+
+      setFormSchema((prev) => ({
+        ...prev,
+        fields: [...(prev.fields || []), newField],
+      }));
+
+      // Auto-select the new field
+      setSelectedField(newField.id);
+
+      notifications.show({
+        title: 'Field Added',
+        message: `${fieldType} field added successfully`,
+        color: 'green',
+        icon: <IconCheck size={16} />,
+        autoClose: 2000,
+      });
+    },
+    [formSchema.fields]
+  );
 
   // Update a field in the form
   const handleUpdateField = useCallback((fieldId: string, updates: Partial<FieldDefinition>) => {
@@ -159,74 +159,83 @@ export function FormBuilder({ template, onSave, onCancel, loading = false }: For
   }, []);
 
   // Delete a field from the form
-  const handleDeleteField = useCallback((fieldId: string) => {
-    setFormSchema((prev) => ({
-      ...prev,
-      fields: (prev.fields || []).filter((field) => field.id !== fieldId),
-    }));
-    
-    if (selectedField === fieldId) {
-      setSelectedField(null);
-    }
+  const handleDeleteField = useCallback(
+    (fieldId: string) => {
+      setFormSchema((prev) => ({
+        ...prev,
+        fields: (prev.fields || []).filter((field) => field.id !== fieldId),
+      }));
 
-    notifications.show({
-      title: 'Field Removed',
-      message: 'Field deleted successfully',
-      color: 'orange',
-      icon: <IconTrash size={16} />,
-      autoClose: 2000,
-    });
-  }, [selectedField]);
+      if (selectedField === fieldId) {
+        setSelectedField(null);
+      }
+
+      notifications.show({
+        title: 'Field Removed',
+        message: 'Field deleted successfully',
+        color: 'orange',
+        icon: <IconTrash size={16} />,
+        autoClose: 2000,
+      });
+    },
+    [selectedField]
+  );
 
   // Duplicate a field
-  const handleDuplicateField = useCallback((fieldId: string) => {
-    const field = formSchema.fields?.find((f) => f.id === fieldId);
-    if (!field) return;
+  const handleDuplicateField = useCallback(
+    (fieldId: string) => {
+      const field = formSchema.fields?.find((f) => f.id === fieldId);
+      if (!field) return;
 
-    const duplicatedField: FieldDefinition = {
-      ...field,
-      id: generateId(),
-      name: `${field.name}_copy`,
-      label: `${field.label} (Copy)`,
-      order: (formSchema.fields?.length || 0),
-    };
-
-    setFormSchema((prev) => ({
-      ...prev,
-      fields: [...(prev.fields || []), duplicatedField],
-    }));
-
-    setSelectedField(duplicatedField.id);
-    
-    notifications.show({
-      title: 'Field Duplicated',
-      message: 'Field copied successfully',
-      color: 'blue',
-      icon: <IconCopy size={16} />,
-      autoClose: 2000,
-    });
-  }, [formSchema.fields]);
-
-  // Handle drag end for reordering fields
-  const handleDragEnd = useCallback((event: any) => {
-    const { active, over } = event;
-
-    if (active.id !== over.id) {
-      const fields = formSchema.fields || [];
-      const oldIndex = fields.findIndex((field) => field.id === active.id);
-      const newIndex = fields.findIndex((field) => field.id === over.id);
-
-      const reorderedFields = arrayMove(fields, oldIndex, newIndex).map((field, index) => ({
+      const duplicatedField: FieldDefinition = {
         ...field,
-        order: index,
-      }));
+        id: generateId(),
+        name: `${field.name}_copy`,
+        label: `${field.label} (Copy)`,
+        order: formSchema.fields?.length || 0,
+      };
 
       setFormSchema((prev) => ({
         ...prev,
-        fields: reorderedFields,
+        fields: [...(prev.fields || []), duplicatedField],
       }));
-    }
-  }, [formSchema.fields]);
+
+      setSelectedField(duplicatedField.id);
+
+      notifications.show({
+        title: 'Field Duplicated',
+        message: 'Field copied successfully',
+        color: 'blue',
+        icon: <IconCopy size={16} />,
+        autoClose: 2000,
+      });
+    },
+    [formSchema.fields]
+  );
+
+  // Handle drag end for reordering fields
+  const handleDragEnd = useCallback(
+    (event: any) => {
+      const { active, over } = event;
+
+      if (active.id !== over.id) {
+        const fields = formSchema.fields || [];
+        const oldIndex = fields.findIndex((field) => field.id === active.id);
+        const newIndex = fields.findIndex((field) => field.id === over.id);
+
+        const reorderedFields = arrayMove(fields, oldIndex, newIndex).map((field, index) => ({
+          ...field,
+          order: index,
+        }));
+
+        setFormSchema((prev) => ({
+          ...prev,
+          fields: reorderedFields,
+        }));
+      }
+    },
+    [formSchema.fields]
+  );
 
   // Save the form template
   const handleSave = useCallback(async () => {
@@ -263,7 +272,7 @@ export function FormBuilder({ template, onSave, onCancel, loading = false }: For
       };
 
       await onSave(templateData);
-      
+
       notifications.show({
         title: 'Form Saved',
         message: 'Form template saved successfully',
@@ -283,19 +292,21 @@ export function FormBuilder({ template, onSave, onCancel, loading = false }: For
   }, [form, formSchema, onSave]);
 
   // Get the currently selected field
-  const currentField = selectedField 
+  const currentField = selectedField
     ? formSchema.fields?.find((field) => field.id === selectedField)
     : null;
 
   // Generate unique ID
   function generateId(): string {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    return (
+      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    );
   }
 
   return (
     <Container size="xl" py="md">
       <LoadingOverlay visible={loading} />
-      
+
       {/* Header */}
       <Paper p="md" mb="md" withBorder>
         <Grid align="center">
@@ -334,18 +345,22 @@ export function FormBuilder({ template, onSave, onCancel, loading = false }: For
 
       {/* Form Settings */}
       <Paper p="md" mb="md" withBorder>
-        <Title order={4} mb="md">Form Settings</Title>
+        <Title order={4} mb="md">
+          Form Settings
+        </Title>
         <Grid>
           <Grid.Col span={6}>
             <TextInput
               label="Form Name"
               placeholder="Enter form name"
               required
-              {...form.getInputProps('name')}
+              value={form.values.name}
               onChange={(event) => {
-                form.getInputProps('name').onChange(event);
-                setFormSchema((prev) => ({ ...prev, name: event.currentTarget.value }));
+                const value = event.currentTarget.value;
+                form.setFieldValue('name', value);
+                setFormSchema((prev) => ({ ...prev, name: value }));
               }}
+              error={form.errors.name}
             />
           </Grid.Col>
           <Grid.Col span={6}>
@@ -358,11 +373,13 @@ export function FormBuilder({ template, onSave, onCancel, loading = false }: For
                 { value: 'STATE_PERMIT', label: 'State Permit' },
                 { value: 'CUSTOM', label: 'Custom' },
               ]}
-              {...form.getInputProps('category')}
+              value={form.values.category}
               onChange={(value) => {
-                form.getInputProps('category').onChange(value);
-                setFormSchema((prev) => ({ ...prev, category: value as any }));
+                const categoryValue = (value || 'CUSTOM') as typeof form.values.category;
+                form.setFieldValue('category', categoryValue);
+                setFormSchema((prev) => ({ ...prev, category: categoryValue }));
               }}
+              error={form.errors.category}
             />
           </Grid.Col>
           <Grid.Col span={12}>
@@ -370,11 +387,13 @@ export function FormBuilder({ template, onSave, onCancel, loading = false }: For
               label="Description"
               placeholder="Brief description of this form"
               rows={2}
-              {...form.getInputProps('description')}
+              value={form.values.description}
               onChange={(event) => {
-                form.getInputProps('description').onChange(event);
-                setFormSchema((prev) => ({ ...prev, description: event.currentTarget.value }));
+                const value = event.currentTarget.value;
+                form.setFieldValue('description', value);
+                setFormSchema((prev) => ({ ...prev, description: value }));
               }}
+              error={form.errors.description}
             />
           </Grid.Col>
         </Grid>
