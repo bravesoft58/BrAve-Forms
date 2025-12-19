@@ -46,7 +46,7 @@ export class ClerkStrategy extends PassportStrategy(Strategy, 'clerk') {
         email: 'developer@braveforms.test',
         firstName: 'Dev',
         lastName: 'User',
-        orgId: DEFAULT_ORG_ID, // 'org_qd_default' - matches clerk_org_id in database
+        orgId: DEFAULT_ORG_ID, // Database UUID for org foreign keys
         orgRole: 'ADMIN', // UPPERCASE to match ROLE_HIERARCHY in roles.decorator.ts
         orgSlug: DEFAULT_ORG_SLUG, // Consistent with DEFAULT_ORG_ID
         sessionId: 'dev-session-123',

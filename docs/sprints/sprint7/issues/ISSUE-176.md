@@ -341,6 +341,138 @@ describe('FormSettings', () => {
 
 ---
 
+## Additional Backend Fixes Required (December 19, 2025)
+
+After fixing the frontend input pattern, form saving still failed with multiple backend errors. The following additional fixes were required:
+
+### Fix 2: NestJS ValidationPipe Compatibility
+
+**Problem:** "Bad Request Exception" when saving form template
+
+**Root Cause:** NestJS `ValidationPipe` with `forbidNonWhitelisted: true` requires class-validator decorators on all GraphQL input type properties. The input types only had `@Field()` decorators.
+
+**File:** `apps/backend/src/modules/forms/forms.types.ts`
+
+**Solution:** Added class-validator decorators to all input types:
+
+```typescript
+import { IsString, IsOptional, IsEnum, IsBoolean, IsObject } from 'class-validator';
+
+@InputType()
+export class CreateFormTemplateInput {
+  @Field()
+  @IsString()
+  name: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @Field(() => FormCategory)
+  @IsEnum(FormCategory)
+  category: FormCategory;
+
+  @Field(() => GraphQLJSON)
+  @IsObject()
+  schema: any;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
+  @IsObject()
+  compliance?: any;
+}
+```
+
+Applied same pattern to: `UpdateFormTemplateInput`, `CreateFormSubmissionInput`, `UpdateFormSubmissionInput`, `CloneFormTemplateInput`
+
+---
+
+### Fix 3: User Property Mismatch (user.id vs user.userId)
+
+**Problem:** "Argument 'createdBy' is missing" Prisma error
+
+**Root Cause:** The Clerk auth guard sets `user.userId` but resolver was accessing `user.id` (undefined)
+
+**File:** `apps/backend/src/modules/forms/forms.resolver.ts`
+
+**Solution:** Changed all `user.id` references to `user.userId` in 6 locations:
+
+| Line | Method                 | Change                     |
+| ---- | ---------------------- | -------------------------- |
+| 67   | createFormTemplate     | `createdBy: user.userId`   |
+| 85   | duplicateFormTemplate  | `user.userId`              |
+| 96   | createEpaSwpppTemplate | `user.userId`              |
+| 108  | cloneFormTemplate      | `user.userId`              |
+| 146  | createFormSubmission   | `submittedBy: user.userId` |
+| 166  | updateFormSubmission   | `reviewedBy: user.userId`  |
+
+---
+
+### Fix 4: Organization ID Type Mismatch (Clerk ID vs Database UUID)
+
+**Problem:** "Foreign key constraint violated: form_templates_org_id_fkey"
+
+**Root Cause:** The auth strategy returned `orgId: 'org_qd_default'` (Clerk org ID), but the database foreign key on `form_templates.org_id` expects a UUID (`1d1e2121-cfd7-4784-bd5a-d86439c9b793`)
+
+**Files Modified:**
+
+1. **`apps/backend/src/common/constants.ts`**
+
+   ```typescript
+   // BEFORE
+   export const DEFAULT_ORG_ID = 'org_qd_default';
+
+   // AFTER
+   export const DEFAULT_ORG_CLERK_ID = 'org_qd_default'; // Clerk org ID
+   export const DEFAULT_ORG_ID = '1d1e2121-cfd7-4784-bd5a-d86439c9b793'; // Database UUID
+   ```
+
+2. **`apps/backend/src/seeds/default-org.seed.ts`**
+
+   ```typescript
+   // Updated to use DEFAULT_ORG_CLERK_ID for clerkOrgId field
+   data: {
+     id: DEFAULT_ORG_ID,           // Database UUID
+     clerkOrgId: DEFAULT_ORG_CLERK_ID,  // Clerk org ID
+     name: DEFAULT_ORG_NAME,
+   }
+   ```
+
+3. **`apps/backend/src/modules/auth/strategies/clerk.strategy.ts`**
+   ```typescript
+   // Updated comment
+   orgId: DEFAULT_ORG_ID, // Database UUID for org foreign keys
+   ```
+
+---
+
+## Complete Fix Summary
+
+| #   | Issue                              | File                         | Fix                                         |
+| --- | ---------------------------------- | ---------------------------- | ------------------------------------------- |
+| 1   | Double onChange handler            | FormBuilder.tsx              | Use explicit value/onChange/error props     |
+| 2   | Missing class-validator decorators | forms.types.ts               | Add @IsString, @IsOptional, @IsObject, etc. |
+| 3   | user.id undefined                  | forms.resolver.ts            | Change to user.userId (6 locations)         |
+| 4   | Org ID type mismatch               | constants.ts, seed, strategy | Use database UUID, not Clerk org ID         |
+
+---
+
+## Verification
+
+**Database Query Confirmation:**
+
+```sql
+SELECT id, name, category, created_at FROM form_templates ORDER BY created_at DESC LIMIT 1;
+
+-- Result:
+-- 4295fb4c-2159-4b83-b0c7-4e415e1742df | New Forma | EPA_SWPPP | 2025-12-19 14:21:51.265
+```
+
+Form template successfully created and saved.
+
+---
+
 ## Related Issues
 
 - ISSUE-177: Form Builder Save Conflicting Messages

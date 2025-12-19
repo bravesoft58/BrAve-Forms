@@ -64,7 +64,7 @@ export class FormsResolver {
       category: input.category,
       schema: input.schema,
       compliance: input.compliance,
-      createdBy: user.id,
+      createdBy: user.userId,
     });
   }
 
@@ -82,7 +82,7 @@ export class FormsResolver {
     @Args('id') id: string,
     @CurrentUser() user: any
   ): Promise<FormTemplate> {
-    return this.formsService.duplicateFormTemplate(id, user.orgId, user.id);
+    return this.formsService.duplicateFormTemplate(id, user.orgId, user.userId);
   }
 
   @Mutation(() => Boolean)
@@ -93,7 +93,7 @@ export class FormsResolver {
 
   @Mutation(() => FormTemplate)
   async createEpaSwpppTemplate(@CurrentUser() user: any): Promise<FormTemplate> {
-    return this.formsService.createEpaSwpppTemplate(user.orgId, user.id);
+    return this.formsService.createEpaSwpppTemplate(user.orgId, user.userId);
   }
 
   @Mutation(() => FormTemplate)
@@ -105,7 +105,7 @@ export class FormsResolver {
     return this.templateCloningService.cloneTemplate(
       sourceTemplateId,
       user.orgId,
-      user.id,
+      user.userId,
       input || undefined
     );
   }
@@ -143,7 +143,7 @@ export class FormsResolver {
       templateId: input.templateId,
       inspectionId: input.inspectionId,
       projectId: input.projectId,
-      submittedBy: user.id,
+      submittedBy: user.userId,
       data: input.data,
       metadata: input.metadata,
       offlineCreated: input.offlineCreated,
@@ -163,7 +163,7 @@ export class FormsResolver {
         (input.status === FormStatus.REVIEWED ||
           input.status === FormStatus.APPROVED ||
           input.status === FormStatus.REJECTED)
-          ? user.id
+          ? user.userId
           : undefined,
     });
   }

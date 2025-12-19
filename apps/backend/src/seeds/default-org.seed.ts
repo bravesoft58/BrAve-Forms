@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { DEFAULT_ORG_ID, DEFAULT_ORG_NAME, DEFAULT_ORG_SLUG } from '../common/constants';
+import { DEFAULT_ORG_ID, DEFAULT_ORG_CLERK_ID, DEFAULT_ORG_NAME } from '../common/constants';
 
 const prisma = new PrismaClient();
 
@@ -8,7 +8,7 @@ async function seedDefaultOrganization() {
 
   // Check if organization exists
   const existing = await prisma.organization.findUnique({
-    where: { clerkOrgId: DEFAULT_ORG_ID },
+    where: { clerkOrgId: DEFAULT_ORG_CLERK_ID },
   });
 
   if (existing) {
@@ -20,7 +20,7 @@ async function seedDefaultOrganization() {
   const org = await prisma.organization.create({
     data: {
       id: DEFAULT_ORG_ID,
-      clerkOrgId: DEFAULT_ORG_ID,
+      clerkOrgId: DEFAULT_ORG_CLERK_ID,
       name: DEFAULT_ORG_NAME,
       plan: 'STARTER',
       createdAt: new Date(),
@@ -39,4 +39,3 @@ seedDefaultOrganization()
   .finally(async () => {
     await prisma.$disconnect();
   });
-
