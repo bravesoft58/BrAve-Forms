@@ -271,21 +271,12 @@ export function FormBuilder({ template, onSave, onCancel, loading = false }: For
         fields: (formSchema.fields || []).sort((a, b) => a.order - b.order),
       };
 
+      // ISSUE-177 fix: Let parent page handle success/error notifications
+      // to avoid duplicate notification messages
       await onSave(templateData);
-
-      notifications.show({
-        title: 'Form Saved',
-        message: 'Form template saved successfully',
-        color: 'green',
-        icon: <IconCheck size={16} />,
-      });
     } catch (error) {
-      notifications.show({
-        title: 'Save Error',
-        message: 'Failed to save form template',
-        color: 'red',
-        icon: <IconX size={16} />,
-      });
+      // Parent page handles error notification
+      console.error('Form save failed:', error);
     } finally {
       setSaving(false);
     }
