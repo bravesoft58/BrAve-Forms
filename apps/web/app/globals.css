@@ -1000,4 +1000,110 @@ th {
     font-size: 9pt;
     font-style: italic;
   }
+
+  /* Form Fill Page Print Optimization (ISSUE-184) */
+  /* Fix header taking full first page, content starting on page 2 */
+
+  /* Remove min-height that forces full viewport */
+  .desktop-view.min-h-screen,
+  .mobile-view {
+    min-height: auto !important;
+    height: auto !important;
+  }
+
+  /* Reduce container padding for print */
+  .mantine-Container-root {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* Reduce Stack gap to keep header close to content */
+  .mantine-Stack-root {
+    gap: 8pt !important;
+  }
+
+  /* Keep form header and first section together */
+  .desktop-view > .mantine-Container-root > .mantine-Stack-root > div:first-child {
+    page-break-after: avoid !important;
+    margin-bottom: 6pt !important;
+  }
+
+  /* Form title compact styling */
+  .mantine-Title-root {
+    margin-bottom: 2pt !important;
+    font-size: 16pt !important;
+  }
+
+  /* Form content container */
+  .bg-white.rounded-lg.shadow-sm.p-6 {
+    padding: 8pt !important;
+    box-shadow: none !important;
+    border: 1pt solid #ddd !important;
+    page-break-before: avoid !important;
+  }
+
+  /* FormRenderer Paper compact */
+  .mantine-Paper-root[role="main"],
+  form.mantine-Paper-root {
+    padding: 8pt !important;
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* Form fields compact spacing */
+  .mantine-InputWrapper-root {
+    margin-bottom: 6pt !important;
+  }
+
+  .mantine-InputWrapper-label {
+    font-size: 9pt !important;
+    font-weight: bold !important;
+    margin-bottom: 2pt !important;
+  }
+
+  .mantine-Input-input,
+  .mantine-TextInput-input,
+  .mantine-Textarea-input,
+  .mantine-Select-input,
+  .mantine-NumberInput-input {
+    font-size: 10pt !important;
+    padding: 4pt 6pt !important;
+    min-height: auto !important;
+    border: 1pt solid #ccc !important;
+  }
+
+  /* Checkbox and radio compact */
+  .mantine-Checkbox-root,
+  .mantine-Radio-root {
+    margin-bottom: 4pt !important;
+  }
+
+  .mantine-Checkbox-label,
+  .mantine-Radio-label {
+    font-size: 10pt !important;
+  }
+
+  /* Signature and photo fields */
+  .mantine-InputWrapper-root:has(.signature-canvas),
+  .mantine-InputWrapper-root:has(.photo-upload) {
+    page-break-inside: avoid !important;
+  }
+
+  /* Group sections together, avoid orphans */
+  .form-section,
+  .field-group {
+    page-break-inside: avoid !important;
+  }
+
+  /* Buttons hidden but keep submit/save visible sections markers */
+  .mantine-Button-root {
+    display: none !important;
+  }
+
+  /* Form actions footer hidden in print */
+  form .mantine-Stack-root:last-child:has(.mantine-Button-root) {
+    display: none !important;
+  }
 }
