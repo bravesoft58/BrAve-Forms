@@ -2,6 +2,76 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type User {
+  id: ID!
+  email: String!
+  firstName: String
+  lastName: String
+  orgId: String!
+  orgRole: String!
+}
+
+type UserPreferences {
+  id: ID!
+  userId: String!
+  orgId: String!
+  emailWeatherAlerts: Boolean!
+  emailInspectionReminders: Boolean!
+  emailFormConfirmations: Boolean!
+  emailWeeklySummary: Boolean!
+  pushRealTimeAlerts: Boolean!
+  pushInspectionReminders: Boolean!
+  quietHoursEnabled: Boolean!
+  quietHoursStart: String!
+  quietHoursEnd: String!
+  timezone: String!
+  timeFormat: String!
+  language: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type InspectionSummary {
+  id: String!
+  type: String!
+  status: String!
+  inspectionDate: DateTime!
+  submittedAt: DateTime
+  weatherTriggered: Boolean!
+  overdue: Boolean!
+}
+
+type ProjectCompliance {
+  overallScore: Float!
+  pendingInspections: Float!
+  overdueInspections: Float!
+  lastInspection: DateTime
+  nextDeadline: DateTime
+  requiresAttention: Boolean!
+}
+
+type ProjectWithCompliance {
+  id: String!
+  name: String!
+  address: String!
+  latitude: Float!
+  longitude: Float!
+  permitNumber: String
+  startDate: DateTime!
+  endDate: DateTime
+  disturbedAcres: Float!
+  status: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  recentInspections: [InspectionSummary!]!
+  compliance: ProjectCompliance!
+}
+
 type FormTemplate {
   id: ID!
   orgId: String!
@@ -29,11 +99,6 @@ enum FormCategory {
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSON
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type FormSubmission {
   id: ID!
@@ -198,7 +263,54 @@ type UserOrganization {
   joinedAt: DateTime!
 }
 
+type SupportRequest {
+  id: ID!
+  userId: String!
+  orgId: String!
+  type: SupportRequestType!
+  subject: String!
+  description: String!
+  status: SupportRequestStatus!
+  priority: SupportRequestPriority!
+  response: String
+  respondedAt: DateTime
+  respondedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""Type of support request"""
+enum SupportRequestType {
+  BUG
+  FEATURE
+  HELP
+  FEEDBACK
+}
+
+"""Status of support request"""
+enum SupportRequestStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+"""Priority level of support request"""
+enum SupportRequestPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
 type Query {
+  """Get current authenticated user"""
+  me: User!
+
+  """Get current user preferences (creates defaults if not exists)"""
+  myPreferences: UserPreferences!
+  projects: [ProjectWithCompliance!]!
+  project(id: String!): ProjectWithCompliance!
   formTemplates(category: String, isActive: Boolean, take: Float, skip: Float): [FormTemplate!]!
   formTemplate(id: String!): FormTemplate!
   formSubmissions(templateId: String, projectId: String, inspectionId: String, status: String, take: Float, skip: Float): [JSON!]!
@@ -217,21 +329,27 @@ type Query {
   generatePhotoUrl(photoKey: String!): String!
   getCompliancePackage(inspectionId: String!): String!
   currentOrganization: String
-  projects(filter: ProjectFilterInput): [Project!]!
   organizationDashboard: OrganizationStats!
   organizationStats: String
   organizationProjects: [String!]!
   organizationUsers: [String!]!
-}
 
-input ProjectFilterInput {
-  status: String
-  search: String
-  limit: Float
-  offset: Float
+  """Get all support requests for the current user"""
+  mySupportRequests: [SupportRequest!]!
+
+  """Get a single support request by ID"""
+  supportRequest(id: ID!): SupportRequest
 }
 
 type Mutation {
+  """Update notification preferences"""
+  updateNotificationPreferences(input: NotificationPreferencesInput!): UserPreferences!
+
+  """Update account/regional preferences (timezone, language)"""
+  updateAccountPreferences(input: AccountPreferencesInput!): UserPreferences!
+  createProject(input: CreateProjectInput!): ProjectWithCompliance!
+  updateProject(id: String!, input: UpdateProjectInput!): ProjectWithCompliance!
+  deleteProject(id: String!): Boolean!
   createFormTemplate(input: CreateFormTemplateInput!): FormTemplate!
   updateFormTemplate(id: String!, input: UpdateFormTemplateInput!): FormTemplate!
   duplicateFormTemplate(id: String!): FormTemplate!
@@ -249,6 +367,55 @@ type Mutation {
   syncOrganization(clerkOrgId: String!, orgData: String!): String!
   syncUserOrganization(userId: String!, orgId: String!, role: String!): String!
   removeUserFromOrganization(userId: String!, orgId: String!): String!
+
+  """Create a new support request"""
+  createSupportRequest(input: CreateSupportRequestInput!): SupportRequest!
+}
+
+input NotificationPreferencesInput {
+  emailWeatherAlerts: Boolean
+  emailInspectionReminders: Boolean
+  emailFormConfirmations: Boolean
+  emailWeeklySummary: Boolean
+  pushRealTimeAlerts: Boolean
+  pushInspectionReminders: Boolean
+  quietHoursEnabled: Boolean
+  quietHoursStart: String
+  quietHoursEnd: String
+}
+
+input AccountPreferencesInput {
+  """IANA timezone (e.g., America/Los_Angeles)"""
+  timezone: String
+
+  """Time format: 12h or 24h"""
+  timeFormat: String
+
+  """Language code (e.g., en, es)"""
+  language: String
+}
+
+input CreateProjectInput {
+  name: String!
+  address: String!
+  latitude: Float!
+  longitude: Float!
+  permitNumber: String
+  startDate: DateTime!
+  endDate: DateTime
+  disturbedAcres: Float!
+}
+
+input UpdateProjectInput {
+  name: String
+  address: String
+  latitude: Float
+  longitude: Float
+  permitNumber: String
+  startDate: DateTime
+  endDate: DateTime
+  disturbedAcres: Float
+  status: String
 }
 
 input CreateFormTemplateInput {
@@ -290,4 +457,11 @@ input UpdateFormSubmissionInput {
 
 input UpdateOrganizationInput {
   name: String
+}
+
+input CreateSupportRequestInput {
+  type: SupportRequestType!
+  subject: String!
+  description: String!
+  priority: SupportRequestPriority
 }

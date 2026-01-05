@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Container, Group, Stack, Paper, NavLink, Title, Text, Divider } from '@mantine/core';
 import {
   IconUser,
+  IconUsers,
   IconSettings,
   IconBell,
   IconPalette,
@@ -40,6 +41,12 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
       description: 'Your account information',
       href: '/settings/profile',
       icon: IconUser,
+    },
+    {
+      label: 'Team',
+      description: 'Manage organization users',
+      href: '/settings/team',
+      icon: IconUsers,
     },
     {
       label: 'Notifications',

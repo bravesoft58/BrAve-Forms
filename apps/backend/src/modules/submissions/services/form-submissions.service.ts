@@ -38,10 +38,14 @@ export class FormSubmissionsService {
       throw new NotFoundException('Form template not found');
     }
 
+    // ISSUE-178: Fix schema extraction - handle different schema formats
+    const schema = template.schema as Record<string, unknown>;
+    const fields = this.extractFieldsFromSchema(schema);
+
     const templateForValidation: FormTemplate = {
       id: template.id,
       name: template.name,
-      fields: (template.schema as { fields: unknown })?.fields as any[],
+      fields,
     };
 
     const typeValidation = this.validationService.validateFieldTypes(
@@ -145,10 +149,14 @@ export class FormSubmissionsService {
     }
 
     if (input.status === FormSubmissionStatus.SUBMITTED) {
+      // ISSUE-178: Fix schema extraction - handle different schema formats
+      const schema = existing.template.schema as Record<string, unknown>;
+      const fields = this.extractFieldsFromSchema(schema);
+
       const templateForValidation: FormTemplate = {
         id: existing.template.id,
         name: existing.template.name,
-        fields: (existing.template.schema as { fields: unknown })?.fields as any[],
+        fields,
       };
 
       const validation = this.validationService.validateRequiredFields(
@@ -312,5 +320,35 @@ export class FormSubmissionsService {
     };
 
     return mapping[status];
+  }
+
+  /**
+   * ISSUE-178: Extract fields from schema handling multiple formats
+   * - Format 1: { fields: [...] } - direct fields array
+   * - Format 2: { sections: [{ fields: [...] }] } - sectioned format
+   * - Format 3: { pages: [{ fields: [...] }] } - paged format
+   */
+  private extractFieldsFromSchema(schema: Record<string, unknown>): any[] {
+    if (!schema) return [];
+
+    // Direct fields array
+    if (Array.isArray(schema.fields)) {
+      return schema.fields;
+    }
+
+    // Sectioned format - flatten all section fields
+    if (Array.isArray(schema.sections)) {
+      return schema.sections.flatMap((section: any) =>
+        Array.isArray(section.fields) ? section.fields : []
+      );
+    }
+
+    // Paged format - flatten all page fields
+    if (Array.isArray(schema.pages)) {
+      return schema.pages.flatMap((page: any) => (Array.isArray(page.fields) ? page.fields : []));
+    }
+
+    // Fallback: return empty array if no recognizable format
+    return [];
   }
 }

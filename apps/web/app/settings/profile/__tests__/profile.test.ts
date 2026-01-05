@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateProfileCompletion } from '../page';
+import { calculateProfileCompletion } from '../utils';
 
 describe('calculateProfileCompletion', () => {
   describe('returns correct percentage based on user data', () => {

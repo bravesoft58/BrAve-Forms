@@ -1,5 +1,6 @@
 import { Resolver, Query, Mutation, Args, ID, InputType, Field } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { IsString, IsNotEmpty, IsOptional, IsObject } from 'class-validator';
 import { ClerkAuthGuard } from '@/modules/auth/guards/clerk-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { GraphQLJSON } from 'graphql-type-json';
@@ -15,27 +16,40 @@ interface ClerkUser {
 @InputType()
 class CreateFormSubmissionInput {
   @Field()
+  @IsString()
+  @IsNotEmpty()
   templateId: string;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   inspectionId?: string;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   projectId?: string;
 
   @Field(() => GraphQLJSON)
+  @IsObject()
   data: Record<string, unknown>;
 }
 
 @InputType()
 class UpdateFormSubmissionInput {
   @Field(() => GraphQLJSON, { nullable: true })
+  @IsObject()
+  @IsOptional()
   data?: Record<string, unknown>;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   status?: FormSubmissionStatus;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   reviewNotes?: string;
 }
 

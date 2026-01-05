@@ -1,0 +1,428 @@
+{
+  "name": "Example Test Form",
+  "description": "Comprehensive test form demonstrating all field types and features - used for testing form rendering, validation, and submission",
+  "category": "TESTING",
+  "version": "1.0.0",
+  "compliance": {
+    "regulation": "Internal Testing",
+    "agency": "QA Department",
+    "requiredFields": ["date", "inspector_name", "text_required"]
+  },
+  "schema": {
+    "sections": [
+      {
+        "id": "basic_info",
+        "title": "Basic Information",
+        "order": 1,
+        "fields": [
+          {
+            "id": "date",
+            "type": "date",
+            "label": "Inspection Date",
+            "required": true,
+            "defaultValue": "{{currentDate}}",
+            "helpText": "Auto-fills with today's date"
+          },
+          {
+            "id": "time",
+            "type": "time",
+            "label": "Inspection Time",
+            "required": true,
+            "defaultValue": "{{currentTime}}",
+            "helpText": "Auto-fills with current time"
+          },
+          {
+            "id": "project_name",
+            "type": "text",
+            "label": "Project Name",
+            "required": true,
+            "defaultValue": "{{projectName}}",
+            "readonly": true,
+            "helpText": "Auto-filled from project data"
+          },
+          {
+            "id": "project_address",
+            "type": "text",
+            "label": "Project Address",
+            "required": false,
+            "defaultValue": "{{projectAddress}}",
+            "readonly": true
+          },
+          {
+            "id": "inspector_name",
+            "type": "text",
+            "label": "Inspector Name",
+            "required": true,
+            "defaultValue": "{{currentUser}}",
+            "readonly": true,
+            "helpText": "Auto-filled with logged-in user"
+          }
+        ]
+      },
+      {
+        "id": "text_fields",
+        "title": "Text Field Examples",
+        "order": 2,
+        "fields": [
+          {
+            "id": "text_required",
+            "type": "text",
+            "label": "Required Text Field",
+            "placeholder": "Enter some text here...",
+            "required": true,
+            "validation": {
+              "minLength": 5,
+              "maxLength": 100
+            },
+            "helpText": "Must be between 5-100 characters"
+          },
+          {
+            "id": "text_optional",
+            "type": "text",
+            "label": "Optional Text Field",
+            "placeholder": "This field is optional",
+            "required": false,
+            "validation": {
+              "maxLength": 200
+            }
+          },
+          {
+            "id": "textarea_field",
+            "type": "textarea",
+            "label": "Multi-line Text Area",
+            "placeholder": "Enter detailed description here...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            },
+            "helpText": "Supports multi-line input"
+          }
+        ]
+      },
+      {
+        "id": "number_fields",
+        "title": "Number Field Examples",
+        "order": 3,
+        "fields": [
+          {
+            "id": "number_integer",
+            "type": "number",
+            "label": "Integer Field",
+            "required": true,
+            "validation": {
+              "min": 0,
+              "max": 100
+            },
+            "defaultValue": 50,
+            "helpText": "Enter a whole number between 0-100"
+          },
+          {
+            "id": "number_decimal",
+            "type": "number",
+            "label": "Decimal Field (e.g., Temperature)",
+            "required": false,
+            "validation": {
+              "min": -50,
+              "max": 150
+            },
+            "helpText": "Supports decimal values"
+          },
+          {
+            "id": "precipitation",
+            "type": "number",
+            "label": "Precipitation (inches)",
+            "required": false,
+            "validation": {
+              "min": 0,
+              "max": 10
+            },
+            "helpText": "Rain amount - EPA CGP requires inspection if >= 0.25 inches"
+          }
+        ]
+      },
+      {
+        "id": "selection_fields",
+        "title": "Selection Field Examples",
+        "order": 4,
+        "fields": [
+          {
+            "id": "select_single",
+            "type": "select",
+            "label": "Single Selection Dropdown",
+            "required": true,
+            "options": [
+              { "value": "option1", "label": "Option 1 - First Choice" },
+              { "value": "option2", "label": "Option 2 - Second Choice" },
+              { "value": "option3", "label": "Option 3 - Third Choice" },
+              { "value": "other", "label": "Other (Specify)" }
+            ],
+            "helpText": "Choose one option from the list"
+          },
+          {
+            "id": "select_other_specify",
+            "type": "text",
+            "label": "Specify Other Selection",
+            "required": true,
+            "placeholder": "Enter custom selection...",
+            "conditionalDisplay": {
+              "field": "select_single",
+              "operator": "equals",
+              "value": "other"
+            },
+            "helpText": "This field shows when 'Other' is selected above"
+          },
+          {
+            "id": "radio_field",
+            "type": "radio",
+            "label": "Radio Button Selection",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes" },
+              { "value": "no", "label": "No" },
+              { "value": "na", "label": "N/A" }
+            ],
+            "defaultValue": "no",
+            "helpText": "Select one option - mutually exclusive"
+          },
+          {
+            "id": "checkbox_field",
+            "type": "checkboxes",
+            "label": "Checkbox Selection (Multiple)",
+            "required": false,
+            "options": [
+              { "value": "check1", "label": "Checkbox Option 1" },
+              { "value": "check2", "label": "Checkbox Option 2" },
+              { "value": "check3", "label": "Checkbox Option 3" },
+              { "value": "check4", "label": "Checkbox Option 4" }
+            ],
+            "helpText": "Select all that apply"
+          }
+        ]
+      },
+      {
+        "id": "conditional_fields",
+        "title": "Conditional Field Examples",
+        "order": 5,
+        "fields": [
+          {
+            "id": "show_extra_fields",
+            "type": "radio",
+            "label": "Show Additional Fields?",
+            "required": true,
+            "options": [
+              { "value": "yes", "label": "Yes - Show extra fields" },
+              { "value": "no", "label": "No - Hide extra fields" }
+            ],
+            "defaultValue": "no",
+            "helpText": "Select Yes to reveal conditional fields below"
+          },
+          {
+            "id": "conditional_text",
+            "type": "text",
+            "label": "Conditional Text Field",
+            "required": true,
+            "placeholder": "This appears when Yes is selected above",
+            "conditionalDisplay": {
+              "field": "show_extra_fields",
+              "operator": "equals",
+              "value": "yes"
+            }
+          },
+          {
+            "id": "conditional_textarea",
+            "type": "textarea",
+            "label": "Conditional Notes",
+            "required": false,
+            "placeholder": "Additional notes when showing extra fields...",
+            "conditionalDisplay": {
+              "field": "show_extra_fields",
+              "operator": "equals",
+              "value": "yes"
+            }
+          },
+          {
+            "id": "weather_type",
+            "type": "select",
+            "label": "Weather Condition",
+            "required": true,
+            "options": [
+              { "value": "sunny", "label": "Sunny/Clear" },
+              { "value": "cloudy", "label": "Cloudy/Overcast" },
+              { "value": "rain", "label": "Rain" },
+              { "value": "snow", "label": "Snow" },
+              { "value": "wind", "label": "High Wind" }
+            ]
+          },
+          {
+            "id": "rain_amount",
+            "type": "number",
+            "label": "Rain Amount (inches)",
+            "required": true,
+            "validation": {
+              "min": 0,
+              "max": 20
+            },
+            "conditionalDisplay": {
+              "field": "weather_type",
+              "operator": "equals",
+              "value": "rain"
+            },
+            "helpText": "Required when weather is Rain"
+          },
+          {
+            "id": "wind_speed",
+            "type": "number",
+            "label": "Wind Speed (mph)",
+            "required": true,
+            "validation": {
+              "min": 0,
+              "max": 200
+            },
+            "conditionalDisplay": {
+              "field": "weather_type",
+              "operator": "equals",
+              "value": "wind"
+            },
+            "helpText": "Required when weather is High Wind"
+          }
+        ]
+      },
+      {
+        "id": "photo_fields",
+        "title": "Photo Field Examples",
+        "order": 6,
+        "fields": [
+          {
+            "id": "single_photo",
+            "type": "photo",
+            "label": "Single Photo (Required)",
+            "required": true,
+            "multiple": false,
+            "captureGPS": true,
+            "helpText": "Take one photo with GPS coordinates"
+          },
+          {
+            "id": "multiple_photos",
+            "type": "photo",
+            "label": "Multiple Photos (Optional)",
+            "required": false,
+            "multiple": true,
+            "maxPhotos": 10,
+            "captureGPS": true,
+            "helpText": "Capture up to 10 photos"
+          },
+          {
+            "id": "site_photos",
+            "type": "photo",
+            "label": "Site Documentation Photos",
+            "required": false,
+            "multiple": true,
+            "maxPhotos": 20,
+            "captureGPS": true,
+            "helpText": "Document site conditions with photos"
+          }
+        ]
+      },
+      {
+        "id": "repeater_section",
+        "title": "Repeater Field Example",
+        "order": 7,
+        "fields": [
+          {
+            "id": "items",
+            "type": "repeater",
+            "label": "Line Items",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 20,
+            "helpText": "Add one or more items (1-20)",
+            "itemSchema": {
+              "fields": [
+                {
+                  "id": "item_description",
+                  "type": "text",
+                  "label": "Item Description",
+                  "required": true,
+                  "validation": {
+                    "maxLength": 200
+                  }
+                },
+                {
+                  "id": "item_quantity",
+                  "type": "number",
+                  "label": "Quantity",
+                  "required": true,
+                  "validation": {
+                    "min": 1,
+                    "max": 9999
+                  }
+                },
+                {
+                  "id": "item_status",
+                  "type": "select",
+                  "label": "Status",
+                  "required": true,
+                  "options": [
+                    { "value": "good", "label": "Good" },
+                    { "value": "fair", "label": "Fair" },
+                    { "value": "poor", "label": "Poor" },
+                    { "value": "na", "label": "N/A" }
+                  ]
+                },
+                {
+                  "id": "item_notes",
+                  "type": "textarea",
+                  "label": "Notes",
+                  "required": false,
+                  "validation": {
+                    "maxLength": 500
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "signatures",
+        "title": "Signature Examples",
+        "order": 8,
+        "fields": [
+          {
+            "id": "notes",
+            "type": "textarea",
+            "label": "Final Notes",
+            "placeholder": "Any additional notes or comments...",
+            "required": false,
+            "validation": {
+              "maxLength": 1000
+            }
+          },
+          {
+            "id": "inspector_signature",
+            "type": "signature",
+            "label": "Inspector Signature",
+            "required": true,
+            "captureTimestamp": true,
+            "helpText": "Sign to certify this inspection is complete and accurate"
+          },
+          {
+            "id": "witness_signature",
+            "type": "signature",
+            "label": "Witness Signature (Optional)",
+            "required": false,
+            "captureTimestamp": true,
+            "helpText": "Optional second signature for witnessed inspections"
+          }
+        ]
+      }
+    ]
+  },
+  "offlineCapable": true,
+  "metadata": {
+    "estimatedCompletionTime": "10-15 minutes",
+    "fieldOptimization": "mobile-friendly with all field types",
+    "purpose": "Testing and demonstration of form engine capabilities",
+    "targetRole": "QA Testers, Developers"
+  }
+}

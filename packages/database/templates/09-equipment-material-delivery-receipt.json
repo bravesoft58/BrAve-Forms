@@ -243,8 +243,22 @@
               { "value": "wrong_item", "label": "Wrong Item - Incorrect material" },
               { "value": "damaged", "label": "Damaged - Physical damage" },
               { "value": "missing_docs", "label": "Missing Documentation (certs, test reports)" },
-              { "value": "late_delivery", "label": "Late Delivery" }
+              { "value": "late_delivery", "label": "Late Delivery" },
+              { "value": "other", "label": "Other" }
             ]
+          },
+          {
+            "id": "discrepancy_other_specify",
+            "type": "text",
+            "label": "Specify Other Discrepancy",
+            "placeholder": "Describe the discrepancy type...",
+            "required": true,
+            "validation": { "maxLength": 200 },
+            "conditionalDisplay": {
+              "field": "discrepancy_type",
+              "operator": "contains",
+              "value": "other"
+            }
           },
           {
             "id": "discrepancy_notes",

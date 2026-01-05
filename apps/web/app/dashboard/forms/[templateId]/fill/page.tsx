@@ -1,9 +1,11 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { Container, Title, Text, Stack, Button, Loader, Alert } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
+import { useUser } from '@clerk/nextjs';
+import { useQuery } from '@tanstack/react-query';
 import { FormRenderer } from '@/components/Forms/FormRenderer';
 import {
   FormSubmissionData,
@@ -13,6 +15,7 @@ import {
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useSubmitForm } from '@/hooks/useSubmitForm';
 import { useFormTemplate } from '@/hooks/useFormTemplates';
+import { useAppAuth } from '@/app/providers';
 
 /**
  * Transform API template schema to FormRenderer format
@@ -96,13 +99,137 @@ function transformTemplateForRenderer(apiTemplate: {
   };
 }
 
+/**
+ * ISSUE-185 & ISSUE-186: Auto-fill helper functions
+ * Generates initial values from user and project context
+ */
+interface AutoFillContext {
+  user?: {
+    firstName?: string | null;
+    lastName?: string | null;
+    fullName?: string | null;
+    primaryEmailAddress?: { emailAddress: string } | null;
+  } | null;
+  project?: {
+    name?: string;
+    address?: string;
+    permitNumber?: string;
+    disturbedAcres?: number;
+  } | null;
+}
+
+function generateAutoFillValues(
+  fields: FormField[],
+  context: AutoFillContext
+): Record<string, unknown> {
+  const values: Record<string, unknown> = {};
+  const today = new Date().toISOString().split('T')[0];
+
+  for (const field of fields) {
+    const labelLower = field.label.toLowerCase();
+    const idLower = field.id.toLowerCase();
+
+    // ISSUE-185: Inspector Name Auto-Fill
+    if (
+      labelLower.includes('inspector') &&
+      (labelLower.includes('name') || idLower.includes('name'))
+    ) {
+      if (context.user?.fullName) {
+        values[field.id] = context.user.fullName;
+      } else if (context.user?.firstName && context.user?.lastName) {
+        values[field.id] = `${context.user.firstName} ${context.user.lastName}`;
+      }
+    }
+
+    // Auto-fill inspector email
+    if (
+      labelLower.includes('inspector') &&
+      (labelLower.includes('email') || idLower.includes('email'))
+    ) {
+      if (context.user?.primaryEmailAddress?.emailAddress) {
+        values[field.id] = context.user.primaryEmailAddress.emailAddress;
+      }
+    }
+
+    // Auto-fill date fields with today's date
+    if (
+      field.type === 'date' &&
+      (labelLower.includes('inspection') || labelLower.includes('today'))
+    ) {
+      values[field.id] = today;
+    }
+
+    // ISSUE-186: Form Fields Pull From Project Data
+    if (context.project) {
+      // Project name
+      if (labelLower.includes('project') && labelLower.includes('name')) {
+        values[field.id] = context.project.name;
+      }
+      // Site address
+      if (labelLower.includes('site') && labelLower.includes('address')) {
+        values[field.id] = context.project.address;
+      }
+      if (labelLower.includes('project') && labelLower.includes('address')) {
+        values[field.id] = context.project.address;
+      }
+      // Permit number
+      if (labelLower.includes('permit') && labelLower.includes('number')) {
+        values[field.id] = context.project.permitNumber;
+      }
+      // Disturbed acres
+      if (labelLower.includes('disturbed') && labelLower.includes('acres')) {
+        values[field.id] = context.project.disturbedAcres;
+      }
+    }
+  }
+
+  return values;
+}
+
 export default function FormFillPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const submitMutation = useSubmitForm();
+  const auth = useAppAuth();
 
-  // Validate templateId parameter
+  // ISSUE-185: Get current user for auto-fill
+  const { user } = useUser();
+
+  // Validate templateId and projectId parameters
   const templateId = typeof params.templateId === 'string' ? params.templateId : undefined;
+  const projectId = searchParams.get('projectId');
+
+  // ISSUE-186: Fetch project data if projectId is provided
+  const { data: project } = useQuery({
+    queryKey: ['project', projectId],
+    queryFn: async () => {
+      if (!projectId || !auth.getToken) return null;
+      const token = await auth.getToken();
+      const response = await fetch(`/api/graphql`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          query: `query GetProject($id: ID!) {
+            project(id: $id) {
+              id
+              name
+              address
+              permitNumber
+              disturbedAcres
+            }
+          }`,
+          variables: { id: projectId },
+        }),
+      });
+      const result = await response.json();
+      return result.data?.project || null;
+    },
+    enabled: !!projectId && auth.isLoaded,
+  });
 
   // Fetch template from API
   const { data: apiTemplate, isLoading, error } = useFormTemplate(templateId);
@@ -112,6 +239,12 @@ export default function FormFillPage() {
     if (!apiTemplate) return null;
     return transformTemplateForRenderer(apiTemplate);
   }, [apiTemplate]);
+
+  // ISSUE-185 & ISSUE-186: Generate auto-fill values
+  const initialValues = useMemo(() => {
+    if (!template) return {};
+    return generateAutoFillValues(template.fields, { user, project });
+  }, [template, user, project]);
 
   const handleSubmit = async (data: FormSubmissionData) => {
     if (!templateId) return;
@@ -210,7 +343,7 @@ export default function FormFillPage() {
             <FormRenderer
               template={template}
               onSubmit={handleSubmit}
-              initialValues={{}}
+              initialValues={initialValues}
               hideHeader
             />
           </div>
