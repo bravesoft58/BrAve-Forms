@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Paper,
   Stack,
@@ -70,6 +70,37 @@ export function FieldProperties({ field, onUpdate, onDelete }: FieldPropertiesPr
       epaCritical: field.metadata?.epaCompliance?.criticalField || false,
     },
   });
+
+  // ISSUE-180 FIX: Reset form values when field changes
+  // Without this, selecting a new field would show stale values from the previous field
+  // because useForm initialValues only applies on mount, not on prop changes
+  useEffect(() => {
+    form.setValues({
+      label: field.label || '',
+      name: field.name || '',
+      description: field.description || '',
+      placeholder: field.placeholder || '',
+      defaultValue: field.defaultValue || '',
+      required: field.validation?.required || false,
+      width: field.width || 'full',
+      minLength: field.validation?.minLength || undefined,
+      maxLength: field.validation?.maxLength || undefined,
+      min: field.validation?.min || undefined,
+      max: field.validation?.max || undefined,
+      step: field.validation?.step || undefined,
+      pattern: field.validation?.pattern || '',
+      options: field.options || [],
+      gpsRequired: field.metadata?.gpsRequired || false,
+      photoQuality: field.metadata?.photoQuality || 'high',
+      signatureCertificate: field.metadata?.signatureCertificate || false,
+      weatherSource: field.metadata?.weatherSource || 'noaa',
+      units: field.metadata?.units || '',
+      epaRegulation: field.metadata?.epaCompliance?.regulation || '',
+      epaSection: field.metadata?.epaCompliance?.section || '',
+      epaCritical: field.metadata?.epaCompliance?.criticalField || false,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [field.id]); // Reset when a different field is selected
 
   // Update field when form values change
   const handleFormChange = (updates: any) => {
