@@ -29,6 +29,7 @@ import {
   IconForms,
 } from '@tabler/icons-react';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import type { FieldDefinition } from '@brave-forms/types';
 
@@ -39,6 +40,7 @@ interface FormCanvasProps {
   onDeleteField: (fieldId: string) => void;
   onDuplicateField: (fieldId: string) => void;
   isLoading?: boolean;
+  isDropTarget?: boolean;
 }
 
 interface SortableFieldProps {
@@ -237,7 +239,12 @@ export function FormCanvas({
   onDeleteField,
   onDuplicateField,
   isLoading = false,
+  isDropTarget: _isDropTarget = false,
 }: FormCanvasProps) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: 'form-canvas-drop-zone',
+  });
+
   const sortedFields = [...fields].sort((a, b) => a.order - b.order);
 
   // Show skeleton loading state when form is being loaded
@@ -274,15 +281,29 @@ export function FormCanvas({
 
   if (fields.length === 0) {
     return (
-      <Paper withBorder p="xl" style={{ textAlign: 'center', minHeight: '400px' }}>
+      <Paper
+        ref={setNodeRef}
+        withBorder
+        p="xl"
+        style={{
+          textAlign: 'center',
+          minHeight: '400px',
+          backgroundColor: isOver ? 'var(--mantine-color-blue-0)' : undefined,
+          borderColor: isOver ? 'var(--mantine-color-blue-5)' : undefined,
+          borderStyle: isOver ? 'dashed' : undefined,
+          borderWidth: isOver ? '2px' : undefined,
+          transition: 'all 0.2s ease',
+        }}
+      >
         <Stack align="center" justify="center" style={{ minHeight: '300px' }}>
           <IconForms size={64} style={{ opacity: 0.3 }} />
           <Text size="lg" fw={500} c="dimmed">
-            No fields added yet
+            {isOver ? 'Drop field here' : 'No fields added yet'}
           </Text>
           <Text size="sm" c="dimmed" maw={300}>
-            Start building your form by selecting field types from the palette on the left. For EPA
-            compliance, use the SWPPP template.
+            {isOver
+              ? 'Release to add field to form'
+              : 'Drag fields from the palette or click to add. For EPA compliance, use the SWPPP template.'}
           </Text>
           <Button variant="light" leftSection={<IconEye size={16} />} disabled>
             Preview will appear here
@@ -293,7 +314,18 @@ export function FormCanvas({
   }
 
   return (
-    <Paper withBorder style={{ minHeight: '400px' }}>
+    <Paper
+      ref={setNodeRef}
+      withBorder
+      style={{
+        minHeight: '400px',
+        backgroundColor: isOver ? 'var(--mantine-color-blue-0)' : undefined,
+        borderColor: isOver ? 'var(--mantine-color-blue-5)' : undefined,
+        borderStyle: isOver ? 'dashed' : undefined,
+        borderWidth: isOver ? '2px' : undefined,
+        transition: 'all 0.2s ease',
+      }}
+    >
       <Box p="md">
         <Group justify="space-between" mb="md">
           <Text size="sm" fw={500}>

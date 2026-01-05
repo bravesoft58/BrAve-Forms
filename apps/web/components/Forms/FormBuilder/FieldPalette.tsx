@@ -13,6 +13,8 @@ import {
   Badge,
   ScrollArea,
 } from '@mantine/core';
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 import {
   IconTextCaption,
   IconHash,
@@ -31,7 +33,6 @@ import {
   IconShieldCheck,
   IconRuler,
   IconClipboardList,
-  IconCode,
   IconTable,
   IconCalculator,
   IconFileUpload,
@@ -241,6 +242,72 @@ const fieldCategories = [
   },
 ];
 
+interface DraggableFieldButtonProps {
+  fieldType: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number }>;
+  color: string;
+  description: string;
+  badge?: string;
+  onAddField: (fieldType: string) => void;
+}
+
+function DraggableFieldButton({
+  fieldType,
+  label,
+  icon: Icon,
+  color,
+  description,
+  badge,
+  onAddField,
+}: DraggableFieldButtonProps) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: `palette-${fieldType}`,
+    data: {
+      fieldType,
+      source: 'palette',
+    },
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    opacity: isDragging ? 0.5 : 1,
+    cursor: isDragging ? 'grabbing' : 'grab',
+  };
+
+  return (
+    <Tooltip label={description} position="right" withArrow>
+      <Button
+        ref={setNodeRef}
+        style={{
+          ...style,
+          height: '48px', // Construction glove-friendly touch target
+          fontSize: '14px',
+        }}
+        variant="light"
+        color={color}
+        justify="space-between"
+        leftSection={<Icon size={18} />}
+        rightSection={
+          badge ? (
+            <Badge size="xs" color={color} variant="dot">
+              {badge}
+            </Badge>
+          ) : null
+        }
+        onClick={() => onAddField(fieldType)}
+        {...listeners}
+        {...attributes}
+        fullWidth
+      >
+        <Text size="sm" style={{ textAlign: 'left', flex: 1 }}>
+          {label}
+        </Text>
+      </Button>
+    </Tooltip>
+  );
+}
+
 export function FieldPalette({ onAddField }: FieldPaletteProps) {
   return (
     <Paper withBorder h="100%" style={{ minHeight: '600px' }}>
@@ -258,49 +325,23 @@ export function FieldPalette({ onAddField }: FieldPaletteProps) {
               <Text size="sm" fw={600} c="dimmed" mb="xs">
                 {category.name}
               </Text>
-              
+
               <Stack gap="xs" mb="md">
-                {category.fields.map((field) => {
-                  const Icon = field.icon;
-                  
-                  return (
-                    <Tooltip
-                      key={field.type}
-                      label={field.description}
-                      position="right"
-                      withArrow
-                    >
-                      <Button
-                        variant="light"
-                        color={field.color}
-                        justify="space-between"
-                        leftSection={<Icon size={18} />}
-                        rightSection={
-                          field.badge ? (
-                            <Badge size="xs" color={field.color} variant="dot">
-                              {field.badge}
-                            </Badge>
-                          ) : null
-                        }
-                        onClick={() => onAddField(field.type)}
-                        style={{ 
-                          height: '48px', // Construction glove-friendly touch target
-                          fontSize: '14px',
-                        }}
-                        fullWidth
-                      >
-                        <Text size="sm" style={{ textAlign: 'left', flex: 1 }}>
-                          {field.label}
-                        </Text>
-                      </Button>
-                    </Tooltip>
-                  );
-                })}
+                {category.fields.map((field) => (
+                  <DraggableFieldButton
+                    key={field.type}
+                    fieldType={field.type}
+                    label={field.label}
+                    icon={field.icon}
+                    color={field.color}
+                    description={field.description}
+                    badge={field.badge}
+                    onAddField={onAddField}
+                  />
+                ))}
               </Stack>
-              
-              {category !== fieldCategories[fieldCategories.length - 1] && (
-                <Divider my="sm" />
-              )}
+
+              {category !== fieldCategories[fieldCategories.length - 1] && <Divider my="sm" />}
             </div>
           ))}
 
@@ -316,9 +357,11 @@ export function FieldPalette({ onAddField }: FieldPaletteProps) {
               leftSection={<IconShieldCheck size={18} />}
               onClick={() => {
                 // Add EPA SWPPP preset fields
-                ['text', 'date', 'number', 'photo', 'bmpChecklist', 'signature'].forEach((type, index) => {
-                  setTimeout(() => onAddField(type), index * 100);
-                });
+                ['text', 'date', 'number', 'photo', 'bmpChecklist', 'signature'].forEach(
+                  (type, index) => {
+                    setTimeout(() => onAddField(type), index * 100);
+                  }
+                );
               }}
               fullWidth
               size="md"
@@ -330,8 +373,8 @@ export function FieldPalette({ onAddField }: FieldPaletteProps) {
           {/* Tips */}
           <Paper p="sm" bg="gray.0" radius="sm">
             <Text size="xs" c="dimmed">
-              <strong>Tip:</strong> EPA forms require GPS-enabled photos and exact 0.25" rainfall thresholds. 
-              Use compliance fields to ensure regulatory accuracy.
+              <strong>Tip:</strong> EPA forms require GPS-enabled photos and exact 0.25 inch
+              rainfall thresholds. Use compliance fields to ensure regulatory accuracy.
             </Text>
           </Paper>
         </Stack>

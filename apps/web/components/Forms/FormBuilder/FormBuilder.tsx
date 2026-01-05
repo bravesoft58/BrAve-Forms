@@ -33,6 +33,9 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import {
   DndContext,
+  DragOverlay,
+  DragStartEvent,
+  DragEndEvent,
   closestCenter,
   KeyboardSensor,
   PointerSensor,
@@ -40,7 +43,6 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 
 import type { FieldDefinition, FormTemplate } from '@brave-forms/types';
 
@@ -71,6 +73,7 @@ export function FormBuilder({ template, onSave, onCancel, loading = false }: For
   const [selectedField, setSelectedField] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [activeFieldType, setActiveFieldType] = useState<string | null>(null);
 
   // Form validation
   const form = useForm({
@@ -213,28 +216,56 @@ export function FormBuilder({ template, onSave, onCancel, loading = false }: For
     [formSchema.fields]
   );
 
-  // Handle drag end for reordering fields
+  // Handle drag start - track what is being dragged
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const { active } = event;
+
+    // Check if dragging from palette
+    if (active.data.current?.source === 'palette') {
+      setActiveFieldType(active.data.current.fieldType);
+    } else {
+      setActiveFieldType(null);
+    }
+  }, []);
+
+  // Handle drag end for reordering fields OR adding from palette
   const handleDragEnd = useCallback(
-    (event: any) => {
+    (event: DragEndEvent) => {
       const { active, over } = event;
 
-      if (active.id !== over.id) {
+      // Reset drag state
+      setActiveFieldType(null);
+
+      // Check if dropping from palette to canvas
+      if (active.data.current?.source === 'palette' && over?.id === 'form-canvas-drop-zone') {
+        const fieldType = active.data.current.fieldType;
+        if (fieldType) {
+          handleAddField(fieldType);
+        }
+        return;
+      }
+
+      // Handle reordering existing fields
+      if (over && active.id !== over.id) {
         const fields = formSchema.fields || [];
         const oldIndex = fields.findIndex((field) => field.id === active.id);
         const newIndex = fields.findIndex((field) => field.id === over.id);
 
-        const reorderedFields = arrayMove(fields, oldIndex, newIndex).map((field, index) => ({
-          ...field,
-          order: index,
-        }));
+        // Only reorder if both indices are valid (not -1)
+        if (oldIndex !== -1 && newIndex !== -1) {
+          const reorderedFields = arrayMove(fields, oldIndex, newIndex).map((field, index) => ({
+            ...field,
+            order: index,
+          }));
 
-        setFormSchema((prev) => ({
-          ...prev,
-          fields: reorderedFields,
-        }));
+          setFormSchema((prev) => ({
+            ...prev,
+            fields: reorderedFields,
+          }));
+        }
       }
     },
-    [formSchema.fields]
+    [formSchema.fields, handleAddField]
   );
 
   // Save the form template
@@ -391,50 +422,62 @@ export function FormBuilder({ template, onSave, onCancel, loading = false }: For
       </Paper>
 
       {/* Main Builder Interface */}
-      <Grid gutter="md">
-        {/* Field Palette */}
-        <Grid.Col span={3}>
-          <FieldPalette onAddField={handleAddField} />
-        </Grid.Col>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <Grid gutter="md">
+          {/* Field Palette */}
+          <Grid.Col span={3}>
+            <FieldPalette onAddField={handleAddField} />
+          </Grid.Col>
 
-        {/* Form Canvas */}
-        <Grid.Col span={6}>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-            modifiers={[restrictToVerticalAxis]}
-          >
+          {/* Form Canvas */}
+          <Grid.Col span={6}>
             <FormCanvas
               fields={formSchema.fields || []}
               selectedField={selectedField}
               onSelectField={setSelectedField}
               onDeleteField={handleDeleteField}
               onDuplicateField={handleDuplicateField}
+              isDropTarget={activeFieldType !== null}
             />
-          </DndContext>
-        </Grid.Col>
+          </Grid.Col>
 
-        {/* Field Properties */}
-        <Grid.Col span={3}>
-          {currentField ? (
-            <FieldProperties
-              field={currentField}
-              onUpdate={(updates) => handleUpdateField(currentField.id, updates)}
-              onDelete={() => handleDeleteField(currentField.id)}
-            />
-          ) : (
-            <Paper p="md" withBorder>
-              <Stack align="center" py="xl">
-                <IconSettings size={48} style={{ opacity: 0.5 }} />
-                <Text c="dimmed" ta="center">
-                  Select a field to configure its properties
-                </Text>
-              </Stack>
+          {/* Field Properties */}
+          <Grid.Col span={3}>
+            {currentField ? (
+              <FieldProperties
+                field={currentField}
+                onUpdate={(updates) => handleUpdateField(currentField.id, updates)}
+                onDelete={() => handleDeleteField(currentField.id)}
+              />
+            ) : (
+              <Paper p="md" withBorder>
+                <Stack align="center" py="xl">
+                  <IconSettings size={48} style={{ opacity: 0.5 }} />
+                  <Text c="dimmed" ta="center">
+                    Select a field to configure its properties
+                  </Text>
+                </Stack>
+              </Paper>
+            )}
+          </Grid.Col>
+        </Grid>
+
+        {/* Drag Overlay for visual feedback */}
+        <DragOverlay>
+          {activeFieldType && (
+            <Paper p="sm" withBorder shadow="md" style={{ opacity: 0.8 }}>
+              <Text size="sm" fw={500}>
+                {activeFieldType.charAt(0).toUpperCase() + activeFieldType.slice(1)} Field
+              </Text>
             </Paper>
           )}
-        </Grid.Col>
-      </Grid>
+        </DragOverlay>
+      </DndContext>
 
       {/* Preview Modal */}
       <Modal
