@@ -14,6 +14,7 @@ import {
   Tooltip,
   Alert,
   Skeleton,
+  Grid,
 } from '@mantine/core';
 import {
   IconGripVertical,
@@ -28,10 +29,25 @@ import {
   IconSignature,
   IconForms,
 } from '@tabler/icons-react';
-import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableContext, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import type { FieldDefinition } from '@brave-forms/types';
+
+// ISSUE-181: Convert field width to Mantine Grid column span (12-column grid)
+function getGridSpan(width: string): number {
+  switch (width) {
+    case 'quarter':
+      return 3; // 25% width
+    case 'third':
+      return 4; // 33% width
+    case 'half':
+      return 6; // 50% width
+    case 'full':
+    default:
+      return 12; // 100% width
+  }
+}
 
 interface FormCanvasProps {
   fields: FieldDefinition[];
@@ -341,22 +357,24 @@ export function FormCanvas({
           </Group>
         </Group>
 
+        {/* ISSUE-181: Multi-column layout using Grid with dynamic column spans */}
         <SortableContext
           items={sortedFields.map((field) => field.id)}
-          strategy={verticalListSortingStrategy}
+          strategy={rectSortingStrategy}
         >
-          <Stack gap="sm">
+          <Grid gutter="sm">
             {sortedFields.map((field) => (
-              <SortableField
-                key={field.id}
-                field={field}
-                isSelected={selectedField === field.id}
-                onSelect={() => onSelectField(field.id)}
-                onDelete={() => onDeleteField(field.id)}
-                onDuplicate={() => onDuplicateField(field.id)}
-              />
+              <Grid.Col key={field.id} span={getGridSpan(field.width || 'full')}>
+                <SortableField
+                  field={field}
+                  isSelected={selectedField === field.id}
+                  onSelect={() => onSelectField(field.id)}
+                  onDelete={() => onDeleteField(field.id)}
+                  onDuplicate={() => onDuplicateField(field.id)}
+                />
+              </Grid.Col>
             ))}
-          </Stack>
+          </Grid>
         </SortableContext>
 
         {/* Add Field Hint */}
