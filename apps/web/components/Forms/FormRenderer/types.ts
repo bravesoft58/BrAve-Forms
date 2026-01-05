@@ -29,7 +29,7 @@ export interface FormField {
 }
 
 /**
- * Field Types (15 total - ISSUE-094 implements all)
+ * Field Types (17 total - ISSUE-094 + ISSUE-182 tel/email support)
  */
 export type FieldType =
   | 'text'
@@ -46,7 +46,9 @@ export type FieldType =
   | 'gps'
   | 'repeater'
   | 'file'
-  | 'computed';
+  | 'computed'
+  | 'tel'
+  | 'email';
 
 /**
  * Field Validation Rules
@@ -101,4 +103,3 @@ export interface FormRendererProps {
   /** Hide form header (title/description) - use when page already shows them */
   hideHeader?: boolean;
 }
-

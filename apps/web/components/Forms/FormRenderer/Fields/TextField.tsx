@@ -9,17 +9,22 @@ interface TextFieldProps {
   register: UseFormRegister<any>;
   error?: FieldError;
   disabled?: boolean;
+  /** HTML input type - defaults to 'text', supports 'tel' and 'email' */
+  inputType?: 'text' | 'tel' | 'email';
 }
 
-export function TextField({ field, register, error, disabled }: TextFieldProps) {
+export function TextField({
+  field,
+  register,
+  error,
+  disabled,
+  inputType = 'text',
+}: TextFieldProps) {
   return (
-    <FieldWrapper
-      id={field.id}
-      label={field.label}
-      required={field.required}
-    >
+    <FieldWrapper id={field.id} label={field.label} required={field.required}>
       <TextInput
         id={field.id}
+        type={inputType}
         placeholder={field.placeholder}
         {...register(field.id)}
         disabled={disabled}
@@ -28,4 +33,3 @@ export function TextField({ field, register, error, disabled }: TextFieldProps) 
     </FieldWrapper>
   );
 }
-

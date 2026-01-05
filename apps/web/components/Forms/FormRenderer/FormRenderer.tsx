@@ -166,6 +166,28 @@ export function FormRenderer({
                   disabled={readOnly}
                 />
               );
+            case 'tel':
+              return (
+                <TextField
+                  key={field.id}
+                  field={field}
+                  register={register}
+                  error={error}
+                  disabled={readOnly}
+                  inputType="tel"
+                />
+              );
+            case 'email':
+              return (
+                <TextField
+                  key={field.id}
+                  field={field}
+                  register={register}
+                  error={error}
+                  disabled={readOnly}
+                  inputType="email"
+                />
+              );
             case 'textarea':
               return (
                 <TextareaField
@@ -355,7 +377,12 @@ export function generateValidationSchema(template: FormTemplate) {
     switch (field.type) {
       case 'text':
       case 'textarea':
+      case 'tel':
         fieldSchema = generateStringSchema(field);
+        break;
+
+      case 'email':
+        fieldSchema = generateEmailSchema(field);
         break;
 
       case 'number':
@@ -543,6 +570,36 @@ function generateNumberSchema(field: FormField): z.ZodTypeAny {
     });
   } else {
     schema = schema.optional();
+  }
+
+  return schema;
+}
+
+/**
+ * Generate email field validation schema (ISSUE-182)
+ * Includes email format validation in addition to string rules
+ */
+function generateEmailSchema(field: FormField): z.ZodTypeAny {
+  let schema: z.ZodString = z
+    .string()
+    .email(field.validation?.customMessage || 'Invalid email address');
+
+  // Required validation
+  if (field.required) {
+    schema = schema.min(1, `${field.label} is required`);
+  }
+
+  // Max length validation (if specified)
+  if (field.validation?.maxLength) {
+    schema = schema.max(
+      field.validation.maxLength,
+      `Maximum ${field.validation.maxLength} characters allowed`
+    );
+  }
+
+  // Apply optional if not required
+  if (!field.required) {
+    return schema.optional().or(z.literal(''));
   }
 
   return schema;
