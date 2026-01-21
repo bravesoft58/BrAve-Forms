@@ -18,39 +18,8 @@ import { IconChevronLeft, IconDeviceFloppy, IconMapPin } from '@tabler/icons-rea
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useCreateProject } from '@/hooks/useProjects';
-
-/**
- * Geocode an address using OpenStreetMap Nominatim API (free, no API key)
- */
-async function geocodeAddress(address: string): Promise<{ lat: number; lon: number } | null> {
-  try {
-    const encodedAddress = encodeURIComponent(address);
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`,
-      {
-        headers: {
-          'User-Agent': 'BrAveForms/1.0 (construction-compliance-app)',
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error('Geocoding request failed');
-    }
-
-    const data = await response.json();
-    if (data && data.length > 0) {
-      return {
-        lat: parseFloat(data[0].lat),
-        lon: parseFloat(data[0].lon),
-      };
-    }
-    return null;
-  } catch (error) {
-    console.error('Geocoding error:', error);
-    return null;
-  }
-}
+import { useAppAuth } from '@/app/providers';
+import { geocodeAddress as geocodeAddressAPI } from '@/lib/api/projects';
 
 /**
  * New Project Page - Sprint 6 Enhancement
@@ -69,6 +38,7 @@ async function geocodeAddress(address: string): Promise<{ lat: number; lon: numb
 export default function NewProjectPage() {
   const router = useRouter();
   const createProjectMutation = useCreateProject();
+  const { getToken } = useAppAuth();
   const [isGeocoding, setIsGeocoding] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -94,16 +64,17 @@ export default function NewProjectPage() {
 
     setIsGeocoding(true);
     try {
-      const coords = await geocodeAddress(formData.address);
-      if (coords) {
+      const token = getToken ? await getToken() : null;
+      const result = await geocodeAddressAPI(formData.address, token);
+      if (result) {
         setFormData((prev) => ({
           ...prev,
-          latitude: coords.lat,
-          longitude: coords.lon,
+          latitude: result.latitude,
+          longitude: result.longitude,
         }));
         notifications.show({
           title: 'Coordinates Found',
-          message: `Latitude: ${coords.lat.toFixed(6)}, Longitude: ${coords.lon.toFixed(6)}`,
+          message: `Latitude: ${result.latitude.toFixed(6)}, Longitude: ${result.longitude.toFixed(6)}`,
           color: 'green',
         });
       } else {
@@ -114,6 +85,13 @@ export default function NewProjectPage() {
           color: 'yellow',
         });
       }
+    } catch (error) {
+      console.error('[Geocode] Error:', error);
+      notifications.show({
+        title: 'Geocoding Error',
+        message: error instanceof Error ? error.message : 'Failed to lookup coordinates',
+        color: 'red',
+      });
     } finally {
       setIsGeocoding(false);
     }

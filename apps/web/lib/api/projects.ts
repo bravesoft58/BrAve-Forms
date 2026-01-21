@@ -380,3 +380,49 @@ export async function deleteProject(id: string, token: string | null): Promise<b
 
   return data.deleteProject;
 }
+
+// ============================================================================
+// Geocoding
+// ============================================================================
+
+export interface GeocodeResult {
+  latitude: number;
+  longitude: number;
+  displayName: string;
+}
+
+/**
+ * Geocode an address to get latitude/longitude coordinates
+ *
+ * @param address - Address string to geocode
+ * @param token - Clerk JWT token
+ * @returns Promise resolving to coordinates or null if not found
+ *
+ * Uses backend proxy to avoid CORS issues with Nominatim API
+ */
+export async function geocodeAddress(
+  address: string,
+  token: string | null
+): Promise<GeocodeResult | null> {
+  if (!address || typeof address !== 'string' || address.trim() === '') {
+    return null;
+  }
+
+  const data = await makeAuthenticatedRequest<{ geocodeAddress: GeocodeResult | null }>(
+    {
+      query: `
+        query GeocodeAddress($address: String!) {
+          geocodeAddress(address: $address) {
+            latitude
+            longitude
+            displayName
+          }
+        }
+      `,
+      variables: { address },
+    },
+    token
+  );
+
+  return data.geocodeAddress;
+}

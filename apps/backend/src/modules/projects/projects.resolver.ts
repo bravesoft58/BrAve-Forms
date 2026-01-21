@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Field, ObjectType, InputType } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Field, ObjectType, InputType, Float } from '@nestjs/graphql';
 import { UseGuards, Logger } from '@nestjs/common';
 import { IsString, IsNumber, IsOptional, IsDate, Min } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -192,6 +192,19 @@ export class UpdateProjectInput {
   status?: string;
 }
 
+// Geocoding Result Type
+@ObjectType('GeocodeResult')
+export class GeocodeResultGQL {
+  @Field(() => Float)
+  latitude: number;
+
+  @Field(() => Float)
+  longitude: number;
+
+  @Field()
+  displayName: string;
+}
+
 @Resolver(() => ProjectWithComplianceGQL)
 export class ProjectsResolver {
   private readonly logger = new Logger(ProjectsResolver.name);
@@ -249,6 +262,118 @@ export class ProjectsResolver {
       recentInspections: project.inspections.map(this.mapInspection),
       compliance: this.calculateProjectCompliance(project),
     };
+  }
+
+  @Query(() => GeocodeResultGQL, { nullable: true })
+  @UseGuards(ClerkAuthGuard, RolesGuard)
+  @TeamAccess()
+  async geocodeAddress(@Args('address') address: string): Promise<GeocodeResultGQL | null> {
+    this.logger.log(`Geocoding address: ${address}`);
+
+    try {
+      // Try Photon geocoder first (better fuzzy matching for US addresses)
+      const photonResult = await this.tryPhotonGeocode(address);
+      if (photonResult) {
+        return photonResult;
+      }
+
+      // Fallback to Nominatim
+      const nominatimResult = await this.tryNominatimGeocode(address);
+      if (nominatimResult) {
+        return nominatimResult;
+      }
+
+      this.logger.log('No geocoding results found from any service');
+      return null;
+    } catch (error) {
+      this.logger.error(`Geocoding error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return null;
+    }
+  }
+
+  private async tryPhotonGeocode(address: string): Promise<GeocodeResultGQL | null> {
+    try {
+      const encodedAddress = encodeURIComponent(address);
+      const url = `https://photon.komoot.io/api/?q=${encodedAddress}&limit=1`;
+      this.logger.log(`Trying Photon geocoder: ${url}`);
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        this.logger.warn(`Photon geocoding failed: ${response.status}`);
+        return null;
+      }
+
+      const data = await response.json();
+
+      if (data?.features?.length > 0) {
+        const feature = data.features[0];
+        const coords = feature.geometry?.coordinates;
+        const props = feature.properties || {};
+
+        if (coords && coords.length >= 2) {
+          const displayParts = [
+            props.name,
+            props.street,
+            props.city,
+            props.state,
+            props.postcode,
+            props.country,
+          ].filter(Boolean);
+
+          const result = {
+            latitude: coords[1],
+            longitude: coords[0],
+            displayName: displayParts.join(', ') || address,
+          };
+          this.logger.log(`Photon result: ${JSON.stringify(result)}`);
+          return result;
+        }
+      }
+
+      this.logger.log('No Photon results found');
+      return null;
+    } catch (error) {
+      this.logger.warn(`Photon error: ${error instanceof Error ? error.message : 'Unknown'}`);
+      return null;
+    }
+  }
+
+  private async tryNominatimGeocode(address: string): Promise<GeocodeResultGQL | null> {
+    try {
+      const encodedAddress = encodeURIComponent(address);
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`;
+      this.logger.log(`Trying Nominatim geocoder: ${url}`);
+
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'BrAveForms/1.0 (construction-compliance-app)',
+        },
+      });
+
+      if (!response.ok) {
+        this.logger.warn(`Nominatim geocoding failed: ${response.status}`);
+        return null;
+      }
+
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const result = {
+          latitude: parseFloat(data[0].lat),
+          longitude: parseFloat(data[0].lon),
+          displayName: data[0].display_name,
+        };
+        this.logger.log(`Nominatim result: ${JSON.stringify(result)}`);
+        return result;
+      }
+
+      this.logger.log('No Nominatim results found');
+      return null;
+    } catch (error) {
+      this.logger.warn(`Nominatim error: ${error instanceof Error ? error.message : 'Unknown'}`);
+      return null;
+    }
   }
 
   @Mutation(() => ProjectWithComplianceGQL)
