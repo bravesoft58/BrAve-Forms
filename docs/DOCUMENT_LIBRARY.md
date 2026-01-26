@@ -1,6 +1,6 @@
 # BrAve Forms - Master Documentation Library
 
-**Last Updated:** 2025-11-30
+**Last Updated:** 2025-01-26
 **Maintained By:** Documentation Library Manager Agent
 **Status:** ALIGNED - Sprint 5 Complete, Production-Ready MVP
 
@@ -56,6 +56,21 @@ This master index provides a complete inventory of all documentation in the BrAv
   - **Purpose:** Setup instructions for local development environment
   - **Status:** Active
   - **Location:** Moved to docs/ from root (October 24, 2025)
+
+- ACTIVE **[GITHUB_WORKFLOW.md](GITHUB_WORKFLOW.md)** - Git branching and PR workflow
+  - **Purpose:** GitHub Flow strategy, branch naming, PR process
+  - **Status:** Active (Created October 24, 2025)
+  - **Coverage:** Branch protection, commit standards, merge strategies
+
+### CI/CD Pipeline
+
+- ACTIVE **[.github/workflows/deploy-production.yml](../../.github/workflows/deploy-production.yml)** - Production deployment workflow
+  - **Purpose:** Automated deployment to DigitalOcean on push to master
+  - **Status:** Active (Created January 26, 2025)
+  - **Trigger:** Push to master branch or manual workflow_dispatch
+  - **Process:** SSH deploy, Docker rebuild, health check
+  - **Server:** 159.89.246.229 (api.brave-soft.com / forms.brave-soft.com)
+  - **Note:** Local reference guide available at CI_CD_PIPELINE.md (gitignored)
 
 ### Project Management
 
