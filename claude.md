@@ -78,7 +78,11 @@ All code must be production-ready, professional, and contain ZERO references to 
 - **Container Runtime:** containerd (production standard)
 - **Image Building:** nerdctl with k8s.io namespace
 - **IaC:** Terraform 1.5+
-- **CI/CD:** GitHub Actions
+- **CI/CD:** GitHub Actions (see `.github/workflows/deploy-production.yml`)
+  - **Trigger:** Push to master auto-deploys to production
+  - **Server:** 159.89.246.229 (api.brave-soft.com / forms.brave-soft.com)
+  - **Process:** SSH deploy -> Docker rebuild -> Health check
+  - **Local Guide:** CI_CD_PIPELINE.md (gitignored, local reference only)
 - **Monitoring:** Datadog, Sentry
 - **Namespace:** braveforms (local isolation)
 
