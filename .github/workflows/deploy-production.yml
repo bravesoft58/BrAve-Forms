@@ -1,0 +1,33 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to DigitalOcean
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DO_SSH_HOST }}
+          username: ${{ secrets.DO_SSH_USER }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          script: |
+            cd ~/brave-forms
+            git pull origin master
+            docker compose down
+            docker compose up -d --build
+            echo "Deployed at $(date)"
+
+      - name: Health Check
+        run: |
+          sleep 45
+          curl -sf http://${{ secrets.DO_SSH_HOST }}:4000/graphql \
+            -X POST -H "Content-Type: application/json" \
+            -d '{"query":"{ __typename }"}' || exit 1
+          echo "Backend healthy"
