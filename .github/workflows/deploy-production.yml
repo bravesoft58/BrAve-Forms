@@ -27,7 +27,7 @@ jobs:
       - name: Health Check
         run: |
           sleep 45
-          curl -sf http://${{ secrets.DO_SSH_HOST }}:4000/graphql \
+          curl -sf https://api.brave-soft.com/graphql \
             -X POST -H "Content-Type: application/json" \
             -d '{"query":"{ __typename }"}' || exit 1
           echo "Backend healthy"
