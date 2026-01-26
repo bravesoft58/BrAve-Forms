@@ -8,6 +8,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ManagementAccess, TeamAccess, AdminAccess } from '../../common/decorators/roles.decorator';
 import { ProjectsService } from './projects.service';
 import { PrismaService } from '../database/prisma.service';
+import { OrganizationService } from '../organization/organization.service';
 
 // GraphQL Types for Project Management (unique names to avoid conflicts with organizations.resolver)
 @ObjectType('InspectionSummary')
@@ -211,7 +212,8 @@ export class ProjectsResolver {
 
   constructor(
     private readonly projectsService: ProjectsService,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
+    private readonly organizationService: OrganizationService
   ) {}
 
   @Query(() => [ProjectWithComplianceGQL])
@@ -508,12 +510,27 @@ export class ProjectsResolver {
 
   // Helper Methods
   private async getOrganizationByClerkId(clerkOrgId: string): Promise<any> {
-    const org = await this.prisma.organization.findUnique({
+    // First, try to find existing organization
+    let org = await this.prisma.organization.findUnique({
       where: { clerkOrgId },
     });
 
+    // JIT (Just-in-Time) provisioning: auto-create organization if it doesn't exist
     if (!org) {
-      throw new Error(`Organization not found for Clerk ID: ${clerkOrgId}`);
+      this.logger.log(`Organization not found for Clerk ID: ${clerkOrgId}, creating via JIT provisioning`);
+
+      try {
+        // Use OrganizationService to sync/create the organization
+        // The service will fetch org details from Clerk if available
+        org = await this.organizationService.syncOrganization(clerkOrgId, {
+          name: 'Construction Company', // Default name, will be updated via webhook
+        });
+
+        this.logger.log(`JIT provisioned organization: ${org.id} for Clerk ID: ${clerkOrgId}`);
+      } catch (error) {
+        this.logger.error(`Failed to JIT provision organization for Clerk ID: ${clerkOrgId}`, error);
+        throw new Error(`Failed to create organization for Clerk ID: ${clerkOrgId}`);
+      }
     }
 
     return org;
