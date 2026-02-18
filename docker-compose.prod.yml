@@ -44,13 +44,13 @@ services:
         max-size: '10m'
         max-file: '3'
 
-  # Redis for BullMQ and caching
+  # Valkey for BullMQ and caching (BSD-licensed Redis fork)
   redis:
-    image: redis:7-alpine
+    image: valkey/valkey:8-alpine
     container_name: braveforms-redis
     restart: always
     command: >
-      redis-server
+      valkey-server
       --appendonly yes
       --requirepass ${REDIS_PASSWORD}
       --maxmemory 256mb
@@ -58,7 +58,7 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ['CMD', 'redis-cli', '-a', '${REDIS_PASSWORD}', 'ping']
+      test: ['CMD', 'valkey-cli', '-a', '${REDIS_PASSWORD}', 'ping']
       interval: 30s
       timeout: 10s
       retries: 5

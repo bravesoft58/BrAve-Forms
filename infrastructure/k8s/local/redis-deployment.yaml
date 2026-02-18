@@ -1,4 +1,5 @@
-# Redis for BullMQ - Weather monitoring and background jobs
+# Valkey for BullMQ - Weather monitoring and background jobs
+# BSD-licensed Redis fork, wire-compatible
 # Processes EPA 0.25" rain threshold alerts
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -50,48 +51,48 @@ spec:
         tier: cache
     spec:
       containers:
-      - name: redis
-        image: redis:7-alpine
-        ports:
-        - containerPort: 6379
-        command:
-          - redis-server
-          - --appendonly
-          - "yes"
-          - --requirepass
-          - $(REDIS_PASSWORD)
-        env:
-        - name: REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: brave-forms-secrets
-              key: redis-password
-        volumeMounts:
-        - name: redis-storage
-          mountPath: /data
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-        livenessProbe:
-          tcpSocket:
-            port: 6379
-          initialDelaySeconds: 15
-          periodSeconds: 20
-        readinessProbe:
-          exec:
-            command:
-            - redis-cli
-            - --no-auth-warning
-            - -a
+        - name: valkey
+          image: valkey/valkey:8-alpine
+          ports:
+            - containerPort: 6379
+          command:
+            - valkey-server
+            - --appendonly
+            - 'yes'
+            - --requirepass
             - $(REDIS_PASSWORD)
-            - ping
-          initialDelaySeconds: 5
-          periodSeconds: 10
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: brave-forms-secrets
+                  key: redis-password
+          volumeMounts:
+            - name: redis-storage
+              mountPath: /data
+          resources:
+            requests:
+              memory: '128Mi'
+              cpu: '100m'
+            limits:
+              memory: '256Mi'
+              cpu: '200m'
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            exec:
+              command:
+                - valkey-cli
+                - --no-auth-warning
+                - -a
+                - $(REDIS_PASSWORD)
+                - ping
+            initialDelaySeconds: 5
+            periodSeconds: 10
       volumes:
-      - name: redis-storage
-        persistentVolumeClaim:
-          claimName: redis-pvc
+        - name: redis-storage
+          persistentVolumeClaim:
+            claimName: redis-pvc

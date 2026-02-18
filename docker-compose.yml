@@ -24,17 +24,17 @@ services:
     networks:
       - braveforms-network
 
-  # Redis for BullMQ and caching
+  # Valkey for BullMQ and caching (BSD-licensed Redis fork)
   redis:
-    image: redis:7-alpine
+    image: valkey/valkey:8-alpine
     container_name: braveforms-redis
-    command: redis-server --appendonly yes --requirepass redis_secure_pass
+    command: valkey-server --appendonly yes --requirepass redis_secure_pass
     ports:
       - '6379:6379'
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ['CMD', 'redis-cli', '-a', 'redis_secure_pass', 'ping']
+      test: ['CMD', 'valkey-cli', '-a', 'redis_secure_pass', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
