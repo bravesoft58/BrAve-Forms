@@ -1,12 +1,21 @@
 /**
  * BrAve Forms Photo Storage Service
- * Handles construction photo storage with MinIO/S3 compatibility
+ * Handles construction photo storage with S3-compatible backends (SeaweedFS, AWS S3)
  * Implements intelligent compression, EXIF preservation, and compliance requirements
  */
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3Client, CreateBucketCommand, PutObjectCommand, GetObjectCommand, HeadObjectCommand, ListObjectsV2Command, DeleteObjectCommand, HeadBucketCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  CreateBucketCommand,
+  PutObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+  ListObjectsV2Command,
+  DeleteObjectCommand,
+  HeadBucketCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as sharp from 'sharp';
 import * as crypto from 'crypto';
@@ -54,7 +63,7 @@ export class PhotoStorageService {
     thumbnail: { width: 150, height: 150, quality: 70 },
     small: { width: 480, height: 480, quality: 75 },
     medium: { width: 1024, height: 1024, quality: 80 },
-    large: { width: 2048, height: 2048, quality: 85 }
+    large: { width: 2048, height: 2048, quality: 85 },
   };
 
   private readonly POSTGRES_THRESHOLD = 50 * 1024 * 1024; // 50MB
@@ -81,9 +90,9 @@ export class PhotoStorageService {
       region,
       credentials: {
         accessKeyId,
-        secretAccessKey
+        secretAccessKey,
       },
-      forcePathStyle: !!endpoint, // Required for MinIO
+      forcePathStyle: !!endpoint, // Required for S3-compatible endpoints (SeaweedFS)
     });
 
     this.logger.log(`Initialized S3 client with endpoint: ${endpoint || 'AWS S3'}`);
@@ -91,16 +100,20 @@ export class PhotoStorageService {
 
   async ensureBucketExists(): Promise<void> {
     try {
-      await this.s3Client.send(new HeadBucketCommand({
-        Bucket: this.bucketName
-      }));
+      await this.s3Client.send(
+        new HeadBucketCommand({
+          Bucket: this.bucketName,
+        })
+      );
       this.logger.log(`Bucket ${this.bucketName} exists`);
     } catch (error) {
       if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
         this.logger.log(`Creating bucket: ${this.bucketName}`);
-        await this.s3Client.send(new CreateBucketCommand({
-          Bucket: this.bucketName
-        }));
+        await this.s3Client.send(
+          new CreateBucketCommand({
+            Bucket: this.bucketName,
+          })
+        );
         this.logger.log(`Created bucket: ${this.bucketName}`);
       } else {
         this.logger.error('Error checking bucket existence:', error);
@@ -127,30 +140,26 @@ export class PhotoStorageService {
 
       // Optimize photo quality
       const optimizedPhoto = await this.optimizePhoto(photoBuffer, imageMetadata);
-      const compressionRatio = ((photoBuffer.length - optimizedPhoto.length) / photoBuffer.length) * 100;
+      const compressionRatio =
+        ((photoBuffer.length - optimizedPhoto.length) / photoBuffer.length) * 100;
 
       // Generate variants
       const variants = await this.generateVariants(optimizedPhoto, photoId);
 
       // Upload original optimized photo
       const photoKey = this.generatePhotoKey(metadata, photoId, originalFilename);
-      const uploadResult = await this.uploadToS3(
-        optimizedPhoto,
-        photoKey,
-        metadata,
-        photoId
-      );
+      await this.uploadToS3(optimizedPhoto, photoKey, metadata, photoId);
 
       // Calculate checksums
       const checksums = {
         md5: crypto.createHash('md5').update(optimizedPhoto).digest('hex'),
-        sha256: crypto.createHash('sha256').update(optimizedPhoto).digest('hex')
+        sha256: crypto.createHash('sha256').update(optimizedPhoto).digest('hex'),
       };
 
       const uploadTime = Date.now() - startTime;
       this.logger.log(
         `Photo uploaded: ${photoId} (${(optimizedPhoto.length / 1024 / 1024).toFixed(2)}MB) ` +
-        `in ${uploadTime}ms, ${compressionRatio.toFixed(1)}% compression`
+          `in ${uploadTime}ms, ${compressionRatio.toFixed(1)}% compression`
       );
 
       return {
@@ -160,9 +169,8 @@ export class PhotoStorageService {
         compressionRatio,
         variants,
         storageLocation: photoKey,
-        checksums
+        checksums,
       };
-
     } catch (error) {
       this.logger.error(`Failed to upload photo: ${error.message}`, error.stack);
       throw error;
@@ -181,7 +189,7 @@ export class PhotoStorageService {
         hasAlpha: metadata.hasAlpha,
         orientation: metadata.orientation,
         exif: metadata.exif,
-        gps: this.extractGPSFromEXIF(metadata.exif)
+        gps: this.extractGPSFromEXIF(metadata.exif),
       };
     } catch (error) {
       this.logger.error('Failed to extract image metadata:', error);
@@ -191,7 +199,7 @@ export class PhotoStorageService {
 
   private extractGPSFromEXIF(exifBuffer?: Buffer): { latitude?: number; longitude?: number } {
     if (!exifBuffer) return {};
-    
+
     try {
       // This is a simplified GPS extraction - in production, use exif-reader library
       return {
@@ -221,13 +229,13 @@ export class PhotoStorageService {
 
   private async optimizePhoto(photoBuffer: Buffer, metadata: any): Promise<Buffer> {
     const quality = this.calculateOptimalQuality(photoBuffer.length, metadata);
-    
+
     let pipeline = sharp(photoBuffer)
       .jpeg({
         quality,
         progressive: true,
         mozjpeg: true,
-        chromaSubsampling: '4:2:0'
+        chromaSubsampling: '4:2:0',
       })
       .withMetadata(); // Preserve EXIF data
 
@@ -235,7 +243,7 @@ export class PhotoStorageService {
     if (metadata.width > 4096 || metadata.height > 4096) {
       pipeline = pipeline.resize(4096, 4096, {
         fit: 'inside',
-        withoutEnlargement: true
+        withoutEnlargement: true,
       });
     }
 
@@ -245,23 +253,23 @@ export class PhotoStorageService {
     return await pipeline.toBuffer();
   }
 
-  private calculateOptimalQuality(size: number, metadata: any): number {
+  private calculateOptimalQuality(size: number, _metadata: any): number {
     // Adjust quality based on image size and complexity
-    if (size < 1024 * 1024) { // < 1MB
+    if (size < 1024 * 1024) {
+      // < 1MB
       return 90;
-    } else if (size < 5 * 1024 * 1024) { // < 5MB
+    } else if (size < 5 * 1024 * 1024) {
+      // < 5MB
       return 85;
-    } else if (size < 10 * 1024 * 1024) { // < 10MB
+    } else if (size < 10 * 1024 * 1024) {
+      // < 10MB
       return 80;
     } else {
       return 75;
     }
   }
 
-  private async generateVariants(
-    optimizedPhoto: Buffer,
-    photoId: string
-  ): Promise<PhotoVariant[]> {
+  private async generateVariants(optimizedPhoto: Buffer, photoId: string): Promise<PhotoVariant[]> {
     const variants: PhotoVariant[] = [];
 
     for (const [variantName, config] of Object.entries(this.variants)) {
@@ -269,28 +277,30 @@ export class PhotoStorageService {
         const variantBuffer = await sharp(optimizedPhoto)
           .resize(config.width, config.height, {
             fit: 'inside',
-            withoutEnlargement: true
+            withoutEnlargement: true,
           })
-          .jpeg({ 
-            quality: config.quality, 
-            progressive: true 
+          .jpeg({
+            quality: config.quality,
+            progressive: true,
           })
           .toBuffer();
 
         const variantKey = `variants/${photoId}/${variantName}.jpg`;
-        
-        await this.s3Client.send(new PutObjectCommand({
-          Bucket: this.bucketName,
-          Key: variantKey,
-          Body: variantBuffer,
-          ContentType: 'image/jpeg',
-          Metadata: {
-            'photo-id': photoId,
-            'variant': variantName,
-            'dimensions': `${config.width}x${config.height}`,
-            'quality': config.quality.toString()
-          }
-        }));
+
+        await this.s3Client.send(
+          new PutObjectCommand({
+            Bucket: this.bucketName,
+            Key: variantKey,
+            Body: variantBuffer,
+            ContentType: 'image/jpeg',
+            Metadata: {
+              'photo-id': photoId,
+              variant: variantName,
+              dimensions: `${config.width}x${config.height}`,
+              quality: config.quality.toString(),
+            },
+          })
+        );
 
         const signedUrl = await this.generateSignedUrl(variantKey, 3600);
 
@@ -298,9 +308,8 @@ export class PhotoStorageService {
           name: variantName,
           size: variantBuffer.length,
           dimensions: `${config.width}x${config.height}`,
-          url: signedUrl
+          url: signedUrl,
         });
-
       } catch (error) {
         this.logger.error(`Failed to generate variant ${variantName}:`, error);
         // Continue with other variants
@@ -316,9 +325,9 @@ export class PhotoStorageService {
     originalFilename?: string
   ): string {
     const timestamp = new Date().toISOString().split('T')[0];
-    const filename = originalFilename ? 
-      originalFilename.replace(/[^a-zA-Z0-9.-]/g, '_') : 
-      `photo-${photoId}.jpg`;
+    const filename = originalFilename
+      ? originalFilename.replace(/[^a-zA-Z0-9.-]/g, '_')
+      : `photo-${photoId}.jpg`;
 
     return `photos/${metadata.projectId}/${timestamp}/${photoId}/${filename}`;
   }
@@ -339,13 +348,13 @@ export class PhotoStorageService {
         'project-id': metadata.projectId,
         'site-location': metadata.siteLocation || '',
         'captured-at': metadata.capturedAt,
-        'device': metadata.device || '',
+        device: metadata.device || '',
         'compliance-type': metadata.complianceType,
         'form-id': metadata.formId || '',
         'user-id': metadata.userId,
         'inspection-id': metadata.inspectionId || '',
-        'upload-timestamp': new Date().toISOString()
-      }
+        'upload-timestamp': new Date().toISOString(),
+      },
     });
 
     return await this.s3Client.send(putCommand);
@@ -354,7 +363,7 @@ export class PhotoStorageService {
   async generateSignedUrl(photoKey: string, expiresIn: number = 3600): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
-      Key: photoKey
+      Key: photoKey,
     });
 
     return await getSignedUrl(this.s3Client, command, { expiresIn });
@@ -364,7 +373,7 @@ export class PhotoStorageService {
     try {
       const command = new GetObjectCommand({
         Bucket: this.bucketName,
-        Key: photoKey
+        Key: photoKey,
       });
 
       const response = await this.s3Client.send(command);
@@ -379,7 +388,7 @@ export class PhotoStorageService {
     try {
       const command = new DeleteObjectCommand({
         Bucket: this.bucketName,
-        Key: photoKey
+        Key: photoKey,
       });
 
       await this.s3Client.send(command);
@@ -400,21 +409,22 @@ export class PhotoStorageService {
         Bucket: this.bucketName,
         Prefix: `photos/${projectId}/`,
         MaxKeys: maxKeys,
-        ContinuationToken: continuationToken
+        ContinuationToken: continuationToken,
       });
 
       const response = await this.s3Client.send(command);
 
-      const photos = response.Contents?.map(object => ({
-        key: object.Key,
-        size: object.Size,
-        lastModified: object.LastModified,
-        etag: object.ETag
-      })) || [];
+      const photos =
+        response.Contents?.map((object) => ({
+          key: object.Key,
+          size: object.Size,
+          lastModified: object.LastModified,
+          etag: object.ETag,
+        })) || [];
 
       return {
         photos,
-        nextToken: response.NextContinuationToken
+        nextToken: response.NextContinuationToken,
       };
     } catch (error) {
       this.logger.error(`Failed to list photos for project ${projectId}:`, error);
@@ -431,11 +441,11 @@ export class PhotoStorageService {
       const command = new ListObjectsV2Command({
         Bucket: this.bucketName,
         Prefix: `photos/`,
-        MaxKeys: 1000
+        MaxKeys: 1000,
       });
 
       const response = await this.s3Client.send(command);
-      
+
       // Filter photos by inspection ID from metadata
       const inspectionPhotos = [];
       let totalSize = 0;
@@ -443,19 +453,19 @@ export class PhotoStorageService {
       for (const object of response.Contents || []) {
         const headCommand = new HeadObjectCommand({
           Bucket: this.bucketName,
-          Key: object.Key!
+          Key: object.Key!,
         });
 
         const headResponse = await this.s3Client.send(headCommand);
-        
+
         if (headResponse.Metadata?.['inspection-id'] === inspectionId) {
           const signedUrl = await this.generateSignedUrl(object.Key!, 86400); // 24 hours
-          
+
           inspectionPhotos.push({
             key: object.Key,
             url: signedUrl,
             size: object.Size,
-            metadata: headResponse.Metadata
+            metadata: headResponse.Metadata,
           });
 
           totalSize += object.Size || 0;
@@ -464,12 +474,12 @@ export class PhotoStorageService {
 
       this.logger.log(
         `Created compliance package for inspection ${inspectionId}: ` +
-        `${inspectionPhotos.length} photos, ${(totalSize / 1024 / 1024).toFixed(2)}MB`
+          `${inspectionPhotos.length} photos, ${(totalSize / 1024 / 1024).toFixed(2)}MB`
       );
 
       return {
         photos: inspectionPhotos,
-        packageSize: totalSize
+        packageSize: totalSize,
       };
     } catch (error) {
       this.logger.error(`Failed to create compliance package for ${inspectionId}:`, error);
@@ -479,7 +489,7 @@ export class PhotoStorageService {
 
   private async streamToBuffer(stream: any): Promise<Buffer> {
     const chunks: Buffer[] = [];
-    
+
     return new Promise((resolve, reject) => {
       stream.on('data', (chunk: Buffer) => chunks.push(chunk));
       stream.on('end', () => resolve(Buffer.concat(chunks)));
@@ -496,14 +506,14 @@ export class PhotoStorageService {
     try {
       const command = new ListObjectsV2Command({
         Bucket: this.bucketName,
-        MaxKeys: 10000 // Adjust based on expected volume
+        MaxKeys: 10000, // Adjust based on expected volume
       });
 
       const response = await this.s3Client.send(command);
       const totalPhotos = response.Contents?.length || 0;
       const totalSize = response.Contents?.reduce((sum, obj) => sum + (obj.Size || 0), 0) || 0;
       const averageSize = totalPhotos > 0 ? totalSize / totalPhotos : 0;
-      
+
       // Rough cost estimate for S3/MinIO (per GB per month)
       const costPerGB = 0.023; // AWS S3 Standard pricing
       const costEstimate = (totalSize / 1024 / 1024 / 1024) * costPerGB;
@@ -512,7 +522,7 @@ export class PhotoStorageService {
         totalPhotos,
         totalSize,
         averageSize,
-        costEstimate
+        costEstimate,
       };
     } catch (error) {
       this.logger.error('Failed to get storage stats:', error);

@@ -40,24 +40,22 @@ services:
     networks:
       - braveforms-network
 
-  # MinIO Object Storage for photos (S3-compatible)
-  minio:
-    image: minio/minio:latest
-    container_name: braveforms-minio
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin123
+  # SeaweedFS Object Storage for photos (S3-compatible)
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    container_name: braveforms-seaweedfs
+    command: server -s3 -dir=/data -filer
     ports:
-      - '9000:9000' # API
-      - '9001:9001' # Console
+      - '8335:8333' # S3 API (8333 taken by globe-corp, 8334 by engram-flow)
+      - '9335:9333' # Master (9333 taken by globe-corp, 9334 by engram-flow)
+      - '8081:8080' # Filer (8080 taken by globe-corp)
     volumes:
-      - minio_data:/data
-    command: server /data --console-address ":9001"
+      - seaweedfs_data:/data
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1:9333/cluster/status']
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - braveforms-network
 
@@ -72,16 +70,10 @@ services:
       PORT: 4000
       DATABASE_URL: postgresql://brave:brave_secure_pass@postgres:5432/brave_forms?schema=public
       REDIS_URL: redis://:redis_secure_pass@redis:6379
-      MINIO_ENDPOINT: minio
-      MINIO_PORT: 9000
-      MINIO_ACCESS_KEY: minioadmin
-      MINIO_SECRET_KEY: minioadmin123
-      MINIO_USE_SSL: 'false'
-      MINIO_BUCKET: brave-forms-uploads
       AWS_ACCESS_KEY_ID: minioadmin
       AWS_SECRET_ACCESS_KEY: minioadmin123
       AWS_REGION: us-east-1
-      S3_ENDPOINT: http://minio:9000
+      S3_ENDPOINT: http://seaweedfs:8333
       S3_BUCKET_NAME: brave-forms-uploads
       SKIP_CLERK_AUTH: 'false'
       CLERK_SECRET_KEY: sk_test_ukrcGObFIAn9XhIrhalKVKBSG90MqO8rPeRyXlIFjY
@@ -94,7 +86,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      minio:
+      seaweedfs:
         condition: service_healthy
     networks:
       - braveforms-network
@@ -130,8 +122,8 @@ volumes:
     name: braveforms-postgres-data
   redis_data:
     name: braveforms-redis-data
-  minio_data:
-    name: braveforms-minio-data
+  seaweedfs_data:
+    name: braveforms-seaweedfs-data
 
 networks:
   braveforms-network:

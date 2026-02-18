@@ -3,7 +3,13 @@ import { UseGuards, Logger, BadRequestException, ForbiddenException } from '@nes
 import { ClerkAuthGuard } from '@/modules/auth/guards/clerk-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { PhotosService } from './photos.service';
-import { Photo, UploadPhotoBase64Input, PhotoUploadResult, PhotoPair, CreatePhotoPairInput } from './photos.types';
+import {
+  Photo,
+  UploadPhotoBase64Input,
+  PhotoUploadResult,
+  PhotoPair,
+  CreatePhotoPairInput,
+} from './photos.types';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/modules/database/prisma.service';
 
@@ -198,7 +204,7 @@ export class PhotosResolver {
       );
 
       // Generate URLs
-      const s3Endpoint = this.configService.get<string>('S3_ENDPOINT', 'http://localhost:9000');
+      const s3Endpoint = this.configService.get<string>('S3_ENDPOINT', 'http://localhost:8335');
       const bucketName = this.configService.get<string>('S3_BUCKET_NAME', 'braveforms-photos');
 
       const url = photo.s3Key ? `${s3Endpoint}/${bucketName}/${photo.s3Key}` : '';

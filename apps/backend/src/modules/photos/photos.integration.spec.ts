@@ -23,7 +23,7 @@ describe('Photos Integration Tests (ISSUE-064)', () => {
     get: jest.fn((key: string) => {
       const config: Record<string, string> = {
         AWS_REGION: 'us-east-1',
-        S3_ENDPOINT: 'http://localhost:9000',
+        S3_ENDPOINT: 'http://localhost:8335',
         AWS_ACCESS_KEY_ID: 'test',
         AWS_SECRET_ACCESS_KEY: 'test',
         S3_BUCKET_NAME: 'test-bucket',

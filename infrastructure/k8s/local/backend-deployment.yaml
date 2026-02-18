@@ -105,7 +105,7 @@ spec:
             - name: INSPECTION_DEADLINE_HOURS
               value: '24'
             - name: S3_ENDPOINT
-              value: 'http://minio:9000'
+              value: 'http://seaweedfs:8333'
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:

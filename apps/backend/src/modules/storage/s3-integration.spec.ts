@@ -1,6 +1,6 @@
 /**
- * MinIO Integration Test for BrAve Forms Photo Storage
- * Tests containerized MinIO S3-compatible storage
+ * S3 Integration Test for BrAve Forms Photo Storage
+ * Tests containerized S3-compatible storage (SeaweedFS)
  */
 
 import { Test } from '@nestjs/testing';
@@ -8,24 +8,22 @@ import { ConfigService } from '@nestjs/config';
 import { PhotoStorageService } from './photo-storage.service';
 import { S3Client, ListBucketsCommand } from '@aws-sdk/client-s3';
 import * as sharp from 'sharp';
-import * as fs from 'fs';
-import * as path from 'path';
 
 // Mock configuration for testing
 const mockConfig = {
   get: (key: string, defaultValue?: any) => {
     const config = {
-      'AWS_ACCESS_KEY_ID': 'minioadmin',
-      'AWS_SECRET_ACCESS_KEY': 'minioadmin',
-      'S3_ENDPOINT': 'http://localhost:9000',
-      'AWS_REGION': 'us-east-1',
-      'S3_BUCKET_NAME': 'brave-forms-photos-test'
+      AWS_ACCESS_KEY_ID: 'minioadmin',
+      AWS_SECRET_ACCESS_KEY: 'minioadmin',
+      S3_ENDPOINT: 'http://localhost:8335',
+      AWS_REGION: 'us-east-1',
+      S3_BUCKET_NAME: 'brave-forms-photos-test',
     };
     return config[key] || defaultValue;
-  }
+  },
 };
 
-describe('MinIO Photo Storage Integration', () => {
+describe('S3 Photo Storage Integration', () => {
   let photoStorageService: PhotoStorageService;
   let s3Client: S3Client;
 
@@ -35,44 +33,42 @@ describe('MinIO Photo Storage Integration', () => {
         PhotoStorageService,
         {
           provide: ConfigService,
-          useValue: mockConfig
-        }
-      ]
+          useValue: mockConfig,
+        },
+      ],
     }).compile();
 
     photoStorageService = module.get<PhotoStorageService>(PhotoStorageService);
 
     // Create S3 client for direct testing
     s3Client = new S3Client({
-      endpoint: 'http://localhost:9000',
+      endpoint: 'http://localhost:8335',
       region: 'us-east-1',
       credentials: {
         accessKeyId: 'minioadmin',
-        secretAccessKey: 'minioadmin'
+        secretAccessKey: 'minioadmin',
       },
-      forcePathStyle: true
+      forcePathStyle: true,
     });
   });
 
-  describe('MinIO Connectivity', () => {
-    it('should connect to MinIO API', async () => {
+  describe('S3 Storage Connectivity', () => {
+    it('should connect to S3 API', async () => {
       try {
         const response = await s3Client.send(new ListBucketsCommand({}));
         expect(response.Buckets).toBeDefined();
-        console.log('✅ MinIO API connectivity: OK');
       } catch (error) {
-        console.error('❌ MinIO API connectivity failed:', error.message);
+        console.error('S3 API connectivity failed:', error.message);
         throw error;
       }
     });
 
-    it('should access MinIO console', async () => {
+    it('should access SeaweedFS cluster status', async () => {
       try {
-        const response = await fetch('http://localhost:9001');
+        const response = await fetch('http://localhost:9335/cluster/status');
         expect(response.ok).toBe(true);
-        console.log('✅ MinIO Console accessibility: OK');
       } catch (error) {
-        console.error('❌ MinIO Console access failed:', error.message);
+        console.error('SeaweedFS cluster status check failed:', error.message);
         throw error;
       }
     });
@@ -88,11 +84,11 @@ describe('MinIO Photo Storage Integration', () => {
           width: 1024,
           height: 768,
           channels: 3,
-          background: { r: 100, g: 150, b: 200 }
-        }
+          background: { r: 100, g: 150, b: 200 },
+        },
       })
-      .jpeg({ quality: 85 })
-      .toBuffer();
+        .jpeg({ quality: 85 })
+        .toBuffer();
     });
 
     it('should ensure bucket exists', async () => {
@@ -113,7 +109,7 @@ describe('MinIO Photo Storage Integration', () => {
         device: 'Test Device',
         complianceType: 'stormwater-inspection',
         formId: 'form-001',
-        userId: 'user-test-001'
+        userId: 'user-test-001',
       };
 
       try {
@@ -133,11 +129,12 @@ describe('MinIO Photo Storage Integration', () => {
         expect(result.checksums.sha256).toBeDefined();
 
         console.log(`✅ Photo upload: ${result.photoId}`);
-        console.log(`   Size: ${(result.originalSize / 1024 / 1024).toFixed(2)}MB -> ${(result.compressedSize / 1024 / 1024).toFixed(2)}MB`);
+        console.log(
+          `   Size: ${(result.originalSize / 1024 / 1024).toFixed(2)}MB -> ${(result.compressedSize / 1024 / 1024).toFixed(2)}MB`
+        );
         console.log(`   Compression: ${result.compressionRatio.toFixed(1)}%`);
         console.log(`   Upload time: ${uploadTime}ms`);
-        console.log(`   Variants: ${result.variants.map(v => v.name).join(', ')}`);
-
+        console.log(`   Variants: ${result.variants.map((v) => v.name).join(', ')}`);
       } catch (error) {
         console.error('❌ Photo upload failed:', error.message);
         throw error;
@@ -151,11 +148,11 @@ describe('MinIO Photo Storage Integration', () => {
           width: 3000,
           height: 2000,
           channels: 3,
-          background: { r: 120, g: 180, b: 140 }
-        }
+          background: { r: 120, g: 180, b: 140 },
+        },
       })
-      .jpeg({ quality: 90 })
-      .toBuffer();
+        .jpeg({ quality: 90 })
+        .toBuffer();
 
       expect(largePhoto.length).toBeGreaterThan(2 * 1024 * 1024); // >2MB
 
@@ -164,7 +161,7 @@ describe('MinIO Photo Storage Integration', () => {
         siteLocation: '40.7128,-74.0060',
         capturedAt: new Date().toISOString(),
         complianceType: 'large-photo-test',
-        userId: 'user-test-001'
+        userId: 'user-test-001',
       };
 
       try {
@@ -180,9 +177,10 @@ describe('MinIO Photo Storage Integration', () => {
         expect(uploadTime).toBeLessThan(10000); // Should complete in <10 seconds
 
         console.log(`✅ Large photo upload: ${result.photoId}`);
-        console.log(`   Size: ${(result.originalSize / 1024 / 1024).toFixed(2)}MB -> ${(result.compressedSize / 1024 / 1024).toFixed(2)}MB`);
+        console.log(
+          `   Size: ${(result.originalSize / 1024 / 1024).toFixed(2)}MB -> ${(result.compressedSize / 1024 / 1024).toFixed(2)}MB`
+        );
         console.log(`   Upload time: ${uploadTime}ms`);
-
       } catch (error) {
         console.error('❌ Large photo upload failed:', error.message);
         throw error;
@@ -194,7 +192,7 @@ describe('MinIO Photo Storage Integration', () => {
     it('should get storage statistics', async () => {
       try {
         const stats = await photoStorageService.getStorageStats();
-        
+
         expect(stats.totalPhotos).toBeGreaterThanOrEqual(0);
         expect(stats.totalSize).toBeGreaterThanOrEqual(0);
         expect(stats.averageSize).toBeGreaterThanOrEqual(0);
@@ -205,7 +203,6 @@ describe('MinIO Photo Storage Integration', () => {
         console.log(`   Total Size: ${(stats.totalSize / 1024 / 1024).toFixed(2)}MB`);
         console.log(`   Average Size: ${(stats.averageSize / 1024 / 1024).toFixed(2)}MB`);
         console.log(`   Estimated Monthly Cost: $${stats.costEstimate.toFixed(2)}`);
-
       } catch (error) {
         console.error('❌ Failed to get storage stats:', error.message);
         throw error;
@@ -220,21 +217,21 @@ describe('MinIO Photo Storage Integration', () => {
           width: 2048,
           height: 1536,
           channels: 3,
-          background: { r: 150, g: 100, b: 200 }
-        }
+          background: { r: 150, g: 100, b: 200 },
+        },
       })
-      .jpeg({ quality: 85 })
-      .toBuffer();
+        .jpeg({ quality: 85 })
+        .toBuffer();
 
       const metadata = {
         projectId: 'performance-test',
         capturedAt: new Date().toISOString(),
         complianceType: 'performance-benchmark',
-        userId: 'benchmark-user'
+        userId: 'benchmark-user',
       };
 
       const startTime = Date.now();
-      const result = await photoStorageService.uploadPhoto(testPhoto, metadata);
+      await photoStorageService.uploadPhoto(testPhoto, metadata);
       const uploadTime = Date.now() - startTime;
 
       expect(uploadTime).toBeLessThan(5000); // <5 seconds for 2-4MB photo
@@ -242,7 +239,9 @@ describe('MinIO Photo Storage Integration', () => {
       console.log('✅ Performance Benchmark:');
       console.log(`   Photo Size: ${(testPhoto.length / 1024 / 1024).toFixed(2)}MB`);
       console.log(`   Upload Time: ${uploadTime}ms`);
-      console.log(`   Throughput: ${((testPhoto.length / 1024 / 1024) / (uploadTime / 1000)).toFixed(2)}MB/s`);
+      console.log(
+        `   Throughput: ${(testPhoto.length / 1024 / 1024 / (uploadTime / 1000)).toFixed(2)}MB/s`
+      );
 
       // Performance assertion
       if (uploadTime > 5000) {
@@ -252,15 +251,15 @@ describe('MinIO Photo Storage Integration', () => {
   });
 });
 
-// Helper function to check if MinIO is running
-async function checkMinIOStatus(): Promise<boolean> {
+// Helper function to check if SeaweedFS is running
+async function checkStorageStatus(): Promise<boolean> {
   try {
-    const response = await fetch('http://localhost:9000/minio/health/live');
-    return response.ok || response.status === 403;
+    const response = await fetch('http://localhost:9335/cluster/status');
+    return response.ok;
   } catch {
     return false;
   }
 }
 
 // Export for use in other tests
-export { checkMinIOStatus };
+export { checkStorageStatus };

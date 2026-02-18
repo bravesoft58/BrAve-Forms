@@ -798,8 +798,8 @@ export class QRPortalResolver {
     mimeType: string;
   }): string {
     if (photo.storageType === StorageType.S3 && photo.s3Key) {
-      // MinIO/S3 storage: Construct URL from endpoint and key
-      const endpoint = process.env.S3_ENDPOINT || 'http://localhost:9000';
+      // S3-compatible storage (SeaweedFS): Construct URL from endpoint and key
+      const endpoint = process.env.S3_ENDPOINT || 'http://localhost:8335';
       const bucket = process.env.S3_BUCKET_NAME || 'braveforms-photos';
       return `${endpoint}/${bucket}/${photo.s3Key}`;
     }
@@ -816,7 +816,7 @@ export class QRPortalResolver {
 
   /**
    * Helper: Get thumbnail URL based on storage type
-   * S3 (MinIO): Uses dedicated thumbnail key or constructs from s3Key
+   * S3 (SeaweedFS): Uses dedicated thumbnail key or constructs from s3Key
    * POSTGRESQL: Returns same data URL (frontend handles resizing)
    */
   private getThumbnailUrl(photo: {
@@ -827,7 +827,7 @@ export class QRPortalResolver {
     mimeType: string;
   }): string {
     if (photo.storageType === StorageType.S3) {
-      const endpoint = process.env.S3_ENDPOINT || 'http://localhost:9000';
+      const endpoint = process.env.S3_ENDPOINT || 'http://localhost:8335';
       const bucket = process.env.S3_BUCKET_NAME || 'braveforms-photos';
 
       // If explicit thumbnail key exists, use it

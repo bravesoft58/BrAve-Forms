@@ -1,17 +1,8 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Controller, Control, FieldError } from 'react-hook-form';
-import {
-  Button,
-  Image,
-  Group,
-  Stack,
-  Text,
-  Progress,
-  Paper,
-  Badge,
-} from '@mantine/core';
+import { Button, Image, Group, Stack, Text, Progress, Paper, Badge } from '@mantine/core';
 import { IconCamera, IconTrash, IconRefresh, IconPhoto } from '@tabler/icons-react';
 import { FieldWrapper } from './FieldWrapper';
 import { FormField } from '../types';
@@ -23,7 +14,6 @@ import {
   uploadPhoto,
   isPhotoUploadError,
   isCapturedPhoto,
-  PhotoUploadResult,
 } from '@/lib/photo-upload';
 
 interface PhotoFieldProps {
@@ -43,7 +33,6 @@ interface PhotoData {
 }
 
 export function PhotoField({ field, control, error, disabled }: PhotoFieldProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const { getToken } = useAuth();
@@ -91,7 +80,7 @@ export function PhotoField({ field, control, error, disabled }: PhotoFieldProps)
 
         setUploadProgress(50);
 
-        // Upload to MinIO
+        // Upload to S3-compatible storage
         const result = await uploadPhoto(captured, token, {
           fieldName: field.id,
         });
@@ -184,7 +173,7 @@ export function PhotoField({ field, control, error, disabled }: PhotoFieldProps)
 
         setUploadProgress(50);
 
-        // Upload to MinIO
+        // Upload to S3-compatible storage
         const result = await uploadPhoto(captured, token, {
           fieldName: field.id,
         });
@@ -293,7 +282,11 @@ export function PhotoField({ field, control, error, disabled }: PhotoFieldProps)
                 </Group>
               ) : photoData ? (
                 <Stack gap="sm">
-                  <Paper p="xs" withBorder style={{ position: 'relative', display: 'inline-block' }}>
+                  <Paper
+                    p="xs"
+                    withBorder
+                    style={{ position: 'relative', display: 'inline-block' }}
+                  >
                     <Image
                       src={photoData.thumbnailUrl || photoData.url}
                       alt={field.label}

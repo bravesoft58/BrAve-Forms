@@ -16,7 +16,7 @@ describe('StorageService', () => {
     get: jest.fn((key: string) => {
       const config: Record<string, string> = {
         AWS_REGION: 'us-east-1',
-        S3_ENDPOINT: 'http://localhost:9000',
+        S3_ENDPOINT: 'http://localhost:8335',
         AWS_ACCESS_KEY_ID: 'minioadmin',
         AWS_SECRET_ACCESS_KEY: 'minioadmin',
         S3_BUCKET_NAME: 'braveforms-photos',
@@ -125,9 +125,7 @@ describe('StorageService', () => {
 
       mockS3Send.mockRejectedValueOnce(new Error('S3 upload failed'));
 
-      await expect(service.uploadToS3(buffer, key, mimeType)).rejects.toThrow(
-        'S3 upload failed'
-      );
+      await expect(service.uploadToS3(buffer, key, mimeType)).rejects.toThrow('S3 upload failed');
     });
   });
 
@@ -201,11 +199,7 @@ describe('StorageService', () => {
         jpeg: mockJpeg,
       });
 
-      const result = await service.processAndStorePhoto(
-        inputBuffer,
-        'org_xyz',
-        'photo_abc123'
-      );
+      const result = await service.processAndStorePhoto(inputBuffer, 'org_xyz', 'photo_abc123');
 
       expect(result.s3Key).toBe('photos/org_xyz/photo_abc123.jpg');
     });

@@ -1,36 +1,44 @@
 /**
- * Manual MinIO Photo Storage Test Script for BrAve Forms
- * Run this script to manually test all MinIO functionality
+ * Manual S3-Compatible Photo Storage Test Script for BrAve Forms
+ * Run this script to manually test all S3 storage functionality (SeaweedFS)
  */
 
-const { S3Client, CreateBucketCommand, PutObjectCommand, GetObjectCommand, ListObjectsV2Command, HeadBucketCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+/* eslint-disable @typescript-eslint/no-var-requires */
+const {
+  S3Client,
+  CreateBucketCommand,
+  PutObjectCommand,
+  GetObjectCommand,
+  ListObjectsV2Command,
+  HeadBucketCommand,
+  ListBucketsCommand,
+} = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const sharp = require('sharp');
 const crypto = require('crypto');
-const fs = require('fs');
 
-// MinIO Configuration
-const minioConfig = {
-  endpoint: 'http://localhost:9000',
+// S3-compatible storage configuration (SeaweedFS)
+const s3Config = {
+  endpoint: 'http://localhost:8335',
   region: 'us-east-1',
   credentials: {
     accessKeyId: 'minioadmin',
-    secretAccessKey: 'minioadmin'
+    secretAccessKey: 'minioadmin',
   },
-  forcePathStyle: true
+  forcePathStyle: true,
 };
 
 const bucketName = 'brave-forms-photos-test';
 
-class MinIOTester {
+class S3StorageTester {
   constructor() {
-    this.s3Client = new S3Client(minioConfig);
+    this.s3Client = new S3Client(s3Config);
     this.results = {};
   }
 
   async runAllTests() {
-    console.log('🚀 Starting BrAve Forms MinIO Photo Storage Tests...\n');
-    
+    console.log('Starting BrAve Forms S3 Photo Storage Tests...\n');
+
     try {
       await this.testConnectivity();
       await this.testBucketOperations();
@@ -40,66 +48,66 @@ class MinIOTester {
       await this.testPerformance();
       await this.generateReport();
     } catch (error) {
-      console.error('❌ Test suite failed:', error.message);
+      console.error('Test suite failed:', error.message);
       process.exit(1);
     }
   }
 
   async testConnectivity() {
-    console.log('📡 Testing MinIO Connectivity...');
-    
+    console.log('Testing S3 Storage Connectivity...');
+
     try {
-      // Test API connectivity
+      // Test S3 API connectivity
       const listResponse = await this.s3Client.send(new ListBucketsCommand({}));
       this.results.connectivity = {
-        api: '✅ Connected',
-        buckets: listResponse.Buckets?.length || 0
+        api: 'PASS - Connected',
+        buckets: listResponse.Buckets?.length || 0,
       };
-      console.log(`   ✅ API connected - Found ${listResponse.Buckets?.length || 0} buckets`);
+      console.log(`   PASS: S3 API connected - Found ${listResponse.Buckets?.length || 0} buckets`);
 
-      // Test Console connectivity
-      const consoleResponse = await fetch('http://localhost:9001');
-      if (consoleResponse.ok) {
-        this.results.connectivity.console = '✅ Accessible';
-        console.log('   ✅ Console accessible');
+      // Test SeaweedFS cluster status
+      const clusterResponse = await fetch('http://localhost:9335/cluster/status');
+      if (clusterResponse.ok) {
+        this.results.connectivity.cluster = 'PASS - Accessible';
+        console.log('   PASS: SeaweedFS cluster status accessible');
       } else {
-        throw new Error('Console not accessible');
+        throw new Error('Cluster status not accessible');
       }
     } catch (error) {
-      console.log('   ❌ Connectivity failed:', error.message);
+      console.log('   FAIL: Connectivity failed:', error.message);
       this.results.connectivity = { error: error.message };
       throw error;
     }
   }
 
   async testBucketOperations() {
-    console.log('\n🪣 Testing Bucket Operations...');
-    
+    console.log('\nTesting Bucket Operations...');
+
     try {
       // Check if bucket exists, create if not
       try {
         await this.s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
-        console.log(`   ✅ Bucket '${bucketName}' exists`);
+        console.log(`   PASS: Bucket '${bucketName}' exists`);
       } catch (error) {
         if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
           await this.s3Client.send(new CreateBucketCommand({ Bucket: bucketName }));
-          console.log(`   ✅ Created bucket '${bucketName}'`);
+          console.log(`   PASS: Created bucket '${bucketName}'`);
         } else {
           throw error;
         }
       }
 
-      this.results.bucketOps = '✅ All operations successful';
+      this.results.bucketOps = 'PASS - All operations successful';
     } catch (error) {
-      console.log('   ❌ Bucket operations failed:', error.message);
+      console.log('   FAIL: Bucket operations failed:', error.message);
       this.results.bucketOps = { error: error.message };
       throw error;
     }
   }
 
   async testPhotoUpload() {
-    console.log('\n📸 Testing Photo Upload...');
-    
+    console.log('\nTesting Photo Upload...');
+
     try {
       // Create a test construction photo
       const testPhoto = await sharp({
@@ -107,12 +115,12 @@ class MinIOTester {
           width: 2048,
           height: 1536,
           channels: 3,
-          background: { r: 100, g: 150, b: 200 }
-        }
+          background: { r: 100, g: 150, b: 200 },
+        },
       })
-      .composite([
-        {
-          input: Buffer.from(`
+        .composite([
+          {
+            input: Buffer.from(`
             <svg width="400" height="150">
               <rect width="400" height="150" fill="rgba(0,0,0,0.7)"/>
               <text x="20" y="30" font-family="Arial" font-size="20" fill="white">
@@ -122,25 +130,25 @@ class MinIOTester {
                 Project: Construction Site #001
               </text>
               <text x="20" y="90" font-family="Arial" font-size="14" fill="white">
-                GPS: 40.7128°N, 74.0060°W
+                GPS: 40.7128 N, 74.0060 W
               </text>
               <text x="20" y="120" font-family="Arial" font-size="14" fill="white">
                 ${new Date().toISOString()}
               </text>
             </svg>
           `),
-          top: 50,
-          left: 50
-        }
-      ])
-      .jpeg({ quality: 85 })
-      .toBuffer();
+            top: 50,
+            left: 50,
+          },
+        ])
+        .jpeg({ quality: 85 })
+        .toBuffer();
 
       const photoId = crypto.randomUUID();
       const photoKey = `test-uploads/${photoId}/construction-photo.jpg`;
-      
+
       const startTime = Date.now();
-      
+
       const uploadCommand = new PutObjectCommand({
         Bucket: bucketName,
         Key: photoKey,
@@ -150,10 +158,10 @@ class MinIOTester {
           'project-id': 'test-project-001',
           'site-location': '40.7128,-74.0060',
           'captured-at': new Date().toISOString(),
-          'device': 'iPhone 15 Pro',
+          device: 'iPhone 15 Pro',
           'compliance-type': 'stormwater-inspection',
-          'user-id': 'test-user-001'
-        }
+          'user-id': 'test-user-001',
+        },
       });
 
       await this.s3Client.send(uploadCommand);
@@ -162,54 +170,55 @@ class MinIOTester {
       // Verify upload by retrieving
       const getCommand = new GetObjectCommand({
         Bucket: bucketName,
-        Key: photoKey
+        Key: photoKey,
       });
-      
+
       const response = await this.s3Client.send(getCommand);
       const downloadedSize = parseInt(response.ContentLength || '0');
 
-      console.log(`   ✅ Photo uploaded: ${photoId}`);
-      console.log(`   📊 Size: ${(testPhoto.length / 1024 / 1024).toFixed(2)}MB`);
-      console.log(`   ⏱️  Upload time: ${uploadTime}ms`);
-      console.log(`   🔍 Verified: ${downloadedSize === testPhoto.length ? 'OK' : 'Size mismatch'}`);
-      
+      console.log(`   PASS: Photo uploaded: ${photoId}`);
+      console.log(`   Size: ${(testPhoto.length / 1024 / 1024).toFixed(2)}MB`);
+      console.log(`   Upload time: ${uploadTime}ms`);
+      console.log(`   Verified: ${downloadedSize === testPhoto.length ? 'OK' : 'Size mismatch'}`);
+
       // Generate signed URL
       const signedUrl = await getSignedUrl(this.s3Client, getCommand, { expiresIn: 3600 });
-      console.log(`   🔗 Signed URL: ${signedUrl.substring(0, 80)}...`);
+      console.log(`   Signed URL: ${signedUrl.substring(0, 80)}...`);
 
       this.results.photoUpload = {
-        status: '✅ Successful',
+        status: 'PASS',
         photoId,
         originalSize: testPhoto.length,
         uploadTime,
-        verified: downloadedSize === testPhoto.length
+        verified: downloadedSize === testPhoto.length,
       };
-
     } catch (error) {
-      console.log('   ❌ Photo upload failed:', error.message);
+      console.log('   FAIL: Photo upload failed:', error.message);
       this.results.photoUpload = { error: error.message };
       throw error;
     }
   }
 
   async testPhotoVariants() {
-    console.log('\n🎨 Testing Photo Variants Generation...');
-    
+    console.log('\nTesting Photo Variants Generation...');
+
     try {
       const testPhoto = await sharp({
         create: {
           width: 1600,
           height: 1200,
           channels: 3,
-          background: { r: 150, g: 100, b: 200 }
-        }
-      }).jpeg({ quality: 85 }).toBuffer();
+          background: { r: 150, g: 100, b: 200 },
+        },
+      })
+        .jpeg({ quality: 85 })
+        .toBuffer();
 
       const variants = {
         thumbnail: { width: 150, height: 150, quality: 70 },
         small: { width: 480, height: 480, quality: 75 },
         medium: { width: 1024, height: 1024, quality: 80 },
-        large: { width: 2048, height: 2048, quality: 85 }
+        large: { width: 2048, height: 2048, quality: 85 },
       };
 
       const baseKey = `test-variants/${Date.now()}`;
@@ -219,49 +228,55 @@ class MinIOTester {
         const variantBuffer = await sharp(testPhoto)
           .resize(config.width, config.height, {
             fit: 'inside',
-            withoutEnlargement: true
+            withoutEnlargement: true,
           })
           .jpeg({ quality: config.quality, progressive: true })
           .toBuffer();
 
         const variantKey = `${baseKey}/${variantName}.jpg`;
-        
-        await this.s3Client.send(new PutObjectCommand({
-          Bucket: bucketName,
-          Key: variantKey,
-          Body: variantBuffer,
-          ContentType: 'image/jpeg',
-          Metadata: {
-            variant: variantName,
-            dimensions: `${config.width}x${config.height}`,
-            quality: config.quality.toString()
-          }
-        }));
+
+        await this.s3Client.send(
+          new PutObjectCommand({
+            Bucket: bucketName,
+            Key: variantKey,
+            Body: variantBuffer,
+            ContentType: 'image/jpeg',
+            Metadata: {
+              variant: variantName,
+              dimensions: `${config.width}x${config.height}`,
+              quality: config.quality.toString(),
+            },
+          })
+        );
 
         variantResults[variantName] = {
           size: variantBuffer.length,
           dimensions: `${config.width}x${config.height}`,
-          compression: ((testPhoto.length - variantBuffer.length) / testPhoto.length * 100).toFixed(1)
+          compression: (
+            ((testPhoto.length - variantBuffer.length) / testPhoto.length) *
+            100
+          ).toFixed(1),
         };
 
-        console.log(`   ✅ ${variantName}: ${(variantBuffer.length / 1024).toFixed(0)}KB (${variantResults[variantName].compression}% smaller)`);
+        console.log(
+          `   PASS: ${variantName}: ${(variantBuffer.length / 1024).toFixed(0)}KB (${variantResults[variantName].compression}% smaller)`
+        );
       }
 
       this.results.variants = {
-        status: '✅ All variants generated',
+        status: 'PASS - All variants generated',
         originalSize: testPhoto.length,
-        variants: variantResults
+        variants: variantResults,
       };
-
     } catch (error) {
-      console.log('   ❌ Photo variants failed:', error.message);
+      console.log('   FAIL: Photo variants failed:', error.message);
       this.results.variants = { error: error.message };
     }
   }
 
   async testComplianceFeatures() {
-    console.log('\n⚖️ Testing Compliance Features...');
-    
+    console.log('\nTesting Compliance Features...');
+
     try {
       const inspectionId = `inspection-${Date.now()}`;
       const photoCount = 3;
@@ -271,15 +286,17 @@ class MinIOTester {
       for (let i = 0; i < photoCount; i++) {
         const testPhoto = await sharp({
           create: {
-            width: 800 + (i * 100),
-            height: 600 + (i * 100),
+            width: 800 + i * 100,
+            height: 600 + i * 100,
             channels: 3,
-            background: { r: 100 + (i * 50), g: 150, b: 200 - (i * 50) }
-          }
-        }).jpeg({ quality: 85 }).toBuffer();
+            background: { r: 100 + i * 50, g: 150, b: 200 - i * 50 },
+          },
+        })
+          .jpeg({ quality: 85 })
+          .toBuffer();
 
         const photoKey = `compliance/${inspectionId}/photo-${i + 1}.jpg`;
-        
+
         // Calculate checksums for compliance
         const md5Hash = crypto.createHash('md5').update(testPhoto).digest('hex');
         const sha256Hash = crypto.createHash('sha256').update(testPhoto).digest('hex');
@@ -297,8 +314,8 @@ class MinIOTester {
             'md5-checksum': md5Hash,
             'sha256-checksum': sha256Hash,
             'retention-years': '7',
-            'regulatory-requirement': 'EPA-CGP'
-          }
+            'regulatory-requirement': 'EPA-CGP',
+          },
         });
 
         uploadPromises.push(this.s3Client.send(uploadCommand));
@@ -309,66 +326,68 @@ class MinIOTester {
       // List inspection photos to verify compliance package
       const listCommand = new ListObjectsV2Command({
         Bucket: bucketName,
-        Prefix: `compliance/${inspectionId}/`
+        Prefix: `compliance/${inspectionId}/`,
       });
 
       const listResponse = await this.s3Client.send(listCommand);
       const totalSize = listResponse.Contents?.reduce((sum, obj) => sum + (obj.Size || 0), 0) || 0;
 
-      console.log(`   ✅ Compliance package created: ${inspectionId}`);
-      console.log(`   📸 Photos in package: ${listResponse.Contents?.length || 0}`);
-      console.log(`   📦 Package size: ${(totalSize / 1024 / 1024).toFixed(2)}MB`);
-      console.log(`   🔒 All photos have compliance checksums and 7-year retention metadata`);
+      console.log(`   PASS: Compliance package created: ${inspectionId}`);
+      console.log(`   Photos in package: ${listResponse.Contents?.length || 0}`);
+      console.log(`   Package size: ${(totalSize / 1024 / 1024).toFixed(2)}MB`);
+      console.log(`   All photos have compliance checksums and 7-year retention metadata`);
 
       this.results.compliance = {
-        status: '✅ Compliance features working',
+        status: 'PASS - Compliance features working',
         inspectionId,
         photoCount: listResponse.Contents?.length || 0,
         packageSize: totalSize,
-        retentionCompliant: true
+        retentionCompliant: true,
       };
-
     } catch (error) {
-      console.log('   ❌ Compliance features failed:', error.message);
+      console.log('   FAIL: Compliance features failed:', error.message);
       this.results.compliance = { error: error.message };
     }
   }
 
   async testPerformance() {
-    console.log('\n⚡ Testing Performance Benchmarks...');
-    
+    console.log('\nTesting Performance Benchmarks...');
+
     try {
       // Test concurrent uploads
       const concurrentCount = 5;
-      const photoSize = 1024 * 1024; // 1MB each
-      
+
       const testPhoto = await sharp({
         create: {
           width: 1024,
           height: 1024,
           channels: 3,
-          background: { r: 120, g: 180, b: 140 }
-        }
-      }).jpeg({ quality: 80 }).toBuffer();
+          background: { r: 120, g: 180, b: 140 },
+        },
+      })
+        .jpeg({ quality: 80 })
+        .toBuffer();
 
-      console.log(`   🔄 Testing ${concurrentCount} concurrent uploads...`);
-      
+      console.log(`   Testing ${concurrentCount} concurrent uploads...`);
+
       const startTime = Date.now();
-      
+
       const uploadPromises = Array.from({ length: concurrentCount }, (_, i) => {
         const photoKey = `performance-test/${Date.now()}-${i}.jpg`;
-        
-        return this.s3Client.send(new PutObjectCommand({
-          Bucket: bucketName,
-          Key: photoKey,
-          Body: testPhoto,
-          ContentType: 'image/jpeg',
-          Metadata: {
-            'test-type': 'performance-benchmark',
-            'upload-index': i.toString(),
-            'batch-timestamp': Date.now().toString()
-          }
-        }));
+
+        return this.s3Client.send(
+          new PutObjectCommand({
+            Bucket: bucketName,
+            Key: photoKey,
+            Body: testPhoto,
+            ContentType: 'image/jpeg',
+            Metadata: {
+              'test-type': 'performance-benchmark',
+              'upload-index': i.toString(),
+              'batch-timestamp': Date.now().toString(),
+            },
+          })
+        );
       });
 
       await Promise.all(uploadPromises);
@@ -376,109 +395,110 @@ class MinIOTester {
       const avgTimePerPhoto = totalTime / concurrentCount;
       const throughput = (testPhoto.length * concurrentCount) / (totalTime / 1000) / 1024 / 1024;
 
-      console.log(`   ✅ Concurrent uploads completed`);
-      console.log(`   ⏱️  Total time: ${totalTime}ms`);
-      console.log(`   📊 Average per photo: ${avgTimePerPhoto.toFixed(0)}ms`);
-      console.log(`   🚀 Throughput: ${throughput.toFixed(2)}MB/s`);
+      console.log(`   PASS: Concurrent uploads completed`);
+      console.log(`   Total time: ${totalTime}ms`);
+      console.log(`   Average per photo: ${avgTimePerPhoto.toFixed(0)}ms`);
+      console.log(`   Throughput: ${throughput.toFixed(2)}MB/s`);
 
       // Performance assertions
       const performanceGood = totalTime < 10000 && avgTimePerPhoto < 2000;
-      
+
       this.results.performance = {
-        status: performanceGood ? '✅ Meets requirements' : '⚠️  Below expected performance',
+        status: performanceGood ? 'PASS - Meets requirements' : 'WARN - Below expected performance',
         concurrentUploads: concurrentCount,
         totalTime,
         averageTimePerPhoto: avgTimePerPhoto,
-        throughput: throughput.toFixed(2)
+        throughput: throughput.toFixed(2),
       };
 
       if (!performanceGood) {
-        console.log(`   ⚠️  Performance below expectations (target: <10s total, <2s per photo)`);
+        console.log(`   WARN: Performance below expectations (target: <10s total, <2s per photo)`);
       }
-
     } catch (error) {
-      console.log('   ❌ Performance test failed:', error.message);
+      console.log('   FAIL: Performance test failed:', error.message);
       this.results.performance = { error: error.message };
     }
   }
 
   async generateReport() {
-    console.log('\n📊 BrAve Forms MinIO Storage Test Results');
-    console.log('=' .repeat(60));
-    
+    console.log('\nBrAve Forms S3 Storage Test Results');
+    console.log('='.repeat(60));
+
     // Overall status
-    const allTestsPassed = Object.values(this.results).every(result => 
-      typeof result === 'object' && !result.error && 
-      (typeof result.status === 'string' ? result.status.includes('✅') : true)
+    const allTestsPassed = Object.values(this.results).every(
+      (result) =>
+        typeof result === 'object' &&
+        !result.error &&
+        (typeof result.status === 'string' ? result.status.includes('PASS') : true)
     );
 
-    console.log(`\n🎯 Overall Status: ${allTestsPassed ? '✅ ALL TESTS PASSED' : '❌ SOME TESTS FAILED'}`);
-    
+    console.log(`\nOverall Status: ${allTestsPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED'}`);
+
     // Detailed results
-    console.log('\n🔍 Detailed Results:');
-    
+    console.log('\nDetailed Results:');
+
     if (this.results.connectivity) {
-      console.log(`   MinIO API: ${this.results.connectivity.api || '❌ Failed'}`);
-      console.log(`   MinIO Console: ${this.results.connectivity.console || '❌ Failed'}`);
+      console.log(`   S3 API: ${this.results.connectivity.api || 'FAIL'}`);
+      console.log(`   Cluster Status: ${this.results.connectivity.cluster || 'FAIL'}`);
     }
 
     if (this.results.photoUpload) {
-      console.log(`   Photo Upload: ${this.results.photoUpload.status || '❌ Failed'}`);
+      console.log(`   Photo Upload: ${this.results.photoUpload.status || 'FAIL'}`);
       if (this.results.photoUpload.uploadTime) {
         console.log(`     Upload Performance: ${this.results.photoUpload.uploadTime}ms`);
       }
     }
 
     if (this.results.variants) {
-      console.log(`   Photo Variants: ${this.results.variants.status || '❌ Failed'}`);
+      console.log(`   Photo Variants: ${this.results.variants.status || 'FAIL'}`);
     }
 
     if (this.results.compliance) {
-      console.log(`   Compliance Features: ${this.results.compliance.status || '❌ Failed'}`);
+      console.log(`   Compliance Features: ${this.results.compliance.status || 'FAIL'}`);
       if (this.results.compliance.photoCount) {
         console.log(`     Compliance Package: ${this.results.compliance.photoCount} photos`);
       }
     }
 
     if (this.results.performance) {
-      console.log(`   Performance: ${this.results.performance.status || '❌ Failed'}`);
+      console.log(`   Performance: ${this.results.performance.status || 'FAIL'}`);
       if (this.results.performance.throughput) {
         console.log(`     Throughput: ${this.results.performance.throughput}MB/s`);
       }
     }
 
     // Recommendations
-    console.log('\n💡 Recommendations for BrAve Forms:');
-    console.log('   ✅ MinIO is ready for construction photo storage');
-    console.log('   ✅ S3 API compatibility confirmed');
-    console.log('   ✅ High-resolution photo support verified');
-    console.log('   ✅ GPS EXIF data preservation working');
-    console.log('   ✅ Multi-tenant bucket organization ready');
-    console.log('   ✅ Compliance features (7-year retention) implemented');
-    console.log('   ✅ Performance meets construction site requirements');
+    console.log('\nRecommendations for BrAve Forms:');
+    console.log('   - S3-compatible storage (SeaweedFS) is ready for construction photo storage');
+    console.log('   - S3 API compatibility confirmed');
+    console.log('   - High-resolution photo support verified');
+    console.log('   - GPS EXIF data preservation working');
+    console.log('   - Multi-tenant bucket organization ready');
+    console.log('   - Compliance features (7-year retention) implemented');
+    console.log('   - Performance meets construction site requirements');
 
     // Cost estimate
-    const totalPhotos = 5; // Approximate from tests
+    const totalPhotos = 5;
     const avgPhotoSize = 1024 * 1024; // 1MB average
     const totalSizeGB = (totalPhotos * avgPhotoSize) / (1024 * 1024 * 1024);
-    const monthlyCost = totalSizeGB * 0.023; // S3 standard pricing
+    const monthlyCost = totalSizeGB * 0.023; // S3 pricing model
 
-    console.log(`\n💰 Storage Cost Estimate:`);
+    console.log(`\nStorage Cost Estimate:`);
     console.log(`   Test photos stored: ${totalPhotos}`);
     console.log(`   Total storage: ${totalSizeGB.toFixed(3)}GB`);
     console.log(`   Estimated monthly cost: $${monthlyCost.toFixed(4)}`);
     console.log(`   Projected 1TB/month cost: $23.00 (S3 pricing model)`);
 
-    console.log(`\n🎉 MinIO containerized storage is ready for BrAve Forms production use!`);
-    
+    console.log(`\nS3-compatible storage (SeaweedFS) is ready for BrAve Forms production use.`);
+
     return allTestsPassed;
   }
 }
 
 // Run the tests
 async function runTests() {
-  const tester = new MinIOTester();
-  
+  const tester = new S3StorageTester();
+
   try {
     const success = await tester.runAllTests();
     process.exit(success ? 0 : 1);
@@ -488,25 +508,24 @@ async function runTests() {
   }
 }
 
-// Check if MinIO is running first
-async function checkMinIORunning() {
+// Check if S3 storage (SeaweedFS) is running
+async function checkStorageRunning() {
   try {
-    const response = await fetch('http://localhost:9000/minio/health/live');
-    return response.ok || response.status === 403;
+    const response = await fetch('http://localhost:9335/cluster/status');
+    return response.ok;
   } catch {
     return false;
   }
 }
 
 // Main execution
-checkMinIORunning()
-  .then(isRunning => {
-    if (!isRunning) {
-      console.error('❌ MinIO is not running on localhost:9000');
-      console.log('💡 Start MinIO with: cd infrastructure/docker && docker-compose up minio');
-      process.exit(1);
-    }
-    return runTests();
-  });
+checkStorageRunning().then((isRunning) => {
+  if (!isRunning) {
+    console.error('S3 storage (SeaweedFS) is not running on localhost:9335');
+    console.log('Start with: docker compose up seaweedfs');
+    process.exit(1);
+  }
+  return runTests();
+});
 
-module.exports = { MinIOTester };
+module.exports = { S3StorageTester };

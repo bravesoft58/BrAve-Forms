@@ -1,13 +1,13 @@
 /**
  * Photo Upload Service for BrAve Forms
  *
- * Handles photo capture, compression, and upload to MinIO storage.
+ * Handles photo capture, compression, and upload to S3-compatible storage (SeaweedFS) storage.
  * Supports both web (file input) and mobile (Capacitor Camera).
  *
  * Features:
  * - File compression using canvas (max 2000px, 90% quality for construction detail)
  * - GPS extraction from device (fallback when EXIF unavailable)
- * - Upload to MinIO via GraphQL mutation
+ * - Upload to S3-compatible storage (SeaweedFS) via GraphQL mutation
  * - Error handling for permissions, file size, and network issues
  * - Offline queue for 30-day offline capability
  */
@@ -277,7 +277,7 @@ export async function getCurrentLocation(): Promise<{
 }
 
 /**
- * Upload photo to MinIO storage via GraphQL
+ * Upload photo to S3-compatible storage (SeaweedFS) storage via GraphQL
  */
 export async function uploadPhoto(
   photo: CapturedPhoto,
