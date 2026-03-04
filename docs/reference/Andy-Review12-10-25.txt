@@ -1,0 +1,77 @@
+Brave Forms Review - December 2025
+Dashboard
+•	General Appearance: The overall look of the dashboard is good.
+•	Functionality Issues: 
+o	New Inspection link: Clicking this displays the text "new inspection" but does not trigger any action.
+o	Upload Photos link: This also does not function and is noted to be implemented in Sprint 5.
+•	User Feedback: The placement of "Upload Photos" on the dashboard is considered strange. Photos are expected to be part of a specific inspection, not a standalone feature.
+Projects Tab
+•	UI Elements: The interface includes useful filters like Active, All, and Archived.
+•	Project Creation: 
+o	Bug: After filling out the form and clicking "Create Project," the button shows a spinning animation but the project is never created or listed. The only available action is to cancel.
+•	Suggested Improvements: 
+o	The project creation or editing screen should include functionality to assign users to the project
+o	It should also allow for the assignment of specific inspection forms required for that project.
+Forms Tab
+•	General: The forms are well-organized with sorting tabs like All, EPA, OSHA, State, and Custom.
+•	N.Swips Form: 
+o	Data Entry Bug: It is impossible to enter any data into the fields, including Project Name and Project Number. This might be a consequence of not having any projects created in the system.
+o	Print Preview: The feature generates a 13-page PDF, but the layout needs cleaning. The header information appears on the first page, while the actual form content (like Project Name) starts on the second page.
+•	NDEP BWPC SWPP Form: 
+o	Partial Functionality: Some fields allow data entry (Project, Address, Location).
+o	Helpful Features: The City and County fields have useful dropdown/autofill selection lists.
+o	Data Entry Bug: It is not possible to enter or select dates for Estimated project start date and end date. Data entry is also blocked for Operator owner name, Operator address, and Contact person. "Unsupported field errors" were observed.
+o	User Feedback: Fields like Total acreage and Distribution acreage should ideally pull data directly from the project details rather than requiring manual entry.
+•	Working in Water Daily Monitoring Form: 
+o	Functionality: This form works better, allowing data entry, date selection, and checkbox interaction.
+o	UI Inconsistencies: The field labels and structure are inconsistent compared to other forms (e.g., "Project location" vs. "Project Address").
+o	Placeholders: Repeater field placeholders are visible for "daily work logs" and "tributary readings."
+o	Submission Issue: The form submission fails with an "API request failed with a status 400" error.
+o	User Feedback: The form contains mandatory "Yes" checkboxes for "All BMPs maintained" and "No unauthorized impacts," which is questionable as it forces a positive confirmation to proceed.
+•	EPA Routine Facility Inspection Form: 
+o	Functionality: Data entry is possible. The Inspection time field helpfully defaults to the current time. The Inspector's name field should ideally autofill based on the logged-in user.
+o	Submission Issue: This form also fails upon submission with an "API request failed with a status 400" error, even after all mandatory fields are completed.
+o	User Feedback: The purpose of this form is unclear to the user. The checklist format uses only "Yes" checkboxes, implying that a non-answer is a "No."
+•	Equipment/Material Delivery Receipt Form: 
+o	Overall Impression: This form has good potential and is well-designed.
+o	Functionality: Includes fields for delivery details, discrepancies, and photo uploads.
+o	Photo Upload: The system allows selecting a photo, but the upload fails with a "file is too large" error.
+o	Suggested Improvement: The Discrepancy types dropdown should include an "Other" option with a text field for description.
+o	Unclear Actions: The functions of the Submit and Save and Draft buttons are unclear, as they do not appear to work.
+Form Builder
+•	New Form Creation: 
+o	Bug: Attempting to name a new form or edit its description causes the interface to error out, preventing form creation.
+•	Field Library & Canvas: 
+o	Bug: Drag-and-drop functionality for adding fields does not work. Fields must be added by clicking.
+o	Bug: When adding a new field (e.g., a Number field), it incorrectly inherits properties (like label) from the previously created field (e.g., a Text field).
+•	Saving: 
+o	Bug: After saving a template, the system shows conflicting messages: "Bad request" followed by "Form saved successfully." The form does not appear in the main Forms list, indicating it did not actually save.
+•	Suggested Improvements: 
+o	Implement functional drag-and-drop for placing and arranging fields.
+o	Provide a more flexible layout system (e.g., multi-column) instead of a simple row-based structure.
+o	It would be helpful to have an example form to try and replicate to better test the builder's capabilities.
+Settings
+•	General Impression: The settings section is well-designed and contains very useful features.
+•	Profile: Includes user information, role, and a "Danger Zone" for account deletion. The ability for a user to delete their own account was questioned.
+•	Notifications: This feature is highly praised for its customizability, including setting preferences and "quiet hours."
+•	Display & Account: Options for light/dark mode, offline sync, time zone, and language are available.
+•	Bug: Changing the language (e.g., to Spanish) does not update the UI, possibly because there is no "Save" button to apply the change.
+Overall Conclusions & Missing Features
+•	Core Workflow: The envisioned workflow is to select a project first and then fill out forms associated with it, rather than selecting a form and then finding the project. The application should be structured around a project-centric view.
+•	Missing Administrator Features: 
+o	User Management: There is no visible interface for administrators to add new users.
+o	Project Assignment: There is no functionality to assign users or specific forms to a project.
+📅 Next Arrangements
+•	Fix the New Inspection and Upload Photos links on the Dashboard.
+•	Resolve the bug preventing project creation in the Projects tab.
+•	Implement user and form assignment functionality within project creation/editing screens.
+•	Fix data entry bugs across all forms.
+•	Correct the print preview layout for the N.Swips form so content starts on the first page.
+•	Investigate and resolve the "API request failed with a status 400" error on form submission.
+•	Review the mandatory "Yes" checkboxes on the Working in Water Daily Monitoring Form for logical correctness.
+•	Add an "Other" option with a description field to the Discrepancy types dropdown in the delivery receipt form.
+•	Fix critical Form Builder bugs that prevent creating, editing, and saving new forms.
+•	Implement a functional drag-and-drop interface and prevent field property inheritance issues in the Form Builder.
+•	Resolve the issue where changing the language in Settings does not apply the change.
+•	Create a dedicated User Management section (adding users, assigning roles) and enable project-level user/form assignments.
+•	Create an example form to provide a target for testing the Form Builder’s capabilities.

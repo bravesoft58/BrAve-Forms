@@ -1,0 +1,177 @@
+# .claude/business-requirements.md
+# BrAve Forms Platform Business Requirements
+
+## Critical Compliance Requirements
+
+### Environmental Compliance (EPA CGP 2022)
+- **0.25" rain threshold**: MUST trigger inspection within 24 hours
+- **Weekly inspections**: Required regardless of weather
+- **Qualified inspector**: EPA certification verification required
+- **3-year retention**: All SWPPP records after permit termination
+- **BMP documentation**: Photo required for each Best Management Practice
+
+### OSHA Safety Requirements
+- **5-year retention**: Safety inspections and incident reports
+- **Injury tracking**: OSHA 300 log format compliance
+- **Training documentation**: Duration of employment + 3 years
+- **Qualified personnel**: Certification verification for safety roles
+
+## User Roles and Critical Workflows
+
+### Foreman Daily Workflow
+1. Morning weather check (automatic alerts)
+2. Required inspections review
+3. Site walk with GPS markers
+4. Photo documentation with GPS/timestamp
+5. Digital signature completion
+6. Auto-sync when WiFi available
+
+### Inspector Access Workflow
+1. QR code scan at site entrance
+2. Read-only portal access (no app required)
+3. Document review and violation marking
+4. Photo annotation and GPS tagging
+5. Report generation with digital signature
+6. Automatic distribution to contractor/agency
+
+## Data Requirements
+
+### Retention Periods by Type
+- **SWPPP Records**: 3 years (EPA requirement)
+- **Safety Inspections**: 5 years (OSHA requirement)
+- **Training Records**: Employment + 3 years (OSHA)
+- **Project Documents**: 7 years (State requirements)
+- **Audit Logs**: 7 years (SOC 2 compliance)
+
+### Photo Requirements
+- **Minimum resolution**: 8MP with GPS tagging
+- **Automatic metadata**: Timestamp, weather, GPS coordinates
+- **Storage allocation**: 200-500MB for 30-day offline
+- **Compression**: Max 2MB per photo for mobile upload
+- **Formats**: JPEG primary, WebP for web optimization
+
+## Weather Integration Rules
+
+### Automatic Triggers
+- **Rain threshold**: 0.25" precipitation activates compliance
+- **Wind limits**: 30mph for crane operations, 20mph concrete
+- **Temperature limits**: 40-95°F for concrete work
+- **Inspection deadline**: 24 hours for rain events
+
+### Data Sources
+- **Primary**: NOAA Weather API (free, reliable)
+- **Backup**: OpenWeatherMap (1,000 calls/day limit)
+- **Alerts**: Push notifications to foremen and PMs
+
+## Performance Requirements
+
+### Mobile Performance Targets
+- **App launch**: <2 seconds from icon tap
+- **Photo upload**: <5 seconds for 5MB images
+- **Form submission**: <300ms end-to-end
+- **Offline sync**: <30 seconds for 100 records
+- **Battery usage**: Maximum 0.5% per minute
+
+### System Capacity
+- **Concurrent users**: 10,000+ active sessions
+- **Form submissions**: 1M+ per month
+- **Photo storage**: 50TB+ with growth capability
+- **API throughput**: 1,000 requests/second sustained
+
+## Critical Business Logic
+
+### Multi-Party Signatures
+- Touch/stylus signature capture
+- Typed signature option with confirmation
+- Sequential signing workflows
+- Timestamp and GPS for each signature
+- Email notifications to all parties
+
+### Offline Operation
+- **30-day capability**: Full functionality without network
+- **Local storage**: 2-4GB allocation per device
+- **Sync queuing**: Exponential backoff retry
+- **Conflict resolution**: Field-level merge with user prompt
+
+### QR Inspector Portal
+- **Dynamic codes**: 30-second to 72-hour expiration
+- **One-time use**: Optional security mode
+- **High contrast**: Outdoor visibility optimization
+- **No app required**: Web-based portal access
+
+## Integration Points
+
+### QuickBooks API
+- Job costing synchronization
+- Time entry automation
+- Expense tracking integration
+- Real-time or batch sync options
+
+### Government APIs
+- EPA e-Reporting (CDX credentials)
+- State agency submissions (varies by state)
+- OSHA reporting integration
+- Permit status monitoring
+
+### Weather Services
+- NOAA API integration (primary)
+- OpenWeatherMap backup
+- Historical data for reporting
+- Alert webhooks for real-time triggers
+
+## Validation Rules
+
+### Form Validation
+```javascript
+// Critical validation patterns
+const swpppValidation = {
+  inspector: { required: true, certified: true },
+  inspectionDate: { required: true, within24Hours: true },
+  rainAmount: { required: true, precision: 2, min: 0 },
+  bmps: { minItems: 1, photoRequired: true },
+  correctiveActions: { requiredIf: 'bmps.failed', deadline: 7 }
+};
+```
+
+### Data Quality Rules
+- GPS coordinates required for all site activities
+- Timestamp validation (cannot be future)
+- Inspector certification verification
+- Photo metadata completeness check
+- Digital signature validation
+
+## Error Handling Requirements
+
+### Critical Errors (Stop Work)
+- Safety violations detected
+- Environmental discharge events
+- Inspector access failures
+- Data corruption detected
+
+### Recoverable Errors (Log and Continue)
+- Weather API timeouts
+- Photo upload failures
+- Sync conflicts
+- Network connectivity issues
+
+### User Experience
+- Clear error messages with recovery steps
+- Automatic retry for transient failures
+- Offline capability during network issues
+- Progress indication for long operations
+
+## Compliance Reporting
+
+### Automatic Reports
+- **Daily**: Compliance status dashboard
+- **Weekly**: SWPPP inspection summary
+- **Monthly**: Regulatory submission preparation
+- **Annual**: Compliance audit package
+
+### Manual Reports
+- **Incident reports**: Within 24 hours
+- **Violation responses**: 7-day corrective action plans
+- **Inspector summaries**: Generated after each visit
+- **Project completion**: Final compliance certification
+
+Remember: These requirements drive the technical implementation but should not override coding standards or architectural decisions defined in the main CLAUDE.md file.
