@@ -1,66 +1,83 @@
 # BrAve Forms Claude Code Sub-Agents Configuration
 
+**Last Updated:** 2026-02-17T16:00:00Z
+**Doc Version:** v2.0.0
+
 ## Project Overview
 
-BrAve Forms (note the capital A) is a mobile-first construction compliance and forms management system designed to reduce daily documentation from 2-3 hours to under 30 minutes. The platform prevents $25,000-$50,000 daily EPA fines through automated compliance tracking. These specialized sub-agents streamline development across technical domains while ensuring strict EPA CGP and OSHA compliance.
+BrAve Forms (note the capital A) is a Nevada construction forms management platform for Q&D Construction. The app manages 5 specific permit/inspection forms tied to project permits, with a clean project setup that auto-populates forms, day-to-day form continuity, and inspector read-only access via QR code.
 
-## Current Tech Stack (Per CLAUDE.md)
+See `docs/ANDY_SALVAGE_PLAN.md` for full specifications.
+
+## Documentation Timestamp Policy
+
+**MANDATORY - Cross-repo Melport LLC policy (enforced 2026-02-16):**
+
+Every documentation file (\*.md) MUST have:
+
+- **Last Updated:** YYYY-MM-DDTHH:MM:SSZ (ISO 8601 UTC)
+- **Doc Version:** vMAJOR.MINOR.PATCH (semantic versioning)
+
+Both fields MUST be updated on EVERY edit, no exceptions.
+
+Enforced by `.claude/hooks/timestamp-validator.sh` (hint on Edit/Write of any markdown file).
+
+## Documentation Versioning Policy
+
+Semantic versioning for documents:
+
+- **MAJOR:** Structural rewrite, new sections, significant scope change
+- **MINOR:** Content additions, updated specifications, new subsections
+- **PATCH:** Typo fixes, clarifications, formatting, timestamp-only updates
+
+## Current Tech Stack (Post-Salvage Feb 2026)
 
 ### Backend
 
 - **Framework:** NestJS 10.x with GraphQL (Code-first approach using decorators)
-- **Database:** PostgreSQL 15 with TimescaleDB extension (RLS for multi-tenancy)
-- **ORM:** Prisma 5.x with JSONB support (Custom multi-tenant middleware)
-- **Queue:** BullMQ with Redis
-- **Auth:** Clerk (JWT with org context: o.id, o.rol, o.slg)
+- **Database:** PostgreSQL 15
+- **ORM:** Prisma 5.x with JSONB support
+- **Auth:** Clerk (simplified - no Organizations, roles stored in DB as ADMIN/USER)
 
 ### Frontend
 
 - **Framework:** Next.js 14 (App Router)
-- **Mobile:** Capacitor 6 with React (Released April 2024)
-- **State:** Valtio + TanStack Query (with @tanstack/query-async-storage-persister)
 - **UI:** Mantine v7 components
 - **Forms:** React Hook Form + Zod
-- **Offline:** Service Workers + IndexedDB (Custom 30-day sync)
+- **State:** Valtio + TanStack Query
 
 ### Infrastructure
 
-- **IaC:** Terraform 1.5+
-- **Container:** Docker with multi-stage builds
-- **Orchestration:** Kubernetes (EKS)
-- **CI/CD:** GitHub Actions
-- **Monitoring:** Datadog, Sentry
+- **CI/CD:** GitHub Actions -> SSH deploy to DigitalOcean
+- **Production:** api.brave-soft.com / forms.brave-soft.com
 
-## Sub-Agents Directory Structure
+## Sub-Agents Directory (15 agents, cleaned 2026-02-17)
 
 ```
 .claude/agents/
-├── api-integration-architect.md              # YES NestJS/GraphQL API design
-├── chaos-engineer.md                         # YES System resilience testing
-├── compliance-engine-developer.md            # YES EPA/OSHA compliance rules
-├── database-schema-architect.md              # YES PostgreSQL/Prisma design
-├── devops-pipeline-engineer.md               # YES CI/CD and deployment
-├── doc-library-manager.md                    # YES Documentation management
-├── doc-sync-guardian.md                      # YES Documentation consistency
-├── infrastructure-designer.md                # YES AWS/Terraform infrastructure
-├── mobile-app-builder.md                     # YES Capacitor mobile development
-├── offline-sync-specialist.md                # YES 30-day offline capability
-├── performance-optimizer.md                  # YES System performance tuning
-├── photo-storage-optimizer.md                # YES Image processing/storage
-├── product-owner.md                          # YES Product strategy/roadmap
-├── project-manager.md                        # YES Project coordination
-├── qr-inspector-portal-developer.md          # YES Inspector QR portal
-├── scrum-master.md                           # YES Agile process management
-├── security-compliance-officer.md            # YES Security/compliance audit
-├── technical-writer.md                       # YES User documentation
-├── test-automation-engineer.md               # YES Testing strategies
-├── weather-integration-specialist.md         # YES Weather API integration
-├── frontend-ux-developer.md                  # NO MISSING - Needs creation
-├── forms-engine-developer.md                 # NO MISSING - Needs creation
-├── graphql-api-specialist.md                 # NO MISSING - Needs creation
-├── multi-tenant-architect.md                 # NO MISSING - Needs creation
-└── queue-processing-engineer.md              # NO MISSING - Needs creation
+├── api-integration-architect.md        # NestJS/GraphQL API design
+├── code-reviewer.md                    # Code quality enforcement
+├── database-schema-architect.md        # PostgreSQL/Prisma schema design
+├── devops-pipeline-engineer.md         # CI/CD and Docker deployment
+├── doc-library-manager.md              # Documentation organization
+├── doc-sync-guardian.md                # Documentation consistency
+├── forms-engine-developer.md           # Form component development
+├── frontend-ux-developer.md            # Next.js/Mantine UI development
+├── graphql-api-specialist.md           # GraphQL resolvers and mutations
+├── performance-optimizer.md            # Performance tuning
+├── project-manager.md                  # Sprint coordination
+├── qr-inspector-portal-developer.md    # Inspector QR portal
+├── security-compliance-officer.md      # Auth and security
+├── technical-writer.md                 # User documentation
+└── test-automation-engineer.md         # Testing strategies
 ```
+
+20 agents removed on 2026-02-17 (did not align with salvage plan):
+mobile-app-builder, weather-integration-specialist, compliance-engine-developer,
+chaos-engineer, infrastructure-designer, multi-tenant-architect, photo-storage-optimizer,
+queue-processing-engineer, offline-sync-specialist, academic-researcher, community-analyst,
+competitive-analyst, source-code-analyst, research-writer, research-agent,
+technical-architect, product-manager, documentation-curator, product-owner, scrum-master.
 
 ## Existing Agents (Currently in .claude/agents/)
 
