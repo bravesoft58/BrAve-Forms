@@ -16,9 +16,9 @@ All Clerk authentication keys have been verified and tested successfully. The co
 ### Environment Variables (.env.local)
 
 ```
-CLERK_SECRET_KEY="sk_test_ukrcGObFIAn9XhIrhalKVKBSG90MqO8rPeRyXlIFjY"
-CLERK_PUBLISHABLE_KEY="pk_test_c2VsZWN0ZWQtcHVtYS05OC5jbGVyay5hY2NvdW50cy5kZXYk"
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_c2VsZWN0ZWQtcHVtYS05OC5jbGVyay5hY2NvdW50cy5kZXYk"
+CLERK_SECRET_KEY="sk_test_[REDACTED]"
+CLERK_PUBLISHABLE_KEY="pk_test_[REDACTED]"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_[REDACTED]"
 ```
 
 ### Clerk Instance
@@ -98,7 +98,7 @@ NEXT_PUBLIC_APP_URL: LOADED ✓ (http://localhost:3003)
 **Fix:** Updated to match `CLERK_PUBLISHABLE_KEY` value:
 
 ```
-pk_test_c2VsZWN0ZWQtcHVtYS05OC5jbGVyay5hY2NvdW50cy5kZXYk
+pk_test_[REDACTED]
 ```
 
 **Reason:** Next.js requires `NEXT_PUBLIC_` prefix to expose environment variables to client-side code.
@@ -180,7 +180,7 @@ Per CLAUDE.md and TECH_STACK_DETAILS.md:
 
 ```bash
 curl -X GET https://api.clerk.com/v1/users?limit=1 \
-  -H "Authorization: Bearer sk_test_ukrcGObFIAn9XhIrhalKVKBSG90MqO8rPeRyXlIFjY" \
+  -H "Authorization: Bearer sk_test_[REDACTED]" \
   -H "Content-Type: application/json"
 ```
 

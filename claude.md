@@ -7,6 +7,33 @@ Acknowledge by stating "CLAUDE.md rules understood" before proceeding.
 
 **IMPORTANT:** You must always refer to me as "Developer" in responses. This verifies you've read these instructions.
 
+## Session Memory Protocol
+
+This repo uses a **4-layer memory system** in `~/.claude/projects/E--BrAve-Forms/memory/`. See global CLAUDE.md for full CoALA protocol details.
+
+| Layer       | File                  | Auto-loaded?    | Purpose                                 |
+| ----------- | --------------------- | --------------- | --------------------------------------- |
+| Boot State  | `MEMORY.md`           | Yes (200 lines) | Mission, tasks, infra, hot gotchas      |
+| Session Log | `daily/YYYY-MM-DD.md` | No              | Running log during work                 |
+| Reference   | `*.md` topic files    | No              | gotchas, direction-log, lessons-learned |
+| Retrieval   | MCP memory            | No              | Cross-repo context                      |
+
+**Session Protocol:**
+
+1. `MEMORY.md` auto-loads at start -- you're oriented immediately
+2. During work: log to today's daily note (decisions, events, gotchas)
+3. On gotcha discovery: update `gotchas.md` immediately
+4. On direction change: update `direction-log.md` with date + WHY
+5. Session end: refresh `MEMORY.md`, 1-3 MCP `memory_store` calls
+6. Before risky ops: run `/checkpoint`
+
+**Iron Rules:**
+
+- `MEMORY.md` stays under 200 lines (archive excess to `archive/`)
+- `gotchas.md` updates happen on discovery, not at session end
+- MCP tags MUST be arrays, MUST include `proj:brave-forms`
+- Every memory file needs timestamp + semantic version
+
 ## ABSOLUTE CODE STANDARDS - ZERO TOLERANCE
 
 **NEVER include in ANY code, commits, PRs, or documentation:**
@@ -59,7 +86,7 @@ All code must be production-ready, professional, and contain ZERO references to 
 - **Language:** TypeScript 5.x
 - **Database:** PostgreSQL 15 with TimescaleDB extension (RLS for multi-tenancy)
 - **ORM:** Prisma 5.x with JSONB support (Multi-tenancy via custom implementation)
-- **Queue:** BullMQ with Redis
+- **Queue:** BullMQ with Valkey (Redis-compatible)
 - **Authentication:** Clerk (JWT with org context: o.id, o.rol, o.slg)
 
 ### Frontend
@@ -73,11 +100,9 @@ All code must be production-ready, professional, and contain ZERO references to 
 
 ### Infrastructure
 
-- **Local Dev:** Rancher Desktop (containerd + k3s + nerdctl)
-- **Production:** Kubernetes (EKS)
-- **Container Runtime:** containerd (production standard)
-- **Image Building:** nerdctl with k8s.io namespace
-- **IaC:** Terraform 1.5+
+- **Local Dev:** Docker Compose (postgres, valkey, seaweedfs containers)
+- **Production:** DigitalOcean Droplet (Docker Compose)
+- **Object Storage:** SeaweedFS (local), DigitalOcean Spaces (production)
 - **CI/CD:** GitHub Actions (see `.github/workflows/deploy-production.yml`)
   - **Trigger:** Push to master auto-deploys to production
   - **Server:** 159.89.246.229 (api.brave-soft.com / forms.brave-soft.com)
@@ -431,9 +456,11 @@ evidence/{sprint-or-iteration}/{issue-id}/
 - Document multi-tenancy considerations
 - NO emoji in documentation
 - NO AI branding in documentation
-- **ALWAYS use full timestamps (date + time)** in format: YYYY-MM-DD HH:MM:SS
-- Include timezone (UTC or local) for precision
-- Update timestamps whenever document is modified
+- **ALWAYS use ISO 8601 UTC timestamps** in format: YYYY-MM-DDTHH:MM:SSZ (e.g., 2026-02-17T15:30:00Z)
+- **ALWAYS include Doc Version** using semantic versioning: vMAJOR.MINOR.PATCH (e.g., v1.2.0)
+- Both **Last Updated** and **Doc Version** fields MUST be updated on EVERY edit to any \*.md file
+- Enforced by `.claude/hooks/timestamp-validator.sh` (hint on Edit/Write of any markdown file)
+- No exceptions - this is a cross-repo Melport LLC policy
 
 ## Project-Specific Context
 
@@ -970,7 +997,7 @@ All compliance features must cite official EPA CGP documentation.
   - Changed ports: 30001-30003 → 30101-30103
   - Added port conflict detection system
   - Updated all documentation and deployment scripts
-  - Matches production EKS architecture
+  - Production runs on DigitalOcean Droplet with Docker Compose
   - Added 18 slash commands for streamlined workflows
   - Added ABSOLUTE CODE STANDARDS (NO emoji, NO AI branding)
   - Expanded enforcement techniques with mandatory checklists

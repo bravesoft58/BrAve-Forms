@@ -6,9 +6,41 @@ on:
   workflow_dispatch:
 
 jobs:
+  pre-deploy-check:
+    name: Pre-Deploy Quality Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: |
+          pnpm type-check:backend
+          pnpm type-check:web
+
+      - name: Build
+        run: |
+          pnpm --filter backend build
+          pnpm --filter web build
+
   deploy:
     name: Deploy to DigitalOcean
     runs-on: ubuntu-latest
+    needs: pre-deploy-check
 
     steps:
       - name: Deploy via SSH
