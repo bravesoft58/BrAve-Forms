@@ -171,6 +171,12 @@ docs/sprints/**/code/*.js
 docs/sprints/**/code/*.js.map
 docs/sprints/**/code/*.d.ts
 docs/sprints/**/code/*.d.ts.map
+packages/types/src/*.js
+packages/types/src/*.js.map
+packages/types/src/*.d.ts
+packages/types/src/*.d.ts.map
+docs/archive/**/*.d.ts
+docs/archive/**/*.d.ts.map
 
 # Landing page build artifacts
 Landing/**/*.js
