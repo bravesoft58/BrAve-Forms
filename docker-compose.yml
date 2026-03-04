@@ -10,7 +10,7 @@ services:
     environment:
       POSTGRES_DB: brave_forms
       POSTGRES_USER: brave
-      POSTGRES_PASSWORD: brave_secure_pass
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-brave_secure_pass}
     ports:
       - '5432:5432'
     volumes:
@@ -28,13 +28,13 @@ services:
   redis:
     image: valkey/valkey:8-alpine
     container_name: braveforms-redis
-    command: valkey-server --appendonly yes --requirepass redis_secure_pass
+    command: valkey-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_secure_pass}
     ports:
       - '6379:6379'
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ['CMD', 'valkey-cli', '-a', 'redis_secure_pass', 'ping']
+      test: ['CMD', 'valkey-cli', '-a', '${REDIS_PASSWORD:-redis_secure_pass}', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -49,7 +49,7 @@ services:
     command: server -s3 -dir=/data -filer
     ports:
       - '8335:8333' # S3 API (8333 taken by globe-corp, 8334 by engram-flow)
-      - '9335:9333' # Master (9333 taken by globe-corp, 9334 by engram-flow)
+      - '9336:9333' # Master (9333: globe-corp, 9335: overwatch)
       - '8081:8080' # Filer (8080 taken by globe-corp)
     volumes:
       - seaweedfs_data:/data
@@ -71,16 +71,16 @@ services:
     environment:
       NODE_ENV: development
       PORT: 4000
-      DATABASE_URL: postgresql://brave:brave_secure_pass@postgres:5432/brave_forms?schema=public
-      REDIS_URL: redis://:redis_secure_pass@redis:6379
-      AWS_ACCESS_KEY_ID: minioadmin
-      AWS_SECRET_ACCESS_KEY: minioadmin123
-      AWS_REGION: us-east-1
-      S3_ENDPOINT: http://seaweedfs:8333
-      S3_BUCKET_NAME: brave-forms-uploads
+      DATABASE_URL: postgresql://brave:${POSTGRES_PASSWORD:-brave_secure_pass}@postgres:5432/brave_forms?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_pass}@redis:6379
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-minioadmin}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-minioadmin123}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://seaweedfs:8333}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-brave-forms-uploads}
       SKIP_CLERK_AUTH: 'false'
-      CLERK_SECRET_KEY: sk_test_ukrcGObFIAn9XhIrhalKVKBSG90MqO8rPeRyXlIFjY
-      CLERK_PUBLISHABLE_KEY: pk_test_c2VsZWN0ZWQtcHVtYS05OC5jbGVyay5hY2NvdW50cy5kZXYk
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
+      CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
       CORS_ORIGIN: http://localhost:3000
     ports:
       - '4000:4000'
@@ -102,7 +102,7 @@ services:
       dockerfile: apps/web/Dockerfile
       args:
         NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://localhost:4000/graphql
-        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_c2VsZWN0ZWQtcHVtYS05OC5jbGVyay5hY2NvdW50cy5kZXYk
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
         NEXT_PUBLIC_SKIP_CLERK_AUTH: 'false'
         SKIP_CLERK_AUTH: 'false'
     container_name: braveforms-web
@@ -110,8 +110,8 @@ services:
       NODE_ENV: production
       NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://localhost:4000/graphql
       NEXT_PUBLIC_SKIP_CLERK_AUTH: 'false'
-      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_c2VsZWN0ZWQtcHVtYS05OC5jbGVyay5hY2NvdW50cy5kZXYk
-      CLERK_SECRET_KEY: sk_test_ukrcGObFIAn9XhIrhalKVKBSG90MqO8rPeRyXlIFjY
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
     ports:
       - '3000:3000'
     depends_on:

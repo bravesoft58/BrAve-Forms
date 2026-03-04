@@ -47,13 +47,8 @@ jobs:
 
       - name: Run ESLint
         run: |
-          pnpm lint:backend || true
-          pnpm lint:web || true
-        # TODO: ISSUE-114 - Lint failures temporarily ignored to unblock Sprint 3
-        # Backend: 10 lint errors remaining (unused imports/variables)
-        # Mobile: 88 lint issues (48 errors + 40 warnings) - mobile linting disabled
-        # MUST FIX IN SPRINT 3: Remove || true and fix all lint errors
-        # pnpm lint:mobile
+          pnpm lint:backend
+          pnpm lint:web
 
   type-check:
     name: Type Check (TypeScript)
@@ -92,14 +87,8 @@ jobs:
 
       - name: Run TypeScript type check
         run: |
-          pnpm type-check:backend || true
-          pnpm type-check:web || true
-        # TODO: ISSUE-114 - Type-check failures temporarily ignored to unblock Sprint 3
-        # Web: 16 type errors in WeatherDashboard.tsx and query integration tests
-        # Backend: Passing locally
-        # Mobile: Disabled (88 lint issues must be fixed first)
-        # MUST FIX IN SPRINT 3: Remove || true and fix all type errors
-        # pnpm type-check:mobile
+          pnpm type-check:backend
+          pnpm type-check:web
 
   test:
     name: Test (Vitest + Coverage)
@@ -137,16 +126,17 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run tests with coverage
-        run: pnpm test -- --coverage || true
-        # TODO: ISSUE-114 - Test failures temporarily ignored to unblock Sprint 3
-        # Mobile: No test files found (exit code 1)
-        # Web/Backend: May have failures from Sprint 1 code
-        # MUST FIX IN SPRINT 3: Remove || true and fix all test failures
+        run: pnpm test -- --coverage
 
       - name: Check coverage threshold
         run: |
-          # Parse coverage report and ensure >80% for new code
-          echo "Coverage check passed"
+          if [ -f ./coverage/coverage-summary.json ]; then
+            LINE_PCT=$(node -e "const c = require('./coverage/coverage-summary.json'); console.log(c.total.lines.pct)")
+            echo "Line coverage: ${LINE_PCT}%"
+            node -e "const c = require('./coverage/coverage-summary.json'); if (c.total.lines.pct < 80) { console.error('Coverage ' + c.total.lines.pct + '% is below 80% threshold'); process.exit(1); }"
+          else
+            echo "No coverage report found - ensure tests generate coverage output"
+          fi
 
       - name: Comment coverage on PR
         uses: actions/github-script@v7
@@ -169,7 +159,7 @@ jobs:
               | Functions | ${total.functions.pct}% |
               | Branches | ${total.branches.pct}% |
 
-              ${total.lines.pct < 80 ? '⚠️ Coverage is below 80% threshold' : '✅ Coverage meets 80% threshold'}
+              ${total.lines.pct < 80 ? 'WARNING: Coverage is below 80% threshold' : 'PASS: Coverage meets 80% threshold'}
               `;
 
               github.rest.issues.createComment({
@@ -222,18 +212,14 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build ${{ matrix.workspace }}
-        run: pnpm --filter ${{ matrix.workspace }} build || true
-        # TODO: ISSUE-114 - Build failures temporarily ignored to unblock Sprint 3
-        # Web: Type errors from WeatherDashboard and query integration
-        # Backend: May have type errors or dependency issues
-        # MUST FIX IN SPRINT 3: Remove || true and fix all build failures
+        run: pnpm --filter ${{ matrix.workspace }} build
 
       - name: Verify build artifacts
         run: |
           if [ "${{ matrix.workspace }}" = "backend" ]; then
-            test -d apps/backend/dist || echo "Backend build artifacts missing (expected)"
+            test -d apps/backend/dist || { echo "Backend build artifacts missing"; exit 1; }
           elif [ "${{ matrix.workspace }}" = "web" ]; then
-            test -d apps/web/.next || echo "Web build artifacts missing (expected)"
+            test -d apps/web/.next || { echo "Web build artifacts missing"; exit 1; }
           fi
 
   all-checks-passed:

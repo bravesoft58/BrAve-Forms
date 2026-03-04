@@ -66,7 +66,7 @@ prisma.$use(async (params, next) => {
 
 ### Queue & Background Jobs
 
-**BullMQ with Redis**
+**BullMQ with Valkey** (BSD-licensed Redis fork, wire-compatible)
 
 - **Use Cases:**
   - Photo processing (EXIF extraction, compression, CDN upload)
@@ -193,7 +193,7 @@ export class ProjectsResolver {
   - Backend API (Port 30101)
   - Web Frontend (Port 30102)
   - PostgreSQL (Port 30103)
-  - Redis, MinIO (internal only)
+  - Valkey, SeaweedFS (internal only)
 - **Ingress:** Traefik for local routing
 - **Secrets:** Manual creation via `k8s-local-setup.ps1 -CreateSecrets`
 
@@ -210,56 +210,44 @@ kubectl apply -f infrastructure/k8s/local/
 
 ### Production Infrastructure
 
-**Kubernetes (AWS EKS)**
+**DigitalOcean Droplet**
 
-- **Region:** Multi-region for high availability
-- **Node Groups:** Spot + On-Demand mix for cost optimization
-- **Autoscaling:** Horizontal Pod Autoscaler (HPA) for 10,000+ concurrent users
-- **Monitoring:** Datadog APM + Sentry error tracking
-
-**Infrastructure as Code (IaC):**
-
-- **Terraform 1.5+:** All infrastructure defined as code
-- **State:** Remote state in S3 with DynamoDB locking
-- **Modules:** Reusable modules for VPC, EKS, RDS, S3
+- **Server:** 159.89.246.229 (4GB RAM, 2 vCPU, ~$29/month)
+- **Domains:** api.brave-soft.com, forms.brave-soft.com
+- **Orchestration:** Docker Compose (docker-compose.prod.yml)
+- **Monitoring:** Basic health checks via GitHub Actions
 
 **CI/CD Pipeline (GitHub Actions):**
 
 ```yaml
 Workflow:
-1. Lint + Type Check
-2. Unit Tests (80% coverage requirement)
-3. Build Docker Images
-4. Push to ECR
-5. Deploy to Staging
-6. E2E Tests (Playwright)
-7. Manual Approval Gate
-8. Deploy to Production
-9. Health Check Verification
+1. Type Check (backend + web)
+2. Build (backend + web)
+3. SSH Deploy to DigitalOcean
+4. Health Check Verification
 ```
 
-### Storage & CDN
+### Storage
 
-**PostgreSQL RDS:**
+**PostgreSQL:**
 
-- **Instance:** Multi-AZ deployment
-- **Backups:** Automated daily backups + point-in-time recovery
-- **Encryption:** At-rest and in-transit
+- **Local:** TimescaleDB container (port 5432)
+- **Production:** PostgreSQL on DigitalOcean droplet
 - **RLS:** Row-Level Security for multi-tenancy
 
 **Photo Storage:**
 
-- **Primary:** AWS S3 (50TB+ capacity)
-- **CDN:** CloudFront for global delivery
+- **Local:** SeaweedFS (S3-compatible, ports 8335/9335/8081)
+- **Production:** DigitalOcean Spaces (S3-compatible)
 - **Optimization:** Progressive JPEG compression
 - **Lifecycle:** Hot → Warm → Cold storage tiering
 - **Metadata:** PostgreSQL (EXIF, GPS, timestamps)
 
-**Redis ElastiCache:**
+**Valkey (Redis-compatible):**
 
 - **Use:** BullMQ queues, session cache, rate limiting
-- **Mode:** Cluster mode for HA
-- **Persistence:** RDB + AOF snapshots
+- **Local:** Valkey 8 Alpine container (port 6379)
+- **Persistence:** AOF append-only
 
 ---
 
@@ -665,8 +653,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 - **Node.js:** 18.x LTS
 - **pnpm:** 8.x
 - **PostgreSQL:** 15.x
-- **Redis:** 7.x
-- **Kubernetes:** 1.27+
+- **Valkey:** 8.x (Redis wire-compatible)
 - **iOS:** 13+
 - **Android:** 10+ (API level 29)
 

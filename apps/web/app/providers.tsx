@@ -30,7 +30,8 @@ export function useAppAuth(): AppAuthData {
   const { userId, sessionId, isLoaded, isSignedIn, getToken } = useAuth();
   const { user } = useUser();
 
-  // Default org ID for now - will be replaced with Clerk Organizations later
+  // MVP: Single-tenant Q&D Construction pilot
+  // S1 will wire this to Clerk Organizations JWT claims (o.id, o.rol, o.slg)
   // This must match the clerk_org_id in the database, not the database id
   const orgId = 'org_qd_default';
 
