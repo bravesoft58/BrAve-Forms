@@ -155,3 +155,32 @@ RANCHER_PORT_SCAN_RESULTS.md
 secrets-local.yaml# Playwright MCP screenshots
 .playwright-mcp/
 apps/web/test-output.txt
+apps/web/playwright-report/
+apps/web/test-results/
+
+# Compiled TypeScript output in non-dist locations
+scripts/**/*.js
+scripts/**/*.js.map
+scripts/**/*.d.ts
+scripts/**/*.d.ts.map
+packages/database/scripts/**/*.js
+packages/database/scripts/**/*.js.map
+packages/database/scripts/**/*.d.ts
+packages/database/scripts/**/*.d.ts.map
+docs/sprints/**/code/*.js
+docs/sprints/**/code/*.js.map
+docs/sprints/**/code/*.d.ts
+docs/sprints/**/code/*.d.ts.map
+
+# Landing page build artifacts
+Landing/**/*.js
+Landing/**/*.js.map
+Landing/**/*.d.ts
+Landing/**/*.d.ts.map
+
+# Misc untracked noise
+nul
+*.png
+!apps/web/public/**/*.png
+!Logos/**/*.png
+vitest-json.txt

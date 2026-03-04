@@ -72,6 +72,12 @@ type ProjectWithCompliance {
   compliance: ProjectCompliance!
 }
 
+type GeocodeResult {
+  latitude: Float!
+  longitude: Float!
+  displayName: String!
+}
+
 type FormTemplate {
   id: ID!
   orgId: String!
@@ -311,6 +317,11 @@ type Query {
   myPreferences: UserPreferences!
   projects: [ProjectWithCompliance!]!
   project(id: String!): ProjectWithCompliance!
+  geocodeAddress(address: String!): GeocodeResult
+  currentOrganization: Organization!
+  organizationStats: String
+  organizationProjects: [String!]!
+  organizationUsers: [String!]!
   formTemplates(category: String, isActive: Boolean, take: Float, skip: Float): [FormTemplate!]!
   formTemplate(id: String!): FormTemplate!
   formSubmissions(templateId: String, projectId: String, inspectionId: String, status: String, take: Float, skip: Float): [JSON!]!
@@ -328,11 +339,7 @@ type Query {
   getStorageStats: String!
   generatePhotoUrl(photoKey: String!): String!
   getCompliancePackage(inspectionId: String!): String!
-  currentOrganization: String
   organizationDashboard: OrganizationStats!
-  organizationStats: String
-  organizationProjects: [String!]!
-  organizationUsers: [String!]!
 
   """Get all support requests for the current user"""
   mySupportRequests: [SupportRequest!]!
@@ -350,6 +357,9 @@ type Mutation {
   createProject(input: CreateProjectInput!): ProjectWithCompliance!
   updateProject(id: String!, input: UpdateProjectInput!): ProjectWithCompliance!
   deleteProject(id: String!): Boolean!
+  syncOrganization(clerkOrgId: String!, orgData: String!): String!
+  syncUserOrganization(userId: String!, orgId: String!, role: String!): String!
+  removeUserFromOrganization(userId: String!, orgId: String!): String!
   createFormTemplate(input: CreateFormTemplateInput!): FormTemplate!
   updateFormTemplate(id: String!, input: UpdateFormTemplateInput!): FormTemplate!
   duplicateFormTemplate(id: String!): FormTemplate!
@@ -364,9 +374,6 @@ type Mutation {
   cloneSubmission(sourceId: ID!, mode: String = "keep_all"): FormSubmission!
   copyYesterdaysLog(templateId: ID!): FormSubmission!
   updateOrganization(input: UpdateOrganizationInput!): Organization!
-  syncOrganization(clerkOrgId: String!, orgData: String!): String!
-  syncUserOrganization(userId: String!, orgId: String!, role: String!): String!
-  removeUserFromOrganization(userId: String!, orgId: String!): String!
 
   """Create a new support request"""
   createSupportRequest(input: CreateSupportRequestInput!): SupportRequest!
