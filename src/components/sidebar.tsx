@@ -53,17 +53,17 @@ export default function Sidebar({
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 transition-transform md:static md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-[#233B5C] transition-transform md:static md:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-16 items-center justify-between border-b border-zinc-200 px-6 dark:border-zinc-800">
-          <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+        <div className="flex h-16 items-center justify-between border-b border-white/10 px-6">
+          <span className="text-lg font-semibold tracking-tight text-white">
             BrAve Forms
           </span>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-zinc-500 hover:bg-zinc-100 md:hidden dark:hover:bg-zinc-800"
+            className="rounded-md p-1 text-white/60 hover:bg-white/10 hover:text-white md:hidden"
           >
             <X size={20} />
           </button>
@@ -84,8 +84,8 @@ export default function Sidebar({
                 onClick={onClose}
                 className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-400"
-                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+                    ? "bg-white/15 text-white"
+                    : "text-white/70 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 <Icon size={20} />
@@ -94,6 +94,10 @@ export default function Sidebar({
             );
           })}
         </nav>
+
+        <div className="border-t border-white/10 px-4 py-3">
+          <p className="text-xs text-white/40">Q&D Construction</p>
+        </div>
       </aside>
     </>
   );
