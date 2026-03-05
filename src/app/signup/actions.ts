@@ -6,7 +6,6 @@ import { createClient } from "@/lib/supabase/server";
 
 export type AuthState = {
   error: string;
-  success?: boolean;
 };
 
 export async function signup(
