@@ -14,7 +14,7 @@
 |-------|-------|----|----------|-------------|--------|
 | [BF-01](stories/BF-01-database-schema-rls.md) | Database schema + RLS policies | 5 | CRITICAL | None | COMPLETE |
 | [BF-02](stories/BF-02-supabase-auth.md) | Supabase Auth + protected routes | 3 | CRITICAL | None | COMPLETE |
-| [BF-03](stories/BF-03-app-shell-navigation.md) | App shell + role-based navigation | 3 | HIGH | BF-02 | NOT STARTED |
+| [BF-03](stories/BF-03-app-shell-navigation.md) | App shell + role-based navigation | 3 | HIGH | BF-02 | COMPLETE |
 | [BF-04](stories/BF-04-project-creation.md) | Project creation (full fields + permits) | 5 | HIGH | BF-01, BF-03 | NOT STARTED |
 | [BF-05](stories/BF-05-project-list-detail.md) | Project list + detail page with tabs | 5 | HIGH | BF-01, BF-03 | NOT STARTED |
 | [BF-06](stories/BF-06-daily-dust-log-form.md) | Daily Dust Log form (editable) | 5 | HIGH | BF-01, BF-05 | NOT STARTED |
@@ -28,8 +28,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Stories Complete | 2/8 |
-| Story Points Complete | 8/30 (27%) |
+| Stories Complete | 3/8 |
+| Story Points Complete | 11/30 (37%) |
 | Tests at Sprint Start | 0 (no test suite yet) |
 
 ---
@@ -79,4 +79,4 @@ Stories should be executed in this order based on dependencies and priority:
 
 ---
 
-**Last Updated:** 2026-03-05T22:15:00Z
+**Last Updated:** 2026-03-05T23:00:00Z
