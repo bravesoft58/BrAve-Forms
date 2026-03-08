@@ -4,9 +4,9 @@
 **Story Points:** 5
 **Priority:** HIGH
 **Dependencies:** BF-01, BF-05
-**Status:** NOT STARTED
+**Status:** COMPLETE
 **Created:** 2026-03-05
-**Last Updated:** 2026-03-05T00:00:00Z
+**Last Updated:** 2026-03-07T00:00:00Z
 **Backlog Ref:** Andy Salvage Plan Section 5.1 (Form 1: Daily Dust Log), Salvage Sprint S2-005
 
 ---
@@ -44,7 +44,7 @@ Build the Daily Dust Log form as a dedicated React component matching the AQMD P
 ## Tasks
 
 - [ ] T-06.1: Create Zod schema and TypeScript types for Dust Log (0.5h)
-- [ ] T-06.2: Build DailyDustLog form component with React Hook Form (2h)
+- [ ] T-06.2: Build DailyDustLog form component with useActionState + Zod validation (2h)
 - [ ] T-06.3: Implement dynamic entry rows (add/remove) (0.5h)
 - [ ] T-06.4: Write server action for form submission (insert into form_submissions) (0.5h)
 - [ ] T-06.5: Wire form into project detail Dust Log tab (0.5h)
@@ -103,7 +103,7 @@ interface DailyDustLogProps {
 
 | Component | Verdict | Rationale |
 |-----------|---------|-----------|
-| Form library | React Hook Form + Zod | useFieldArray for dynamic entry rows |
+| Form library | useActionState + Zod | Server action validation, client-side dynamic rows via useState |
 | Auto-fill | Props from project data | Server component passes project to client form |
 | Storage | JSONB in form_submissions | Typed by Zod schema, queryable via Supabase |
 | Dropdowns | Native select elements | Simple, accessible, no library needed |

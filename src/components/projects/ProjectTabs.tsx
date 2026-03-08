@@ -76,9 +76,7 @@ export default function ProjectTabs({
           <Placeholder message="Team management coming soon." />
         )}
         {formTabs.some((ft) => ft.key === activeTab) && (
-          <Placeholder
-            message={`${FORM_LABELS[activeTab as FormType] ?? activeTab} submissions will appear here.`}
-          />
+          <FormTabContent projectId={projectId} activeTab={activeTab} />
         )}
       </div>
     </div>
@@ -110,6 +108,38 @@ function Placeholder({ message }: { message: string }) {
   return (
     <div className="flex items-center justify-center rounded-lg border-2 border-dashed border-zinc-300 py-12 dark:border-zinc-700">
       <p className="text-sm text-zinc-500 dark:text-zinc-400">{message}</p>
+    </div>
+  );
+}
+
+const FORM_ROUTE_MAP: Partial<Record<FormType, string>> = {
+  daily_dust_log: "dust-log",
+};
+
+function FormTabContent({ projectId, activeTab }: { projectId: string; activeTab: string }) {
+  const routeSlug = FORM_ROUTE_MAP[activeTab as FormType];
+
+  if (!routeSlug) {
+    return (
+      <Placeholder
+        message={`${FORM_LABELS[activeTab as FormType] ?? activeTab} submissions will appear here.`}
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          {FORM_LABELS[activeTab as FormType]} submissions will appear here.
+        </p>
+        <Link
+          href={`/dashboard/projects/${projectId}/forms/${routeSlug}/new`}
+          className="rounded-md bg-[#233B5C] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1a2d47] focus:outline-none focus:ring-2 focus:ring-[#5C6F8A] focus:ring-offset-2"
+        >
+          New Entry
+        </Link>
+      </div>
     </div>
   );
 }

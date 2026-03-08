@@ -15,9 +15,9 @@
 | [BF-01](stories/BF-01-database-schema-rls.md) | Database schema + RLS policies | 5 | CRITICAL | None | COMPLETE |
 | [BF-02](stories/BF-02-supabase-auth.md) | Supabase Auth + protected routes | 3 | CRITICAL | None | COMPLETE |
 | [BF-03](stories/BF-03-app-shell-navigation.md) | App shell + role-based navigation | 3 | HIGH | BF-02 | COMPLETE |
-| [BF-04](stories/BF-04-project-creation.md) | Project creation (full fields + permits) | 5 | HIGH | BF-01, BF-03 | NOT STARTED |
-| [BF-05](stories/BF-05-project-list-detail.md) | Project list + detail page with tabs | 5 | HIGH | BF-01, BF-03 | NOT STARTED |
-| [BF-06](stories/BF-06-daily-dust-log-form.md) | Daily Dust Log form (editable) | 5 | HIGH | BF-01, BF-05 | NOT STARTED |
+| [BF-04](stories/BF-04-project-creation.md) | Project creation (full fields + permits) | 5 | HIGH | BF-01, BF-03 | COMPLETE |
+| [BF-05](stories/BF-05-project-list-detail.md) | Project list + detail page with tabs | 5 | HIGH | BF-01, BF-03 | COMPLETE |
+| [BF-06](stories/BF-06-daily-dust-log-form.md) | Daily Dust Log form (editable) | 5 | HIGH | BF-01, BF-05 | COMPLETE |
 | [BF-07](stories/BF-07-dust-log-view-history.md) | Dust Log read-only view + form history + Use Previous | 3 | MEDIUM | BF-06 | NOT STARTED |
 | [BF-08](stories/BF-08-e2e-verification.md) | End-to-end verification | 1 | MEDIUM | BF-01 through BF-07 | NOT STARTED |
 | **Total** | | **30** | | | |
@@ -28,8 +28,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Stories Complete | 3/8 |
-| Story Points Complete | 11/30 (37%) |
+| Stories Complete | 6/8 |
+| Story Points Complete | 26/30 (87%) |
 | Tests at Sprint Start | 0 (no test suite yet) |
 
 ---
@@ -63,7 +63,7 @@ Stories should be executed in this order based on dependencies and priority:
 |------|-------|-------------|
 | Stack | Next.js 16 + Supabase vs NestJS + Prisma | Supabase eliminates entire backend layer -- no API routes needed for CRUD, RLS handles authorization at DB level |
 | Auth | Supabase Auth vs Clerk | Supabase Auth native integration with RLS, no extra service, simpler for single-tenant pilot |
-| Forms | React Hook Form + Zod | Industry standard, works with Next.js App Router, server-side validation via Zod schemas |
+| Forms | useActionState + Zod 3 | Server-side Zod validation via Server Actions. RHF dropped due to Zod v4 resolver conflicts. |
 | Storage | Supabase Storage | Built-in, replaces S3/MinIO. Storage buckets + RLS for access control |
 
 ---
@@ -79,4 +79,4 @@ Stories should be executed in this order based on dependencies and priority:
 
 ---
 
-**Last Updated:** 2026-03-05T23:00:00Z
+**Last Updated:** 2026-03-07T15:00:00Z
