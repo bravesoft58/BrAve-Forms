@@ -60,3 +60,64 @@ export async function submitDustLog(
   revalidatePath(`/dashboard/projects/${projectId}`);
   redirect(`/dashboard/projects/${projectId}?tab=daily_dust_log`);
 }
+
+export async function appendDustLogEntries(
+  _prevState: DustLogState,
+  formData: FormData
+): Promise<DustLogState> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { error: "You must be logged in." };
+  }
+
+  const projectId = formData.get("project_id") as string;
+  const submissionId = formData.get("submission_id") as string;
+  if (!projectId || !submissionId) {
+    return { error: "Missing project or submission ID." };
+  }
+
+  const raw = parseDustLogForm(formData);
+  const result = dustLogSchema.safeParse(raw);
+
+  if (!result.success) {
+    const fieldErrors: Record<string, string[]> = {};
+    for (const issue of result.error.issues) {
+      const key = issue.path.join(".");
+      if (!fieldErrors[key]) fieldErrors[key] = [];
+      fieldErrors[key].push(issue.message);
+    }
+    return { error: "Please fix the errors below.", fieldErrors };
+  }
+
+  const { entries: newEntries } = result.data;
+  const supabase = await createClient();
+
+  // Fetch existing submission to get current entries
+  const { data: existing, error: fetchError } = await supabase
+    .from("form_submissions")
+    .select("data")
+    .eq("id", submissionId)
+    .single();
+
+  if (fetchError || !existing) {
+    return { error: "Submission not found." };
+  }
+
+  const existingEntries = Array.isArray(existing.data) ? existing.data : [];
+  const merged = [...existingEntries, ...newEntries];
+
+  const { error: updateError } = await supabase
+    .from("form_submissions")
+    .update({
+      data: merged,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", submissionId);
+
+  if (updateError) {
+    return { error: updateError.message };
+  }
+
+  revalidatePath(`/dashboard/projects/${projectId}`);
+  redirect(`/dashboard/projects/${projectId}/forms/dust-log/${submissionId}`);
+}
