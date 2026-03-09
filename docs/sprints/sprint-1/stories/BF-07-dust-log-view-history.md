@@ -4,9 +4,10 @@
 **Story Points:** 3
 **Priority:** MEDIUM
 **Dependencies:** BF-06
-**Status:** NOT STARTED
+**Status:** COMPLETE
 **Created:** 2026-03-05
-**Last Updated:** 2026-03-05T00:00:00Z
+**Completed:** 2026-03-09T12:00:00Z
+**Last Updated:** 2026-03-09T12:00:00Z
 **Backlog Ref:** Andy Salvage Plan Section 6 (Form Continuity), Salvage Sprint S2-006/S2-008/S2-009
 
 ---
@@ -28,28 +29,28 @@ Three capabilities that complete the Dust Log workflow: (1) Read-only view of su
 
 ## Acceptance Criteria
 
-- [ ] DailyDustLogView component renders submitted data in read-only format
-- [ ] Read-only view matches original PDF layout (table format, clean headers)
-- [ ] No edit controls in read-only view
-- [ ] Form log tab on project detail page shows list of submissions: date, submitted by, status
-- [ ] Submissions sorted by date (newest first)
-- [ ] Click submission in list opens read-only view
-- [ ] "New Entry" button at top of form log tab
-- [ ] "Use Previous" button on new entry form
-- [ ] "Use Previous" loads most recent submission's data into form
-- [ ] Date/time fields cleared when using previous (user enters today's values)
-- [ ] All other fields pre-filled from previous submission
-- [ ] Empty state when no submissions exist ("No dust log entries yet")
+- [x] DailyDustLogView component renders submitted data in read-only format
+- [x] Read-only view matches original PDF layout (table format, clean headers)
+- [x] No edit controls in read-only view
+- [x] Form log tab on project detail page shows list of submissions: date, submitted by, status
+- [x] Submissions sorted by date (newest first)
+- [x] Click submission in list opens read-only view
+- [x] "New Entry" button at top of form log tab
+- [x] "Use Previous" button on new entry form
+- [x] "Use Previous" loads most recent submission's data into form
+- [x] Date/time fields cleared when using previous (user enters today's values)
+- [x] All other fields pre-filled from previous submission
+- [x] Empty state when no submissions exist ("No dust log entries yet")
 
 ---
 
 ## Tasks
 
-- [ ] T-07.1: Build DailyDustLogView read-only component (1h)
-- [ ] T-07.2: Build FormLogTab component (submission list + new entry button) (1h)
-- [ ] T-07.3: Implement "Use Previous" -- query latest submission, pass as initialData to form (0.5h)
-- [ ] T-07.4: Wire view/list into project detail Dust Log tab (0.25h)
-- [ ] T-07.5: Test full flow: create, view, use previous (0.25h)
+- [x] T-07.1: Build DailyDustLogView read-only component (1h)
+- [x] T-07.2: Build FormLogTab component (submission list + new entry button) (1h)
+- [x] T-07.3: Implement "Use Previous" -- query latest submission, pass as initialData to form (0.5h)
+- [x] T-07.4: Wire view/list into project detail Dust Log tab (0.25h)
+- [x] T-07.5: Test full flow: create, view, use previous (0.25h)
 
 ---
 

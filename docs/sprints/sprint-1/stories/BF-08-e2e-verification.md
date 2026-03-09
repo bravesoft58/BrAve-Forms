@@ -4,9 +4,10 @@
 **Story Points:** 1
 **Priority:** MEDIUM
 **Dependencies:** BF-01 through BF-07
-**Status:** NOT STARTED
+**Status:** COMPLETE
 **Created:** 2026-03-05
-**Last Updated:** 2026-03-05T00:00:00Z
+**Completed:** 2026-03-09T14:00:00Z
+**Last Updated:** 2026-03-09T14:00:00Z
 **Backlog Ref:** Andy Salvage Plan Section 14 (Verification Criteria), Salvage Sprint S2-010
 
 ---
@@ -19,23 +20,23 @@ Run through the complete end-to-end workflow that proves Sprint 1 delivers on it
 
 ## Acceptance Criteria
 
-- [ ] Step 1: Admin creates project with all fields + selects SAD and Dust Control permits
-- [ ] Step 2: Permits auto-trigger Daily Dust Log as required form
-- [ ] Step 3: Project detail page shows Dust Log tab
-- [ ] Step 4: Admin opens Dust Log tab -> clicks "New Entry" -> project data auto-fills header
-- [ ] Step 5: Admin fills dust log entry with multiple observations, submits
-- [ ] Step 6: Submitted entry appears in form log history
-- [ ] Step 7: Admin clicks submitted entry -> read-only view renders correctly
-- [ ] Step 8: Admin starts new dust log -> clicks "Use Previous" -> data pre-fills, date/time cleared
-- [ ] Step 9: No console errors throughout entire flow
-- [ ] Step 10: Data persists correctly in Supabase (verify via Table Editor)
+- [x] Step 1: Admin creates project with all fields + selects SAD and Dust Control permits
+- [x] Step 2: Permits auto-trigger Daily Dust Log as required form
+- [x] Step 3: Project detail page shows Dust Log tab
+- [x] Step 4: Admin opens Dust Log tab -> clicks "New Entry" -> project data auto-fills header
+- [x] Step 5: Admin fills dust log entry with multiple observations, submits
+- [x] Step 6: Submitted entry appears in form log history
+- [x] Step 7: Admin clicks submitted entry -> read-only view renders correctly
+- [x] Step 8: Admin starts new dust log -> clicks "Use Previous" -> data pre-fills, date/time cleared
+- [x] Step 9: No console errors throughout entire flow
+- [x] Step 10: Data persists correctly in Supabase (verify via Table Editor)
 
 ---
 
 ## Tasks
 
-- [ ] T-08.1: Execute full workflow and document results (0.5h)
-- [ ] T-08.2: Fix any bugs discovered during verification (0.5h)
+- [x] T-08.1: Execute full workflow and document results (0.5h)
+- [x] T-08.2: Fix any bugs discovered during verification (0.5h)
 
 ---
 

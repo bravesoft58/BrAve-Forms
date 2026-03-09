@@ -18,8 +18,8 @@
 | [BF-04](stories/BF-04-project-creation.md) | Project creation (full fields + permits) | 5 | HIGH | BF-01, BF-03 | COMPLETE |
 | [BF-05](stories/BF-05-project-list-detail.md) | Project list + detail page with tabs | 5 | HIGH | BF-01, BF-03 | COMPLETE |
 | [BF-06](stories/BF-06-daily-dust-log-form.md) | Daily Dust Log form (editable) | 5 | HIGH | BF-01, BF-05 | COMPLETE |
-| [BF-07](stories/BF-07-dust-log-view-history.md) | Dust Log read-only view + form history + Use Previous | 3 | MEDIUM | BF-06 | NOT STARTED |
-| [BF-08](stories/BF-08-e2e-verification.md) | End-to-end verification | 1 | MEDIUM | BF-01 through BF-07 | NOT STARTED |
+| [BF-07](stories/BF-07-dust-log-view-history.md) | Dust Log read-only view + form history + Use Previous | 3 | MEDIUM | BF-06 | COMPLETE |
+| [BF-08](stories/BF-08-e2e-verification.md) | End-to-end verification | 1 | MEDIUM | BF-01 through BF-07 | COMPLETE |
 | **Total** | | **30** | | | |
 
 ---
@@ -28,8 +28,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Stories Complete | 6/8 |
-| Story Points Complete | 26/30 (87%) |
+| Stories Complete | 8/8 |
+| Story Points Complete | 30/30 (100%) |
 | Tests at Sprint Start | 0 (no test suite yet) |
 
 ---
@@ -70,13 +70,53 @@ Stories should be executed in this order based on dependencies and priority:
 
 ## Sprint Retrospective
 
-*(Completed at sprint end)*
+*(Completed 2026-03-09)*
 
-- [ ] All stories marked COMPLETE or explicitly deferred
-- [ ] Velocity calculated and recorded
-- [ ] Lessons documented
-- [ ] Backlog updated with any new stories discovered
+- [x] All stories marked COMPLETE or explicitly deferred
+- [x] Velocity calculated and recorded
+- [x] Lessons documented
+- [x] Backlog updated with any new stories discovered
+
+### Velocity
+
+| Metric | Value |
+|--------|-------|
+| Stories planned | 8 |
+| Stories completed | 8 (100%) |
+| Story points planned | 30 |
+| Story points completed | 30 (100%) |
+| Calendar time | 5 days (Mar 5-9) |
+| Tests added | 0 (no test suite -- manual E2E verification) |
+
+### Lessons Documented
+
+1. Next.js 16 renames middleware.ts to proxy.ts -- caught early via docs
+2. useSearchParams() requires Suspense boundary -- split server page + client form pattern
+3. Supabase join returns array type, needs `as unknown as` cast for TypeScript
+4. Date-only strings parsed as UTC midnight by `new Date()` -- append "T00:00:00" for local time
+5. Zod pinned to ~3.24.x -- 3.25+ bundles Zod 4 internally causing resolver conflicts
+6. pnpm is the package manager -- npm install fails due to .pnpm structure
+7. Worktree workflow works well for feature isolation (adopted BF-05 onward)
+
+### Bugs Found and Fixed
+
+| Bug | Severity | Fix |
+|-----|----------|-----|
+| BL-001 | LOW | Added placeholder pages for /dashboard/users and /dashboard/settings |
+| BL-002 | LOW | Fixed timezone-shifted dates (append "T00:00:00" to date strings) |
+| BL-003 | LOW | Sort inconsistency resolved by BL-002 fix |
+
+### What Went Well
+
+- Full foundation built in 5 days: schema, auth, projects, first form
+- E2E verification passed 10/10 steps on first run
+- Salvage plan alignment -- no scope creep beyond Andy's requirements
+
+### What Could Improve
+
+- No automated test suite yet -- all verification manual
+- Should add permit numbers during project creation (data gap, not code bug)
 
 ---
 
-**Last Updated:** 2026-03-07T15:00:00Z
+**Last Updated:** 2026-03-09T15:00:00Z
