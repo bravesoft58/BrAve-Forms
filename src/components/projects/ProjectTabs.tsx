@@ -169,35 +169,55 @@ function FormTabContent({
 
       {submissions.length > 0 && (
         <ul className="divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-700 dark:border-zinc-700">
-          {submissions.map((sub) => (
-            <li key={sub.id} className="flex items-center justify-between px-4 py-3">
-              <div>
-                <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                  {new Date(sub.form_date).toLocaleDateString("en-US", {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </span>
-                {sub.submitted_at && (
-                  <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
-                    at {new Date(sub.submitted_at).toLocaleTimeString("en-US", {
-                      hour: "numeric",
-                      minute: "2-digit",
+          {submissions.map((sub) => {
+            const viewHref = routeSlug
+              ? `/dashboard/projects/${projectId}/forms/${routeSlug}/${sub.id}`
+              : null;
+            const content = (
+              <>
+                <div>
+                  <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                    {new Date(sub.form_date).toLocaleDateString("en-US", {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
                     })}
                   </span>
-                )}
-              </div>
-              <span
-                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
-                  statusBadge[sub.status] ?? statusBadge.draft
-                }`}
-              >
-                {sub.status}
-              </span>
-            </li>
-          ))}
+                  {sub.submitted_at && (
+                    <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
+                      at {new Date(sub.submitted_at).toLocaleTimeString("en-US", {
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  )}
+                </div>
+                <span
+                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
+                    statusBadge[sub.status] ?? statusBadge.draft
+                  }`}
+                >
+                  {sub.status}
+                </span>
+              </>
+            );
+
+            return viewHref ? (
+              <li key={sub.id}>
+                <Link
+                  href={viewHref}
+                  className="flex items-center justify-between px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                >
+                  {content}
+                </Link>
+              </li>
+            ) : (
+              <li key={sub.id} className="flex items-center justify-between px-4 py-3">
+                {content}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

@@ -53,3 +53,16 @@ export async function getProjectSubmissions(projectId: string) {
   if (error) throw new Error(error.message);
   return data;
 }
+
+export async function getSubmissionById(submissionId: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("form_submissions")
+    .select("*")
+    .eq("id", submissionId)
+    .single();
+
+  if (error) return null;
+  return data;
+}
