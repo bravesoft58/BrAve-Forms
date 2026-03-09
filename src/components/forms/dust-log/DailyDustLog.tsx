@@ -20,6 +20,7 @@ interface DailyDustLogProps {
   projectName: string;
   permitNumber: string | null;
   companyName: string | null;
+  previousEntry?: DustLogEntry | null;
 }
 
 function makeEmptyEntry(): DustLogEntry {
@@ -44,9 +45,25 @@ export default function DailyDustLog({
   projectName,
   permitNumber,
   companyName,
+  previousEntry,
 }: DailyDustLogProps) {
   const [state, formAction, pending] = useActionState(submitDustLog, initialState);
   const [entries, setEntries] = useState<DustLogEntry[]>([makeEmptyEntry()]);
+  const [usedPrevious, setUsedPrevious] = useState(false);
+
+  function applyPrevious() {
+    if (!previousEntry) return;
+    const now = new Date();
+    setEntries([
+      {
+        ...previousEntry,
+        date: now.toISOString().split("T")[0],
+        time: now.toTimeString().slice(0, 5),
+        corrective_actions: "",
+      },
+    ]);
+    setUsedPrevious(true);
+  }
 
   function updateEntry(index: number, field: keyof DustLogEntry, value: string) {
     setEntries((prev) =>
@@ -90,9 +107,25 @@ export default function DailyDustLog({
         </div>
       </section>
 
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">
-        Record inspection results for dust control compliance. Minimum 1 entry per day.
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          Record inspection results for dust control compliance. Minimum 1 entry per day.
+        </p>
+        {previousEntry && !usedPrevious && (
+          <button
+            type="button"
+            onClick={applyPrevious}
+            className="rounded-md border border-[#5C6F8A] px-3 py-1.5 text-sm font-medium text-[#233B5C] shadow-sm hover:bg-[#5C6F8A]/10 dark:border-zinc-500 dark:text-zinc-300 dark:hover:bg-zinc-700"
+          >
+            Use Previous
+          </button>
+        )}
+        {usedPrevious && (
+          <span className="text-xs text-green-600 dark:text-green-400">
+            Pre-filled from last submission (date/time reset)
+          </span>
+        )}
+      </div>
 
       {/* Entries table */}
       <div className="overflow-x-auto">

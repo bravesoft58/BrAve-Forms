@@ -54,6 +54,38 @@ export async function getProjectSubmissions(projectId: string) {
   return data;
 }
 
+export async function getLatestSubmission(projectId: string, formType: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("form_submissions")
+    .select("data")
+    .eq("project_id", projectId)
+    .eq("form_type", formType)
+    .order("form_date", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error) return null;
+  return data;
+}
+
+export async function getAllSubmissions() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("form_submissions")
+    .select(`
+      id, form_type, form_date, status, submitted_at, created_at,
+      project_id,
+      projects ( name )
+    `)
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 export async function getSubmissionById(submissionId: string) {
   const supabase = await createClient();
 

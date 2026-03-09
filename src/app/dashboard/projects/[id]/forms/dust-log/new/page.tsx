@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import { getProjectById } from "@/lib/queries/projects";
+import { getProjectById, getLatestSubmission } from "@/lib/queries/projects";
 import DailyDustLog from "@/components/forms/dust-log/DailyDustLog";
+import type { DustLogEntry } from "@/lib/schemas/dust-log";
 
 export default async function NewDustLogPage({
   params,
@@ -8,7 +9,10 @@ export default async function NewDustLogPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const project = await getProjectById(id);
+  const [project, latestSubmission] = await Promise.all([
+    getProjectById(id),
+    getLatestSubmission(id, "daily_dust_log"),
+  ]);
   if (!project) notFound();
 
   // Find permit number from SAD or dust_control permits
@@ -16,6 +20,13 @@ export default async function NewDustLogPage({
     (p: { permit_type: string; permit_number: string | null }) =>
       p.permit_type === "surface_area_disturbance" || p.permit_type === "dust_control"
   );
+
+  // Extract last entry from previous submission for "Use Previous"
+  const prevEntries: DustLogEntry[] = Array.isArray(latestSubmission?.data)
+    ? latestSubmission.data
+    : [];
+  const lastEntry: DustLogEntry | null =
+    prevEntries.length > 0 ? prevEntries[prevEntries.length - 1] : null;
 
   return (
     <div>
@@ -27,6 +38,7 @@ export default async function NewDustLogPage({
         projectName={project.name}
         permitNumber={dustPermit?.permit_number ?? null}
         companyName={project.superintendent_name ?? null}
+        previousEntry={lastEntry}
       />
     </div>
   );
