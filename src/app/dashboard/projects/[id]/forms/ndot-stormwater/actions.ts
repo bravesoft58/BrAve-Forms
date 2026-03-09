@@ -63,7 +63,7 @@ export async function submitNdotStormwater(
   if (data.photos.length > 0) {
     const photoRows = data.photos.map((p) => ({
       submission_id: submission.id,
-      file_path: p.url,
+      file_path: p.file_name,
       caption: p.caption || null,
     }));
     await supabase.from("form_photos").insert(photoRows);

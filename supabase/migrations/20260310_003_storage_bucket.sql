@@ -8,7 +8,7 @@ insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 values (
   'form-attachments',
   'form-attachments',
-  false,
+  true,
   10485760, -- 10 MB per file
   array['image/jpeg', 'image/png', 'image/webp']
 )

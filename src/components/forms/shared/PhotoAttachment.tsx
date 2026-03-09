@@ -101,8 +101,8 @@ export default function PhotoAttachment({
       const supabase = createClient();
       const filePath = `${storagePath}/${photo.file_name}`;
       await supabase.storage.from(BUCKET).remove([filePath]);
-    } catch {
-      // Storage cleanup is best-effort
+    } catch (err) {
+      console.error("Storage cleanup failed:", err);
     }
     onPhotosChange(photos.filter((_, i) => i !== index));
   }
