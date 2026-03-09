@@ -25,8 +25,8 @@
 | Story | Title | SP | Priority | Dependencies | Status |
 |-------|-------|----|----------|-------------|--------|
 | [BF-09](stories/BF-09-form-infrastructure.md) | Form infrastructure (constants, routes, permit triggers) | 3 | HIGH | None | COMPLETE |
-| [BF-10](stories/BF-10-ndep-stormwater-form.md) | NDEP Weekly Stormwater form (3 sections) | 8 | HIGH | BF-09 | NOT STARTED |
-| [BF-11](stories/BF-11-ndep-stormwater-view.md) | NDEP Stormwater read-only view + routing | 2 | HIGH | BF-10 | NOT STARTED |
+| [BF-10](stories/BF-10-ndep-stormwater-form.md) | NDEP Weekly Stormwater form (3 sections) | 8 | HIGH | BF-09 | COMPLETE |
+| [BF-11](stories/BF-11-ndep-stormwater-view.md) | NDEP Stormwater read-only view + routing | 2 | HIGH | BF-10 | COMPLETE |
 | [BF-12](stories/BF-12-ndot-stormwater-form.md) | NDOT Weekly Stormwater form (3 sections) | 8 | HIGH | BF-09 | NOT STARTED |
 | [BF-13](stories/BF-13-ndot-photo-attachment.md) | NDOT photo attachment (Supabase Storage) | 3 | HIGH | BF-12 | NOT STARTED |
 | [BF-14](stories/BF-14-ndot-stormwater-view.md) | NDOT Stormwater read-only view + routing (with photos) | 2 | HIGH | BF-12, BF-13 | NOT STARTED |
@@ -44,8 +44,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Stories Complete | 1/12 |
-| Story Points Complete | 3/48 (6%) |
+| Stories Complete | 3/12 |
+| Story Points Complete | 13/48 (27%) |
 | Tests at Sprint Start | 0 (no test suite) |
 
 ---
@@ -105,4 +105,4 @@ Stories should be executed in this order based on dependencies and priority:
 
 ---
 
-**Last Updated:** 2026-03-09T18:45:00Z
+**Last Updated:** 2026-03-09T22:35:00Z
