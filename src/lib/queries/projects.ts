@@ -40,3 +40,16 @@ export async function getProjectFormRequirements(projectId: string) {
   if (error) throw new Error(error.message);
   return data;
 }
+
+export async function getProjectSubmissions(projectId: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("form_submissions")
+    .select("id, form_type, form_date, status, submitted_at, created_at")
+    .eq("project_id", projectId)
+    .order("form_date", { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return data;
+}

@@ -15,16 +15,27 @@ interface FormRequirement {
   form_type: string;
 }
 
+interface Submission {
+  id: string;
+  form_type: string;
+  form_date: string;
+  status: string;
+  submitted_at: string | null;
+  created_at: string;
+}
+
 export default function ProjectTabs({
   projectId,
   activeTab,
   permits,
   formRequirements,
+  submissions = [],
 }: {
   projectId: string;
   activeTab: string;
   permits: Permit[];
   formRequirements: FormRequirement[];
+  submissions?: Submission[];
 }) {
   const pathname = usePathname();
   const basePath = pathname.split("?")[0];
@@ -76,7 +87,11 @@ export default function ProjectTabs({
           <Placeholder message="Team management coming soon." />
         )}
         {formTabs.some((ft) => ft.key === activeTab) && (
-          <FormTabContent projectId={projectId} activeTab={activeTab} />
+          <FormTabContent
+            projectId={projectId}
+            activeTab={activeTab}
+            submissions={submissions.filter((s) => s.form_type === activeTab)}
+          />
         )}
       </div>
     </div>
@@ -116,30 +131,75 @@ const FORM_ROUTE_MAP: Partial<Record<FormType, string>> = {
   daily_dust_log: "dust-log",
 };
 
-function FormTabContent({ projectId, activeTab }: { projectId: string; activeTab: string }) {
-  const routeSlug = FORM_ROUTE_MAP[activeTab as FormType];
+const statusBadge: Record<string, string> = {
+  draft: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+  submitted: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  reviewed: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+  revised: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
+};
 
-  if (!routeSlug) {
-    return (
-      <Placeholder
-        message={`${FORM_LABELS[activeTab as FormType] ?? activeTab} submissions will appear here.`}
-      />
-    );
-  }
+function FormTabContent({
+  projectId,
+  activeTab,
+  submissions,
+}: {
+  projectId: string;
+  activeTab: string;
+  submissions: Submission[];
+}) {
+  const routeSlug = FORM_ROUTE_MAP[activeTab as FormType];
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          {FORM_LABELS[activeTab as FormType]} submissions will appear here.
+          {submissions.length === 0
+            ? `No ${FORM_LABELS[activeTab as FormType] ?? activeTab} submissions yet.`
+            : `${submissions.length} submission${submissions.length === 1 ? "" : "s"}`}
         </p>
-        <Link
-          href={`/dashboard/projects/${projectId}/forms/${routeSlug}/new`}
-          className="rounded-md bg-[#233B5C] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1a2d47] focus:outline-none focus:ring-2 focus:ring-[#5C6F8A] focus:ring-offset-2"
-        >
-          New Entry
-        </Link>
+        {routeSlug && (
+          <Link
+            href={`/dashboard/projects/${projectId}/forms/${routeSlug}/new`}
+            className="rounded-md bg-[#233B5C] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1a2d47] focus:outline-none focus:ring-2 focus:ring-[#5C6F8A] focus:ring-offset-2"
+          >
+            New Entry
+          </Link>
+        )}
       </div>
+
+      {submissions.length > 0 && (
+        <ul className="divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-700 dark:border-zinc-700">
+          {submissions.map((sub) => (
+            <li key={sub.id} className="flex items-center justify-between px-4 py-3">
+              <div>
+                <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                  {new Date(sub.form_date).toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </span>
+                {sub.submitted_at && (
+                  <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    at {new Date(sub.submitted_at).toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                )}
+              </div>
+              <span
+                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
+                  statusBadge[sub.status] ?? statusBadge.draft
+                }`}
+              >
+                {sub.status}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

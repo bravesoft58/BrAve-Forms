@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getProjectById } from "@/lib/queries/projects";
+import { getProjectById, getProjectSubmissions } from "@/lib/queries/projects";
 import ProjectTabs from "@/components/projects/ProjectTabs";
 
 const statusColors: Record<string, string> = {
@@ -21,6 +21,8 @@ export default async function ProjectDetailPage({
 
   const project = await getProjectById(id);
   if (!project) notFound();
+
+  const submissions = await getProjectSubmissions(id);
 
   const activeTab = tab || "permits";
   const badgeClass = statusColors[project.status] ?? statusColors.archived;
@@ -52,6 +54,7 @@ export default async function ProjectDetailPage({
         activeTab={activeTab}
         permits={project.project_permits ?? []}
         formRequirements={project.project_form_requirements ?? []}
+        submissions={submissions}
       />
     </div>
   );
