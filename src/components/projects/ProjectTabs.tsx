@@ -129,6 +129,10 @@ function Placeholder({ message }: { message: string }) {
 
 const FORM_ROUTE_MAP: Partial<Record<FormType, string>> = {
   daily_dust_log: "dust-log",
+  ndep_weekly_stormwater: "ndep-stormwater",
+  ndot_weekly_stormwater: "ndot-stormwater",
+  ndep_sad_application: "ndep-sad",
+  nnph_dust_permit: "nnph-dust-permit",
 };
 
 const statusBadge: Record<string, string> = {
