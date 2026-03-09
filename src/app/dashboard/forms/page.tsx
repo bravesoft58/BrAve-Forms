@@ -53,7 +53,7 @@ export default async function FormsPage() {
                   </p>
                   <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
                     {projectName} &middot;{" "}
-                    {new Date(sub.form_date).toLocaleDateString("en-US", {
+                    {new Date(sub.form_date + "T00:00:00").toLocaleDateString("en-US", {
                       weekday: "short",
                       month: "short",
                       day: "numeric",

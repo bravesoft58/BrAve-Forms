@@ -177,7 +177,7 @@ function FormTabContent({
               <>
                 <div>
                   <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                    {new Date(sub.form_date).toLocaleDateString("en-US", {
+                    {new Date(sub.form_date + "T00:00:00").toLocaleDateString("en-US", {
                       weekday: "short",
                       month: "short",
                       day: "numeric",

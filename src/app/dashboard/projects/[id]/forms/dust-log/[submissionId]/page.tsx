@@ -84,7 +84,7 @@ export default async function DustLogViewPage({
             Form Date
           </p>
           <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">
-            {new Date(submission.form_date).toLocaleDateString("en-US", {
+            {new Date(submission.form_date + "T00:00:00").toLocaleDateString("en-US", {
               weekday: "short",
               month: "short",
               day: "numeric",
