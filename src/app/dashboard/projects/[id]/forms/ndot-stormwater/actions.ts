@@ -41,7 +41,7 @@ export async function submitNdotStormwater(
   const data = result.data;
   const supabase = await createClient();
 
-  const { error: insertError } = await supabase
+  const { data: submission, error: insertError } = await supabase
     .from("form_submissions")
     .insert({
       project_id: projectId,
@@ -51,10 +51,22 @@ export async function submitNdotStormwater(
       status: "submitted",
       submitted_by: user.id,
       submitted_at: new Date().toISOString(),
-    });
+    })
+    .select("id")
+    .single();
 
-  if (insertError) {
-    return { error: insertError.message };
+  if (insertError || !submission) {
+    return { error: insertError?.message ?? "Failed to create submission." };
+  }
+
+  // Insert photo records into form_photos table (best-effort — form data JSONB is the source of truth)
+  if (data.photos.length > 0) {
+    const photoRows = data.photos.map((p) => ({
+      submission_id: submission.id,
+      file_path: p.url,
+      caption: p.caption || null,
+    }));
+    await supabase.from("form_photos").insert(photoRows);
   }
 
   revalidatePath(`/dashboard/projects/${projectId}`);

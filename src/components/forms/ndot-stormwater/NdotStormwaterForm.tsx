@@ -13,6 +13,8 @@ import {
 import Section1SiteInfo from "./Section1SiteInfo";
 import Section2BmpCategories from "./Section2BmpCategories";
 import Section3DischargeSignatures from "./Section3DischargeSignatures";
+import PhotoAttachment from "@/components/forms/shared/PhotoAttachment";
+import type { FormPhoto } from "@/lib/schemas/ndot-stormwater";
 
 interface NdotStormwaterFormProps {
   projectId: string;
@@ -112,7 +114,8 @@ export default function NdotStormwaterForm({
       contract_number: contractNumber,
       inspection_date: now.toISOString().split("T")[0],
       previous_inspection_date: "",
-      // Clear all 4 signature fields
+      // Clear signatures and photos from previous submission
+      photos: [],
       inspector_name: "",
       inspector_date: now.toISOString().split("T")[0],
       wpcm_name: "",
@@ -158,6 +161,13 @@ export default function NdotStormwaterForm({
 
       <Section1SiteInfo data={data} onChange={update} fieldErrors={state.fieldErrors} />
       <Section2BmpCategories data={data} onChange={update} />
+
+      <PhotoAttachment
+        photos={data.photos}
+        onPhotosChange={(photos: FormPhoto[]) => update("photos", photos)}
+        storagePath={`projects/${projectId}/ndot-stormwater`}
+      />
+
       <Section3DischargeSignatures data={data} onChange={update} fieldErrors={state.fieldErrors} />
 
       <div className="flex items-center gap-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
