@@ -101,6 +101,13 @@ export type NdepSadData = z.infer<typeof ndepSadSchema>;
 export type AddressBlock = z.infer<typeof addressBlockSchema>;
 export type ContactBlock = z.infer<typeof contactBlockSchema>;
 
+export const NDEP_SAD_APP_TYPE_LABELS: Record<string, string> = {
+  new_standalone: "New — Standalone SAD",
+  revision_standalone: "Revision — Standalone SAD",
+  renewal_standalone: "Renewal — Standalone SAD",
+  revision_within_class_ii: "Revision — Within Class II Air Quality Permit",
+};
+
 export function parseNdepSadForm(formData: FormData): unknown {
   const raw = formData.get("data") as string;
   try {
