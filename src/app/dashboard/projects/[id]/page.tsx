@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProjectById, getProjectSubmissions, getProjectDocuments } from "@/lib/queries/projects";
 import { getCurrentUser } from "@/lib/auth";
@@ -48,11 +49,19 @@ export default async function ProjectDetailPage({
               </p>
             )}
           </div>
-          <span
-            className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${badgeClass}`}
-          >
-            {project.status.replace("_", " ")}
-          </span>
+          <div className="flex shrink-0 items-center gap-3">
+            <Link
+              href={`/dashboard/projects/${project.id}/edit`}
+              className="rounded-md border border-zinc-300 px-3 py-1 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            >
+              Edit Project
+            </Link>
+            <span
+              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${badgeClass}`}
+            >
+              {project.status.replace("_", " ")}
+            </span>
+          </div>
         </div>
       </div>
 

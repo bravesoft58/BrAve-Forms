@@ -28,11 +28,13 @@ function ContactGroup({
   prefix,
   errors,
   showAddress,
+  defaults,
 }: {
   title: string;
   prefix: string;
   errors?: Record<string, string[]>;
   showAddress?: boolean;
+  defaults?: Record<string, string | null>;
 }) {
   return (
     <div className="space-y-3">
@@ -40,24 +42,24 @@ function ContactGroup({
       <div className="grid gap-3 sm:grid-cols-3">
         <div>
           <label htmlFor={`${prefix}_name`} className={labelClass}>Name</label>
-          <input id={`${prefix}_name`} name={`${prefix}_name`} type="text" className={inputClass} />
+          <input id={`${prefix}_name`} name={`${prefix}_name`} type="text" defaultValue={defaults?.[`${prefix}_name`] ?? ""} className={inputClass} />
           <FieldError errors={errors} field={`${prefix}_name`} />
         </div>
         <div>
           <label htmlFor={`${prefix}_phone`} className={labelClass}>Phone</label>
-          <input id={`${prefix}_phone`} name={`${prefix}_phone`} type="tel" className={inputClass} />
+          <input id={`${prefix}_phone`} name={`${prefix}_phone`} type="tel" defaultValue={defaults?.[`${prefix}_phone`] ?? ""} className={inputClass} />
           <FieldError errors={errors} field={`${prefix}_phone`} />
         </div>
         <div>
           <label htmlFor={`${prefix}_email`} className={labelClass}>Email</label>
-          <input id={`${prefix}_email`} name={`${prefix}_email`} type="email" className={inputClass} />
+          <input id={`${prefix}_email`} name={`${prefix}_email`} type="email" defaultValue={defaults?.[`${prefix}_email`] ?? ""} className={inputClass} />
           <FieldError errors={errors} field={`${prefix}_email`} />
         </div>
       </div>
       {showAddress && (
         <div>
           <label htmlFor={`${prefix}_address`} className={labelClass}>Address</label>
-          <input id={`${prefix}_address`} name={`${prefix}_address`} type="text" className={inputClass} />
+          <input id={`${prefix}_address`} name={`${prefix}_address`} type="text" defaultValue={defaults?.[`${prefix}_address`] ?? ""} className={inputClass} />
           <FieldError errors={errors} field={`${prefix}_address`} />
         </div>
       )}
@@ -65,9 +67,39 @@ function ContactGroup({
   );
 }
 
-export default function ProjectForm() {
-  const [state, formAction, pending] = useActionState(createProject, initialState);
-  const [selectedPermits, setSelectedPermits] = useState<Set<PermitType>>(new Set());
+interface Permit {
+  permit_type: string;
+  permit_number: string | null;
+}
+
+interface ProjectFormProps {
+  action?: (prev: ProjectState, formData: FormData) => Promise<ProjectState>;
+  submitLabel?: string;
+  pendingLabel?: string;
+  defaults?: Record<string, string | number | null>;
+  existingPermits?: Permit[];
+}
+
+export default function ProjectForm({
+  action,
+  submitLabel = "Create Project",
+  pendingLabel = "Creating...",
+  defaults,
+  existingPermits,
+}: ProjectFormProps = {}) {
+  const serverAction = action ?? createProject;
+  const [state, formAction, pending] = useActionState(serverAction, initialState);
+
+  const initialPermits = new Set<PermitType>(
+    (existingPermits ?? []).map((p) => p.permit_type as PermitType)
+  );
+  const [selectedPermits, setSelectedPermits] = useState<Set<PermitType>>(initialPermits);
+
+  // Build permit number lookup from existing data
+  const permitNumbers: Record<string, string> = {};
+  for (const p of existingPermits ?? []) {
+    if (p.permit_number) permitNumbers[p.permit_type] = p.permit_number;
+  }
 
   function togglePermit(permit: PermitType) {
     setSelectedPermits((prev) => {
@@ -85,6 +117,8 @@ export default function ProjectForm() {
       requiredForms.add(form);
     }
   }
+
+  const d = defaults ?? {};
 
   return (
     <form action={formAction} className="space-y-8">
@@ -104,7 +138,7 @@ export default function ProjectForm() {
           <label htmlFor="name" className={labelClass}>
             Project Name <span className="text-red-500">*</span>
           </label>
-          <input id="name" name="name" type="text" required className={inputClass} />
+          <input id="name" name="name" type="text" required defaultValue={String(d.name ?? "")} className={inputClass} />
           <FieldError errors={state.fieldErrors} field="name" />
         </div>
 
@@ -112,7 +146,7 @@ export default function ProjectForm() {
           <label htmlFor="address" className={labelClass}>
             Address <span className="text-red-500">*</span>
           </label>
-          <input id="address" name="address" type="text" required className={inputClass} />
+          <input id="address" name="address" type="text" required defaultValue={String(d.address ?? "")} className={inputClass} />
           <FieldError errors={state.fieldErrors} field="address" />
         </div>
 
@@ -121,14 +155,14 @@ export default function ProjectForm() {
             <label htmlFor="start_date" className={labelClass}>
               Start Date <span className="text-red-500">*</span>
             </label>
-            <input id="start_date" name="start_date" type="date" required className={inputClass} />
+            <input id="start_date" name="start_date" type="date" required defaultValue={String(d.start_date ?? "")} className={inputClass} />
             <FieldError errors={state.fieldErrors} field="start_date" />
           </div>
           <div>
             <label htmlFor="completion_date" className={labelClass}>
               Completion Date <span className="text-red-500">*</span>
             </label>
-            <input id="completion_date" name="completion_date" type="date" required className={inputClass} />
+            <input id="completion_date" name="completion_date" type="date" required defaultValue={String(d.completion_date ?? "")} className={inputClass} />
             <FieldError errors={state.fieldErrors} field="completion_date" />
           </div>
         </div>
@@ -139,10 +173,10 @@ export default function ProjectForm() {
         <h3 className="text-lg font-semibold text-[#233B5C] dark:text-zinc-100">
           Contacts
         </h3>
-        <ContactGroup title="Superintendent" prefix="superintendent" errors={state.fieldErrors} />
-        <ContactGroup title="Foreman" prefix="foreman" errors={state.fieldErrors} />
-        <ContactGroup title="Project Manager" prefix="pm" errors={state.fieldErrors} />
-        <ContactGroup title="Owner Representative" prefix="owner_rep" errors={state.fieldErrors} showAddress />
+        <ContactGroup title="Superintendent" prefix="superintendent" errors={state.fieldErrors} defaults={d as Record<string, string | null>} />
+        <ContactGroup title="Foreman" prefix="foreman" errors={state.fieldErrors} defaults={d as Record<string, string | null>} />
+        <ContactGroup title="Project Manager" prefix="pm" errors={state.fieldErrors} defaults={d as Record<string, string | null>} />
+        <ContactGroup title="Owner Representative" prefix="owner_rep" errors={state.fieldErrors} showAddress defaults={d as Record<string, string | null>} />
       </section>
 
       {/* Section 3: Site Details */}
@@ -154,19 +188,19 @@ export default function ProjectForm() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="acres_disturbed" className={labelClass}>Acres Disturbed</label>
-            <input id="acres_disturbed" name="acres_disturbed" type="number" step="0.01" min="0" className={inputClass} />
+            <input id="acres_disturbed" name="acres_disturbed" type="number" step="0.01" min="0" defaultValue={d.acres_disturbed != null ? String(d.acres_disturbed) : ""} className={inputClass} />
             <FieldError errors={state.fieldErrors} field="acres_disturbed" />
           </div>
           <div>
             <label htmlFor="soil_type" className={labelClass}>Soil Type</label>
-            <input id="soil_type" name="soil_type" type="text" className={inputClass} />
+            <input id="soil_type" name="soil_type" type="text" defaultValue={String(d.soil_type ?? "")} className={inputClass} />
             <FieldError errors={state.fieldErrors} field="soil_type" />
           </div>
         </div>
 
         <div>
           <label htmlFor="parcel_numbers" className={labelClass}>Parcel Numbers</label>
-          <input id="parcel_numbers" name="parcel_numbers" type="text" className={inputClass} />
+          <input id="parcel_numbers" name="parcel_numbers" type="text" defaultValue={String(d.parcel_numbers ?? "")} className={inputClass} />
           <FieldError errors={state.fieldErrors} field="parcel_numbers" />
         </div>
 
@@ -176,6 +210,7 @@ export default function ProjectForm() {
             id="description"
             name="description"
             rows={3}
+            defaultValue={String(d.description ?? "")}
             className={inputClass}
           />
           <FieldError errors={state.fieldErrors} field="description" />
@@ -214,6 +249,7 @@ export default function ProjectForm() {
                     name="permit_number"
                     type="text"
                     placeholder="Permit number (optional)"
+                    defaultValue={permitNumbers[permit] ?? ""}
                     className={`${inputClass} max-w-xs`}
                   />
                 </div>
@@ -242,7 +278,7 @@ export default function ProjectForm() {
           disabled={pending}
           className="rounded-md bg-[#233B5C] px-6 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1a2d47] focus:outline-none focus:ring-2 focus:ring-[#5C6F8A] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {pending ? "Creating..." : "Create Project"}
+          {pending ? pendingLabel : submitLabel}
         </button>
       </div>
     </form>
