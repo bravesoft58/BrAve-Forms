@@ -4,9 +4,10 @@
 **Story Points:** 2
 **Priority:** HIGH
 **Dependencies:** BF-12, BF-13
-**Status:** NOT STARTED
+**Status:** COMPLETE
+**Completed:** 2026-03-10T23:10:00Z
 **Created:** 2026-03-09
-**Last Updated:** 2026-03-09T16:00:00Z
+**Last Updated:** 2026-03-10T23:10:00Z
 **Backlog Ref:** Salvage S3-009
 
 ---
@@ -19,22 +20,22 @@ Build the read-only view for submitted NDOT stormwater inspections including att
 
 ## Acceptance Criteria
 
-- [ ] View page renders all 3 sections of submitted NDOT stormwater form
-- [ ] All 11 BMP categories display in table format
-- [ ] Conditional fields show values (not show/hide logic -- just display what was submitted)
-- [ ] Dual signatures display (Inspector + WPCM)
-- [ ] Attached photos display with captions
-- [ ] Metadata card shows: report no, form date, submitted at, status badge
-- [ ] Submission list in project tab links to view page
-- [ ] Back button returns to project form tab
+- [x] View page renders all 3 sections of submitted NDOT stormwater form
+- [x] All 11 BMP categories display in table format
+- [x] Conditional fields show values (not show/hide logic -- just display what was submitted)
+- [x] Dual signatures display (Inspector + WPCM)
+- [x] Attached photos display with captions
+- [x] Metadata card shows: report no, form date, submitted at, status badge
+- [x] Submission list in project tab links to view page
+- [x] Back button returns to project form tab
 
 ---
 
 ## Tasks
 
-- [ ] T-14.1: Build NdotStormwaterView component with photo gallery (~200 lines) (1h)
-- [ ] T-14.2: Create view page route (0.5h)
-- [ ] T-14.3: Verify end-to-end: submit form with photos -> view shows everything (0.25h)
+- [x] T-14.1: Build NdotStormwaterView component with photo gallery (~200 lines) (1h)
+- [x] T-14.2: Create view page route (0.5h)
+- [x] T-14.3: Verify end-to-end: submit form with photos -> view shows everything (0.25h)
 
 ---
 

@@ -27,16 +27,18 @@
 | [BF-09](stories/BF-09-form-infrastructure.md) | Form infrastructure (constants, routes, permit triggers) | 3 | HIGH | None | COMPLETE |
 | [BF-10](stories/BF-10-ndep-stormwater-form.md) | NDEP Weekly Stormwater form (3 sections) | 8 | HIGH | BF-09 | COMPLETE |
 | [BF-11](stories/BF-11-ndep-stormwater-view.md) | NDEP Stormwater read-only view + routing | 2 | HIGH | BF-10 | COMPLETE |
-| [BF-12](stories/BF-12-ndot-stormwater-form.md) | NDOT Weekly Stormwater form (3 sections) | 8 | HIGH | BF-09 | NOT STARTED |
-| [BF-13](stories/BF-13-ndot-photo-attachment.md) | NDOT photo attachment (Supabase Storage) | 3 | HIGH | BF-12 | NOT STARTED |
-| [BF-14](stories/BF-14-ndot-stormwater-view.md) | NDOT Stormwater read-only view + routing (with photos) | 2 | HIGH | BF-12, BF-13 | NOT STARTED |
+| [BF-12](stories/BF-12-ndot-stormwater-form.md) | NDOT Weekly Stormwater form (3 sections) | 8 | HIGH | BF-09 | COMPLETE |
+| [BF-13](stories/BF-13-ndot-photo-attachment.md) | NDOT photo attachment (Supabase Storage) | 3 | HIGH | BF-12 | COMPLETE |
+| [BF-14](stories/BF-14-ndot-stormwater-view.md) | NDOT Stormwater read-only view + routing (with photos) | 2 | HIGH | BF-12, BF-13 | COMPLETE |
 | [BF-15](stories/BF-15-ndep-sad-form.md) | NDEP SAD Application form + view | 5 | HIGH | BF-09 | NOT STARTED |
 | [BF-16](stories/BF-16-nnph-dust-permit-form.md) | NNPH Dust Control Permit form + view | 5 | HIGH | BF-09 | NOT STARTED |
 | [BF-17](stories/BF-17-document-upload.md) | Document upload system (Supabase Storage + Documents tab) | 3 | MEDIUM | None | NOT STARTED |
 | [BF-18](stories/BF-18-project-edit.md) | Project edit page | 3 | MEDIUM | None | NOT STARTED |
 | [BF-19](stories/BF-19-inspector-qr-portal.md) | Inspector QR Portal | 5 | MEDIUM | BF-11, BF-14, BF-15, BF-16, BF-17 | NOT STARTED |
 | [BF-20](stories/BF-20-e2e-verification.md) | E2E verification -- all forms + portal | 1 | MEDIUM | All above | NOT STARTED |
-| **Total** | | **48** | | | |
+| [BF-21](stories/BF-21-ndot-form-compliance-gaps.md) | NDOT Stormwater form compliance gap fixes | 2 | MEDIUM | BF-12 | NOT STARTED |
+| [BF-22](stories/BF-22-ndep-form-compliance-gaps.md) | NDEP Stormwater form compliance gap fixes | 5 | HIGH | BF-10 | NOT STARTED |
+| **Total** | | **55** | | | |
 
 ---
 
@@ -44,8 +46,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Stories Complete | 3/12 |
-| Story Points Complete | 13/48 (27%) |
+| Stories Complete | 6/14 |
+| Story Points Complete | 26/55 (47%) |
 | Tests at Sprint Start | 0 (no test suite) |
 
 ---
@@ -105,4 +107,4 @@ Stories should be executed in this order based on dependencies and priority:
 
 ---
 
-**Last Updated:** 2026-03-09T22:35:00Z
+**Last Updated:** 2026-03-10T23:15:00Z
