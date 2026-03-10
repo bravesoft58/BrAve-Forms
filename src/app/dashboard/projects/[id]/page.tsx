@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
-import { getProjectById, getProjectSubmissions } from "@/lib/queries/projects";
+import { getProjectById, getProjectSubmissions, getProjectDocuments } from "@/lib/queries/projects";
+import { getCurrentUser } from "@/lib/auth";
 import ProjectTabs from "@/components/projects/ProjectTabs";
 
 const statusColors: Record<string, string> = {
@@ -19,10 +20,16 @@ export default async function ProjectDetailPage({
   const { id } = await params;
   const { tab } = await searchParams;
 
-  const project = await getProjectById(id);
+  const [project, user] = await Promise.all([
+    getProjectById(id),
+    getCurrentUser(),
+  ]);
   if (!project) notFound();
 
-  const submissions = await getProjectSubmissions(id);
+  const [submissions, documents] = await Promise.all([
+    getProjectSubmissions(id),
+    getProjectDocuments(id),
+  ]);
 
   const activeTab = tab || "permits";
   const badgeClass = statusColors[project.status] ?? statusColors.archived;
@@ -55,6 +62,8 @@ export default async function ProjectDetailPage({
         permits={project.project_permits ?? []}
         formRequirements={project.project_form_requirements ?? []}
         submissions={submissions}
+        documents={documents}
+        userRole={user?.role ?? "user"}
       />
     </div>
   );

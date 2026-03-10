@@ -86,6 +86,19 @@ export async function getAllSubmissions() {
   return data;
 }
 
+export async function getProjectDocuments(projectId: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("project_documents")
+    .select("id, name, category, file_path, file_size, mime_type, uploaded_by, created_at")
+    .eq("project_id", projectId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 export async function getSubmissionById(submissionId: string) {
   const supabase = await createClient();
 

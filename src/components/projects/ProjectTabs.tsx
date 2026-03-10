@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PERMIT_LABELS, FORM_LABELS, type FormType, type PermitType } from "@/lib/constants/permits";
+import DocumentsTab from "./DocumentsTab";
 
 interface Permit {
   id: string;
@@ -24,18 +25,33 @@ interface Submission {
   created_at: string;
 }
 
+interface ProjectDocument {
+  id: string;
+  name: string;
+  category: string;
+  file_path: string;
+  file_size: number;
+  mime_type: string;
+  uploaded_by: string;
+  created_at: string;
+}
+
 export default function ProjectTabs({
   projectId,
   activeTab,
   permits,
   formRequirements,
   submissions = [],
+  documents = [],
+  userRole = "user",
 }: {
   projectId: string;
   activeTab: string;
   permits: Permit[];
   formRequirements: FormRequirement[];
   submissions?: Submission[];
+  documents?: ProjectDocument[];
+  userRole?: "admin" | "user";
 }) {
   const pathname = usePathname();
   const basePath = pathname.split("?")[0];
@@ -81,7 +97,7 @@ export default function ProjectTabs({
           <PermitsContent permits={permits} />
         )}
         {activeTab === "documents" && (
-          <Placeholder message="Document management coming soon." />
+          <DocumentsTab projectId={projectId} documents={documents} userRole={userRole} />
         )}
         {activeTab === "team" && (
           <Placeholder message="Team management coming soon." />
