@@ -6,7 +6,6 @@ import { getCurrentUser } from "@/lib/auth";
 
 export type DocumentActionState = {
   error: string;
-  success?: boolean;
 };
 
 const BUCKET = "project-documents";
@@ -45,7 +44,7 @@ export async function saveDocumentRecord(
   if (insertError) return { error: insertError.message };
 
   revalidatePath(`/dashboard/projects/${projectId}`);
-  return { error: "", success: true };
+  return { error: "" };
 }
 
 export async function deleteDocument(
@@ -59,14 +58,7 @@ export async function deleteDocument(
 
   const supabase = await createClient();
 
-  // Delete from storage
-  const { error: storageError } = await supabase.storage
-    .from(BUCKET)
-    .remove([filePath]);
-
-  if (storageError) return { error: `Storage delete failed: ${storageError.message}` };
-
-  // Delete metadata row
+  // Delete metadata row first (reversible — file still in storage if this fails)
   const { error: dbError } = await supabase
     .from("project_documents")
     .delete()
@@ -74,6 +66,13 @@ export async function deleteDocument(
 
   if (dbError) return { error: dbError.message };
 
+  // Delete from storage (orphaned file is harmless if this fails)
+  const { error: storageError } = await supabase.storage
+    .from(BUCKET)
+    .remove([filePath]);
+
+  if (storageError) return { error: `File removed from records but storage cleanup failed: ${storageError.message}` };
+
   revalidatePath(`/dashboard/projects/${projectId}`);
-  return { error: "", success: true };
+  return { error: "" };
 }

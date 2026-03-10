@@ -29,3 +29,15 @@
 - **Problem:** `success?: boolean` field defined in AuthState type but never set or read. Dead code shipped.
 - **Fix:** Removed the unused field during verify.
 - **Prevention:** When defining return types for server actions, only include fields that are actually used by the consuming component.
+
+### Repeated dead `success` field pattern in DocumentActionState (2026-03-10)
+- **Context:** BF-17 document-actions.ts — same anti-pattern as BF-02
+- **Problem:** `success?: boolean` set in server action returns but never read by DocumentsTab consumer. Dead code shipped again despite the BF-02 lesson existing.
+- **Fix:** Removed the field during verify.
+- **Prevention:** Before adding optional fields to action state types, verify the consuming component actually reads them.
+
+### Delete operation ordering for storage + DB cleanup (2026-03-10)
+- **Context:** BF-17 deleteDocument server action — deletes from Supabase Storage then DB
+- **Problem:** Storage-first delete means if DB delete fails, metadata row points to a deleted file (404 downloads). Reverse order is strictly better.
+- **Fix:** Reordered to delete DB row first, then storage file. DB failure = fully consistent state. Storage failure = orphaned file (harmless, cleanable).
+- **Prevention:** When deleting from two systems (storage + DB), delete the metadata/index first. An orphaned blob is harmless; a dangling reference causes user-facing errors.

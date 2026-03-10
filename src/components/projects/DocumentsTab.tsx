@@ -134,8 +134,9 @@ export default function DocumentsTab({ projectId, documents, userRole }: Documen
     });
   }
 
+  const supabase = createClient();
+
   function getDownloadUrl(filePath: string): string {
-    const supabase = createClient();
     const { data } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
     return data.publicUrl;
   }
