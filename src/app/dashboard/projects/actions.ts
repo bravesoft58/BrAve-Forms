@@ -131,6 +131,31 @@ function buildProjectFields(data: ReturnType<typeof projectCreateSchema.parse>) 
   };
 }
 
+export async function generateQrToken(
+  projectId: string
+): Promise<{ token?: string; error?: string }> {
+  const user = await getCurrentUser();
+  if (!user) return { error: "You must be logged in." };
+
+  const supabase = await createClient();
+
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 30);
+
+  const { data, error } = await supabase
+    .from("qr_tokens")
+    .insert({
+      project_id: projectId,
+      expires_at: expiresAt.toISOString(),
+      created_by: user.id,
+    })
+    .select("token")
+    .single();
+
+  if (error) return { error: error.message };
+  return { token: data.token };
+}
+
 function deriveFormTypes(permits: { permit_type: string }[]): FormType[] {
   const formTypes = new Set<FormType>();
   for (const permit of permits) {

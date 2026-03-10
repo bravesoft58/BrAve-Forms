@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getProjectById, getProjectSubmissions, getProjectDocuments } from "@/lib/queries/projects";
 import { getCurrentUser } from "@/lib/auth";
 import ProjectTabs from "@/components/projects/ProjectTabs";
+import QrCodeModal from "@/components/inspector/QrCodeModal";
 
 const statusColors: Record<string, string> = {
   active: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
@@ -50,6 +51,7 @@ export default async function ProjectDetailPage({
             )}
           </div>
           <div className="flex shrink-0 items-center gap-3">
+            <QrCodeModal projectId={project.id} />
             <Link
               href={`/dashboard/projects/${project.id}/edit`}
               className="rounded-md border border-zinc-300 px-3 py-1 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
