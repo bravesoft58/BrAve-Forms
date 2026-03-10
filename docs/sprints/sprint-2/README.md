@@ -33,7 +33,7 @@
 | [BF-15](stories/BF-15-ndep-sad-form.md) | NDEP SAD Application form + view | 5 | HIGH | BF-09 | COMPLETE |
 | [BF-16](stories/BF-16-nnph-dust-permit-form.md) | NNPH Dust Control Permit form + view | 5 | HIGH | BF-09 | COMPLETE |
 | [BF-17](stories/BF-17-document-upload.md) | Document upload system (Supabase Storage + Documents tab) | 3 | MEDIUM | None | COMPLETE |
-| [BF-18](stories/BF-18-project-edit.md) | Project edit page | 3 | MEDIUM | None | NOT STARTED |
+| [BF-18](stories/BF-18-project-edit.md) | Project edit page | 3 | MEDIUM | None | COMPLETE |
 | [BF-19](stories/BF-19-inspector-qr-portal.md) | Inspector QR Portal | 5 | MEDIUM | BF-11, BF-14, BF-15, BF-16, BF-17 | NOT STARTED |
 | [BF-20](stories/BF-20-e2e-verification.md) | E2E verification -- all forms + portal | 1 | MEDIUM | All above | NOT STARTED |
 | [BF-21](stories/BF-21-ndot-form-compliance-gaps.md) | NDOT Stormwater form compliance gap fixes | 2 | MEDIUM | BF-12 | NOT STARTED |
@@ -46,8 +46,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Stories Complete | 9/14 |
-| Story Points Complete | 39/55 (71%) |
+| Stories Complete | 10/14 |
+| Story Points Complete | 42/55 (76%) |
 | Tests at Sprint Start | 0 (no test suite) |
 
 ---
