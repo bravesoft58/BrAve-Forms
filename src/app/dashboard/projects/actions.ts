@@ -41,27 +41,7 @@ export async function createProject(
   const { data: project, error: projectError } = await supabase
     .from("projects")
     .insert({
-      name: data.name,
-      address: data.address,
-      start_date: data.start_date,
-      completion_date: data.completion_date,
-      description: data.description || null,
-      acres_disturbed: data.acres_disturbed ? Number(data.acres_disturbed) : null,
-      soil_type: data.soil_type || null,
-      parcel_numbers: data.parcel_numbers || null,
-      superintendent_name: data.superintendent_name || null,
-      superintendent_phone: data.superintendent_phone || null,
-      superintendent_email: data.superintendent_email || null,
-      foreman_name: data.foreman_name || null,
-      foreman_phone: data.foreman_phone || null,
-      foreman_email: data.foreman_email || null,
-      pm_name: data.pm_name || null,
-      pm_phone: data.pm_phone || null,
-      pm_email: data.pm_email || null,
-      owner_rep_name: data.owner_rep_name || null,
-      owner_rep_phone: data.owner_rep_phone || null,
-      owner_rep_email: data.owner_rep_email || null,
-      owner_rep_address: data.owner_rep_address || null,
+      ...buildProjectFields(data),
       created_by: user.id,
     })
     .select("id")
@@ -91,15 +71,10 @@ export async function createProject(
   }
 
   // Derive and insert form requirements (deduplicated)
-  const formTypes = new Set<FormType>();
-  for (const permit of data.permits) {
-    for (const form of PERMIT_FORM_MAP[permit.permit_type]) {
-      formTypes.add(form);
-    }
-  }
+  const formTypes = deriveFormTypes(data.permits);
 
-  if (formTypes.size > 0) {
-    const formRows = Array.from(formTypes).map((ft) => ({
+  if (formTypes.length > 0) {
+    const formRows = formTypes.map((ft) => ({
       project_id: projectId,
       form_type: ft,
       added_by: "auto_permit",

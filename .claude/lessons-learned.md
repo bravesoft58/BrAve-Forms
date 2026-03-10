@@ -41,3 +41,9 @@
 - **Problem:** Storage-first delete means if DB delete fails, metadata row points to a deleted file (404 downloads). Reverse order is strictly better.
 - **Fix:** Reordered to delete DB row first, then storage file. DB failure = fully consistent state. Storage failure = orphaned file (harmless, cleanable).
 - **Prevention:** When deleting from two systems (storage + DB), delete the metadata/index first. An orphaned blob is harmless; a dangling reference causes user-facing errors.
+
+### Extract helpers before duplication, not after (2026-03-10)
+- **Context:** BF-18 Project Edit — `buildProjectFields` and `deriveFormTypes` extracted for `updateProject` but `createProject` kept inline duplicates of the same logic.
+- **Problem:** 21 field mappings duplicated between `createProject` (inline) and `buildProjectFields` (helper). Adding a field requires updating two places.
+- **Fix:** Refactored `createProject` to use `buildProjectFields` (with spread + `created_by`) and `deriveFormTypes`.
+- **Prevention:** When extracting a helper for a new function, immediately refactor the original function to use it too. Don't leave the old inline version behind.
