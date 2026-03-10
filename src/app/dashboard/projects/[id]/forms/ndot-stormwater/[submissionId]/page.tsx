@@ -28,7 +28,7 @@ function YNBadge({ value }: { value?: string }) {
   return <span className="text-zinc-400">N/A</span>;
 }
 
-const PRECIP_LABELS: Record<string, string> = {
+const INTENSITY_LABELS: Record<string, string> = {
   none: "None", light: "Light", moderate: "Moderate", heavy: "Heavy",
 };
 const TEMP_LABELS: Record<string, string> = {
@@ -147,8 +147,8 @@ export default async function NdotStormwaterViewPage({
         </h3>
         <div className="grid gap-4 sm:grid-cols-4">
           <div><p className={labelClass}>Weather</p><p className={valueClass}>{(data.weather ?? []).join(", ") || "—"}</p></div>
-          <div><p className={labelClass}>Precip Intensity</p><p className={valueClass}>{PRECIP_LABELS[data.precip_intensity ?? ""] ?? "—"}</p></div>
-          <div><p className={labelClass}>Wind</p><p className={valueClass}>{PRECIP_LABELS[data.wind ?? ""] ?? "—"}</p></div>
+          <div><p className={labelClass}>Precip Intensity</p><p className={valueClass}>{INTENSITY_LABELS[data.precip_intensity ?? ""] ?? "—"}</p></div>
+          <div><p className={labelClass}>Wind</p><p className={valueClass}>{INTENSITY_LABELS[data.wind ?? ""] ?? "—"}</p></div>
           <div><p className={labelClass}>Temperature</p><p className={valueClass}>{TEMP_LABELS[data.temp_range ?? ""] ?? "—"}</p></div>
         </div>
         {!data.precip_na && (
