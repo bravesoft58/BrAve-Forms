@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useCallback, useState, useTransition } from "react";
 import QRCode from "react-qr-code";
 import { X, QrCode, Copy, Check } from "lucide-react";
 import { generateQrToken } from "@/app/dashboard/projects/actions";
@@ -34,6 +34,17 @@ export default function QrCodeModal({ projectId }: { projectId: string }) {
     }
   }
 
+  const handleClose = useCallback(() => setOpen(false), []);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") handleClose();
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, handleClose]);
+
   async function handleCopy() {
     if (!inspectorUrl) return;
     await navigator.clipboard.writeText(inspectorUrl);
@@ -53,11 +64,14 @@ export default function QrCodeModal({ projectId }: { projectId: string }) {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+          onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
+        >
           <div className="relative w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-zinc-900">
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={handleClose}
               className="absolute right-3 top-3 rounded-md p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
             >
               <X className="h-5 w-5" />

@@ -10,7 +10,11 @@ export async function validateToken(token: string): Promise<string | null> {
     .gt("expires_at", new Date().toISOString())
     .single();
 
-  if (error || !data) return null;
+  if (error) {
+    console.error("[inspector] Token validation failed:", error.message);
+    return null;
+  }
+  if (!data) return null;
   return data.project_id;
 }
 
