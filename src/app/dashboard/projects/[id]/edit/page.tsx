@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getProjectById } from "@/lib/queries/projects";
 import { getCurrentUser } from "@/lib/auth";
 import { updateProject } from "@/app/dashboard/projects/actions";
@@ -16,6 +16,7 @@ export default async function EditProjectPage({
     getCurrentUser(),
   ]);
   if (!project || !user) notFound();
+  if (user.role !== "admin") redirect(`/dashboard/projects/${id}`);
 
   const boundUpdate = updateProject.bind(null, id);
 

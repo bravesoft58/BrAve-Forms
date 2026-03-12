@@ -20,6 +20,9 @@ export async function createProject(
   if (!user) {
     return { error: "You must be logged in." };
   }
+  if (user.role !== "admin") {
+    return { error: "Only administrators can create projects." };
+  }
 
   const raw = parseProjectForm(formData);
   const result = projectCreateSchema.safeParse(raw);
@@ -48,6 +51,9 @@ export async function createProject(
     .single();
 
   if (projectError) {
+    if (projectError.message.includes("row-level security")) {
+      return { error: "You don't have permission to create projects. Contact your administrator." };
+    }
     return { error: projectError.message };
   }
 
@@ -175,6 +181,9 @@ export async function updateProject(
 ): Promise<ProjectState> {
   const user = await getCurrentUser();
   if (!user) return { error: "You must be logged in." };
+  if (user.role !== "admin") {
+    return { error: "Only administrators can edit projects." };
+  }
 
   const raw = parseProjectForm(formData);
   const result = projectCreateSchema.safeParse(raw);
@@ -198,7 +207,12 @@ export async function updateProject(
     .update(buildProjectFields(data))
     .eq("id", projectId);
 
-  if (updateError) return { error: updateError.message };
+  if (updateError) {
+    if (updateError.message.includes("row-level security")) {
+      return { error: "You don't have permission to edit projects. Contact your administrator." };
+    }
+    return { error: updateError.message };
+  }
 
   // Replace permits: delete all, then re-insert
   const { error: deletePermitsError } = await supabase
