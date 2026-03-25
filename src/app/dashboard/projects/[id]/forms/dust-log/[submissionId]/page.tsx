@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import PrintButton from "@/components/print-button";
 import { getProjectById, getSubmissionById } from "@/lib/queries/projects";
 
 const statusBadge: Record<string, string> = {
@@ -164,7 +165,7 @@ export default async function DustLogViewPage({
       )}
 
       {/* Actions */}
-      <div className="mt-6 flex items-center gap-4">
+      <div className="mt-6 flex items-center gap-4 print:hidden">
         <Link
           href={`/dashboard/projects/${id}?tab=daily_dust_log`}
           className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
@@ -177,6 +178,7 @@ export default async function DustLogViewPage({
         >
           Add Entries
         </Link>
+        <PrintButton />
       </div>
     </div>
   );

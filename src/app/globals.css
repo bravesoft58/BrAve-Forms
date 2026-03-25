@@ -24,3 +24,70 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Print styles — clean PDF export of form content */
+@media print {
+  /* Hide dashboard shell (sidebar, header) and action buttons */
+  nav,
+  header,
+  aside,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Reset layout so form content fills the page */
+  body,
+  html {
+    background: white !important;
+    color: black !important;
+  }
+
+  main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Remove fixed/flex layout from dashboard shell */
+  body > div,
+  body > div > div {
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Force light mode for print */
+  * {
+    color-scheme: light !important;
+  }
+
+  .dark\:bg-zinc-900,
+  .dark\:bg-zinc-950,
+  .dark\:bg-zinc-800,
+  .dark\:bg-zinc-800\/50 {
+    background-color: white !important;
+  }
+
+  .dark\:text-zinc-100,
+  .dark\:text-zinc-300,
+  .dark\:text-zinc-400 {
+    color: inherit !important;
+  }
+
+  .dark\:border-zinc-700,
+  .dark\:border-zinc-800 {
+    border-color: #e4e4e7 !important;
+  }
+
+  /* Ensure tables don't break across pages */
+  table {
+    page-break-inside: auto;
+  }
+  tr {
+    page-break-inside: avoid;
+  }
+
+  /* Keep sections together */
+  section {
+    page-break-inside: avoid;
+  }
+}
