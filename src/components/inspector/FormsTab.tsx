@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { FORM_LABELS, type FormType } from "@/lib/constants/permits";
+import InspectorFormDetail from "./FormDetail";
 
 interface Submission {
   id: string;
@@ -29,41 +30,6 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function getSummaryFields(formType: string, data: Record<string, unknown> | unknown[]): { label: string; value: string }[] {
-  if (Array.isArray(data)) {
-    // Dust log — array of entries
-    return [{ label: "Entries", value: `${data.length} inspection${data.length === 1 ? "" : "s"} recorded` }];
-  }
-
-  switch (formType) {
-    case "ndep_weekly_stormwater":
-      return [
-        { label: "Inspector", value: String(data.inspector_name || "—") },
-        { label: "Weather", value: String(data.weather_conditions || "—") },
-        { label: "Rainfall", value: data.rainfall_amount ? `${data.rainfall_amount}"` : "None" },
-      ];
-    case "ndot_weekly_stormwater":
-      return [
-        { label: "Inspector", value: String(data.inspector_name || "—") },
-        { label: "Weather", value: String(data.weather_conditions || "—") },
-        { label: "Rainfall", value: data.rainfall_amount ? `${data.rainfall_amount}"` : "None" },
-      ];
-    case "ndep_sad_application":
-      return [
-        { label: "Applicant", value: String(data.applicant_name || "—") },
-        { label: "Total Acres", value: data.total_acres ? `${data.total_acres} ac` : "—" },
-        { label: "Signature", value: data.signature_name ? "Signed" : "Unsigned" },
-      ];
-    case "nnph_dust_permit":
-      return [
-        { label: "Applicant", value: String(data.applicant_name || data.company_name || "—") },
-        { label: "Application Type", value: String(data.application_type || "—") },
-        { label: "Signature", value: data.signature_name ? "Signed" : "Unsigned" },
-      ];
-    default:
-      return [];
-  }
-}
 
 export default function InspectorFormsTab({ submissions }: { submissions: Submission[] }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -103,7 +69,6 @@ export default function InspectorFormsTab({ submissions }: { submissions: Submis
           <ul className="divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-700 dark:border-zinc-700">
             {subs.map((sub) => {
               const isExpanded = expanded.has(sub.id);
-              const summary = getSummaryFields(sub.form_type, sub.data);
 
               return (
                 <li key={sub.id}>
@@ -139,20 +104,9 @@ export default function InspectorFormsTab({ submissions }: { submissions: Submis
                       {sub.status}
                     </span>
                   </button>
-                  {isExpanded && summary.length > 0 && (
-                    <div className="border-t border-zinc-100 bg-zinc-50/50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-800/30">
-                      <dl className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3">
-                        {summary.map((field) => (
-                          <div key={field.label}>
-                            <dt className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                              {field.label}
-                            </dt>
-                            <dd className="mt-0.5 text-sm text-zinc-900 dark:text-zinc-100">
-                              {field.value}
-                            </dd>
-                          </div>
-                        ))}
-                      </dl>
+                  {isExpanded && (
+                    <div className="border-t border-zinc-100 bg-zinc-50/50 px-4 py-4 dark:border-zinc-800 dark:bg-zinc-800/30">
+                      <InspectorFormDetail formType={sub.form_type} data={sub.data} />
                     </div>
                   )}
                 </li>
