@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.verifyOtp({ type, token_hash });
 
     if (!error) {
-      redirectTo.pathname = "/dashboard";
+      // Password reset flow — send to reset page instead of dashboard
+      redirectTo.pathname = type === "recovery" ? "/reset-password" : "/dashboard";
       return NextResponse.redirect(redirectTo);
     }
   }

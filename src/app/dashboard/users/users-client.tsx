@@ -1,8 +1,8 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
-import { UserPlus, Trash2, Shield, ShieldOff, Loader2 } from "lucide-react";
-import { inviteUser, deleteUser, updateRole, type UserActionState } from "./actions";
+import { UserPlus, Trash2, Shield, ShieldOff, Loader2, RotateCw } from "lucide-react";
+import { inviteUser, deleteUser, updateRole, resendInvite, type UserActionState } from "./actions";
 import type { UserProfile } from "@/lib/queries/users";
 
 const inputClass =
@@ -27,6 +27,14 @@ export default function UsersClient({ users, currentUserId }: UsersClientProps) 
     setActionMsg({});
     startTransition(async () => {
       const result = await updateRole(userId, newRole);
+      setActionMsg(result.error ? { error: result.error } : { success: result.success });
+    });
+  }
+
+  function handleResend(email: string) {
+    setActionMsg({});
+    startTransition(async () => {
+      const result = await resendInvite(email);
       setActionMsg(result.error ? { error: result.error } : { success: result.success });
     });
   }
@@ -181,6 +189,15 @@ export default function UsersClient({ users, currentUserId }: UsersClientProps) 
                   <td className="whitespace-nowrap px-4 py-3 text-right text-sm">
                     {!isCurrentUser && (
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleResend(u.email)}
+                          disabled={actionPending}
+                          title="Resend invite"
+                          className="rounded p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 disabled:opacity-50 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                        >
+                          <RotateCw className="h-4 w-4" />
+                        </button>
                         <button
                           type="button"
                           onClick={() => handleRoleToggle(u.id, u.role)}

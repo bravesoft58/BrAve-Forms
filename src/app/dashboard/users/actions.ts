@@ -114,8 +114,9 @@ export async function updateRole(
     return { error: "You cannot change your own role." };
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase
+  // Use service client to bypass RLS — admins can't update other users' profiles via regular client
+  const service = createServiceClient();
+  const { error } = await service
     .from("profiles")
     .update({ role: newRole })
     .eq("id", userId);
@@ -127,4 +128,28 @@ export async function updateRole(
 
   revalidatePath("/dashboard/users");
   return { error: "", success: `Role updated to ${newRole}.` };
+}
+
+export async function resendInvite(
+  email: string
+): Promise<UserActionState> {
+  const admin = await requireAdmin();
+  if ("error" in admin) return admin;
+
+  if (!email) {
+    return { error: "Email is required." };
+  }
+
+  const service = createServiceClient();
+
+  const { error } = await service.auth.admin.inviteUserByEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://brave-forms.vercel.app"}/login`,
+  });
+
+  if (error) {
+    console.error("resendInvite error:", error);
+    return { error: `Failed to resend invite: ${error.message}` };
+  }
+
+  return { error: "", success: `Invite resent to ${email}` };
 }
