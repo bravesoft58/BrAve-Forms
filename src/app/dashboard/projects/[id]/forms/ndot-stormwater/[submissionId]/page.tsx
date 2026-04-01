@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import PrintButton from "@/components/print-button";
+import FormActions from "@/components/form-actions";
 import { getProjectById, getSubmissionById } from "@/lib/queries/projects";
 import {
   NDOT_BMP_CATEGORIES,
@@ -350,15 +349,7 @@ export default async function NdotStormwaterViewPage({
       </section>
 
       {/* Actions */}
-      <div className="flex items-center gap-4 border-t border-zinc-200 pt-6 dark:border-zinc-800 print:hidden">
-        <Link
-          href={`/dashboard/projects/${id}?tab=ndot_weekly_stormwater`}
-          className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-        >
-          Back
-        </Link>
-        <PrintButton />
-      </div>
+      <FormActions backHref={`/dashboard/projects/${id}?tab=ndot_weekly_stormwater`} submissionId={submissionId} />
     </div>
   );
 }

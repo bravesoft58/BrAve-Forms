@@ -1,6 +1,6 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -12,13 +12,33 @@ export async function GET(request: NextRequest) {
   redirectTo.searchParams.delete("type");
 
   if (token_hash && type) {
-    const supabase = await createClient();
+    // Password reset flow — send to reset page instead of dashboard
+    redirectTo.pathname = type === "recovery" ? "/reset-password" : "/dashboard";
+    const response = NextResponse.redirect(redirectTo);
+
+    // Bind cookies directly to the redirect response so the session
+    // established by verifyOtp survives the redirect.
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            );
+          },
+        },
+      }
+    );
+
     const { error } = await supabase.auth.verifyOtp({ type, token_hash });
 
     if (!error) {
-      // Password reset flow — send to reset page instead of dashboard
-      redirectTo.pathname = type === "recovery" ? "/reset-password" : "/dashboard";
-      return NextResponse.redirect(redirectTo);
+      return response;
     }
   }
 
