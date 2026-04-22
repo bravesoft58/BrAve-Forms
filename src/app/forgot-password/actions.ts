@@ -19,9 +19,12 @@ export async function resetPassword(
 
   const supabase = await createClient();
 
+  // The actual redirect URL is built by the Supabase email template using
+  // {{ .TokenHash }} — this redirectTo is validated against the allow-list
+  // and passed through as the final destination after /auth/confirm runs.
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://brave-forms.vercel.app";
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${siteUrl}/auth/confirm?next=/reset-password`,
+    redirectTo: `${siteUrl}/reset-password`,
   });
 
   if (error) {

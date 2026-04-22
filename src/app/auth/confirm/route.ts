@@ -15,38 +15,9 @@ export async function GET(request: NextRequest) {
   redirectTo.searchParams.delete("type");
   redirectTo.searchParams.delete("next");
 
-  // PKCE flow — @supabase/ssr default. resetPasswordForEmail / signUp with
-  // default email templates redirect here with ?code=XXX.
-  if (code) {
-    redirectTo.pathname = next || "/dashboard";
-    const response = NextResponse.redirect(redirectTo);
-
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              response.cookies.set(name, value, options)
-            );
-          },
-        },
-      }
-    );
-
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-    if (!error) {
-      return response;
-    }
-    console.error("exchangeCodeForSession failed:", error.message);
-  }
-
-  // OTP flow — kept for customized email templates using {{ .TokenHash }}.
+  // OTP flow — default path. Email templates use token_hash + type because
+  // PKCE breaks when corporate email scanners pre-fetch the link or the user
+  // opens it in a different browser than where the reset was requested.
   if (token_hash && type) {
     redirectTo.pathname = next || (type === "recovery" ? "/reset-password" : "/dashboard");
     const response = NextResponse.redirect(redirectTo);
@@ -74,6 +45,37 @@ export async function GET(request: NextRequest) {
       return response;
     }
     console.error("verifyOtp failed:", error.message);
+  }
+
+  // PKCE flow — kept for forward compat (OAuth, magic links). Not used by
+  // password reset / signup / invite templates as of BF-29.
+  if (code) {
+    redirectTo.pathname = next || "/dashboard";
+    const response = NextResponse.redirect(redirectTo);
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            );
+          },
+        },
+      }
+    );
+
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (!error) {
+      return response;
+    }
+    console.error("exchangeCodeForSession failed:", error.message);
   }
 
   redirectTo.pathname = "/login";
