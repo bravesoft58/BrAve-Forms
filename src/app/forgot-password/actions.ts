@@ -19,8 +19,9 @@ export async function resetPassword(
 
   const supabase = await createClient();
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://brave-forms.vercel.app";
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://brave-forms.vercel.app"}/reset-password`,
+    redirectTo: `${siteUrl}/auth/confirm?next=/reset-password`,
   });
 
   if (error) {
