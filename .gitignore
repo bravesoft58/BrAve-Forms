@@ -57,3 +57,6 @@ nul
 .supabase/
 
 .vercel
+
+# Pre-migration data snapshots (contain production user data — never commit)
+/backups/
