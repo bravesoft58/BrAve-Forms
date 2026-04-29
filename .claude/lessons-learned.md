@@ -42,8 +42,32 @@
 - **Fix:** Reordered to delete DB row first, then storage file. DB failure = fully consistent state. Storage failure = orphaned file (harmless, cleanable).
 - **Prevention:** When deleting from two systems (storage + DB), delete the metadata/index first. An orphaned blob is harmless; a dangling reference causes user-facing errors.
 
+### QR modal needs backdrop click and ESC key close (2026-03-10)
+- **Context:** BF-19 Inspector QR portal — QrCodeModal overlay
+- **Problem:** Modal overlay didn't close when clicking backdrop or pressing Escape. Users expect these standard behaviors.
+- **Fix:** Added `onClick` on backdrop div checking `e.target === e.currentTarget`, plus `useEffect` keydown listener for Escape.
+- **Prevention:** Every modal overlay should have: (1) X button, (2) backdrop click close, (3) Escape key close. Add all three from the start.
+
+### Admin-only UI controls must check role server-side (2026-03-10)
+- **Context:** BF-19 — QR code generation button rendered for all users, AC specified admin-only
+- **Problem:** `QrCodeModal` rendered unconditionally. The server action has auth (user must be logged in) but any authenticated user could generate tokens.
+- **Fix:** Added `user?.role === "admin"` conditional render in the server component.
+- **Prevention:** When an AC says "admin only", add the role check where the component is rendered (server component), not just in the action.
+
 ### Extract helpers before duplication, not after (2026-03-10)
 - **Context:** BF-18 Project Edit — `buildProjectFields` and `deriveFormTypes` extracted for `updateProject` but `createProject` kept inline duplicates of the same logic.
 - **Problem:** 21 field mappings duplicated between `createProject` (inline) and `buildProjectFields` (helper). Adding a field requires updating two places.
 - **Fix:** Refactored `createProject` to use `buildProjectFields` (with spread + `created_by`) and `deriveFormTypes`.
 - **Prevention:** When extracting a helper for a new function, immediately refactor the original function to use it too. Don't leave the old inline version behind.
+
+### Schema NOT NULL adds need a write-path audit, not just a backfill (2026-04-29)
+- **Context:** BF-36 hotfix — BF-30 added `projects.organization_id NOT NULL` with backfill, but the `createProject` server action wasn't updated to populate it. Every new-project insert errored in production for Andy.
+- **Problem:** When BF-30 introduced the column it was framed as "schema + backfill". The migration succeeded, all existing rows got values, all gates passed — but nobody walked the code paths that INSERT into the table. A migration that makes a column NOT NULL is a schema *and* code change.
+- **Fix:** BF-36 added a single membership lookup (`organization_members → org_id`) and threaded it into the insert; paired with an RLS hotfix on `qr_tokens` that was a latent admin gap predating BF-30.
+- **Prevention:** When a migration adds a NOT NULL column to a table, before merging the migration: (1) `grep` for every `.from('<table>').insert` call site, (2) confirm each one populates the new column, (3) document the audit in the story. Backfill ≠ done. The story-level checklist for "Phase 1 schema" stories should require a "Code paths audited" line item.
+
+### TODO(TICKET-ID) is the right way to mark deliberate seams (2026-04-29)
+- **Context:** BF-36 createProject has a `TODO(BF-33)` comment marking the membership lookup as the interim form of `getActiveOrg()` once cookie-driven org context lands.
+- **Problem:** Generic `TODO` comments are a Tier 1 verify blocker because they signal incomplete work. But there's a real distinction between "incomplete code" and "complete code with a documented next-step".
+- **Fix:** Use the `TODO(<TICKET-ID>):` format whenever a working implementation has a planned successor. Verify treats this as a -0.5 finding rather than a blocker, because the work is tracked, not abandoned.
+- **Prevention:** If you must add a TODO to merging code, always include the ticket ID in parens. Plain `TODO`/`FIXME` should be reserved for "fix this before shipping".
