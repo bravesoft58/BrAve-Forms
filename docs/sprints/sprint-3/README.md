@@ -41,7 +41,9 @@
 | [BF-33](stories/BF-33-org-switcher-invite-admin.md) | Org switcher, invite flow rewrite, super-admin routes | 5 | HIGH | BF-31 | NOT STARTED |
 | [BF-34](stories/BF-34-role-refactor-fk-fix-tests.md) | Org-scoped role checks, service-audited client, FK fix, cross-tenant Playwright suite | 5 | HIGH | BF-33 | NOT STARTED |
 | [BF-35](stories/BF-35-drop-global-role.md) | Drop `is_admin()` + `profiles.role` with pre-drop backup | 1 | MEDIUM | BF-34 + 7-day stability | SCHEDULED |
-| **Total** | | **22** | | | |
+| [BF-36](stories/BF-36-uat-hotfix-multi-tenant.md) | UAT hotfix: create-project NOT NULL + qr_tokens RLS | 2 | P0 | BF-30 | NOT STARTED |
+| [BF-37](stories/BF-37-dust-log-uat-polish.md) | Daily Dust Log UAT polish (5 items) | 3 | HIGH | None | NOT STARTED |
+| **Total** | | **27** | | | |
 
 ---
 

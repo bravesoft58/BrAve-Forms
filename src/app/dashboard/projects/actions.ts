@@ -40,11 +40,28 @@ export async function createProject(
   const data = result.data;
   const supabase = await createClient();
 
+  // TODO(BF-33): replace with getActiveOrg() once cookie/org-context lands.
+  const { data: membership, error: membershipError } = await supabase
+    .from("organization_members")
+    .select("org_id")
+    .eq("user_id", user.id)
+    .order("joined_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (membershipError) {
+    return { error: "Could not resolve your organization. Try again." };
+  }
+  if (!membership) {
+    return { error: "No organization membership found. Contact your administrator." };
+  }
+
   // Insert project
   const { data: project, error: projectError } = await supabase
     .from("projects")
     .insert({
       ...buildProjectFields(data),
+      organization_id: membership.org_id,
       created_by: user.id,
     })
     .select("id")
