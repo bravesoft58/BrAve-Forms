@@ -3,7 +3,7 @@
 **Type:** Bug + Polish
 **Priority:** HIGH (UAT blocker for one item, polish for the rest)
 **Points:** 3
-**Status:** NOT STARTED
+**Status:** COMPLETE — merged 2026-04-29 (commit 7364d90, verify 9.5/10), awaiting Andy UAT sign-off
 **Sprint:** 3
 **Depends on:** None
 **Reported by:** Andy Breen, UAT 2026-04-25
@@ -66,11 +66,11 @@ Add a Cancel button on the New Entry / Append Entry forms. Behavior: same as bac
 
 ## Acceptance Criteria
 
-- [ ] Company/Contractor field is empty by default OR defaults to `projects.company_name` — never to a person's name.
-- [ ] "Visible Dust" select column shows the chevron + value cleanly at standard widths; no clipping at 100% zoom.
-- [ ] View button no longer opens print dialog; opens form preview/detail view (or is removed if Tim agrees).
-- [ ] Dust log PDF downloads as `<form>_<project>_<date>.pdf`, not `pdf.txt`. All 5 form types tested.
-- [ ] Cancel button visible on Add Entry / Append Entry screens; clicking returns user to the form summary without saving.
+- [x] Company/Contractor field defaults to `projects.company_name` — `superintendent_name` removed from all 3 dust-log page.tsx files. Production verified all 5 Q&D projects have `company_name = "Q&D Construction"` via BF-30 backfill.
+- [x] "Visible Dust" select column: `min-w-[72px]` applied on both `DailyDustLog.tsx:172` and `AppendDustLogEntries.tsx:180`. Visual confirmation at 100% zoom: Andy UAT.
+- [x] View button removed entirely from `form-actions.tsx` (Tim approved removal — story explicitly invited it). Eye icon import dropped, `window.print` call gone.
+- [x] PDF route hardened: `try/catch` around `renderToBuffer` returns JSON 500 (`route.ts:70-81`); empty `download=""` attr removed from `<a>` so browsers respect `Content-Disposition`. Root cause fixed in `dust-log.tsx:41` — accepts both `DustLogEntry[]` and `{entries: ...}` shapes (production stores bare array per `actions.ts:49`). All 5 form types: Andy UAT.
+- [x] Cancel button left of Submit on both forms (`DailyDustLog.tsx:246-253`, `AppendDustLogEntries.tsx:255-262`); `router.back()` matches story spec.
 - [ ] Andy retests all 5 items and signs off in writing.
 
 ## Test Plan
