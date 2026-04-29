@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useRouter } from "next/navigation";
 import { appendDustLogEntries, type DustLogState } from "@/app/dashboard/projects/[id]/forms/dust-log/actions";
 import {
   SOIL_CONDITIONS_LIST,
@@ -48,6 +49,7 @@ export default function AppendDustLogEntries({
   companyName,
   existingEntries,
 }: AppendDustLogEntriesProps) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(appendDustLogEntries, initialState);
   const [entries, setEntries] = useState<DustLogEntry[]>([makeEmptyEntry()]);
 
@@ -175,7 +177,7 @@ export default function AppendDustLogEntries({
                     <select
                       value={entry.visible_dust}
                       onChange={(e) => updateEntry(i, "visible_dust", e.target.value)}
-                      className={selectClass}
+                      className={`${selectClass} min-w-[72px]`}
                     >
                       <option value="Y">Y</option>
                       <option value="N">N</option>
@@ -250,6 +252,14 @@ export default function AppendDustLogEntries({
       </div>
 
       <div className="flex items-center gap-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          disabled={pending}
+          className="rounded-md border border-zinc-300 bg-white px-6 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-[#5C6F8A] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+        >
+          Cancel
+        </button>
         <button
           type="submit"
           disabled={pending}

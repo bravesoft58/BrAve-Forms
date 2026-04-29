@@ -20,7 +20,7 @@ interface DustLogEntry {
 }
 
 interface DustLogProps {
-  data: { entries: DustLogEntry[] };
+  data: DustLogEntry[] | { entries: DustLogEntry[] };
   projectName: string;
   permitNumber?: string;
   companyName?: string;
@@ -37,7 +37,8 @@ const cols = [
 ] as const;
 
 export function DustLogPdf({ data, projectName, permitNumber, companyName }: DustLogProps) {
-  const entries = data.entries ?? [];
+  // Submissions store entries as a bare array; accept either shape for safety.
+  const entries: DustLogEntry[] = Array.isArray(data) ? data : data?.entries ?? [];
 
   return (
     <FormDocument title={`Daily Dust Log - ${projectName}`} landscape>

@@ -67,8 +67,18 @@ export async function GET(
     formDate,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const buffer = await renderToBuffer(element as any);
+  let buffer: Buffer;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    buffer = await renderToBuffer(element as any);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("PDF render failed", { submissionId, formType, error: message });
+    return NextResponse.json(
+      { error: "PDF render failed", detail: message },
+      { status: 500 }
+    );
+  }
 
   const filename = getPdfFilename(formType, projectName, formDate);
 

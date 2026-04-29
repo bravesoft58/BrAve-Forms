@@ -37,7 +37,7 @@ export default async function NewDustLogPage({
         projectId={id}
         projectName={project.name}
         permitNumber={dustPermit?.permit_number ?? null}
-        companyName={project.superintendent_name ?? null}
+        companyName={project.company_name ?? null}
         previousEntry={lastEntry}
       />
     </div>

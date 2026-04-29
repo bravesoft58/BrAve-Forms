@@ -77,7 +77,7 @@ export default async function DustLogViewPage({
             Company
           </p>
           <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">
-            {project.superintendent_name ?? "N/A"}
+            {project.company_name ?? "N/A"}
           </p>
         </div>
         <div>

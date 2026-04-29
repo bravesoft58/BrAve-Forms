@@ -37,7 +37,7 @@ export default async function EditDustLogPage({
         submissionId={submissionId}
         projectName={project.name}
         permitNumber={dustPermit?.permit_number ?? null}
-        companyName={project.superintendent_name ?? null}
+        companyName={project.company_name ?? null}
         existingEntries={existingEntries}
       />
     </div>
