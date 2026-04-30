@@ -3,7 +3,7 @@
 **Type:** Security / Schema Migration
 **Priority:** CRITICAL
 **Points:** 5
-**Status:** NOT STARTED
+**Status:** COMPLETE (2026-04-30 — base migration `20260430120000_multi_tenant_rls.sql` + Option A addendum `20260430140000_admin_org_access.sql`)
 **Sprint:** 3
 **Depends on:** BF-30
 
@@ -165,3 +165,31 @@ After running the forward migration on the branch:
 - Plan: `C:\Users\Tim\.claude\plans\bright-whistling-knuth.md` (Phase 2)
 - Previous: BF-30 (schema foundation)
 - Next: BF-32 (storage privatization)
+
+---
+
+## Addendum — Option A: Admin Tier on Project-Level Data (2026-04-30)
+
+**Why:** /verify caught a behavioral regression introduced by the design table at line 68 above. Pre-BF-31, every `profiles.role='admin'` user saw all submissions/photos/documents/permits/form_requirements via the `is_admin()` short-circuit baked into every policy. BF-31 narrowed that to `is_super_admin()` (Tim only) plus `project_users` gating. Production count under impersonation:
+
+| User | Pre-BF-31 submissions | Post-BF-31 (base) | Post-Option-A |
+|------|:---:|:---:|:---:|
+| Andy Breen (org admin, 2 project_users rows) | 14 | 7 | **14** |
+| Claude Test (org admin, 3 project_users rows) | 14 | 6 | **14** |
+| Gracie Damele (org admin, **0** project_users rows) | 14 | **0** | **14** |
+| Plain member (org member, 0 project_users) | 0 | 0 | 0 |
+| Orphan (no membership) | n/a | 0 | 0 |
+| Tim (super_admin) | 14 | 14 | 14 |
+
+**Migration:** `supabase/migrations/20260430140000_admin_org_access.sql`
+**Rollback:** `supabase/migrations/_rollback/20260430140000_rollback.sql`
+**Pattern:** add `OR public.is_org_admin((SELECT organization_id FROM public.projects WHERE id = project_id))` to the SELECT (and submissions/photos/documents INSERT-UPDATE) policies on the five project-level tables. Matches the BF-31 mutation policies on `qr_tokens`, `project_documents.delete`, `project_permits.{insert,update,delete}`, and `project_form_requirements.{insert,update,delete}` which were already correct.
+
+**Tier matrix (final):**
+- `super_admin` → everything platform-wide (audited).
+- `is_org_admin(org)` → every project's data in the org (read + write where the BF-31 mutations allowed admin write).
+- `project_users` member → data only for projects in their `project_users` rows.
+- non-member of org → projects.SELECT widened to org members but project-level data denied.
+- orphan → all-zero everywhere.
+
+**Verification:** orphan still 0/everything (isolation preserved), plain member still 6 projects + 0 project-level data (BF-31 design intact for non-admins), all 3 Q&D admins now see 14/14 submissions and full org-wide documents/permits/form_requirements. Advisor profile unchanged from BF-31 baseline. Lessons-learned entry captured at `.claude/lessons-learned.md` ("RLS rewrites that collapse a tier silently hide data — count rows under impersonation before AND after").

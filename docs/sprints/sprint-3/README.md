@@ -36,14 +36,14 @@
 | Story | Title | SP | Priority | Dependencies | Status |
 |-------|-------|----|----------|-------------|--------|
 | [BF-30](stories/BF-30-multi-tenant-schema.md) | Multi-tenant schema + Q&D backfill | 3 | CRITICAL | None | COMPLETE (2026-04-25, merged 3b43db6) |
-| [BF-31](stories/BF-31-multi-tenant-rls.md) | RLS rewrite with org-scoped helpers; fix profiles-select leak | 5 | CRITICAL | BF-30 | NOT STARTED |
+| [BF-31](stories/BF-31-multi-tenant-rls.md) | RLS rewrite with org-scoped helpers; fix profiles-select leak | 5 | CRITICAL | BF-30 | COMPLETE (2026-04-30, applied + Option A admin-tier addendum, verify 9.0/10 → 9.5/10 post-fix) |
 | [BF-32](stories/BF-32-private-storage.md) | Storage privatization + signed URLs | 3 | CRITICAL | BF-31 | NOT STARTED |
 | [BF-33](stories/BF-33-org-switcher-invite-admin.md) | Org switcher, invite flow rewrite, super-admin routes | 5 | HIGH | BF-31 | NOT STARTED |
 | [BF-34](stories/BF-34-role-refactor-fk-fix-tests.md) | Org-scoped role checks, service-audited client, FK fix, cross-tenant Playwright suite | 5 | HIGH | BF-33 | NOT STARTED |
 | [BF-35](stories/BF-35-drop-global-role.md) | Drop `is_admin()` + `profiles.role` with pre-drop backup | 1 | MEDIUM | BF-34 + 7-day stability | SCHEDULED |
 | [BF-36](stories/BF-36-uat-hotfix-multi-tenant.md) | UAT hotfix: create-project NOT NULL + qr_tokens RLS | 2 | P0 | BF-30 | COMPLETE (2026-04-29, merged 594c5ef, verify 9.83/10) |
-| [BF-37](stories/BF-37-dust-log-uat-polish.md) | Daily Dust Log UAT polish (5 items) | 3 | HIGH | None | COMPLETE (2026-04-29, merged 7364d90, verify 9.5/10, awaiting Andy UAT) |
-| **Total** | | **27** | | | **8/27 SP done — 3/8 stories merged** |
+| [BF-37](stories/BF-37-dust-log-uat-polish.md) | Daily Dust Log UAT polish (5 items) | 3 | HIGH | None | DONE (2026-04-29, merged 7364d90, verify 9.5/10, Andy UAT signed off 2026-04-30) |
+| **Total** | | **27** | | | **13/27 SP done — 4/8 stories complete** |
 
 ---
 
@@ -128,4 +128,4 @@ Q&D is the first tester org. Migration must preserve:
 ---
 
 **Plan source:** `C:\Users\Tim\.claude\plans\bright-whistling-knuth.md` (approved 2026-04-24)
-**Last Updated:** 2026-04-29
+**Last Updated:** 2026-04-30
