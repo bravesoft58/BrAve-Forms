@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import FormActions from "@/components/form-actions";
 import { getProjectById, getSubmissionById } from "@/lib/queries/projects";
+import { signFileUrlServer } from "@/lib/supabase/signed-urls";
 import {
   NDOT_BMP_CATEGORIES,
   type NdotStormwaterData,
@@ -68,7 +69,17 @@ export default async function NdotStormwaterViewPage({
     name, required: "N" as const, implemented: "N" as const, comments: "",
   }));
 
-  const photos: FormPhoto[] = data.photos ?? [];
+  const rawPhotos: FormPhoto[] = data.photos ?? [];
+  const photos: FormPhoto[] = await Promise.all(
+    rawPhotos.map(async (photo) => ({
+      ...photo,
+      url:
+        (await signFileUrlServer(
+          "form-attachments",
+          `projects/${id}/ndot-stormwater/${photo.file_name}`,
+        )) ?? "",
+    })),
+  );
 
   return (
     <div>

@@ -34,8 +34,11 @@ const bmpCategorySchema = z.object({
   comments: z.string().optional().default(""),
 });
 
+// `url` is deprecated as of BF-32 (storage privatized). Renderers reconstruct
+// the storage path from `${storagePath}/${file_name}` and sign at display
+// time. Kept optional so legacy submissions written before BF-32 still parse.
 const photoSchema = z.object({
-  url: z.string(),
+  url: z.string().optional(),
   caption: z.string().optional().default(""),
   file_name: z.string(),
   uploaded_at: z.string(),

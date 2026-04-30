@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProjectById, getProjectSubmissions, getProjectDocuments } from "@/lib/queries/projects";
 import { getCurrentUser } from "@/lib/auth";
+import { signFileUrlServer } from "@/lib/supabase/signed-urls";
 import ProjectTabs from "@/components/projects/ProjectTabs";
 import QrCodeModal from "@/components/inspector/QrCodeModal";
 
@@ -28,10 +29,17 @@ export default async function ProjectDetailPage({
   ]);
   if (!project) notFound();
 
-  const [submissions, documents] = await Promise.all([
+  const [submissions, rawDocuments] = await Promise.all([
     getProjectSubmissions(id),
     getProjectDocuments(id),
   ]);
+
+  const documents = await Promise.all(
+    rawDocuments.map(async (doc) => ({
+      ...doc,
+      download_url: await signFileUrlServer("project-documents", doc.file_path),
+    })),
+  );
 
   const activeTab = tab || "permits";
   const badgeClass = statusColors[project.status] ?? statusColors.archived;

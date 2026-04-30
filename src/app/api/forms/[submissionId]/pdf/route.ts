@@ -1,9 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { createClient } from "@/lib/supabase/server";
+import { signFileUrlServer } from "@/lib/supabase/signed-urls";
 import { getPdfComponent, getPdfFilename } from "@/lib/pdf/registry";
 import type { FormType } from "@/lib/constants/permits";
 import { FORM_TYPES } from "@/lib/constants/permits";
+
+// Maps form_type to the per-form subfolder used by PhotoAttachment.
+const PHOTO_SUBPATH: Partial<Record<FormType, string>> = {
+  ndot_weekly_stormwater: "ndot-stormwater",
+};
+
+interface PhotoLike {
+  file_name?: string;
+  url?: string;
+  caption?: string;
+  uploaded_at?: string;
+}
+
+async function signPhotosInPlace(
+  data: Record<string, unknown>,
+  formType: FormType,
+  projectId: string,
+): Promise<Record<string, unknown>> {
+  const subPath = PHOTO_SUBPATH[formType];
+  if (!subPath) return data;
+
+  const photos = (data as { photos?: PhotoLike[] }).photos;
+  if (!Array.isArray(photos) || photos.length === 0) return data;
+
+  const signed = await Promise.all(
+    photos.map(async (p) =>
+      p.file_name
+        ? await signFileUrlServer(
+            "form-attachments",
+            `projects/${projectId}/${subPath}/${p.file_name}`,
+          )
+        : null,
+    ),
+  );
+
+  const nextPhotos = photos.map((p, i) => ({ ...p, url: signed[i] ?? "" }));
+  return { ...data, photos: nextPhotos };
+}
 
 export async function GET(
   request: NextRequest,
@@ -24,7 +63,7 @@ export async function GET(
   // Fetch submission + project (RLS ensures user has access)
   const { data: submission, error: subErr } = await supabase
     .from("form_submissions")
-    .select("*, projects(name, project_permits(permit_type, permit_number))")
+    .select("*, project_id, projects(name, project_permits(permit_type, permit_number))")
     .eq("id", submissionId)
     .single();
 
@@ -56,8 +95,9 @@ export async function GET(
   const permitType = permitTypeMap[formType];
   const permit = project?.project_permits?.find((p) => p.permit_type === permitType);
 
-  const formData = (submission.data ?? {}) as Record<string, unknown>;
+  const rawFormData = (submission.data ?? {}) as Record<string, unknown>;
   const formDate = submission.form_date ?? new Date().toISOString().slice(0, 10);
+  const formData = await signPhotosInPlace(rawFormData, formType, submission.project_id);
 
   const element = renderFn({
     data: formData,

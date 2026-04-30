@@ -1,7 +1,4 @@
 import { FileText, Download } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
-
-const BUCKET = "project-documents";
 
 interface Document {
   id: string;
@@ -11,22 +8,14 @@ interface Document {
   file_size: number;
   mime_type: string;
   created_at: string;
+  /** Pre-signed URL generated server-side via service client (BF-32). */
+  download_url: string | null;
 }
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-function getPublicUrl(filePath: string): string {
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
-  return data.publicUrl;
 }
 
 export default function InspectorDocumentsTab({ documents }: { documents: Document[] }) {
@@ -59,15 +48,24 @@ export default function InspectorDocumentsTab({ documents }: { documents: Docume
               </p>
             </div>
           </div>
-          <a
-            href={getPublicUrl(doc.file_path)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-4 shrink-0 rounded-md p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-            title="Download"
-          >
-            <Download className="h-4 w-4" />
-          </a>
+          {doc.download_url ? (
+            <a
+              href={doc.download_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-4 shrink-0 rounded-md p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+              title="Download"
+            >
+              <Download className="h-4 w-4" />
+            </a>
+          ) : (
+            <span
+              className="ml-4 shrink-0 rounded-md p-1.5 text-zinc-300 dark:text-zinc-600"
+              title="Download unavailable"
+            >
+              <Download className="h-4 w-4" />
+            </span>
+          )}
         </li>
       ))}
     </ul>

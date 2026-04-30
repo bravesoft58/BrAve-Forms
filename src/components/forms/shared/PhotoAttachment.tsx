@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X, Camera, Loader2 } from "lucide-react";
 import imageCompression from "browser-image-compression";
 import { createClient } from "@/lib/supabase/client";
@@ -15,6 +15,7 @@ interface PhotoAttachmentProps {
 }
 
 const BUCKET = "form-attachments";
+const SIGNED_URL_TTL_SEC = 3600;
 const COMPRESSION_OPTIONS = {
   maxSizeMB: 1.5,
   maxWidthOrHeight: 1920,
@@ -30,6 +31,37 @@ export default function PhotoAttachment({
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  // Render-time signed URLs keyed by file_name. Not persisted to JSONB —
+  // BF-32 dropped `photo.url` from the storage contract.
+  const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
+
+  // Sign any photos we don't yet have a preview for (covers both newly
+  // uploaded photos and edits that load existing photos from JSONB).
+  useEffect(() => {
+    const missing = photos
+      .map((p) => p.file_name)
+      .filter((name) => name && !previewUrls[name]);
+    if (missing.length === 0) return;
+
+    let cancelled = false;
+    (async () => {
+      const supabase = createClient();
+      const additions: Record<string, string> = {};
+      for (const fileName of missing) {
+        const { data, error: signErr } = await supabase.storage
+          .from(BUCKET)
+          .createSignedUrl(`${storagePath}/${fileName}`, SIGNED_URL_TTL_SEC);
+        if (!signErr && data?.signedUrl) additions[fileName] = data.signedUrl;
+      }
+      if (!cancelled && Object.keys(additions).length > 0) {
+        setPreviewUrls((prev) => ({ ...prev, ...additions }));
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [photos, storagePath, previewUrls]);
 
   async function handleFiles(files: FileList | null) {
     if (!files?.length) return;
@@ -66,12 +98,7 @@ export default function PhotoAttachment({
           break;
         }
 
-        const { data: urlData } = supabase.storage
-          .from(BUCKET)
-          .getPublicUrl(filePath);
-
         newPhotos.push({
-          url: urlData.publicUrl,
           caption: "",
           file_name: fileName,
           uploaded_at: new Date().toISOString(),
@@ -165,11 +192,17 @@ export default function PhotoAttachment({
               >
                 <X className="h-3 w-3" />
               </button>
-              <img
-                src={photo.url}
-                alt={photo.caption || `Photo ${i + 1}`}
-                className="h-40 w-full rounded object-cover"
-              />
+              {previewUrls[photo.file_name] ? (
+                <img
+                  src={previewUrls[photo.file_name]}
+                  alt={photo.caption || `Photo ${i + 1}`}
+                  className="h-40 w-full rounded object-cover"
+                />
+              ) : (
+                <div className="flex h-40 w-full items-center justify-center rounded bg-zinc-100 dark:bg-zinc-700">
+                  <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
+                </div>
+              )}
               <div className="mt-2">
                 <label className={labelClass}>Caption</label>
                 <input

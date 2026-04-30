@@ -34,6 +34,7 @@ interface ProjectDocument {
   mime_type: string;
   uploaded_by: string;
   created_at: string;
+  download_url: string | null;
 }
 
 export default function ProjectTabs({
