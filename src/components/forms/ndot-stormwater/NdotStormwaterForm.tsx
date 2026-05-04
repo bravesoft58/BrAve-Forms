@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import {
   submitNdotStormwater,
+  updateNdotStormwater,
   type NdotStormwaterState,
 } from "@/app/dashboard/projects/[id]/forms/ndot-stormwater/actions";
 import {
@@ -22,6 +23,11 @@ interface NdotStormwaterFormProps {
   contractNumber: string;
   location: string;
   previousData?: NdotStormwaterData | null;
+  /** When set, the form runs in edit mode against this submission. */
+  submissionId?: string;
+  /** Pre-populated data for edit mode. Required when submissionId is set. */
+  initialData?: NdotStormwaterData;
+  cancelHref?: string;
 }
 
 function makeDefaultBmpCategories(): BmpCategory[] {
@@ -98,10 +104,17 @@ export default function NdotStormwaterForm({
   contractNumber,
   location,
   previousData,
+  submissionId,
+  initialData,
+  cancelHref,
 }: NdotStormwaterFormProps) {
-  const [state, formAction, pending] = useActionState(submitNdotStormwater, initialState);
+  const isEdit = Boolean(submissionId);
+  const action = isEdit
+    ? updateNdotStormwater.bind(null, submissionId as string)
+    : submitNdotStormwater;
+  const [state, formAction, pending] = useActionState(action, initialState);
   const [data, setData] = useState<NdotStormwaterData>(() =>
-    makeEmptyData(projectName, contractNumber, location)
+    initialData ?? makeEmptyData(projectName, contractNumber, location)
   );
   const [usedPrevious, setUsedPrevious] = useState(false);
 
@@ -141,9 +154,11 @@ export default function NdotStormwaterForm({
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Weekly stormwater inspection checklist per NDOT requirements.
+          {isEdit
+            ? "Editing existing inspection. Changes save against the original submission."
+            : "Weekly stormwater inspection checklist per NDOT requirements."}
         </p>
-        {previousData && !usedPrevious && (
+        {!isEdit && previousData && !usedPrevious && (
           <button
             type="button"
             onClick={applyPrevious}
@@ -152,7 +167,7 @@ export default function NdotStormwaterForm({
             Use Previous
           </button>
         )}
-        {usedPrevious && (
+        {!isEdit && usedPrevious && (
           <span className="text-xs text-green-600 dark:text-green-400">
             Pre-filled from last submission (date/signatures cleared)
           </span>
@@ -171,12 +186,22 @@ export default function NdotStormwaterForm({
       <Section3DischargeSignatures data={data} onChange={update} fieldErrors={state.fieldErrors} />
 
       <div className="flex items-center gap-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+        {cancelHref && (
+          <a
+            href={cancelHref}
+            className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+          >
+            Cancel
+          </a>
+        )}
         <button
           type="submit"
           disabled={pending}
           className="rounded-md bg-[#233B5C] px-6 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1a2d47] focus:outline-none focus:ring-2 focus:ring-[#5C6F8A] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {pending ? "Submitting..." : "Submit Inspection"}
+          {pending
+            ? isEdit ? "Saving..." : "Submitting..."
+            : isEdit ? "Save Changes" : "Submit Inspection"}
         </button>
       </div>
     </form>

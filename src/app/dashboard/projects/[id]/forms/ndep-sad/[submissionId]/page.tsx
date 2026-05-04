@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import FormActions from "@/components/form-actions";
+import { getCurrentUser } from "@/lib/auth";
 import { getProjectById, getSubmissionById } from "@/lib/queries/projects";
 import {
   NDEP_SAD_APPLICATION_TYPES,
@@ -64,12 +65,15 @@ export default async function NdepSadViewPage({
 }) {
   const { id, submissionId } = await params;
 
-  const [project, submission] = await Promise.all([
+  const [project, submission, user] = await Promise.all([
     getProjectById(id),
     getSubmissionById(submissionId),
+    getCurrentUser(),
   ]);
 
   if (!project || !submission) notFound();
+
+  const canEdit = user?.role === "admin";
 
   const data: NdepSadData | null =
     submission.data && typeof submission.data === "object" && !Array.isArray(submission.data)
@@ -244,7 +248,12 @@ export default async function NdepSadViewPage({
       </section>
 
       {/* Actions */}
-      <FormActions backHref={`/dashboard/projects/${id}?tab=ndep_sad_application`} submissionId={submissionId} />
+      <FormActions
+        backHref={`/dashboard/projects/${id}?tab=ndep_sad_application`}
+        submissionId={submissionId}
+        formType="ndep_sad_application"
+        canEdit={canEdit}
+      />
     </div>
   );
 }

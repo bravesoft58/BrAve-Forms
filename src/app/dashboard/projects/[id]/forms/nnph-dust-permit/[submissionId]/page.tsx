@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import FormActions from "@/components/form-actions";
+import { getCurrentUser } from "@/lib/auth";
 import { getProjectById, getSubmissionById } from "@/lib/queries/projects";
 import {
   type NnphDustPermitData,
@@ -79,12 +80,15 @@ export default async function NnphDustPermitViewPage({
 }) {
   const { id, submissionId } = await params;
 
-  const [project, submission] = await Promise.all([
+  const [project, submission, user] = await Promise.all([
     getProjectById(id),
     getSubmissionById(submissionId),
+    getCurrentUser(),
   ]);
 
   if (!project || !submission) notFound();
+
+  const canEdit = user?.role === "admin";
 
   const data: NnphDustPermitData | null =
     submission.data && typeof submission.data === "object" && !Array.isArray(submission.data)
@@ -278,7 +282,12 @@ export default async function NnphDustPermitViewPage({
       </section>
 
       {/* Actions */}
-      <FormActions backHref={`/dashboard/projects/${id}?tab=nnph_dust_permit`} submissionId={submissionId} />
+      <FormActions
+        backHref={`/dashboard/projects/${id}?tab=nnph_dust_permit`}
+        submissionId={submissionId}
+        formType="nnph_dust_permit"
+        canEdit={canEdit}
+      />
     </div>
   );
 }

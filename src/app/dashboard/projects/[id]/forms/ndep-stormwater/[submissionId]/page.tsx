@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import FormActions from "@/components/form-actions";
+import { getCurrentUser } from "@/lib/auth";
 import { getProjectById, getSubmissionById } from "@/lib/queries/projects";
 import {
   NDEP_CONTROL_MEASURES,
@@ -37,12 +38,15 @@ export default async function NdepStormwaterViewPage({
 }) {
   const { id, submissionId } = await params;
 
-  const [project, submission] = await Promise.all([
+  const [project, submission, user] = await Promise.all([
     getProjectById(id),
     getSubmissionById(submissionId),
+    getCurrentUser(),
   ]);
 
   if (!project || !submission) notFound();
+
+  const canEdit = user?.role === "admin";
 
   const ndepPermit = project.project_permits?.find(
     (p: { permit_type: string; permit_number: string | null }) =>
@@ -276,7 +280,12 @@ export default async function NdepStormwaterViewPage({
       </section>
 
       {/* Actions */}
-      <FormActions backHref={`/dashboard/projects/${id}?tab=ndep_weekly_stormwater`} submissionId={submissionId} />
+      <FormActions
+        backHref={`/dashboard/projects/${id}?tab=ndep_weekly_stormwater`}
+        submissionId={submissionId}
+        formType="ndep_weekly_stormwater"
+        canEdit={canEdit}
+      />
     </div>
   );
 }

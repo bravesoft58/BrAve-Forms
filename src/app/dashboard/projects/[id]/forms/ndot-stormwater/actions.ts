@@ -11,6 +11,16 @@ export type NdotStormwaterState = {
   fieldErrors?: Record<string, string[]>;
 };
 
+function collectFieldErrors(issues: { path: (string | number)[]; message: string }[]) {
+  const fieldErrors: Record<string, string[]> = {};
+  for (const issue of issues) {
+    const key = issue.path.join(".");
+    if (!fieldErrors[key]) fieldErrors[key] = [];
+    fieldErrors[key].push(issue.message);
+  }
+  return fieldErrors;
+}
+
 export async function submitNdotStormwater(
   _prevState: NdotStormwaterState,
   formData: FormData
@@ -29,13 +39,10 @@ export async function submitNdotStormwater(
   const result = ndotStormwaterSchema.safeParse(raw);
 
   if (!result.success) {
-    const fieldErrors: Record<string, string[]> = {};
-    for (const issue of result.error.issues) {
-      const key = issue.path.join(".");
-      if (!fieldErrors[key]) fieldErrors[key] = [];
-      fieldErrors[key].push(issue.message);
-    }
-    return { error: "Please fix the errors below.", fieldErrors };
+    return {
+      error: "Please fix the errors below.",
+      fieldErrors: collectFieldErrors(result.error.issues),
+    };
   }
 
   const data = result.data;
@@ -71,4 +78,65 @@ export async function submitNdotStormwater(
 
   revalidatePath(`/dashboard/projects/${projectId}`);
   redirect(`/dashboard/projects/${projectId}?tab=ndot_weekly_stormwater`);
+}
+
+export async function updateNdotStormwater(
+  submissionId: string,
+  _prevState: NdotStormwaterState,
+  formData: FormData,
+): Promise<NdotStormwaterState> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { error: "You must be logged in." };
+  }
+  if (user.role !== "admin") {
+    return { error: "Admin access required to edit submissions." };
+  }
+
+  const projectId = formData.get("project_id") as string;
+  if (!projectId) {
+    return { error: "Missing project ID." };
+  }
+
+  const raw = parseNdotStormwaterForm(formData);
+  const result = ndotStormwaterSchema.safeParse(raw);
+
+  if (!result.success) {
+    return {
+      error: "Please fix the errors below.",
+      fieldErrors: collectFieldErrors(result.error.issues),
+    };
+  }
+
+  const data = result.data;
+  const supabase = await createClient();
+
+  const { error: updateError } = await supabase
+    .from("form_submissions")
+    .update({
+      data,
+      form_date: data.inspection_date,
+    })
+    .eq("id", submissionId)
+    .eq("project_id", projectId)
+    .eq("form_type", "ndot_weekly_stormwater");
+
+  if (updateError) {
+    return { error: updateError.message };
+  }
+
+  // Replace photo rows so deletes propagate. JSONB stays authoritative.
+  await supabase.from("form_photos").delete().eq("submission_id", submissionId);
+  if (data.photos.length > 0) {
+    const photoRows = data.photos.map((p) => ({
+      submission_id: submissionId,
+      file_path: p.file_name,
+      caption: p.caption || null,
+    }));
+    await supabase.from("form_photos").insert(photoRows);
+  }
+
+  revalidatePath(`/dashboard/projects/${projectId}`);
+  revalidatePath(`/dashboard/projects/${projectId}/forms/ndot-stormwater/${submissionId}`);
+  redirect(`/dashboard/projects/${projectId}/forms/ndot-stormwater/${submissionId}`);
 }
