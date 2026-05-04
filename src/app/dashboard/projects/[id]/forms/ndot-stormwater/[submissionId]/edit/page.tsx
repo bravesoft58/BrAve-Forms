@@ -13,15 +13,17 @@ export default async function EditNdotStormwaterPage({
 
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (user.role !== "admin") {
-    redirect(`/dashboard/projects/${id}/forms/ndot-stormwater/${submissionId}`);
-  }
 
   const [project, submission] = await Promise.all([
     getProjectById(id),
     getSubmissionById(submissionId),
   ]);
   if (!project || !submission) notFound();
+
+  const canEdit = user.role === "admin" || user.id === submission.submitted_by;
+  if (!canEdit) {
+    redirect(`/dashboard/projects/${id}/forms/ndot-stormwater/${submissionId}`);
+  }
 
   const ndotPermit = project.project_permits?.find(
     (p: { permit_type: string; permit_number: string | null }) =>

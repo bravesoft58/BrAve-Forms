@@ -73,7 +73,7 @@ export default async function NdepSadViewPage({
 
   if (!project || !submission) notFound();
 
-  const canEdit = user?.role === "admin";
+  const canEdit = user?.role === "admin" || (!!user && user.id === submission.submitted_by);
 
   const data: NdepSadData | null =
     submission.data && typeof submission.data === "object" && !Array.isArray(submission.data)
