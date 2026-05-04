@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import FormActions from "@/components/form-actions";
+import { getCurrentUser } from "@/lib/auth";
 import { getProjectById, getSubmissionById } from "@/lib/queries/projects";
 import { signFileUrlServer } from "@/lib/supabase/signed-urls";
 import {
@@ -46,12 +47,15 @@ export default async function NdotStormwaterViewPage({
 }) {
   const { id, submissionId } = await params;
 
-  const [project, submission] = await Promise.all([
+  const [project, submission, user] = await Promise.all([
     getProjectById(id),
     getSubmissionById(submissionId),
+    getCurrentUser(),
   ]);
 
   if (!project || !submission) notFound();
+
+  const canEdit = user?.role === "admin";
 
   const ndotPermit = project.project_permits?.find(
     (p: { permit_type: string; permit_number: string | null }) =>
@@ -360,7 +364,13 @@ export default async function NdotStormwaterViewPage({
       </section>
 
       {/* Actions */}
-      <FormActions backHref={`/dashboard/projects/${id}?tab=ndot_weekly_stormwater`} submissionId={submissionId} />
+      <FormActions
+        backHref={`/dashboard/projects/${id}?tab=ndot_weekly_stormwater`}
+        submissionId={submissionId}
+        formType="ndot_weekly_stormwater"
+        editHref={`/dashboard/projects/${id}/forms/ndot-stormwater/${submissionId}/edit`}
+        canEdit={canEdit}
+      />
     </div>
   );
 }

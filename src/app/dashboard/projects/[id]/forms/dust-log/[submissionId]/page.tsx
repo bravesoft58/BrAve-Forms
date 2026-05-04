@@ -173,7 +173,11 @@ export default async function DustLogViewPage({
           Add Entries
         </Link>
       </div>
-      <FormActions backHref={`/dashboard/projects/${id}?tab=daily_dust_log`} submissionId={submissionId} />
+      <FormActions
+        backHref={`/dashboard/projects/${id}?tab=daily_dust_log`}
+        submissionId={submissionId}
+        formType="daily_dust_log"
+      />
     </div>
   );
 }

@@ -17,6 +17,46 @@ async function requireAdmin(): Promise<{ id: string } | UserActionState> {
   return { id: user.id };
 }
 
+// BF-31 RLS treats organization_members.role IN ('owner','admin') as the source of
+// truth for org-admin access. The legacy profiles.role is no longer load-bearing for
+// RLS, so every promote/invite path must keep org_members in sync with profile role.
+function memberRoleFor(profileRole: "admin" | "user"): "admin" | "member" {
+  return profileRole === "admin" ? "admin" : "member";
+}
+
+async function getAdminOrgId(adminId: string): Promise<string | null> {
+  const service = createServiceClient();
+  const { data } = await service
+    .from("organization_members")
+    .select("org_id")
+    .eq("user_id", adminId)
+    .order("joined_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  return data?.org_id ?? null;
+}
+
+async function syncOrgMemberRole(
+  orgId: string,
+  userId: string,
+  profileRole: "admin" | "user",
+  invitedBy?: string,
+): Promise<{ error: string | null }> {
+  const service = createServiceClient();
+  const { error } = await service
+    .from("organization_members")
+    .upsert(
+      {
+        org_id: orgId,
+        user_id: userId,
+        role: memberRoleFor(profileRole),
+        ...(invitedBy ? { invited_by: invitedBy } : {}),
+      },
+      { onConflict: "org_id,user_id" },
+    );
+  return { error: error?.message ?? null };
+}
+
 export async function inviteUser(
   _prevState: UserActionState,
   formData: FormData
@@ -63,18 +103,46 @@ export async function inviteUser(
     return { error: `Failed to invite user: ${createError.message}` };
   }
 
-  // Update role if admin (trigger creates profile with default 'user')
-  if (role === "admin") {
-    // Small delay to let the trigger create the profile
-    await new Promise((r) => setTimeout(r, 500));
+  // Wait for the on_auth_user_created trigger to insert the profile row before we
+  // update role or upsert org_members (the trigger only creates profiles, not memberships).
+  await new Promise((r) => setTimeout(r, 500));
+
+  // Find the new user's id so we can sync org_members. Profile is keyed on email here.
+  const { data: newProfile } = await service
+    .from("profiles")
+    .select("id")
+    .eq("email", email)
+    .single();
+
+  if (role === "admin" && newProfile) {
     const { error: roleError } = await service
       .from("profiles")
       .update({ role: "admin" })
-      .eq("email", email);
+      .eq("id", newProfile.id);
 
     if (roleError) {
       console.error("Role update error:", roleError);
-      // User created but role update failed — not fatal
+      // User created but role update failed — not fatal; org sync below is gated on
+      // the role we already validated, not on the DB read-back.
+    }
+  }
+
+  // Add the invitee to the inviting admin's org with the matching membership role.
+  // Without this, BF-31 RLS denies them every project-scoped query.
+  if (newProfile) {
+    const orgId = await getAdminOrgId(admin.id);
+    if (orgId) {
+      const { error: syncError } = await syncOrgMemberRole(
+        orgId,
+        newProfile.id,
+        role as "admin" | "user",
+        admin.id,
+      );
+      if (syncError) {
+        console.error("Org member sync error:", syncError);
+      }
+    } else {
+      console.error("inviteUser: inviting admin has no org_members row; cannot sync invitee.");
     }
   }
 
@@ -124,6 +192,19 @@ export async function updateRole(
   if (error) {
     console.error("updateRole error:", error);
     return { error: `Failed to update role: ${error.message}` };
+  }
+
+  // Sync organization_members.role so BF-31 RLS sees the new tier. Use the calling
+  // admin's org context — single-org assumption holds until BF-33 ships.
+  const orgId = await getAdminOrgId(admin.id);
+  if (orgId) {
+    const { error: syncError } = await syncOrgMemberRole(orgId, userId, newRole);
+    if (syncError) {
+      console.error("updateRole org_members sync error:", syncError);
+      return { error: `Profile updated but org membership sync failed: ${syncError}` };
+    }
+  } else {
+    console.error("updateRole: calling admin has no org_members row; cannot sync target.");
   }
 
   revalidatePath("/dashboard/users");
