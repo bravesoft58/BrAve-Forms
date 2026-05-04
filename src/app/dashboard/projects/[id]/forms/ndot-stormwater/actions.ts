@@ -89,13 +89,25 @@ export async function updateNdotStormwater(
   if (!user) {
     return { error: "You must be logged in." };
   }
-  if (user.role !== "admin") {
-    return { error: "Admin access required to edit submissions." };
-  }
 
   const projectId = formData.get("project_id") as string;
   if (!projectId) {
     return { error: "Missing project ID." };
+  }
+
+  const supabasePre = await createClient();
+  const { data: existing } = await supabasePre
+    .from("form_submissions")
+    .select("submitted_by")
+    .eq("id", submissionId)
+    .maybeSingle();
+
+  if (!existing) {
+    return { error: "Submission not found." };
+  }
+
+  if (user.role !== "admin" && existing.submitted_by !== user.id) {
+    return { error: "You can only edit submissions you created." };
   }
 
   const raw = parseNdotStormwaterForm(formData);
@@ -109,7 +121,7 @@ export async function updateNdotStormwater(
   }
 
   const data = result.data;
-  const supabase = await createClient();
+  const supabase = supabasePre;
 
   const { error: updateError } = await supabase
     .from("form_submissions")

@@ -88,7 +88,7 @@ export default async function NnphDustPermitViewPage({
 
   if (!project || !submission) notFound();
 
-  const canEdit = user?.role === "admin";
+  const canEdit = user?.role === "admin" || (!!user && user.id === submission.submitted_by);
 
   const data: NnphDustPermitData | null =
     submission.data && typeof submission.data === "object" && !Array.isArray(submission.data)

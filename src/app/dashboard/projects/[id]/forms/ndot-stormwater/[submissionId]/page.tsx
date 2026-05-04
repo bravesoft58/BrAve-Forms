@@ -55,7 +55,7 @@ export default async function NdotStormwaterViewPage({
 
   if (!project || !submission) notFound();
 
-  const canEdit = user?.role === "admin";
+  const canEdit = user?.role === "admin" || (!!user && user.id === submission.submitted_by);
 
   const ndotPermit = project.project_permits?.find(
     (p: { permit_type: string; permit_number: string | null }) =>
