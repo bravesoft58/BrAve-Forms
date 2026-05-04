@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { PERMIT_LABELS, FORM_LABELS, type FormType, type PermitType } from "@/lib/constants/permits";
 import DocumentsTab from "./DocumentsTab";
 
+const WATERWAY_PLACEHOLDER_KEY = "waterway_placeholder";
+
 interface Permit {
   id: string;
   permit_type: string;
@@ -68,7 +70,15 @@ export default function ProjectTabs({
     label: FORM_LABELS[fr.form_type as FormType] ?? fr.form_type,
   }));
 
-  const allTabs = [staticTabs[0], ...formTabs, staticTabs[1], staticTabs[2]];
+  // BF-41: when the project has a Waterway permit, render a placeholder tab so it
+  // doesn't look like the permit is unacknowledged. The actual form is queued for a
+  // future sprint — no FORM_TYPES / PERMIT_FORM_MAP entry yet, so we inject a sentinel.
+  const hasWaterwayPermit = permits.some((p) => p.permit_type === "waterway");
+  const waterwayTabs = hasWaterwayPermit
+    ? [{ key: WATERWAY_PLACEHOLDER_KEY, label: "Work in Waterway" }]
+    : [];
+
+  const allTabs = [staticTabs[0], ...formTabs, ...waterwayTabs, staticTabs[1], staticTabs[2]];
 
   return (
     <div>
@@ -102,6 +112,9 @@ export default function ProjectTabs({
         )}
         {activeTab === "team" && (
           <Placeholder message="Team management coming soon." />
+        )}
+        {activeTab === WATERWAY_PLACEHOLDER_KEY && (
+          <Placeholder message="The Work in Waterway form is queued for the next sprint." />
         )}
         {formTabs.some((ft) => ft.key === activeTab) && (
           <FormTabContent
