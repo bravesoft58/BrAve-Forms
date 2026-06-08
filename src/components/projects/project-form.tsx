@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { createProject, type ProjectState } from "@/app/dashboard/projects/actions";
 import {
   PERMIT_TYPES,
@@ -89,6 +89,11 @@ export default function ProjectForm({
 }: ProjectFormProps = {}) {
   const serverAction = action ?? createProject;
   const [state, formAction, pending] = useActionState(serverAction, initialState);
+  const errorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (state.error) errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [state.error]);
 
   const initialPermits = new Set<PermitType>(
     (existingPermits ?? []).map((p) => p.permit_type as PermitType)
@@ -123,7 +128,7 @@ export default function ProjectForm({
   return (
     <form action={formAction} className="space-y-8">
       {state.error && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-400">
+        <div ref={errorRef} role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-400">
           {state.error}
         </div>
       )}

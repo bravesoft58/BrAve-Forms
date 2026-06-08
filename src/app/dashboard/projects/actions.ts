@@ -68,7 +68,7 @@ export async function createProject(
     .single();
 
   if (projectError) {
-    if (projectError.message.includes("row-level security")) {
+    if (projectError.code === "42501" || projectError.message.includes("row-level security")) {
       return { error: "You don't have permission to create projects. Contact your administrator." };
     }
     return { error: projectError.message };
@@ -225,7 +225,7 @@ export async function updateProject(
     .eq("id", projectId);
 
   if (updateError) {
-    if (updateError.message.includes("row-level security")) {
+    if (updateError.code === "42501" || updateError.message.includes("row-level security")) {
       return { error: "You don't have permission to edit projects. Contact your administrator." };
     }
     return { error: updateError.message };
