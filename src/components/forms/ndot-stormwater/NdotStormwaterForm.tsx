@@ -16,6 +16,7 @@ import Section2BmpCategories from "./Section2BmpCategories";
 import Section3DischargeSignatures from "./Section3DischargeSignatures";
 import PhotoAttachment from "@/components/forms/shared/PhotoAttachment";
 import type { FormPhoto } from "@/lib/schemas/ndot-stormwater";
+import { NDOT_INSTRUCTIONS } from "@/lib/constants/ndot-form-text";
 
 interface NdotStormwaterFormProps {
   projectId: string;
@@ -172,6 +173,11 @@ export default function NdotStormwaterForm({
             Pre-filled from last submission (date/signatures cleared)
           </span>
         )}
+      </div>
+
+      <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-xs leading-relaxed text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-400">
+        <span className="font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Instructions: </span>
+        {NDOT_INSTRUCTIONS}
       </div>
 
       <Section1SiteInfo data={data} onChange={update} fieldErrors={state.fieldErrors} />

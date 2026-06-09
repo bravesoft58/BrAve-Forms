@@ -4,6 +4,7 @@ import {
   labelClass,
 } from "@/components/forms/formStyles";
 import type { NdotStormwaterData } from "@/lib/schemas/ndot-stormwater";
+import { NDOT_SECTION3_PROMPTS, NDOT_CERT_TEXT } from "@/lib/constants/ndot-form-text";
 
 interface Section3Props {
   data: NdotStormwaterData;
@@ -30,7 +31,7 @@ export default function Section3DischargeSignatures({ data, onChange, fieldError
       </h3>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className={labelClass}>Batch plant present?</label>
+          <label className={labelClass}>{NDOT_SECTION3_PROMPTS.batch_plant_present}</label>
           <select
             value={data.batch_plant_present ?? ""}
             onChange={(e) => onChange("batch_plant_present", e.target.value as "Y" | "N")}
@@ -43,7 +44,7 @@ export default function Section3DischargeSignatures({ data, onChange, fieldError
         </div>
         {data.batch_plant_present === "Y" && (
           <div>
-            <label className={labelClass}>Location</label>
+            <label className={labelClass}>{NDOT_SECTION3_PROMPTS.batch_plant_location}</label>
             <select
               value={data.batch_plant_location ?? ""}
               onChange={(e) =>
@@ -88,7 +89,7 @@ export default function Section3DischargeSignatures({ data, onChange, fieldError
       </h3>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className={labelClass}>Illicit discharges observed?</label>
+          <label className={labelClass}>{NDOT_SECTION3_PROMPTS.illicit_discharges}</label>
           <select
             value={data.illicit_discharges ?? ""}
             onChange={(e) => onChange("illicit_discharges", e.target.value as "Y" | "N")}
@@ -100,7 +101,7 @@ export default function Section3DischargeSignatures({ data, onChange, fieldError
           </select>
         </div>
         <div>
-          <label className={labelClass}>Reportable spills?</label>
+          <label className={labelClass}>{NDOT_SECTION3_PROMPTS.reportable_spills}</label>
           <select
             value={data.reportable_spills ?? ""}
             onChange={(e) => onChange("reportable_spills", e.target.value as "Y" | "N")}
@@ -116,7 +117,7 @@ export default function Section3DischargeSignatures({ data, onChange, fieldError
       {data.reportable_spills === "Y" && (
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className={labelClass}>Spill Action Taken</label>
+            <label className={labelClass}>{NDOT_SECTION3_PROMPTS.spill_action}</label>
             <textarea
               value={data.spill_action}
               onChange={(e) => onChange("spill_action", e.target.value)}
@@ -126,7 +127,7 @@ export default function Section3DischargeSignatures({ data, onChange, fieldError
             />
           </div>
           <div>
-            <label className={labelClass}>NDEP report filed?</label>
+            <label className={labelClass}>{NDOT_SECTION3_PROMPTS.ndep_report_filed}</label>
             <select
               value={data.ndep_report_filed ?? ""}
               onChange={(e) => onChange("ndep_report_filed", e.target.value as "Y" | "N")}
@@ -142,7 +143,7 @@ export default function Section3DischargeSignatures({ data, onChange, fieldError
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className={labelClass}>Non-reportable spills?</label>
+          <label className={labelClass}>{NDOT_SECTION3_PROMPTS.non_reportable_spills}</label>
           <select
             value={data.non_reportable_spills ?? ""}
             onChange={(e) => onChange("non_reportable_spills", e.target.value as "Y" | "N")}
@@ -161,7 +162,7 @@ export default function Section3DischargeSignatures({ data, onChange, fieldError
       </h3>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className={labelClass}>Non-structural BMPs</label>
+          <label className={labelClass}>{NDOT_SECTION3_PROMPTS.non_structural_bmps}</label>
           <textarea
             value={data.non_structural_bmps}
             onChange={(e) => onChange("non_structural_bmps", e.target.value)}
@@ -170,7 +171,7 @@ export default function Section3DischargeSignatures({ data, onChange, fieldError
           />
         </div>
         <div>
-          <label className={labelClass}>All areas inspected?</label>
+          <label className={labelClass}>{NDOT_SECTION3_PROMPTS.all_areas_inspected}</label>
           <select
             value={data.all_areas_inspected ?? ""}
             onChange={(e) => onChange("all_areas_inspected", e.target.value as "Y" | "N")}
@@ -197,14 +198,7 @@ export default function Section3DischargeSignatures({ data, onChange, fieldError
         Certification
       </h3>
       <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-        I certify under penalty of law that this document and all attachments were prepared under my
-        direction or supervision in accordance with a system designed to assure that qualified
-        personnel properly gather and evaluate the information submitted. Based on my inquiry of the
-        person or persons who manage the system, or those persons directly responsible for gathering
-        the information, the information submitted is, to the best of my knowledge and belief, true,
-        accurate, and complete. I am aware that there are significant penalties for submitting false
-        information, including the possibility of fine and imprisonment for knowing violations.
-        (40 CFR 122.22(d))
+        {NDOT_CERT_TEXT}
       </p>
 
       {/* Dual Signatures */}

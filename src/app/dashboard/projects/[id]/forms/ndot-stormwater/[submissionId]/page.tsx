@@ -13,6 +13,13 @@ import {
   headerCellClass,
   cellClass,
 } from "@/components/forms/formStyles";
+import {
+  NDOT_BMP_PROMPTS,
+  NDOT_SECTION1_PROMPTS,
+  NDOT_SWPPP_PROMPTS,
+  NDOT_SECTION3_PROMPTS,
+  NDOT_CERT_TEXT,
+} from "@/lib/constants/ndot-form-text";
 
 const statusBadge: Record<string, string> = {
   draft: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
@@ -23,6 +30,9 @@ const statusBadge: Record<string, string> = {
 
 const labelClass = "text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400";
 const valueClass = "mt-1 text-sm text-zinc-900 dark:text-zinc-100";
+// Full official NDOT prompts read as sentences — normal case, not the tiny-caps labelClass (BF-51).
+const questionClass = "text-xs font-medium leading-snug text-zinc-600 dark:text-zinc-400";
+const bmpPromptClass = "mt-0.5 text-xs font-normal leading-snug text-zinc-500 dark:text-zinc-400";
 
 function YNBadge({ value }: { value?: string }) {
   if (value === "Y") return <span className="text-green-700 dark:text-green-400 font-medium">Y</span>;
@@ -179,25 +189,25 @@ export default async function NdotStormwaterViewPage({
         </h3>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <p className={labelClass}>Discharge to TMDL Waterway?</p>
+            <p className={questionClass}>{NDOT_SECTION1_PROMPTS.tmdl_waterway}</p>
             <p className={valueClass}><YNBadge value={data.tmdl_waterway} /></p>
             {data.tmdl_waterway === "Y" && data.tmdl_waterway_names && (
               <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{data.tmdl_waterway_names}</p>
             )}
           </div>
           <div>
-            <p className={labelClass}>Deficiency Follow-up?</p>
+            <p className={questionClass}>{NDOT_SECTION1_PROMPTS.deficiency_followup}</p>
             <p className={valueClass}>{DEFICIENCY_LABELS[data.deficiency_followup ?? ""] ?? "—"}</p>
             {data.deficiency_followup === "yes" && data.deficiency_actions && (
               <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{data.deficiency_actions}</p>
             )}
           </div>
           <div>
-            <p className={labelClass}>Evidence of Erosion?</p>
+            <p className={questionClass}>{NDOT_SECTION1_PROMPTS.erosion_evidence}</p>
             <p className={valueClass}><YNBadge value={data.erosion_evidence} /></p>
             {data.erosion_evidence === "Y" && (
               <>
-                <p className="mt-1 text-xs text-zinc-500">Discharge: <YNBadge value={data.erosion_discharge} /></p>
+                <p className="mt-1 text-xs text-zinc-500">{NDOT_SECTION1_PROMPTS.erosion_discharge} <YNBadge value={data.erosion_discharge} /></p>
                 {data.erosion_waterway && (
                   <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{data.erosion_waterway}</p>
                 )}
@@ -205,11 +215,11 @@ export default async function NdotStormwaterViewPage({
             )}
           </div>
           <div>
-            <p className={labelClass}>Adjacent Property Runoff?</p>
+            <p className={questionClass}>{NDOT_SECTION1_PROMPTS.adjacent_runoff}</p>
             <p className={valueClass}><YNBadge value={data.adjacent_runoff} /></p>
           </div>
           <div>
-            <p className={labelClass}>Pollutant Concerns?</p>
+            <p className={questionClass}>{NDOT_SECTION1_PROMPTS.pollutant_concerns}</p>
             <p className={valueClass}><YNBadge value={data.pollutant_concerns} /></p>
             {data.pollutant_concerns === "Y" && data.pollutant_explain && (
               <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{data.pollutant_explain}</p>
@@ -222,10 +232,10 @@ export default async function NdotStormwaterViewPage({
           SWPPP Elements
         </h3>
         <div className="grid gap-4 sm:grid-cols-4">
-          <div><p className={labelClass}>On-site?</p><p className={valueClass}><YNBadge value={data.swppp_onsite} /></p></div>
-          <div><p className={labelClass}>Signed?</p><p className={valueClass}><YNBadge value={data.swppp_signed} /></p></div>
-          <div><p className={labelClass}>Current?</p><p className={valueClass}><YNBadge value={data.swppp_current} /></p></div>
-          <div><p className={labelClass}>NOI Posted?</p><p className={valueClass}><YNBadge value={data.swppp_posted} /></p></div>
+          <div><p className={questionClass}>{NDOT_SWPPP_PROMPTS.swppp_onsite}</p><p className={valueClass}><YNBadge value={data.swppp_onsite} /></p></div>
+          <div><p className={questionClass}>{NDOT_SWPPP_PROMPTS.swppp_signed}</p><p className={valueClass}><YNBadge value={data.swppp_signed} /></p></div>
+          <div><p className={questionClass}>{NDOT_SWPPP_PROMPTS.swppp_current}</p><p className={valueClass}><YNBadge value={data.swppp_current} /></p></div>
+          <div><p className={questionClass}>{NDOT_SWPPP_PROMPTS.swppp_posted}</p><p className={valueClass}><YNBadge value={data.swppp_posted} /></p></div>
         </div>
       </section>
 
@@ -246,14 +256,25 @@ export default async function NdotStormwaterViewPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {bmps.map((bmp) => (
+              {bmps.map((bmp) => {
+                const prompt = NDOT_BMP_PROMPTS[bmp.name as keyof typeof NDOT_BMP_PROMPTS];
+                return (
                 <tr key={bmp.name}>
-                  <td className={`${cellClass} text-sm font-medium text-zinc-700 dark:text-zinc-300`}>{bmp.name}</td>
+                  <td className={`${cellClass} max-w-md`}>
+                    <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{prompt?.displayName ?? bmp.name}</span>
+                    {prompt && (
+                      <>
+                        <p className={bmpPromptClass}>{prompt.required}</p>
+                        <p className={`${bmpPromptClass} mt-1`}>{prompt.implemented}</p>
+                      </>
+                    )}
+                  </td>
                   <td className={cellClass}><YNBadge value={bmp.required} /></td>
                   <td className={cellClass}><YNBadge value={bmp.implemented} /></td>
                   <td className={`${cellClass} text-sm text-zinc-600 dark:text-zinc-400`}>{bmp.comments || "—"}</td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -301,7 +322,7 @@ export default async function NdotStormwaterViewPage({
           Temporary Batch Plants
         </h3>
         <div className="grid gap-4 sm:grid-cols-3">
-          <div><p className={labelClass}>Present?</p><p className={valueClass}><YNBadge value={data.batch_plant_present} /></p></div>
+          <div><p className={questionClass}>{NDOT_SECTION3_PROMPTS.batch_plant_present}</p><p className={valueClass}><YNBadge value={data.batch_plant_present} /></p></div>
           {data.batch_plant_present === "Y" && (
             <>
               <div><p className={labelClass}>Location</p><p className={valueClass}>{data.batch_plant_location === "onsite" ? "On-site" : data.batch_plant_location === "offsite" ? "Off-site" : "—"}</p></div>
@@ -318,23 +339,23 @@ export default async function NdotStormwaterViewPage({
           Illicit Discharge / Spill Response
         </h3>
         <div className="grid gap-4 sm:grid-cols-3">
-          <div><p className={labelClass}>Illicit Discharges?</p><p className={valueClass}><YNBadge value={data.illicit_discharges} /></p></div>
-          <div><p className={labelClass}>Reportable Spills?</p><p className={valueClass}><YNBadge value={data.reportable_spills} /></p></div>
-          <div><p className={labelClass}>NDEP Report Filed?</p><p className={valueClass}><YNBadge value={data.ndep_report_filed} /></p></div>
+          <div><p className={questionClass}>{NDOT_SECTION3_PROMPTS.illicit_discharges}</p><p className={valueClass}><YNBadge value={data.illicit_discharges} /></p></div>
+          <div><p className={questionClass}>{NDOT_SECTION3_PROMPTS.reportable_spills}</p><p className={valueClass}><YNBadge value={data.reportable_spills} /></p></div>
+          <div><p className={questionClass}>{NDOT_SECTION3_PROMPTS.ndep_report_filed}</p><p className={valueClass}><YNBadge value={data.ndep_report_filed} /></p></div>
         </div>
         {data.reportable_spills === "Y" && data.spill_action && (
           <div><p className={labelClass}>Spill Action Taken</p><p className={valueClass}>{data.spill_action}</p></div>
         )}
         <div className="grid gap-4 sm:grid-cols-2">
-          <div><p className={labelClass}>Non-reportable Spills?</p><p className={valueClass}><YNBadge value={data.non_reportable_spills} /></p></div>
+          <div><p className={questionClass}>{NDOT_SECTION3_PROMPTS.non_reportable_spills}</p><p className={valueClass}><YNBadge value={data.non_reportable_spills} /></p></div>
         </div>
 
         {/* Additional */}
         {data.non_structural_bmps && (
-          <div><p className={labelClass}>Non-structural BMPs</p><p className={valueClass}>{data.non_structural_bmps}</p></div>
+          <div><p className={questionClass}>{NDOT_SECTION3_PROMPTS.non_structural_bmps}</p><p className={valueClass}>{data.non_structural_bmps}</p></div>
         )}
         <div className="grid gap-4 sm:grid-cols-2">
-          <div><p className={labelClass}>All Areas Inspected?</p><p className={valueClass}><YNBadge value={data.all_areas_inspected} /></p></div>
+          <div><p className={questionClass}>{NDOT_SECTION3_PROMPTS.all_areas_inspected}</p><p className={valueClass}><YNBadge value={data.all_areas_inspected} /></p></div>
         </div>
         {data.additional_comments && (
           <div><p className={labelClass}>Additional Comments</p><p className={valueClass}>{data.additional_comments}</p></div>
@@ -344,10 +365,8 @@ export default async function NdotStormwaterViewPage({
         <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
           Certification
         </h3>
-        <p className="text-xs italic text-zinc-500 dark:text-zinc-400">
-          I certify under penalty of law that this document and all attachments were prepared under my
-          direction or supervision in accordance with a system designed to assure that qualified personnel
-          properly gather and evaluate the information submitted. (40 CFR 122.22(d))
+        <p className="text-xs italic text-zinc-500 dark:text-zinc-400 leading-relaxed">
+          {NDOT_CERT_TEXT}
         </p>
         <div className="grid gap-4 sm:grid-cols-2 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
           <div>
