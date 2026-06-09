@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { getProjects } from "@/lib/queries/projects";
+import { getCurrentUser } from "@/lib/auth";
 import ProjectCard from "@/components/projects/ProjectCard";
 
 export default async function ProjectsPage() {
-  const projects = await getProjects();
+  const [projects, user] = await Promise.all([getProjects(), getCurrentUser()]);
+  const isAdmin = user?.role === "admin";
 
   return (
     <div>
@@ -17,13 +19,15 @@ export default async function ProjectsPage() {
             Manage your construction projects and compliance forms.
           </p>
         </div>
-        <Link
-          href="/dashboard/projects/new"
-          className="inline-flex items-center gap-2 rounded-md bg-[#5C6F8A] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#4a5a6f]"
-        >
-          <Plus size={16} />
-          New Project
-        </Link>
+        {isAdmin && (
+          <Link
+            href="/dashboard/projects/new"
+            className="inline-flex items-center gap-2 rounded-md bg-[#5C6F8A] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#4a5a6f]"
+          >
+            <Plus size={16} />
+            New Project
+          </Link>
+        )}
       </div>
 
       {projects.length === 0 ? (
@@ -31,12 +35,14 @@ export default async function ProjectsPage() {
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             No projects yet.
           </p>
-          <Link
-            href="/dashboard/projects/new"
-            className="mt-3 text-sm font-medium text-[#5C6F8A] hover:underline"
-          >
-            Create your first project
-          </Link>
+          {isAdmin && (
+            <Link
+              href="/dashboard/projects/new"
+              className="mt-3 text-sm font-medium text-[#5C6F8A] hover:underline"
+            >
+              Create your first project
+            </Link>
+          )}
         </div>
       ) : (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
