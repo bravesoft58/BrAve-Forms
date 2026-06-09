@@ -8,6 +8,9 @@ import type {
   NdotStormwaterData,
   BmpCategory,
 } from "@/lib/schemas/ndot-stormwater";
+import { NDOT_BMP_PROMPTS } from "@/lib/constants/ndot-form-text";
+
+const promptClass = "mt-0.5 text-xs font-normal leading-snug text-zinc-500 dark:text-zinc-400";
 
 interface Section2Props {
   data: NdotStormwaterData;
@@ -39,16 +42,30 @@ export default function Section2BmpCategories({ data, onChange }: Section2Props)
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-            {data.bmp_categories.map((item, i) => (
+            {data.bmp_categories.map((item, i) => {
+              const prompt = NDOT_BMP_PROMPTS[item.name as keyof typeof NDOT_BMP_PROMPTS];
+              const reqId = `bmp-${i}-required`;
+              const implId = `bmp-${i}-implemented`;
+              return (
               <tr key={item.name}>
-                <td className={`${cellClass} text-sm font-medium text-zinc-700 dark:text-zinc-300`}>
-                  {item.name}
+                <td className={`${cellClass} max-w-md`}>
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    {prompt?.displayName ?? item.name}
+                  </span>
+                  {prompt && (
+                    <>
+                      <p id={reqId} className={promptClass}>{prompt.required}</p>
+                      <p id={implId} className={`${promptClass} mt-1`}>{prompt.implemented}</p>
+                    </>
+                  )}
                 </td>
                 <td className={cellClass}>
                   <select
                     value={item.required}
                     onChange={(e) => updateBmp(i, "required", e.target.value)}
                     className={selectClass}
+                    aria-label={`${item.name} — required`}
+                    aria-describedby={prompt ? reqId : undefined}
                   >
                     <option value="Y">Y</option>
                     <option value="N">N</option>
@@ -59,6 +76,8 @@ export default function Section2BmpCategories({ data, onChange }: Section2Props)
                     value={item.implemented}
                     onChange={(e) => updateBmp(i, "implemented", e.target.value)}
                     className={selectClass}
+                    aria-label={`${item.name} — implemented`}
+                    aria-describedby={prompt ? implId : undefined}
                   >
                     <option value="Y">Y</option>
                     <option value="N">N</option>
@@ -73,7 +92,8 @@ export default function Section2BmpCategories({ data, onChange }: Section2Props)
                   />
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

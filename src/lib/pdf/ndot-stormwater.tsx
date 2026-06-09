@@ -5,7 +5,6 @@ import {
   Section,
   FieldRow,
   Field,
-  YNField,
   YN,
   SignatureBlock,
   Certification,
@@ -13,6 +12,14 @@ import {
   colors,
 } from "./primitives";
 import type { NdotStormwaterData } from "@/lib/schemas/ndot-stormwater";
+import {
+  NDOT_INSTRUCTIONS,
+  NDOT_CERT_TEXT,
+  NDOT_BMP_PROMPTS,
+  NDOT_SECTION1_PROMPTS,
+  NDOT_SWPPP_PROMPTS,
+  NDOT_SECTION3_PROMPTS,
+} from "@/lib/constants/ndot-form-text";
 
 interface Props {
   data: NdotStormwaterData;
@@ -35,10 +42,26 @@ const INTENSITY_LABELS: Record<string, string> = {
   heavy: "Heavy",
 };
 
-const CERT_TEXT =
-  "I certify under penalty of law that this document and all attachments were prepared under my direction or supervision in accordance with a system designed to assure that qualified personnel properly gathered and evaluated the information submitted. Based on my inquiry of the person or persons who manage the system, or those persons directly responsible for gathering the information, the information submitted is, to the best of my knowledge and belief, true, accurate, and complete. I am aware that there are significant penalties for submitting false information, including the possibility of fine and imprisonment for knowing violations. 40 CFR 122.22(d)";
-
 const FORM_ID = "FORM 018-001 WPCM (Rev. 1/04/2017)";
+
+// Full-width "prompt + Y/N" row mirroring the official form's vertical layout.
+// `detail` renders the conditional follow-up answer (waterway names, actions, etc.)
+// beneath the prompt when present.
+function PromptRow({ prompt, value, detail }: { prompt: string; value?: string; detail?: string }) {
+  return (
+    <View style={{ marginBottom: 5 }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <Text style={{ flex: 1, fontSize: 8, paddingRight: 8 }}>{prompt}</Text>
+        <View style={{ flexShrink: 0 }}>
+          <YN value={value} />
+        </View>
+      </View>
+      {detail ? (
+        <Text style={{ fontSize: 7.5, color: colors.muted, marginTop: 1 }}>{detail}</Text>
+      ) : null}
+    </View>
+  );
+}
 
 function PageFooter() {
   return (
@@ -82,6 +105,12 @@ export function NdotStormwaterPdf({ data, projectName, permitNumber, formDate }:
       {/* PAGE 1 — Site Info + Conditions + SWPPP + first BMPs */}
       <Page size="LETTER" style={s.page}>
         <NdotHeader />
+
+        {/* Instructions (official p.1) */}
+        <Text style={{ fontSize: 7, color: colors.muted, marginBottom: 6, lineHeight: 1.3 }}>
+          <Text style={s.bold}>Instructions: </Text>
+          {NDOT_INSTRUCTIONS}
+        </Text>
 
         {/* Site Information */}
         <Section title="Site Information" />
@@ -128,41 +157,47 @@ export function NdotStormwaterPdf({ data, projectName, permitNumber, formDate }:
 
         {/* Assessment Questions */}
         <Section title="Site Assessment" />
-        <FieldRow>
-          <YNField label="TMDL Waterway Potential?" value={data.tmdl_waterway} />
-          <Field label="Waterway Names" value={data.tmdl_waterway_names} />
-        </FieldRow>
-        <FieldRow>
-          <YNField label="Significant Erosion?" value={data.erosion_evidence} />
-          <YNField label="Discharge into Waterway?" value={data.erosion_discharge} />
-          <Field label="Which Waterway" value={data.erosion_waterway} />
-        </FieldRow>
-        <FieldRow>
-          <YNField label="Adjacent Stormwater?" value={data.adjacent_runoff} />
-          <YNField label="Pollutant Concerns?" value={data.pollutant_concerns} />
-        </FieldRow>
-        <FieldRow>
-          <Field
-            label="Deficiency Follow-up"
-            value={
-              data.deficiency_followup === "yes"
-                ? "Yes"
-                : data.deficiency_followup === "no"
-                  ? "No"
-                  : "N/A"
-            }
-          />
-          <Field label="Actions Taken" value={data.deficiency_actions} />
-        </FieldRow>
+        <PromptRow
+          prompt={NDOT_SECTION1_PROMPTS.tmdl_waterway}
+          value={data.tmdl_waterway}
+          detail={
+            data.tmdl_waterway === "Y" && data.tmdl_waterway_names
+              ? `${NDOT_SECTION1_PROMPTS.tmdl_waterway_names} ${data.tmdl_waterway_names}`
+              : undefined
+          }
+        />
+        {/* Deficiency follow-up: N/A | Yes | No */}
+        <View style={{ marginBottom: 5 }}>
+          <Text style={{ fontSize: 8 }}>{NDOT_SECTION1_PROMPTS.deficiency_followup}</Text>
+          <Text style={{ fontSize: 7.5, color: colors.muted, marginTop: 1 }}>
+            {data.deficiency_followup === "yes" ? "Yes" : data.deficiency_followup === "no" ? "No" : "N/A"}
+            {data.deficiency_actions ? ` — ${data.deficiency_actions}` : ""}
+          </Text>
+        </View>
+        <PromptRow
+          prompt={NDOT_SECTION1_PROMPTS.erosion_evidence}
+          value={data.erosion_evidence}
+          detail={
+            data.erosion_evidence === "Y"
+              ? `${NDOT_SECTION1_PROMPTS.erosion_discharge} ${data.erosion_discharge ?? "—"}${
+                  data.erosion_waterway ? ` · ${data.erosion_waterway}` : ""
+                }`
+              : undefined
+          }
+        />
+        <PromptRow prompt={NDOT_SECTION1_PROMPTS.adjacent_runoff} value={data.adjacent_runoff} />
+        <PromptRow
+          prompt={NDOT_SECTION1_PROMPTS.pollutant_concerns}
+          value={data.pollutant_concerns}
+          detail={data.pollutant_concerns === "Y" ? data.pollutant_explain : undefined}
+        />
 
         {/* SWPPP Elements */}
         <Section title="SWPPP Elements" />
-        <FieldRow>
-          <YNField label="SWPPP Onsite?" value={data.swppp_onsite} />
-          <YNField label="SWPPP Signed?" value={data.swppp_signed} />
-          <YNField label="SWPPP Current?" value={data.swppp_current} />
-          <YNField label="Permit Posted?" value={data.swppp_posted} />
-        </FieldRow>
+        <PromptRow prompt={NDOT_SWPPP_PROMPTS.swppp_onsite} value={data.swppp_onsite} />
+        <PromptRow prompt={NDOT_SWPPP_PROMPTS.swppp_signed} value={data.swppp_signed} />
+        <PromptRow prompt={NDOT_SWPPP_PROMPTS.swppp_current} value={data.swppp_current} />
+        <PromptRow prompt={NDOT_SWPPP_PROMPTS.swppp_posted} value={data.swppp_posted} />
 
         <PageFooter />
       </Page>
@@ -172,62 +207,64 @@ export function NdotStormwaterPdf({ data, projectName, permitNumber, formDate }:
         <NdotHeader />
         <Section title="Best Management Practice (BMP) Categories" />
 
-        <View style={s.tableHeaderRow}>
-          <Text style={[s.tableCellBold, { width: "35%" }]}>BMP Category</Text>
-          <Text style={[s.tableCellBold, { width: "15%", textAlign: "center" }]}>Required?</Text>
-          <Text style={[s.tableCellBold, { width: "15%", textAlign: "center" }]}>Implemented?</Text>
-          <Text style={[s.tableCellBold, { width: "35%" }]}>Comments</Text>
-        </View>
-
-        {bmps.map((bmp, i) => (
-          <View key={i} style={s.tableRow}>
-            <Text style={[s.tableCell, { width: "35%" }]}>{bmp.name}</Text>
-            <View style={{ width: "15%", alignItems: "center", paddingVertical: 3 }}>
-              <YN value={bmp.required} />
+        {bmps.map((bmp, i) => {
+          const prompt = NDOT_BMP_PROMPTS[bmp.name as keyof typeof NDOT_BMP_PROMPTS];
+          return (
+            <View
+              key={i}
+              wrap={false}
+              style={{ marginBottom: 7, paddingBottom: 4, borderBottomWidth: 0.5, borderBottomColor: "#D1D5DB" }}
+            >
+              <Text style={[s.bold, { fontSize: 9, marginBottom: 2 }]}>
+                {prompt?.displayName ?? bmp.name}
+              </Text>
+              <PromptRow prompt={prompt?.required ?? "Required?"} value={bmp.required} />
+              <PromptRow prompt={prompt?.implemented ?? "Are BMPs properly implemented?"} value={bmp.implemented} />
+              {bmp.comments ? (
+                <Text style={{ fontSize: 7.5, color: colors.muted }}>Comments: {bmp.comments}</Text>
+              ) : null}
             </View>
-            <View style={{ width: "15%", alignItems: "center", paddingVertical: 3 }}>
-              <YN value={bmp.implemented} />
-            </View>
-            <Text style={[s.tableCell, { width: "35%" }]}>{bmp.comments || "---"}</Text>
-          </View>
-        ))}
+          );
+        })}
 
         {/* Batch Plants */}
         <Section title="Temporary Batch Plants" />
-        <FieldRow>
-          <YNField label="Batch Plant Present?" value={data.batch_plant_present} />
-          <Field
-            label="Location"
-            value={data.batch_plant_location === "onsite" ? "Onsite" : data.batch_plant_location === "offsite" ? "Offsite" : "---"}
-          />
-        </FieldRow>
-        {data.batch_plant_comments && (
-          <View style={s.mb4}>
-            <Text style={[s.bold, { fontSize: 7, color: colors.label }]}>Comments</Text>
-            <Text>{data.batch_plant_comments}</Text>
-          </View>
-        )}
+        <PromptRow
+          prompt={NDOT_SECTION3_PROMPTS.batch_plant_present}
+          value={data.batch_plant_present}
+          detail={
+            data.batch_plant_present === "Y"
+              ? `${NDOT_SECTION3_PROMPTS.batch_plant_location} ${
+                  data.batch_plant_location === "onsite"
+                    ? "Onsite"
+                    : data.batch_plant_location === "offsite"
+                      ? "Offsite"
+                      : "—"
+                }${data.batch_plant_comments ? ` · ${data.batch_plant_comments}` : ""}`
+              : undefined
+          }
+        />
 
         {/* Illicit Discharge */}
-        <Section title="Illicit Discharge Detection & Spill Response" />
-        <FieldRow>
-          <YNField label="Illicit Discharges?" value={data.illicit_discharges} />
-          <YNField label="Reportable Spills?" value={data.reportable_spills} />
-          <YNField label="NDEP Report Filed?" value={data.ndep_report_filed} />
-          <YNField label="Non-reportable Spills?" value={data.non_reportable_spills} />
-        </FieldRow>
-        {data.spill_action && (
-          <View style={s.mb4}>
-            <Text style={[s.bold, { fontSize: 7, color: colors.label }]}>Spill Actions</Text>
-            <Text>{data.spill_action}</Text>
-          </View>
-        )}
+        <Section title="Illicit Discharge Detection and Elimination / Spill Response" />
+        <PromptRow prompt={NDOT_SECTION3_PROMPTS.illicit_discharges} value={data.illicit_discharges} />
+        <PromptRow prompt={NDOT_SECTION3_PROMPTS.reportable_spills} value={data.reportable_spills} />
+        <View style={{ marginBottom: 5 }}>
+          <Text style={{ fontSize: 8 }}>{NDOT_SECTION3_PROMPTS.spill_action}</Text>
+          <Text style={{ fontSize: 7.5, color: colors.muted, marginTop: 1 }}>{data.spill_action || "N/A"}</Text>
+        </View>
+        <PromptRow prompt={NDOT_SECTION3_PROMPTS.ndep_report_filed} value={data.ndep_report_filed} />
+        <PromptRow prompt={NDOT_SECTION3_PROMPTS.non_reportable_spills} value={data.non_reportable_spills} />
 
         {/* Final Check */}
         <Section title="Final Check" />
-        <FieldRow>
-          <YNField label="All Areas Inspected?" value={data.all_areas_inspected} />
-        </FieldRow>
+        <PromptRow prompt={NDOT_SECTION3_PROMPTS.all_areas_inspected} value={data.all_areas_inspected} />
+        <View style={{ marginBottom: 5 }}>
+          <Text style={{ fontSize: 8 }}>{NDOT_SECTION3_PROMPTS.non_structural_bmps}</Text>
+          {data.non_structural_bmps ? (
+            <Text style={{ fontSize: 7.5, color: colors.muted, marginTop: 1 }}>{data.non_structural_bmps}</Text>
+          ) : null}
+        </View>
 
         <PageFooter />
       </Page>
@@ -260,7 +297,7 @@ export function NdotStormwaterPdf({ data, projectName, permitNumber, formDate }:
         )}
 
         {/* Certification + Signatures */}
-        <Certification text={CERT_TEXT} />
+        <Certification text={NDOT_CERT_TEXT} />
         <View style={s.signatureBlock}>
           <SignatureBlock label="Inspector" name={data.inspector_name} date={data.inspector_date} />
           <SignatureBlock label="Water Pollution Control Manager" name={data.wpcm_name} date={data.wpcm_date} />
