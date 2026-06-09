@@ -21,11 +21,11 @@ export type FormType = (typeof FORM_TYPES)[number];
 
 // Human-readable labels
 export const PERMIT_LABELS: Record<PermitType, string> = {
-  surface_area_disturbance: "Surface Area Disturbance (SAD)",
-  dust_control: "Dust Control",
-  stormwater_ndot: "Stormwater (NDOT)",
-  stormwater_ndep: "Stormwater (NDEP)",
-  waterway: "Waterway",
+  surface_area_disturbance: "Surface Area Disturbance (SAD) — NDEP",
+  dust_control: "Dust Control — NNPH",
+  stormwater_ndot: "Stormwater — NDOT",
+  stormwater_ndep: "Stormwater — NDEP",
+  waterway: "Waterway — NDEP",
   other: "Other",
 };
 
