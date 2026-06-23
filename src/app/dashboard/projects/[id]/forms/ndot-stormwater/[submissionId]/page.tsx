@@ -334,28 +334,59 @@ export default async function NdotStormwaterViewPage({
           <div><p className={labelClass}>Batch Plant Comments</p><p className={valueClass}>{data.batch_plant_comments}</p></div>
         )}
 
-        {/* Illicit Discharge / Spill Response */}
+        {/* Illicit Discharge / Spill Response — official Form 018-001 parity (BF-53) */}
         <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
           Illicit Discharge / Spill Response
         </h3>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div><p className={questionClass}>{NDOT_SECTION3_PROMPTS.illicit_discharges}</p><p className={valueClass}><YNBadge value={data.illicit_discharges} /></p></div>
-          <div><p className={questionClass}>{NDOT_SECTION3_PROMPTS.reportable_spills}</p><p className={valueClass}><YNBadge value={data.reportable_spills} /></p></div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <p className={questionClass}>{NDOT_SECTION3_PROMPTS.illicit_discharges}</p>
+            <p className={valueClass}><YNBadge value={data.illicit_discharges} /></p>
+            {data.illicit_discharges === "Y" && data.illicit_discharges_desc && (
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{data.illicit_discharges_desc}</p>
+            )}
+          </div>
+          <div>
+            <p className={questionClass}>{NDOT_SECTION3_PROMPTS.reportable_spills}</p>
+            <p className={valueClass}><YNBadge value={data.reportable_spills} /></p>
+            {data.reportable_spills === "Y" && data.reportable_spills_desc && (
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{data.reportable_spills_desc}</p>
+            )}
+          </div>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div><p className={questionClass}>{NDOT_SECTION3_PROMPTS.spill_action}</p><p className={valueClass}><YNBadge value={data.spill_action} /></p></div>
           <div><p className={questionClass}>{NDOT_SECTION3_PROMPTS.ndep_report_filed}</p><p className={valueClass}><YNBadge value={data.ndep_report_filed} /></p></div>
         </div>
-        {data.reportable_spills === "Y" && data.spill_action && (
-          <div><p className={labelClass}>Spill Action Taken</p><p className={valueClass}>{data.spill_action}</p></div>
-        )}
         <div className="grid gap-4 sm:grid-cols-2">
-          <div><p className={questionClass}>{NDOT_SECTION3_PROMPTS.non_reportable_spills}</p><p className={valueClass}><YNBadge value={data.non_reportable_spills} /></p></div>
+          <div>
+            <p className={questionClass}>{NDOT_SECTION3_PROMPTS.non_reportable_spills}</p>
+            <p className={valueClass}><YNBadge value={data.non_reportable_spills} /></p>
+            {data.non_reportable_spills === "Y" && data.non_reportable_spills_desc && (
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{data.non_reportable_spills_desc}</p>
+            )}
+          </div>
+          <div>
+            <p className={questionClass}>{NDOT_SECTION3_PROMPTS.non_structural_bmps}</p>
+            <p className={valueClass}><YNBadge value={data.non_structural_bmps} /></p>
+            {data.non_structural_bmps === "Y" && data.non_structural_bmps_desc && (
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{data.non_structural_bmps_desc}</p>
+            )}
+          </div>
         </div>
 
-        {/* Additional */}
-        {data.non_structural_bmps && (
-          <div><p className={questionClass}>{NDOT_SECTION3_PROMPTS.non_structural_bmps}</p><p className={valueClass}>{data.non_structural_bmps}</p></div>
-        )}
+        {/* Final Check */}
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
+          Final Check
+        </h3>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div><p className={questionClass}>{NDOT_SECTION3_PROMPTS.all_areas_inspected}</p><p className={valueClass}><YNBadge value={data.all_areas_inspected} /></p></div>
+          <div>
+            <p className={questionClass}>{NDOT_SECTION3_PROMPTS.all_areas_inspected}</p>
+            <p className={valueClass}><YNBadge value={data.all_areas_inspected} /></p>
+            {data.all_areas_inspected === "N" && data.all_areas_inspected_explain && (
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{data.all_areas_inspected_explain}</p>
+            )}
+          </div>
         </div>
         {data.additional_comments && (
           <div><p className={labelClass}>Additional Comments</p><p className={valueClass}>{data.additional_comments}</p></div>

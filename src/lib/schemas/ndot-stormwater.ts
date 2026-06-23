@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 const YN = ["Y", "N"] as const;
+// N/A | Yes | No — official Form 018-001 tri-state for spill-response items (BF-53).
+const YNA = ["Y", "N", "NA"] as const;
 
 // --- Weather & Conditions ---
 
@@ -97,16 +99,21 @@ export const ndotStormwaterSchema = z.object({
   batch_plant_bmps: z.string().optional().default(""),
   batch_plant_comments: z.string().optional().default(""),
 
-  // Illicit Discharge / Spill Response
+  // Illicit Discharge / Spill Response (official Form 018-001 parity — BF-53)
   illicit_discharges: z.enum(YN).optional(),
+  illicit_discharges_desc: z.string().optional().default(""),
   reportable_spills: z.enum(YN).optional(),
-  spill_action: z.string().optional().default(""),
-  ndep_report_filed: z.enum(YN).optional(),
-  non_reportable_spills: z.enum(YN).optional(),
+  reportable_spills_desc: z.string().optional().default(""),
+  spill_action: z.enum(YNA).optional(),
+  ndep_report_filed: z.enum(YNA).optional(),
+  non_reportable_spills: z.enum(YNA).optional(),
+  non_reportable_spills_desc: z.string().optional().default(""),
+  non_structural_bmps: z.enum(YNA).optional(),
+  non_structural_bmps_desc: z.string().optional().default(""),
 
-  // Additional
-  non_structural_bmps: z.string().optional().default(""),
+  // Final Check
   all_areas_inspected: z.enum(YN).optional(),
+  all_areas_inspected_explain: z.string().optional().default(""),
   additional_comments: z.string().optional().default(""),
 
   // Photos

@@ -245,26 +245,38 @@ export function NdotStormwaterPdf({ data, projectName, permitNumber, formDate }:
           }
         />
 
-        {/* Illicit Discharge */}
+        {/* Illicit Discharge — official Form 018-001 parity (BF-53) */}
         <Section title="Illicit Discharge Detection and Elimination / Spill Response" />
-        <PromptRow prompt={NDOT_SECTION3_PROMPTS.illicit_discharges} value={data.illicit_discharges} />
-        <PromptRow prompt={NDOT_SECTION3_PROMPTS.reportable_spills} value={data.reportable_spills} />
-        <View style={{ marginBottom: 5 }}>
-          <Text style={{ fontSize: 8 }}>{NDOT_SECTION3_PROMPTS.spill_action}</Text>
-          <Text style={{ fontSize: 7.5, color: colors.muted, marginTop: 1 }}>{data.spill_action || "N/A"}</Text>
-        </View>
+        <PromptRow
+          prompt={NDOT_SECTION3_PROMPTS.illicit_discharges}
+          value={data.illicit_discharges}
+          detail={data.illicit_discharges === "Y" ? data.illicit_discharges_desc : undefined}
+        />
+        <PromptRow
+          prompt={NDOT_SECTION3_PROMPTS.reportable_spills}
+          value={data.reportable_spills}
+          detail={data.reportable_spills === "Y" ? data.reportable_spills_desc : undefined}
+        />
+        <PromptRow prompt={NDOT_SECTION3_PROMPTS.spill_action} value={data.spill_action} />
         <PromptRow prompt={NDOT_SECTION3_PROMPTS.ndep_report_filed} value={data.ndep_report_filed} />
-        <PromptRow prompt={NDOT_SECTION3_PROMPTS.non_reportable_spills} value={data.non_reportable_spills} />
+        <PromptRow
+          prompt={NDOT_SECTION3_PROMPTS.non_reportable_spills}
+          value={data.non_reportable_spills}
+          detail={data.non_reportable_spills === "Y" ? data.non_reportable_spills_desc : undefined}
+        />
+        <PromptRow
+          prompt={NDOT_SECTION3_PROMPTS.non_structural_bmps}
+          value={data.non_structural_bmps}
+          detail={data.non_structural_bmps === "Y" ? data.non_structural_bmps_desc : undefined}
+        />
 
         {/* Final Check */}
         <Section title="Final Check" />
-        <PromptRow prompt={NDOT_SECTION3_PROMPTS.all_areas_inspected} value={data.all_areas_inspected} />
-        <View style={{ marginBottom: 5 }}>
-          <Text style={{ fontSize: 8 }}>{NDOT_SECTION3_PROMPTS.non_structural_bmps}</Text>
-          {data.non_structural_bmps ? (
-            <Text style={{ fontSize: 7.5, color: colors.muted, marginTop: 1 }}>{data.non_structural_bmps}</Text>
-          ) : null}
-        </View>
+        <PromptRow
+          prompt={NDOT_SECTION3_PROMPTS.all_areas_inspected}
+          value={data.all_areas_inspected}
+          detail={data.all_areas_inspected === "N" ? data.all_areas_inspected_explain : undefined}
+        />
 
         <PageFooter />
       </Page>
