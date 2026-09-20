@@ -8,7 +8,7 @@
 **Started:** 2026-09-20T19:43:50Z
 **Reported by:** Q&D readiness assessment 2026-09-08 (`docs/release/QD-GO-LIVE-READINESS-2026-09-08.md`, blocker 1); re-verified against production 2026-09-20. Added to this sprint by Tim on 2026-09-20.
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-20T19:51:45Z
+**Last Updated:** 2026-09-20T19:53:05Z
 
 ## Problem
 
@@ -89,7 +89,7 @@ Run with a real ordinary user's session against the isolated copy, then against 
 - [x] Applied to an isolated copy first; the negative tests above pass there.
 - [ ] Applied to production; `information_schema.column_privileges` shows no UPDATE on `role`, `platform_role`, `id`, `email` for `authenticated` or `anon`; the trigger exists; the policy has a WITH CHECK.
 - [ ] Negative tests pass against production with an ordinary Q&D user (not an admin).
-- [ ] Privileged-account review recorded: list of super admins and admins before and after, with the finding stated.
+- [x] Privileged-account review recorded: list of super admins and admins before and after, with the finding stated. (Pre-apply review below; repeat after apply.)
 - [ ] No app regression: sign-in, form submit, user invite, role change by an admin all work.
 - [ ] Readiness document blocker 1 updated to point at this ticket and its evidence.
 
@@ -107,6 +107,19 @@ Suite: `Testing/security/bf59_profile_role_guard.sql`, 13 checks, every mutating
 | After re-applying the migration | 13 of 13 PASS | Migration is idempotent on a rolled-back database. |
 
 Visibility matrix (`Testing/security/bf59_visibility_matrix.sql`, read-only, run on the patched copy and on unpatched production): member sees 7 profiles, org admin 7, super admin 8, `select *` works for all three, identical on both. No silent hide (lesson 2026-04-30 pattern).
+
+## Privileged-account review (production, read-only, 2026-09-20)
+
+| Email | role | platform_role | profile updated_at | Membership | Provenance |
+| --- | --- | --- | --- | --- | --- |
+| timsaverill@protonmail.com | admin | super_admin | 2026-04-25 | Q&D Construction: owner | BF-30 backfill set super_admin on 2026-04-25 (EF fact 7d644dbd) |
+| abreen@qdconstruction.com | admin | member | 2026-03-12 | Q&D Construction: admin | Andy, promoted during sprint 2 UAT |
+| gdamele@qdconstruction.com | admin | member | 2026-04-16 | Q&D Construction: admin | Gracie, invited as admin |
+| claude.test@braveforms.dev | admin | member | 2026-03-09 | Q&D Construction: admin | test account (BF-55 removes) |
+| itadmin@pleniumbuilders.com | admin | member | 2026-05-02 | Q&D Construction: admin | was a Q&D `user` in the BF-30 backfill; promoted 2026-05-02 during multi-tenant UAT. Membership is Q&D, not Plenium. Confirm intent in BF-55. |
+| adminbreen@pleniumbuilders.com | admin | member | 2026-06-08 | Plenium Builders: owner | BF-33 Slice 1 backfill by Tim on 2026-06-08 (EF fact edc68e8c) |
+
+Finding: one super admin, and it is Tim. Every admin-role row matches the 2026-09-20 backup exactly and every `updated_at` predates the 2026-09-08 discovery, with a documented provisioning event behind each. No evidence the self-promotion path was used. Caveat, stated plainly: PostgREST writes are not in the Supabase Auth audit log, and a promote-then-revert would leave only a bumped `updated_at`; none of the timestamps is unexplained, but this is evidence of absence, not proof.
 
 ## Notes
 
