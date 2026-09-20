@@ -8,7 +8,7 @@
 **Started:** 2026-09-20T19:43:50Z
 **Reported by:** Q&D readiness assessment 2026-09-08 (`docs/release/QD-GO-LIVE-READINESS-2026-09-08.md`, blocker 1); re-verified against production 2026-09-20. Added to this sprint by Tim on 2026-09-20.
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-20T19:53:05Z
+**Last Updated:** 2026-09-20T20:09:24Z
 
 ## Problem
 
@@ -87,11 +87,11 @@ Run with a real ordinary user's session against the isolated copy, then against 
 
 - [x] Migration file in `supabase/migrations/` with a matching rollback under `_rollback/`.
 - [x] Applied to an isolated copy first; the negative tests above pass there.
-- [ ] Applied to production; `information_schema.column_privileges` shows no UPDATE on `role`, `platform_role`, `id`, `email` for `authenticated` or `anon`; the trigger exists; the policy has a WITH CHECK.
-- [ ] Negative tests pass against production with an ordinary Q&D user (not an admin).
-- [x] Privileged-account review recorded: list of super admins and admins before and after, with the finding stated. (Pre-apply review below; repeat after apply.)
-- [ ] No app regression: sign-in, form submit, user invite, role change by an admin all work.
-- [ ] Readiness document blocker 1 updated to point at this ticket and its evidence.
+- [x] Applied to production; `information_schema.column_privileges` shows no UPDATE on `role`, `platform_role`, `id`, `email` for `authenticated` or `anon`; the trigger exists; the policy has a WITH CHECK.
+- [x] Negative tests pass against production with an ordinary Q&D user (not an admin). (SQL suite impersonating abreen@qdgroupinvesco.com, 13 of 13; the REST suite was not run because no ordinary-user credentials were available. Tim chose to rely on the SQL suite, which exercises the same privilege check PostgREST hits.)
+- [x] Privileged-account review recorded: list of super admins and admins before and after, with the finding stated. (Post-apply rows identical to pre-apply.)
+- [ ] No app regression: sign-in, form submit, user invite, role change by an admin all work. (Unauthenticated smoke only so far: /login 200, /dashboard redirects to /login, anon API healthy. Authenticated flows need a real session: Tim or Andy.)
+- [x] Readiness document blocker 1 updated to point at this ticket and its evidence.
 
 ## Isolated-copy evidence (2026-09-20T19:51:45Z)
 
@@ -108,6 +108,20 @@ Suite: `Testing/security/bf59_profile_role_guard.sql`, 13 checks, every mutating
 
 Visibility matrix (`Testing/security/bf59_visibility_matrix.sql`, read-only, run on the patched copy and on unpatched production): member sees 7 profiles, org admin 7, super admin 8, `select *` works for all three, identical on both. No silent hide (lesson 2026-04-30 pattern).
 
+## Production evidence (applied 2026-09-20T20:07:35Z, Tim's go)
+
+Applied through the Supabase MCP `apply_migration` with the body of `20260920194350_profile_role_guard.sql` (sha256 `b15f1aca...`). Supabase recorded it in `supabase_migrations.schema_migrations` as version `20260920200725` `profile_role_guard`, the same repo-file-vs-recorded-version pattern as every prior MCP-applied migration here (for example the repo's `20260430140000_admin_org_access.sql` is recorded as `20260430141806`).
+
+Catalog after apply: authenticated UPDATE columns on profiles = `full_name, phone`; anon table grants = SELECT only; triggers = `profiles_guard_privilege_columns` (BEFORE UPDATE OF role, platform_role) and `profiles_updated_at`; `profiles_update_own` WITH CHECK = `((select auth.uid()) = id)`.
+
+Negative suite on production (`Testing/security/bf59_profile_role_guard.sql` via MCP, every probe rolled back): 13 of 13 PASS. T01-T04 42501, T05 own full_name 1 row, T06 other row 0 rows, T07 JWT-claim branch 42501, T08 service_role 1 row, T09 super admin true, T10-T13 catalog assertions pass.
+
+Visibility matrix on production after apply: member 7, org admin 7, super admin 8, `select *` works for all three. Identical to before apply.
+
+Smoke: live site /login 200, unauthenticated /dashboard redirects to /login, GoTrue health 200, anonymous organizations select returns an empty set as before. Authenticated regression (sign-in, form submit, invite, admin role change) still to be run by a person with a session.
+
+Rollback if a legitimate profile write breaks: apply `_rollback/20260920194350_rollback.sql` through the same MCP path, then re-apply once the cause is fixed.
+
 ## Privileged-account review (production, read-only, 2026-09-20)
 
 | Email | role | platform_role | profile updated_at | Membership | Provenance |
@@ -119,7 +133,7 @@ Visibility matrix (`Testing/security/bf59_visibility_matrix.sql`, read-only, run
 | itadmin@pleniumbuilders.com | admin | member | 2026-05-02 | Q&D Construction: admin | was a Q&D `user` in the BF-30 backfill; promoted 2026-05-02 during multi-tenant UAT. Membership is Q&D, not Plenium. Confirm intent in BF-55. |
 | adminbreen@pleniumbuilders.com | admin | member | 2026-06-08 | Plenium Builders: owner | BF-33 Slice 1 backfill by Tim on 2026-06-08 (EF fact edc68e8c) |
 
-Finding: one super admin, and it is Tim. Every admin-role row matches the 2026-09-20 backup exactly and every `updated_at` predates the 2026-09-08 discovery, with a documented provisioning event behind each. No evidence the self-promotion path was used. Caveat, stated plainly: PostgREST writes are not in the Supabase Auth audit log, and a promote-then-revert would leave only a bumped `updated_at`; none of the timestamps is unexplained, but this is evidence of absence, not proof.
+Finding: one super admin, and it is Tim. Every admin-role row matches the 2026-09-20 backup exactly and every `updated_at` predates the 2026-09-08 discovery, with a documented provisioning event behind each. Re-read after the production apply at 2026-09-20T20:07Z: identical rows. No evidence the self-promotion path was used. Caveat, stated plainly: PostgREST writes are not in the Supabase Auth audit log, and a promote-then-revert would leave only a bumped `updated_at`; none of the timestamps is unexplained, but this is evidence of absence, not proof.
 
 ## Notes
 
