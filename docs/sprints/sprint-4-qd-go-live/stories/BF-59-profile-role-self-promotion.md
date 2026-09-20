@@ -8,7 +8,7 @@
 **Started:** 2026-09-20T19:43:50Z
 **Reported by:** Q&D readiness assessment 2026-09-08 (`docs/release/QD-GO-LIVE-READINESS-2026-09-08.md`, blocker 1); re-verified against production 2026-09-20. Added to this sprint by Tim on 2026-09-20.
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-20T20:31:34Z
+**Last Updated:** 2026-09-20T20:49:13Z
 
 ## Problem
 
@@ -63,7 +63,9 @@ One migration, additive and reversible, applied to production after the pre-chan
 | CREATE | `supabase/migrations/20260920194350_profile_role_guard.sql` | Grants, anon hygiene, guard trigger, policy WITH CHECK |
 | CREATE | `supabase/migrations/_rollback/20260920194350_rollback.sql` | Exact inverse: restore table-level UPDATE, drop trigger, restore policy |
 | CREATE | `Testing/security/bf59_profile_role_guard.sql` | SQL-level negative suite using role impersonation (`SET LOCAL ROLE` + `request.jwt.claims`); runs on the local copy and on production via MCP |
-| CREATE | `Testing/security/bf59_profile_role_guard.py` | REST-level negative suite against a live project with a real ordinary user session (production acceptance run) |
+| CREATE | `Testing/security/bf59_profile_role_guard.py` | REST-level negative suite against a live project with a real ordinary user session; explicit target, timeout-safe restore, non-destructive cross-user probe |
+| CREATE | `Testing/security/bf59_rest_stub_test.py` | Credential-free self-test of the REST suite against an in-process API stub: patched, open, timeout, and production-refusal scenarios |
+| CREATE | `Testing/security/bf59_visibility_matrix.sql` | Read-only per-tier profile visibility count (no silent hide) |
 | MODIFY | `docs/release/QD-GO-LIVE-READINESS-2026-09-08.md` | Point blocker 1 at this ticket and its evidence (AC 7) |
 
 **Build vs Use:** BUILD — no test framework exists in the repo (`patterns.md` Section 6) and a search for Supabase RLS negative-test helpers (pgTAP `supabase_test_helpers`) returned no results on 2026-09-20; installing pgTAP on production for one check is disproportionate to a 2 SP story. The suite is two small scripts under `Testing/security/`. Reopen when BF-34's Playwright cross-tenant harness lands: fold these checks into it and retire the scripts.
@@ -132,7 +134,16 @@ Fresh-session verify plus a Codex adversarial review found no bypass in the migr
 
 Verify could not write to the repo lessons file under headless permissions; the two lessons are applied by hand in `.claude/lessons-learned.md`. AC 6 (authenticated app regression) remains open and needs a person with a session.
 
+## Verify round 2 (headless, 2026-09-20T20:45:41Z): NEEDS ATTENTION, 8.5
+
+Verify re-executed the cycle itself on the local copy: 13 of 13 on the patched copy, exploit reproduced after the rollback script (2 columns writable, 8 offending grants back), 13 of 13 after re-apply. Codex corroborated and found no migration bypass. Two items remained:
+
+1. **REST suite hardening** (Codex, high). The HTTP helper caught only HTTP errors, so a committed write whose response timed out would crash before the restore; the cross-user probe wrote a literal `"x"`; the script defaulted to the production env file. Fixed: every forbidden probe is followed by a re-read and restore regardless of the response (id case confirmed by email at the new id); the cross-user probe writes the other user's current value back; `--url` and `--anon-key` are required and the production ref is refused without `--allow-production`. Validated by the new `bf59_rest_stub_test.py` (patched: exit 0 no breach; open and timeout: exit 1 with breach lines and the stub's state restored; production refusal: exit 2). That self-test also caught a false breach on the id probe in the first rewrite, which is now fixed.
+2. **AC 6, authenticated app regression.** Still needs a person with a live session.
+
 ### How to re-run the suites independently
+
+REST suite self-test, no credentials: `python Testing/security/bf59_rest_stub_test.py` (expect `RESULT: PASS`).
 
 Local copy (patched, production data from the 2026-09-20 backup): container `bf59-pg`, port 55433, superuser `postgres`, password `bf59local`. If it is not running: `docker run -d --name bf59-pg -e POSTGRES_PASSWORD=bf59local -p 127.0.0.1:55433:5432 public.ecr.aws/supabase/postgres@sha256:d97ae90aaf153598f2978a100c7b9c24098829df4a5c3f3c466bb56b6037b998`, then `python backups/2026-09-20T192106Z-pre-launch-tweaks/scripts/restore_local_docker.py bf59-pg`, then apply the migration with `docker cp` and `psql -f`.
 
