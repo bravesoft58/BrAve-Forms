@@ -7,8 +7,12 @@ Usage:
 URL and anon key default to NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY from .env.local.
 The account must be an ordinary member (profiles.role = 'user', platform_role = 'member').
 
-The only writes attempted are (a) forbidden updates, which must be rejected, and (b) an update of
-full_name to its current value. Exit code 1 on any failure. Never prints tokens or keys.
+The only writes attempted are (a) forbidden updates, which MUST be rejected on a patched target, and
+(b) an update of full_name to its current value. If a forbidden update is NOT rejected (an unpatched or
+regressed target), the hole is open: the script attempts a best-effort restore of the affected field to
+its pre-probe value and reports the breach loudly, so it never leaves an account promoted. That restore
+is client-side and best-effort -- run against production only after the migration is applied, or against
+a disposable isolated project. Exit code 1 on any failure. Never prints tokens or keys.
 """
 import argparse, json, os, sys, urllib.request, urllib.error
 
@@ -68,10 +72,20 @@ def main():
 
     forbidden = [("R01", {"platform_role": "super_admin"}), ("R02", {"role": "admin"}), ("R04", {"email": "bf59@example.invalid"})]
     if other: forbidden.insert(2, ("R03", {"id": other}))
+    breach = False
     for tid, body in forbidden:
+        field = list(body)[0]
         st, resp = call("PATCH", f"{url}/rest/v1/profiles?id=eq.{me}", key, token, body, prefer="return=representation")
         code = resp.get("code") if isinstance(resp, dict) else None
-        record(tid, f"PATCH own row {list(body)[0]}", st in (401, 403) and code == "42501", f"HTTP {st} code={code}")
+        rejected = st in (401, 403) and code == "42501"
+        record(tid, f"PATCH own row {field}", rejected, f"HTTP {st} code={code}")
+        # SAFETY (BF-59 Codex finding): a non-rejected probe means the hole is OPEN and the row was
+        # just modified. Restore the field to its pre-probe value so this detector never leaves a real
+        # account promoted. Best-effort, client-side; also flags the breach loudly below.
+        if not rejected and st in (200, 204):
+            breach = True
+            rst, _ = call("PATCH", f"{url}/rest/v1/profiles?id=eq.{me}", key, token, {field: before.get(field)}, prefer="return=representation")
+            record(tid + "!", f"BREACH: {field} write was NOT blocked; attempted restore", rst in (200, 204), f"restore HTTP {rst}")
 
     st, resp = call("PATCH", f"{url}/rest/v1/profiles?id=eq.{me}", key, token, {"full_name": before["full_name"]}, prefer="return=representation")
     record("R05", "PATCH own row full_name (allowed column)", st == 200 and isinstance(resp, list) and len(resp) == 1, f"HTTP {st} rows={len(resp) if isinstance(resp, list) else 'n/a'}")
@@ -84,6 +98,9 @@ def main():
     record("R07", "own row unchanged after probes", st == 200 and after and after[0] == before, json.dumps({k: after[0].get(k) for k in ("role", "platform_role")}) if after else f"HTTP {st}")
 
     for r in results: print(f"{r[0]}  {r[2]}  {r[1]}  [{r[3]}]")
+    if breach:
+        print("CRITICAL: at least one forbidden write was ACCEPTED -- the self-promotion hole is OPEN on "
+              "this target. A best-effort restore was attempted above; verify the affected row manually.")
     print(f"RESULT: {'PASS' if fails == 0 else str(fails) + ' FAIL'} ({len(results)} checks, user {a.email})")
     sys.exit(1 if fails else 0)
 

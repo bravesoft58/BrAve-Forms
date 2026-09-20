@@ -7,7 +7,7 @@
 --   T05      the same user CAN update full_name on their own row (policy still works for allowed columns)
 --   T06      the same user cannot touch another user's row (0 rows under RLS)
 --   T07      guard trigger fires on the JWT-claim branch even when the DB role is postgres (SECURITY DEFINER path)
---   T08      a service_role request can still change role (user-management actions keep working)
+--   T08      a service_role request can still change role to a DIFFERENT value (user-management actions keep working)
 --   T09      a super admin impersonation still passes is_super_admin()
 --   T10-T12  catalog state: column grants, trigger present, policy has WITH CHECK
 --   T13      anon holds no write privileges on profiles
@@ -112,10 +112,14 @@ BEGIN
   END;
 
   -- ---- T08: service_role request can change role -------------------------
+  -- The value must actually change: the guard only inspects rows where role /
+  -- platform_role IS DISTINCT FROM the old value, so `role = role` would never
+  -- exercise the service-role exemption (Codex finding, verify round 1). The
+  -- probe is rolled back by the P0999 marker like every other one.
   BEGIN
     PERFORM set_config('request.jwt.claims', json_build_object('role', 'service_role')::text, true);
     EXECUTE 'SET LOCAL ROLE service_role';
-    EXECUTE format('UPDATE public.profiles SET role = role WHERE id = %L', v_user);
+    EXECUTE format('UPDATE public.profiles SET role = CASE WHEN role = ''user'' THEN ''admin'' ELSE ''user'' END WHERE id = %L', v_user);
     GET DIAGNOSTICS v_n = ROW_COUNT;
     EXECUTE 'RESET ROLE';
     RAISE EXCEPTION 'probe:%', v_n USING ERRCODE = 'P0999';

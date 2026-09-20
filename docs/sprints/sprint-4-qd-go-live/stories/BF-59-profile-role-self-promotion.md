@@ -8,7 +8,7 @@
 **Started:** 2026-09-20T19:43:50Z
 **Reported by:** Q&D readiness assessment 2026-09-08 (`docs/release/QD-GO-LIVE-READINESS-2026-09-08.md`, blocker 1); re-verified against production 2026-09-20. Added to this sprint by Tim on 2026-09-20.
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-20T20:09:24Z
+**Last Updated:** 2026-09-20T20:31:34Z
 
 ## Problem
 
@@ -121,6 +121,27 @@ Visibility matrix on production after apply: member 7, org admin 7, super admin 
 Smoke: live site /login 200, unauthenticated /dashboard redirects to /login, GoTrue health 200, anonymous organizations select returns an empty set as before. Authenticated regression (sign-in, form submit, invite, admin role change) still to be run by a person with a session.
 
 Rollback if a legitimate profile write breaks: apply `_rollback/20260920194350_rollback.sql` through the same MCP path, then re-apply once the cause is fixed.
+
+## Verify round 1 (headless, 2026-09-20T20:26:41Z): NEEDS ATTENTION, 8.5
+
+Fresh-session verify plus a Codex adversarial review found no bypass in the migration and confirmed at the code layer that every app write to profiles goes through the service-role client. Three findings, all addressed before round 2:
+
+1. **REST suite could become the exploit** (Codex, high). On an unpatched or regressed target a non-rejected PATCH would have left the test account promoted. Verify added a best-effort revert-on-breach with a loud CRITICAL line and restricted the documented targets. Kept as-is and committed.
+2. **T08 was a no-op** (Codex, medium). `SET role = role` never trips the guard's IS DISTINCT FROM condition, so the service-role exemption was never exercised. Fixed: T08 now flips the value inside the rolled-back probe. Re-run on the rebuilt local copy (13 of 13) and on production (T08 PASS, role `user -> user` after the probe).
+3. **No independent re-execution.** The isolated copy had been torn down. It is rebuilt and left running for round 2; see below.
+
+Verify could not write to the repo lessons file under headless permissions; the two lessons are applied by hand in `.claude/lessons-learned.md`. AC 6 (authenticated app regression) remains open and needs a person with a session.
+
+### How to re-run the suites independently
+
+Local copy (patched, production data from the 2026-09-20 backup): container `bf59-pg`, port 55433, superuser `postgres`, password `bf59local`. If it is not running: `docker run -d --name bf59-pg -e POSTGRES_PASSWORD=bf59local -p 127.0.0.1:55433:5432 public.ecr.aws/supabase/postgres@sha256:d97ae90aaf153598f2978a100c7b9c24098829df4a5c3f3c466bb56b6037b998`, then `python backups/2026-09-20T192106Z-pre-launch-tweaks/scripts/restore_local_docker.py bf59-pg`, then apply the migration with `docker cp` and `psql -f`.
+
+```
+MSYS_NO_PATHCONV=1 docker cp Testing/security/bf59_profile_role_guard.sql bf59-pg:/tmp/suite.sql
+MSYS_NO_PATHCONV=1 docker exec bf59-pg psql -U postgres -d postgres -q -v ON_ERROR_STOP=1 -f /tmp/suite.sql
+```
+
+Production: paste the body of `Testing/security/bf59_profile_role_guard.sql` into the Supabase MCP `execute_sql` for project `ytsghlfjgdhczfbggpdl`. Every probe rolls back; the final SELECT is the report. The same holds for `bf59_visibility_matrix.sql`.
 
 ## Privileged-account review (production, read-only, 2026-09-20)
 
