@@ -3,11 +3,12 @@
 **Type:** Security fix (database grants, policy, trigger) + negative tests
 **Priority:** CRITICAL (any signed-in user can become platform super admin)
 **Points:** 2
-**Status:** NOT STARTED
+**Status:** IN PROGRESS
 **Sprint:** 4
+**Started:** 2026-09-20T19:43:50Z
 **Reported by:** Q&D readiness assessment 2026-09-08 (`docs/release/QD-GO-LIVE-READINESS-2026-09-08.md`, blocker 1); re-verified against production 2026-09-20. Added to this sprint by Tim on 2026-09-20.
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-20T19:39:29Z
+**Last Updated:** 2026-09-20T19:51:45Z
 
 ## Problem
 
@@ -44,14 +45,30 @@ No INSERT or DELETE policy exists, so those are already denied for `authenticate
 
 One migration, additive and reversible, applied to production after the pre-change backup and after the same migration passes on an isolated copy.
 
-1. **Column grants (the primary fix).**
-   `REVOKE UPDATE (role, platform_role, id, email) ON public.profiles FROM authenticated, anon;`
-   PostgREST enforces column privileges before RLS, so a request that names any of these columns fails with a permission error regardless of policy. Ordinary users keep UPDATE on `full_name` and `phone` for a future settings page.
+1. **Column grants (the primary fix).** Postgres column privileges are additive to table privileges: revoking a column-level UPDATE does nothing while the table-level UPDATE grant exists (Supabase column-level security guide, read 2026-09-20). The correct shape is revoke-then-grant-back:
+   `REVOKE UPDATE ON TABLE public.profiles FROM authenticated;`
+   `GRANT UPDATE (full_name, phone) ON TABLE public.profiles TO authenticated;`
+   Postgres checks column privileges before RLS, so an UPDATE that names `role`, `platform_role`, `id`, or `email` fails with a permission error regardless of policy. Supabase's client sends only the columns passed to `.update()`, so a future settings page updating `full_name` or `phone` keeps working. SELECT is untouched, so `select('*')` on profiles still works (the guide's wildcard warning applies only when SELECT columns are restricted).
 2. **Hygiene on `anon`.** `REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.profiles FROM anon;` Nothing anonymous should write profiles; RLS already denies it, the grant should agree.
-3. **Trigger guard (defense in depth).** A `BEFORE UPDATE` trigger on `profiles` that raises when `NEW.role IS DISTINCT FROM OLD.role` or `NEW.platform_role IS DISTINCT FROM OLD.platform_role` unless the session role is `service_role` or `postgres`. This survives a future policy or grant change that reopens the column. Keep it SECURITY DEFINER-free; it only compares values and reads `current_user` / `auth.role()`.
+3. **Trigger guard (defense in depth).** A `BEFORE UPDATE` trigger on `profiles` that raises when `NEW.role IS DISTINCT FROM OLD.role` or `NEW.platform_role IS DISTINCT FROM OLD.platform_role` and either `current_user` or `auth.role()` (the JWT role claim PostgREST sets for the request) is `authenticated` or `anon`. The JWT-claim branch matters because inside a SECURITY DEFINER function `current_user` is the function owner, not the caller; the claim still identifies the originating request. Service-role requests (`current_user = service_role`, claim `service_role`) and direct `postgres` sessions (MCP, dashboard, migrations) pass. This survives a future policy or grant change that reopens the column. Not SECURITY DEFINER; it only compares values.
+   BF-35 (drop `profiles.role`) must drop or rewrite this trigger first, since it references `OLD.role`.
 4. **Policy tightening.** Recreate `profiles_update_own` with an explicit `WITH CHECK ((select auth.uid()) = id)` so a row cannot be re-pointed at another id (the `id` column grant revoke already blocks this; the check documents intent).
 5. **Integrity review, not code.** Query `profiles` for anyone with `platform_role = 'super_admin'` other than Tim and anyone with `role = 'admin'` who should not be. Compare against the pre-change backup and the 2026-09-08 readings. Record the result in this ticket. Supabase Auth audit log entries do not cover PostgREST writes, so absence of evidence is not proof; state that plainly.
 6. **Do not** drop `profiles.role` here. That is BF-35, gated on BF-34 and a stability window.
+
+## Files to Modify
+
+| Action | File | Purpose |
+| --- | --- | --- |
+| CREATE | `supabase/migrations/20260920194350_profile_role_guard.sql` | Grants, anon hygiene, guard trigger, policy WITH CHECK |
+| CREATE | `supabase/migrations/_rollback/20260920194350_rollback.sql` | Exact inverse: restore table-level UPDATE, drop trigger, restore policy |
+| CREATE | `Testing/security/bf59_profile_role_guard.sql` | SQL-level negative suite using role impersonation (`SET LOCAL ROLE` + `request.jwt.claims`); runs on the local copy and on production via MCP |
+| CREATE | `Testing/security/bf59_profile_role_guard.py` | REST-level negative suite against a live project with a real ordinary user session (production acceptance run) |
+| MODIFY | `docs/release/QD-GO-LIVE-READINESS-2026-09-08.md` | Point blocker 1 at this ticket and its evidence (AC 7) |
+
+**Build vs Use:** BUILD — no test framework exists in the repo (`patterns.md` Section 6) and a search for Supabase RLS negative-test helpers (pgTAP `supabase_test_helpers`) returned no results on 2026-09-20; installing pgTAP on production for one check is disproportionate to a 2 SP story. The suite is two small scripts under `Testing/security/`. Reopen when BF-34's Playwright cross-tenant harness lands: fold these checks into it and retire the scripts.
+
+**Isolated copy:** a Supabase preview branch was attempted via MCP on 2026-09-20 and the creation was cancelled. The isolated target is instead a local Docker Postgres from the same image production runs (`public.ecr.aws/supabase/postgres:15.8.1.070`, digest in the backup README) with the 2026-09-20 backup restored, on port 55433 (54321/54322 are held by another project's stack on this workstation).
 
 ## Tests (the deliverable is the denial, not the migration)
 
@@ -68,13 +85,28 @@ Run with a real ordinary user's session against the isolated copy, then against 
 
 ## Acceptance criteria
 
-- [ ] Migration file in `supabase/migrations/` with a matching rollback under `_rollback/`.
-- [ ] Applied to an isolated copy first; the negative tests above pass there.
+- [x] Migration file in `supabase/migrations/` with a matching rollback under `_rollback/`.
+- [x] Applied to an isolated copy first; the negative tests above pass there.
 - [ ] Applied to production; `information_schema.column_privileges` shows no UPDATE on `role`, `platform_role`, `id`, `email` for `authenticated` or `anon`; the trigger exists; the policy has a WITH CHECK.
 - [ ] Negative tests pass against production with an ordinary Q&D user (not an admin).
 - [ ] Privileged-account review recorded: list of super admins and admins before and after, with the finding stated.
 - [ ] No app regression: sign-in, form submit, user invite, role change by an admin all work.
 - [ ] Readiness document blocker 1 updated to point at this ticket and its evidence.
+
+## Isolated-copy evidence (2026-09-20T19:51:45Z)
+
+Target: local Docker container `bf59-pg`, image `public.ecr.aws/supabase/postgres:15.8.1.070` (same build as production), port 55433, loaded from the 2026-09-20 backup by `backups/.../scripts/restore_local_docker.py` (schema.sql, then public.* and auth.users data; auth.uid/role/jwt aligned to the production definitions because the image ships older ones). Restored counts matched production: auth.users 9, profiles 8, organizations 2, members 8, projects 10, submissions 39.
+
+Suite: `Testing/security/bf59_profile_role_guard.sql`, 13 checks, every mutating probe rolled back by a marker exception inside a nested block.
+
+| Run | Result | Meaning |
+| --- | --- | --- |
+| RED, before migration | T01 role, T02 platform_role, T04 email: update succeeded (1 row). T07, T10-T13: FAIL | The exploit reproduces on a faithful copy: an ordinary member set `platform_role = 'super_admin'` on their own row. T03 (id) already failed with 42501 because the USING clause doubles as the check when no WITH CHECK exists. T05, T06, T08, T09 PASS (baseline behaviour intact). |
+| GREEN, after migration | 13 of 13 PASS | T01-T04 rejected with 42501; T05 own full_name still updates (1 row); T06 other row 0 rows; T07 trigger blocks the JWT-claim branch as postgres; T08 service_role updates role (1 row); T09 super admin helper true; T10 zero offending grants; T11 trigger present; T12 WITH CHECK present; T13 anon has no write grants. |
+| After rollback script | Identical to the RED pattern | Rollback restores the exact prior state. |
+| After re-applying the migration | 13 of 13 PASS | Migration is idempotent on a rolled-back database. |
+
+Visibility matrix (`Testing/security/bf59_visibility_matrix.sql`, read-only, run on the patched copy and on unpatched production): member sees 7 profiles, org admin 7, super admin 8, `select *` works for all three, identical on both. No silent hide (lesson 2026-04-30 pattern).
 
 ## Notes
 
