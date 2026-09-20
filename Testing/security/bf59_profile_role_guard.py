@@ -81,6 +81,11 @@ def main():
 
     st, others = call("GET", f"{url}/rest/v1/profiles?id=neq.{me}&select={SELECT}&limit=1", key, token, timeout=tmo)
     other = others[0] if st == 200 and isinstance(others, list) and others else None
+    if other is None:
+        # Fail closed (verify round 3): the cross-user probes need a second visible profile. Silently
+        # dropping R03 and R06 would report PASS on a narrower suite than the one documented.
+        print(f"fixture unavailable: no other profile visible to this user (HTTP {st}); cannot run R03/R06")
+        sys.exit(2)
 
     results, fails, breach = [], 0, False
 
@@ -89,9 +94,7 @@ def main():
         results.append((tid, desc, "PASS" if ok else "FAIL", detail))
         fails += 0 if ok else 1
 
-    forbidden = [("R01", "platform_role", "super_admin"), ("R02", "role", "admin"), ("R04", "email", "bf59@example.invalid")]
-    if other:
-        forbidden.insert(2, ("R03", "id", other["id"]))
+    forbidden = [("R01", "platform_role", "super_admin"), ("R02", "role", "admin"), ("R03", "id", other["id"]), ("R04", "email", "bf59@example.invalid")]
     for tid, field, value in forbidden:
         st, resp = call("PATCH", f"{url}/rest/v1/profiles?id=eq.{me}", key, token, {field: value}, prefer="return=representation", timeout=tmo)
         code = resp.get("code") if isinstance(resp, dict) else None
@@ -119,12 +122,22 @@ def main():
     st, resp = call("PATCH", f"{url}/rest/v1/profiles?id=eq.{me}", key, token, {"full_name": before["full_name"]}, prefer="return=representation", timeout=tmo)
     record("R05", "PATCH own row full_name (allowed column)", st == 200 and isinstance(resp, list) and len(resp) == 1, f"HTTP {st} rows={len(resp) if isinstance(resp, list) else 'n/a'}")
 
-    if other:
-        # Same-value write: proves RLS hides the row (0 rows) without ever corrupting it.
-        st, resp = call("PATCH", f"{url}/rest/v1/profiles?id=eq.{other['id']}", key, token, {"full_name": other["full_name"]}, prefer="return=representation", timeout=tmo)
-        record("R06", "PATCH another user's row (RLS, same value)", st in (200, 204) and (resp == [] or resp is None), f"HTTP {st} rows={len(resp) if isinstance(resp, list) else 'n/a'}")
+    # Same-value write: proves RLS hides the row (0 rows) without ever corrupting it.
+    st, resp = call("PATCH", f"{url}/rest/v1/profiles?id=eq.{other['id']}", key, token, {"full_name": other["full_name"]}, prefer="return=representation", timeout=tmo)
+    record("R06", "PATCH another user's row (RLS, same value)", st in (200, 204) and (resp == [] or resp is None), f"HTTP {st} rows={len(resp) if isinstance(resp, list) else 'n/a'}")
 
+    # Final sweep (verify round 3): a forbidden write that committed AFTER its per-probe re-read is
+    # caught here and restored. A client-side detector cannot close this window entirely; the
+    # transactional SQL suite is the production check for that reason.
     after = read_row(me)
+    if after is not None:
+        for _, field, _ in forbidden:
+            if field != "id" and after.get(field) != before.get(field):
+                breach = True
+                rst, _ = call("PATCH", f"{url}/rest/v1/profiles?id=eq.{me}", key, token, {field: before[field]}, prefer="return=representation", timeout=tmo)
+                after = read_row(me)
+                ok = after is not None and after.get(field) == before.get(field)
+                record("SWEEP!", f"BREACH: late-committed {field} write; restore attempted", ok, f"restore HTTP {rst}")
     record("R07", "own row unchanged after probes", after == before, json.dumps({k: after.get(k) for k in ("role", "platform_role", "email")}) if after else "unreadable")
 
     for r in results:

@@ -8,7 +8,7 @@
 **Started:** 2026-09-20T19:43:50Z
 **Reported by:** Q&D readiness assessment 2026-09-08 (`docs/release/QD-GO-LIVE-READINESS-2026-09-08.md`, blocker 1); re-verified against production 2026-09-20. Added to this sprint by Tim on 2026-09-20.
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-20T20:49:13Z
+**Last Updated:** 2026-09-20T21:09:30Z
 
 ## Problem
 
@@ -140,6 +140,17 @@ Verify re-executed the cycle itself on the local copy: 13 of 13 on the patched c
 
 1. **REST suite hardening** (Codex, high). The HTTP helper caught only HTTP errors, so a committed write whose response timed out would crash before the restore; the cross-user probe wrote a literal `"x"`; the script defaulted to the production env file. Fixed: every forbidden probe is followed by a re-read and restore regardless of the response (id case confirmed by email at the new id); the cross-user probe writes the other user's current value back; `--url` and `--anon-key` are required and the production ref is refused without `--allow-production`. Validated by the new `bf59_rest_stub_test.py` (patched: exit 0 no breach; open and timeout: exit 1 with breach lines and the stub's state restored; production refusal: exit 2). That self-test also caught a false breach on the id probe in the first rewrite, which is now fixed.
 2. **AC 6, authenticated app regression.** Still needs a person with a live session.
+
+## Verify round 3 (headless, 2026-09-20T21:07:33Z): NEEDS ATTENTION, 8.5
+
+Per-file: migration 9.7, rollback 9.6, SQL suite 9.6, visibility matrix 9.6, stub test 8.5, REST script 7.5. Both reviewers again: no migration bypass; every profile write in the app goes through the service client. Two Codex findings, both on the REST harness, both fixed the same session:
+
+1. A forbidden write that commits after the per-probe re-read (read lag) escaped detection. Fixed with a final sweep over every forbidden field after all probes, restoring anything that changed. The stub test gained a `late` scenario: open target with read lag, per-probe re-read stale, sweep catches and restores.
+2. An empty fixture lookup silently dropped R03 and R06 and reported PASS on five checks. Fixed: the script fails closed with exit 2 when no second profile is visible. The stub test gained a `solo` scenario.
+
+Stub self-test after the fixes: patched, open, timeout, late, solo, refusal all PASS.
+
+A client-side detector cannot close the lag window entirely; the transactional SQL suite remains the production check, and the REST harness is slated to fold into BF-34's Playwright harness. Three headless rounds have converged on the same verdict for the same structural reason: AC 6 (authenticated regression) is not verifiable headless. No further headless round until a person runs it.
 
 ### How to re-run the suites independently
 

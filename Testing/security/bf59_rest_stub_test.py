@@ -7,6 +7,11 @@ No credentials, no network. Three scenarios:
              stub's state restored to its initial values by the script (including the id case).
   timeout  - the first forbidden PATCH commits but the response hangs past the client timeout.
              Expect the script to detect the committed write on re-read and restore it.
+  late     - open target with read lag: every PATCH is accepted (200) but becomes visible only on
+             the second GET after it, so the per-probe re-read is stale. Expect the final sweep to
+             catch the promotions and restore them (exit 1, breach); state is compared after the
+             lag is flushed.
+  solo     - only the caller's profile is visible (fixture lookup empty). Expect exit 2, no writes.
 
 Run: python Testing/security/bf59_rest_stub_test.py
 """
@@ -28,6 +33,24 @@ class Stub:
     def __init__(self, mode):
         self.mode, self.rows, self.hung = mode, copy.deepcopy(INITIAL), False
         self.me_id = ME  # the caller's row id; follows the row if an id write is accepted
+        self.pending = None  # (row_id, body, gets_remaining): a lagged write in 'late' mode
+        if mode == "solo":
+            del self.rows[OTHER]
+
+    def apply(self, rid, body):
+        r = self.rows[rid]
+        old_id = r["id"]
+        r.update(body)
+        if r["id"] != old_id:
+            self.rows[r["id"]] = self.rows.pop(old_id)
+            if old_id == self.me_id:
+                self.me_id = r["id"]
+
+    def flush(self):
+        if self.pending:
+            rid, body, _ = self.pending
+            self.pending = None
+            self.apply(rid, body)
 
 
 def make_handler(stub):
@@ -59,6 +82,12 @@ def make_handler(stub):
         def do_GET(self):
             u = urlparse(self.path)
             if u.path == "/rest/v1/profiles":
+                if stub.pending:
+                    # 'late' mode: a lagged write becomes visible on the 2nd GET after it.
+                    rid, body, n = stub.pending
+                    stub.pending = (rid, body, n - 1)
+                    if n - 1 <= 0:
+                        stub.flush()
                 rows = self._filter(parse_qs(u.query))
                 # RLS: the caller (ME) sees self and co-org members; both rows visible here.
                 return self._send(200, rows)
@@ -77,14 +106,15 @@ def make_handler(stub):
             if rows and new_id and new_id != stub.me_id and new_id in stub.rows:
                 # Postgres would reject the primary-key collision even on an unpatched target.
                 return self._send(409, {"code": "23505", "message": "duplicate key value violates unique constraint"})
+            if stub.mode == "late":
+                # Writes serialize: an earlier lagged write lands before the next one is accepted.
+                stub.flush()
+                if rows:
+                    stub.pending = (rows[0]["id"], dict(body), 2)
+                return self._send(200, [dict(r, **body) for r in rows])
             hang = bool(forbidden) and stub.mode == "timeout" and not stub.hung
             for r in rows:
-                old_id = r["id"]
-                r.update(body)
-                if r["id"] != old_id:
-                    stub.rows[r["id"]] = stub.rows.pop(old_id)
-                    if old_id == stub.me_id:
-                        stub.me_id = r["id"]
+                stub.apply(r["id"], body)
             if hang:
                 stub.hung = True
                 time.sleep(4)  # longer than the client's --timeout in this test; the write is already committed
@@ -105,14 +135,16 @@ def run_scenario(mode):
                            capture_output=True, text=True, timeout=120)
     finally:
         srv.shutdown()
+    stub.flush()  # eventual consistency: whatever the script wrote last has landed by now
     return p, stub
 
 
 def main():
     failures = 0
-    for mode, want_exit, want_breach in (("patched", 0, False), ("open", 1, True), ("timeout", 1, True)):
+    for mode, want_exit, want_breach in (("patched", 0, False), ("open", 1, True), ("timeout", 1, True), ("late", 1, True), ("solo", 2, False)):
         p, stub = run_scenario(mode)
-        restored = stub.rows == INITIAL
+        expected_rows = {ME: INITIAL[ME]} if mode == "solo" else INITIAL
+        restored = stub.rows == expected_rows
         got_breach = "CRITICAL" in p.stdout
         ok = (p.returncode == want_exit) and (got_breach == want_breach) and restored
         failures += 0 if ok else 1
