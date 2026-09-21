@@ -8,7 +8,7 @@
 **Started:** 2026-09-21T18:17:34Z
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-21T18:19:17Z
+**Last Updated:** 2026-09-21T18:54:37Z
 
 ## Request (verbatim)
 
@@ -101,6 +101,10 @@ Orphan submissions 0, orphan photos 0.
 **Spot-check through Tim's signed-in session** (Claude in Chrome): projects list shows exactly 17254 NDOT 4541 7 Bridges, 17446 - Deodar St, 17446 - Microsoft NVE Easement. Latest submission of each renders (NDOT Weekly Stormwater 671de7bb with its photo; Daily Dust Log 017396e9; Daily Dust Log 449bc1e6). `/api/forms/<id>/pdf` returned 200 `application/pdf` with `%PDF-` bytes for all three (1,514,793 / 4,624 / 4,649 bytes).
 
 Note: the earlier BF-59 regression submission on BF 32 Test had already been deleted on 2026-09-21; the "1 submission" on that project was Andy's June NDOT test.
+
+## Verify round 1 (headless, 2026-09-21T18:34:36Z): NEEDS ATTENTION, 8.5
+
+Verify re-checked production read-only (3 projects, 0 child rows referencing removed ids, 18 submissions, 0 Storage objects under removed prefixes via the script's own dry run) and confirmed every acceptance criterion. Two Codex findings on `bf54_delete_storage_objects.py`, both confirmed: (1) any argument other than exactly `--dry-run` fell through to real-delete mode; (2) a failed list was skipped silently and a failed DELETE still printed DONE with exit 0. Fixed the same session: argparse rejects unknown arguments before anything runs, dry run is the default and deletion needs `--execute`, list and delete failures print and exit 1, and a post-delete re-list must be empty. Exercised: default run lists 0 and exits 0; `--dryrun` typo is rejected; `--execute` on the clean state deletes 0 and reports "re-list clean".
 
 ## Notes
 

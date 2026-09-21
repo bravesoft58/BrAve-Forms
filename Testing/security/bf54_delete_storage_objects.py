@@ -2,13 +2,21 @@
 
 The database cascade removes every child row of a deleted project, but Storage objects are not
 cascaded (verified 2026-09-20). This script deletes the objects under `projects/<id>/` for each
-removed project in both private buckets through the Storage API with the service-role key, then
-prints what the API reported. Run AFTER the project rows are deleted. Idempotent: re-running
-deletes nothing and reports zero. Never prints the key.
+removed project in both private buckets through the Storage API with the service-role key.
+Run AFTER the project rows are deleted. Idempotent: re-running deletes nothing and reports zero.
+Never prints the key.
 
-Usage: python Testing/security/bf54_delete_storage_objects.py [--dry-run]
+Safety contract (verify round 1 findings):
+  * Default mode is a dry run. Deletion requires the explicit `--execute` flag. Unknown arguments
+    are rejected by argparse, so a typo can never fall through into real-delete mode.
+  * A failed list or a failed DELETE is an error: the script prints it, skips nothing silently,
+    and exits 1. After deleting, it re-lists every prefix and exits 1 if anything remains.
+
+Usage:
+  python Testing/security/bf54_delete_storage_objects.py            # dry run (default)
+  python Testing/security/bf54_delete_storage_objects.py --execute  # delete
 """
-import json, os, sys, urllib.request, urllib.error
+import argparse, json, os, sys, urllib.request, urllib.error
 
 REMOVED_PROJECT_IDS = [
     "4dff54b4-c8f2-4d1f-8e59-b4bf764cba9c",  # BF 32 Test
@@ -21,14 +29,21 @@ REMOVED_PROJECT_IDS = [
 ]
 BUCKETS = ["form-attachments", "project-documents"]
 
+
+class StorageError(Exception):
+    pass
+
+
 def load_env():
     env = {}
     p = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env.local")
     for line in open(p, encoding="utf-8"):
         line = line.strip()
         if line and not line.startswith("#") and "=" in line:
-            k, v = line.split("=", 1); env[k.strip()] = v.strip().strip('"').strip("'")
+            k, v = line.split("=", 1)
+            env[k.strip()] = v.strip().strip('"').strip("'")
     return env
+
 
 def call(method, url, key, body=None):
     headers = {"apikey": key, "Authorization": f"Bearer {key}", "Content-Type": "application/json"}
@@ -39,40 +54,79 @@ def call(method, url, key, body=None):
             return r.status, (json.loads(raw) if raw else None)
     except urllib.error.HTTPError as e:
         return e.code, e.read().decode("utf-8", "replace")
+    except (urllib.error.URLError, OSError) as e:
+        return None, f"{type(e).__name__}: {e}"
+
 
 def list_objects(url, key, bucket, prefix):
-    """Storage list is one folder level deep; walk it."""
+    """Storage list is one folder level deep; walk it. Raises on any failed list call."""
     out, stack = [], [prefix]
     while stack:
         p = stack.pop()
         st, items = call("POST", f"{url}/storage/v1/object/list/{bucket}", key, {"prefix": p, "limit": 1000, "offset": 0})
         if st != 200 or not isinstance(items, list):
-            print(f"  list {bucket}/{p}: HTTP {st}"); continue
+            raise StorageError(f"list {bucket}/{p} failed: HTTP {st} {str(items)[:200]}")
         for it in items:
             name = f"{p.rstrip('/')}/{it['name']}" if p else it["name"]
-            if it.get("id") is None:      # folder placeholder
+            if it.get("id") is None:  # folder placeholder
                 stack.append(name)
             else:
                 out.append(name)
     return out
 
+
+def targets_for(url, key, bucket):
+    found = []
+    for pid in REMOVED_PROJECT_IDS:
+        found += list_objects(url, key, bucket, f"projects/{pid}")
+    return found
+
+
 def main():
-    dry = "--dry-run" in sys.argv
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--execute", action="store_true", help="actually delete; without it the script only lists")
+    args = ap.parse_args()  # unknown arguments are rejected here, before anything runs
     env = load_env()
     url, key = env["NEXT_PUBLIC_SUPABASE_URL"].rstrip("/"), env["SUPABASE_SERVICE_ROLE_KEY"]
-    total = 0
+
+    failures, total = 0, 0
     for bucket in BUCKETS:
-        targets = []
-        for pid in REMOVED_PROJECT_IDS:
-            targets += list_objects(url, key, bucket, f"projects/{pid}")
+        try:
+            targets = targets_for(url, key, bucket)
+        except StorageError as e:
+            print(f"{bucket}: ERROR {e}")
+            failures += 1
+            continue
         print(f"{bucket}: {len(targets)} object(s) under removed projects")
-        for t in targets: print(f"  - {t}")
-        if targets and not dry:
-            st, resp = call("DELETE", f"{url}/storage/v1/object/{bucket}", key, {"prefixes": targets})
-            n = len(resp) if isinstance(resp, list) else 0
-            print(f"  delete: HTTP {st}, {n} removed")
-            total += n
-    print(f"{'DRY RUN, nothing deleted' if dry else f'DONE: {total} object(s) deleted'}")
+        for t in targets:
+            print(f"  - {t}")
+        if not targets or not args.execute:
+            continue
+        st, resp = call("DELETE", f"{url}/storage/v1/object/{bucket}", key, {"prefixes": targets})
+        removed = len(resp) if st == 200 and isinstance(resp, list) else 0
+        print(f"  delete: HTTP {st}, {removed} removed")
+        if st != 200 or removed != len(targets):
+            print(f"  ERROR: expected {len(targets)} removed, API reported {removed}: {str(resp)[:200]}")
+            failures += 1
+        total += removed
+        try:
+            remaining = targets_for(url, key, bucket)
+        except StorageError as e:
+            print(f"  ERROR re-list after delete: {e}")
+            failures += 1
+            continue
+        if remaining:
+            print(f"  ERROR: {len(remaining)} object(s) still present after delete: {remaining[:3]}")
+            failures += 1
+
+    if not args.execute:
+        print("DRY RUN, nothing deleted (pass --execute to delete)")
+    elif failures:
+        print(f"FAILED: {failures} error(s); {total} object(s) deleted; review the output before re-running")
+    else:
+        print(f"DONE: {total} object(s) deleted, re-list clean")
+    sys.exit(1 if failures else 0)
+
 
 if __name__ == "__main__":
     main()
