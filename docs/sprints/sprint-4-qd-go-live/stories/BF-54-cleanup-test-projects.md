@@ -3,11 +3,12 @@
 **Type:** Production data cleanup
 **Priority:** HIGH (blocks clean first-day use)
 **Points:** 1
-**Status:** NOT STARTED
+**Status:** IN PROGRESS
 **Sprint:** 4
+**Started:** 2026-09-21T18:17:34Z
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-20T19:30:55Z
+**Last Updated:** 2026-09-21T18:19:17Z
 
 ## Request (verbatim)
 
@@ -51,11 +52,55 @@ Seven projects to remove, carrying 21 form submissions between them plus their p
 
 ## Acceptance criteria
 
-- [ ] Exactly three projects remain, the ones Andy named.
-- [ ] No submissions, photos, documents, permits, requirements, assignments, or QR tokens reference a removed project.
-- [ ] No Storage objects remain under a removed project's prefix in either bucket.
-- [ ] The three kept projects and their 18 submissions are untouched (spot-check one submission per project renders and its PDF downloads).
-- [ ] Before/after counts and the executed SQL are recorded in this ticket.
+- [x] Exactly three projects remain, the ones Andy named.
+- [x] No submissions, photos, documents, permits, requirements, assignments, or QR tokens reference a removed project.
+- [x] No Storage objects remain under a removed project's prefix in either bucket.
+- [x] The three kept projects and their 18 submissions are untouched (spot-check one submission per project renders and its PDF downloads).
+- [x] Before/after counts and the executed SQL are recorded in this ticket.
+
+## Execution record (production, 2026-09-21T18:17Z to 18:19Z, Tim's go)
+
+Precondition: `backups/2026-09-20T192106Z-pre-launch-tweaks/scripts/validate_dump.py` re-run, RESULT: OK. Read-only inventory first; Tim gave the delete go on the exact list below.
+
+**Removed projects and what the cascade took with them**
+
+| Project | id | subs | photos | docs | permits | reqs | assign | QR | Storage |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| BF 32 Test | 4dff54b4 | 1 | 1 | 0 | 5 | 5 | 1 | 0 | 1 |
+| E2E Test Project - Full Verification | 06c0610c | 4 | 0 | 1 | 5 | 5 | 1 | 3 | 1 |
+| I-15 Bridge Repair Phase 1 | f0244e03 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
+| Q&D Parking Lot | 6a92e761 | 6 | 0 | 2 | 3 | 4 | 1 | 9 | 2 |
+| South Meadows Mall | 1ef41705 | 7 | 3 | 0 | 5 | 5 | 1 | 3 | 3 |
+| US-95 Test Project | 1a5c83b5 | 2 | 0 | 0 | 5 | 5 | 1 | 0 | 0 |
+| US-95 Widening Phase 2 | 00000000-…-0001 | 1 | 0 | 0 | 3 | 3 | 0 | 1 | 0 |
+| **Total** | | **21** | **4** | **3** | **26** | **27** | **6** | **16** | **7** |
+
+`based_on_id` links from kept projects into any removal target: 0.
+
+**Steps executed**
+
+1. One transaction via Supabase MCP: `DELETE FROM public.projects WHERE id IN (<7 ids>) AND name NOT IN (<3 keep names>) RETURNING id, name` inside `BEGIN … COMMIT`. Returned 7 rows, the seven names above.
+2. `Testing/security/bf54_delete_storage_objects.py` (service role, Storage API): dry run listed 4 objects in `form-attachments` and 3 in `project-documents` under the removed prefixes; real run deleted 4 + 3, HTTP 200 each.
+
+**Before and after**
+
+| Table | Before | After | Expected |
+| --- | --- | --- | --- |
+| projects | 10 | 3 (all Q&D Construction) | 3 |
+| form_submissions | 39 | 18 | 18 |
+| form_photos | 5 | 1 | 1 |
+| project_documents | 14 | 11 | 11 |
+| project_permits | 35 | 9 | 9 |
+| project_form_requirements | 38 | 11 | 11 |
+| project_users | 9 | 3 | 3 |
+| qr_tokens | 24 | 8 | 8 |
+| storage.objects | 19 | 12 (0 under removed prefixes) | 12 |
+
+Orphan submissions 0, orphan photos 0.
+
+**Spot-check through Tim's signed-in session** (Claude in Chrome): projects list shows exactly 17254 NDOT 4541 7 Bridges, 17446 - Deodar St, 17446 - Microsoft NVE Easement. Latest submission of each renders (NDOT Weekly Stormwater 671de7bb with its photo; Daily Dust Log 017396e9; Daily Dust Log 449bc1e6). `/api/forms/<id>/pdf` returned 200 `application/pdf` with `%PDF-` bytes for all three (1,514,793 / 4,624 / 4,649 bytes).
+
+Note: the earlier BF-59 regression submission on BF 32 Test had already been deleted on 2026-09-21; the "1 submission" on that project was Andy's June NDOT test.
 
 ## Notes
 
