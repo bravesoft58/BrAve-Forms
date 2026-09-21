@@ -5,8 +5,9 @@ proves the same at the SQL level without needing credentials and is the preferre
 Target contract (verify round 2, Codex finding):
   * The target is ALWAYS explicit: --url and --anon-key are required. Nothing is read from .env.local,
     so the script cannot be pointed at production by accident.
-  * The production project ref is refused unless --allow-production is passed. Run it there only
-    after the migration is applied.
+  * The production project ref is refused unconditionally (verify round 4). A write that commits after
+    the process exits cannot be rolled back by a client, so this mutating probe only ever runs against
+    a disposable isolated target. Production is checked by the transactional SQL suite.
   * Every forbidden probe is followed by a re-read of the row. If the field changed, whether the PATCH
     returned success, an error, or timed out with the write already committed, the script restores
     the pre-probe value (for the id column it targets the new id) and reports the breach loudly.
@@ -15,7 +16,7 @@ Target contract (verify round 2, Codex finding):
 
 Usage:
   python Testing/security/bf59_profile_role_guard.py --url https://<ref>.supabase.co --anon-key <key> \
-      --email <ordinary-user> --password <pw> [--allow-production] [--timeout 30]
+      --email <ordinary-user> --password <pw> [--timeout 30]
 The account must be an ordinary member (profiles.role = 'user', platform_role = 'member').
 Exit 0 on all PASS, 1 on any FAIL or breach, 2 on setup errors. Never prints tokens or keys.
 Self-test without credentials: python Testing/security/bf59_rest_stub_test.py
@@ -53,12 +54,11 @@ def main():
     ap.add_argument("--anon-key", required=True)
     ap.add_argument("--email", required=True)
     ap.add_argument("--password", required=True)
-    ap.add_argument("--allow-production", action="store_true")
     ap.add_argument("--timeout", type=float, default=30)
     a = ap.parse_args()
     url, key, tmo = a.url.rstrip("/"), a.anon_key, a.timeout
-    if PRODUCTION_REF in url and not a.allow_production:
-        print("refusing to run against the production project without --allow-production")
+    if PRODUCTION_REF in url:
+        print("refusing to run against the production project: this probe mutates rows and cannot guarantee rollback; use Testing/security/bf59_profile_role_guard.sql there")
         sys.exit(2)
 
     st, tok = call("POST", f"{url}/auth/v1/token?grant_type=password", key, body={"email": a.email, "password": a.password}, timeout=tmo)

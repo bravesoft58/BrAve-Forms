@@ -8,7 +8,7 @@
 **Started:** 2026-09-20T19:43:50Z
 **Reported by:** Q&D readiness assessment 2026-09-08 (`docs/release/QD-GO-LIVE-READINESS-2026-09-08.md`, blocker 1); re-verified against production 2026-09-20. Added to this sprint by Tim on 2026-09-20.
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-21T17:14:28Z
+**Last Updated:** 2026-09-21T17:35:26Z
 
 ## Problem
 
@@ -156,6 +156,10 @@ Driven through Tim's signed-in Brave session (super admin) with Claude in Chrome
 Cleanup: submission 327b1e69 deleted by SQL; invitee deleted through the app. After: auth.users 9, profiles 8, organization_members 8, form_submissions 39, invitee 0, claude.test admin with admin membership. Only residue is a bumped `updated_at` on claude.test's profile.
 
 Browser note: after a text field took focus, every Claude in Chrome page action failed with "Cannot access a chrome-extension:// URL of different extension" until the page was reloaded; the ChatGPT extension installed 2026-09-08 attaches to text fields. Workaround used: reload, then drive controls through `javascript_tool` on the page DOM.
+
+## Verify round 4 (headless, 2026-09-21T17:33:33Z): NEEDS ATTENTION, 8.5
+
+All seven acceptance criteria confirmed met. Verify independently confirmed that the deployed `auth.role()` returns NULL in a bare postgres session, so the guard trigger never blocks future migrations. One Codex finding (confidence 1.0): the REST script's `--allow-production` flag still allowed the mutating probe against production, where a write that commits after the process exits cannot be rolled back by any client-side sweep. Verify named the fix: remove production-mutation support entirely. Done: the flag is gone and the production ref is refused unconditionally, which matches the AC 4 decision that the transactional SQL suite is the production check. The `--allow-production` mention in the round 2 note above is historical.
 
 ## Verify round 3 (headless, 2026-09-20T21:07:33Z): NEEDS ATTENTION, 8.5
 
