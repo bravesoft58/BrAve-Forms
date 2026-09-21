@@ -3,12 +3,13 @@
 **Type:** Security fix (database grants, policy, trigger) + negative tests
 **Priority:** CRITICAL (any signed-in user can become platform super admin)
 **Points:** 2
-**Status:** IN PROGRESS
+**Status:** DONE
 **Sprint:** 4
 **Started:** 2026-09-20T19:43:50Z
+**Completed:** 2026-09-21T18:04:51Z
 **Reported by:** Q&D readiness assessment 2026-09-08 (`docs/release/QD-GO-LIVE-READINESS-2026-09-08.md`, blocker 1); re-verified against production 2026-09-20. Added to this sprint by Tim on 2026-09-20.
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-21T17:50:55Z
+**Last Updated:** 2026-09-21T18:04:51Z
 
 ## Problem
 
@@ -155,6 +156,19 @@ Driven through Tim's signed-in Brave session (super admin) with Claude in Chrome
 Cleanup: submission 327b1e69 deleted by SQL; invitee deleted through the app. After: auth.users 9, profiles 8, organization_members 8, form_submissions 39, invitee 0, claude.test admin with admin membership. Only residue is a bumped `updated_at` on claude.test's profile.
 
 Browser note: after a text field took focus, every Claude in Chrome page action failed with "Cannot access a chrome-extension:// URL of different extension" until the page was reloaded; the ChatGPT extension installed 2026-09-08 attaches to text fields. Workaround used: reload, then drive controls through `javascript_tool` on the page DOM.
+
+## Verify round 6 (headless, 2026-09-21T18:04:51Z): PASS, 9.6 — status DONE
+
+The two conditions that held rounds 1-5 at NEEDS ATTENTION are both cleared: AC 6 (authenticated regression) was run by a person on 2026-09-21, and the REST probe harness that produced all eight prior findings was retired (f0c09f6), so it is no longer in the diff. Scope this round is the migration, its rollback, and the two SQL suites.
+
+Independent execution against the local copy (`bf59-pg`, port 55433) this round, not just re-reading the documented runs:
+
+- Patched copy: guard suite 13 of 13 PASS; visibility matrix member 7 / org admin 7 / super admin 8, `select *` OK for all three, identical to production.
+- Rollback applied: guard suite goes RED exactly as documented — T01/T02/T04 report "update succeeded" (the exploit reproduces), T07/T10-T13 fail, T03 still 42501 (USING doubles as the check), T05/T06/T08/T09 stay PASS. This proves the suite has real discriminating power and is not a tautology.
+- Migration re-applied: 13 of 13 PASS again, applied cleanly (idempotent); copy restored to patched.
+- Confirmed independently: `auth.role()` is NULL in a bare postgres session, so the guard never blocks migrations; the WITH CHECK expression is the real `(select auth.uid()) = id`, not a weakened `true`.
+
+Codex adversarial review (`gpt-6-astra`, xhigh, branch diff against master): verdict `approve`, zero findings — "No concrete bypass, rollback defect, destructive SQL probe, or false PASS." Codex noted it could not rerun the SQL suites (its Docker sandbox was denied); that gap is exactly what the independent run above covers. Both reviewers converge; the two-review guarantee held. Per-file: migration 9.8, rollback 9.6, guard suite 9.5, visibility matrix 9.5. Two minor non-blocking test-completeness notes (T10 does not check a hypothetical `PUBLIC` grantee, backstopped by the behavioral T01-T04; T12 asserts `with_check IS NOT NULL` rather than the exact expression, but surfaces the value and the real protection is the column-grant revoke) — neither affects correctness.
 
 ## Verify round 5 (headless, 2026-09-21T17:48:23Z): NEEDS ATTENTION, 8.0, and the REST harness retired
 
