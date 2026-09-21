@@ -8,7 +8,7 @@
 **Started:** 2026-09-20T19:43:50Z
 **Reported by:** Q&D readiness assessment 2026-09-08 (`docs/release/QD-GO-LIVE-READINESS-2026-09-08.md`, blocker 1); re-verified against production 2026-09-20. Added to this sprint by Tim on 2026-09-20.
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-20T21:09:30Z
+**Last Updated:** 2026-09-21T17:14:28Z
 
 ## Problem
 
@@ -92,7 +92,7 @@ Run with a real ordinary user's session against the isolated copy, then against 
 - [x] Applied to production; `information_schema.column_privileges` shows no UPDATE on `role`, `platform_role`, `id`, `email` for `authenticated` or `anon`; the trigger exists; the policy has a WITH CHECK.
 - [x] Negative tests pass against production with an ordinary Q&D user (not an admin). (SQL suite impersonating abreen@qdgroupinvesco.com, 13 of 13; the REST suite was not run because no ordinary-user credentials were available. Tim chose to rely on the SQL suite, which exercises the same privilege check PostgREST hits.)
 - [x] Privileged-account review recorded: list of super admins and admins before and after, with the finding stated. (Post-apply rows identical to pre-apply.)
-- [ ] No app regression: sign-in, form submit, user invite, role change by an admin all work. (Unauthenticated smoke only so far: /login 200, /dashboard redirects to /login, anon API healthy. Authenticated flows need a real session: Tim or Andy.)
+- [x] No app regression: sign-in, form submit, user invite, role change by an admin all work. (Run 2026-09-21 through Tim's signed-in session via Claude in Chrome; evidence below.)
 - [x] Readiness document blocker 1 updated to point at this ticket and its evidence.
 
 ## Isolated-copy evidence (2026-09-20T19:51:45Z)
@@ -140,6 +140,22 @@ Verify re-executed the cycle itself on the local copy: 13 of 13 on the patched c
 
 1. **REST suite hardening** (Codex, high). The HTTP helper caught only HTTP errors, so a committed write whose response timed out would crash before the restore; the cross-user probe wrote a literal `"x"`; the script defaulted to the production env file. Fixed: every forbidden probe is followed by a re-read and restore regardless of the response (id case confirmed by email at the new id); the cross-user probe writes the other user's current value back; `--url` and `--anon-key` are required and the production ref is refused without `--allow-production`. Validated by the new `bf59_rest_stub_test.py` (patched: exit 0 no breach; open and timeout: exit 1 with breach lines and the stub's state restored; production refusal: exit 2). That self-test also caught a false breach on the id probe in the first rewrite, which is now fixed.
 2. **AC 6, authenticated app regression.** Still needs a person with a live session.
+
+## AC 6: authenticated regression on production (2026-09-21T17:12Z to 17:14Z)
+
+Driven through Tim's signed-in Brave session (super admin) with Claude in Chrome, against the live site after the migration. Every artifact created was removed afterwards; counts were checked back to baseline.
+
+| Check | What was done | Result |
+| --- | --- | --- |
+| Sign-in / profile read | Dashboard and Projects pages loaded with Tim's session (`getCurrentUser` reads `profiles.role`; project list under RLS) | Welcome banner, 10 projects listed |
+| Form submit | Daily Dust Log on the throwaway project "BF 32 Test", default entry, submitted | Redirected to the project's dust-log tab showing the new entry; `form_submissions` row 327b1e69 created (daily_dust_log, submitted_by Tim, 17:12:41Z) |
+| Admin role change | Users page: Demote claude.test@braveforms.dev to user, then Promote back to admin (service-client `updateRole`, now passing the guard trigger with a real value change) | "Role updated to user." then "Role updated to admin."; profile role admin, `organization_members.role` admin synced |
+| User invite | Invite "BF-59 Invite Check" timsaverill+bf59@protonmail.com as user (service-client `inviteUser` + `handle_new_user` trigger) | "Invite sent"; auth user, profile (user/member) and Q&D membership (member) created |
+| Delete user (bonus) | App's Delete user on the invitee, inline Confirm | "User deleted."; auth user, profile and membership gone via cascade |
+
+Cleanup: submission 327b1e69 deleted by SQL; invitee deleted through the app. After: auth.users 9, profiles 8, organization_members 8, form_submissions 39, invitee 0, claude.test admin with admin membership. Only residue is a bumped `updated_at` on claude.test's profile.
+
+Browser note: after a text field took focus, every Claude in Chrome page action failed with "Cannot access a chrome-extension:// URL of different extension" until the page was reloaded; the ChatGPT extension installed 2026-09-08 attaches to text fields. Workaround used: reload, then drive controls through `javascript_tool` on the page DOM.
 
 ## Verify round 3 (headless, 2026-09-20T21:07:33Z): NEEDS ATTENTION, 8.5
 
