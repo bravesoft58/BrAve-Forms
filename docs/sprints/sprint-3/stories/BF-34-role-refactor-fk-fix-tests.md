@@ -171,6 +171,13 @@ Revert `/admin/*` routes to plain service client — low-risk, no schema impact.
 - Audit log has rows for every super-admin cross-org view in the 7-day window (confirm logging works).
 - Zero user-deletion failures in production since FK fix landed.
 
+## Folded in from BF-59 verify findings (2026-09-21)
+
+Two items the BF-59 reviews named as out of that story's scope belong here, since this story already owns the role-check refactor and the cross-tenant test harness:
+
+1. **Target-organization authorization on user-management service-role actions.** `deleteUser`, `updateRole` and `inviteUser` in `src/app/dashboard/users/actions.ts` authorize on the caller's global `profiles.role` and then act through the service client on any target user id, without proving the target belongs to an organization the caller administers. Readiness assessment blocker 1, second bullet. Add the target-org check as part of the org-scoped role refactor.
+2. **REST-level self-promotion probe with disposable fixtures.** BF-59 built and then retired a client-side REST probe (`Testing/security/bf59_profile_role_guard.py`, history at 2961d61 and 235fc4f) because a client that performs the forbidden mutation cannot guarantee rollback against a real server. The Playwright cross-tenant harness this story creates is the right home: a throwaway project and throwaway users, so a failed probe costs nothing. Cases to carry: own-row PATCH of `platform_role`, `role`, `id`, `email` all rejected with 42501; allowed column still updates; other user's row yields 0 rows.
+
 ## Related
 
 - Plan: `C:\Users\Tim\.claude\plans\bright-whistling-knuth.md` (Phase 5a + Phase 6)
