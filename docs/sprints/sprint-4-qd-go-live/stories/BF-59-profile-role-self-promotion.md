@@ -8,7 +8,7 @@
 **Started:** 2026-09-20T19:43:50Z
 **Reported by:** Q&D readiness assessment 2026-09-08 (`docs/release/QD-GO-LIVE-READINESS-2026-09-08.md`, blocker 1); re-verified against production 2026-09-20. Added to this sprint by Tim on 2026-09-20.
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-21T17:35:26Z
+**Last Updated:** 2026-09-21T17:50:55Z
 
 ## Problem
 
@@ -63,9 +63,8 @@ One migration, additive and reversible, applied to production after the pre-chan
 | CREATE | `supabase/migrations/20260920194350_profile_role_guard.sql` | Grants, anon hygiene, guard trigger, policy WITH CHECK |
 | CREATE | `supabase/migrations/_rollback/20260920194350_rollback.sql` | Exact inverse: restore table-level UPDATE, drop trigger, restore policy |
 | CREATE | `Testing/security/bf59_profile_role_guard.sql` | SQL-level negative suite using role impersonation (`SET LOCAL ROLE` + `request.jwt.claims`); runs on the local copy and on production via MCP |
-| CREATE | `Testing/security/bf59_profile_role_guard.py` | REST-level negative suite against a live project with a real ordinary user session; explicit target, timeout-safe restore, non-destructive cross-user probe |
-| CREATE | `Testing/security/bf59_rest_stub_test.py` | Credential-free self-test of the REST suite against an in-process API stub: patched, open, timeout, and production-refusal scenarios |
 | CREATE | `Testing/security/bf59_visibility_matrix.sql` | Read-only per-tier profile visibility count (no silent hide) |
+| REMOVED | `Testing/security/bf59_profile_role_guard.py`, `bf59_rest_stub_test.py` | REST-level probe and its stub self-test. Built in rounds 1-4, retired after verify round 5 (see below). A client-side detector that performs the forbidden mutation has an unbounded hardening surface; the REST-level check is deferred to BF-34's Playwright harness with disposable fixtures. History is in git (2961d61, 235fc4f). |
 | MODIFY | `docs/release/QD-GO-LIVE-READINESS-2026-09-08.md` | Point blocker 1 at this ticket and its evidence (AC 7) |
 
 **Build vs Use:** BUILD — no test framework exists in the repo (`patterns.md` Section 6) and a search for Supabase RLS negative-test helpers (pgTAP `supabase_test_helpers`) returned no results on 2026-09-20; installing pgTAP on production for one check is disproportionate to a 2 SP story. The suite is two small scripts under `Testing/security/`. Reopen when BF-34's Playwright cross-tenant harness lands: fold these checks into it and retire the scripts.
@@ -157,6 +156,12 @@ Cleanup: submission 327b1e69 deleted by SQL; invitee deleted through the app. Af
 
 Browser note: after a text field took focus, every Claude in Chrome page action failed with "Cannot access a chrome-extension:// URL of different extension" until the page was reloaded; the ChatGPT extension installed 2026-09-08 attaches to text fields. Workaround used: reload, then drive controls through `javascript_tool` on the page DOM.
 
+## Verify round 5 (headless, 2026-09-21T17:48:23Z): NEEDS ATTENTION, 8.0, and the REST harness retired
+
+Both reviewers: migration clean, no bypass, all seven acceptance criteria evidenced. Two new Codex findings, both again on the REST harness: (1) a mixed-case production hostname passed the refusal check; (2) on a 200 response, `IncompleteRead` or `JSONDecodeError` during body read escaped the exception handler, so a committed forbidden write could skip the restore.
+
+Decision: retire the REST harness instead of hardening it a fifth time. Across five rounds it produced eight findings and the migration produced none. Every finding was a variant of the same structural problem: a client-side detector that performs the forbidden mutation cannot guarantee rollback against a real server, and each fix exposes the next edge (timeout, late commit, exit, decode, host casing). The story already records that the transactional SQL suite is the production check (AC 4) and that the REST-level check belongs in BF-34's Playwright harness with disposable fixtures. Removing the script closes the surface; the lessons it generated stay in `.claude/lessons-learned.md`.
+
 ## Verify round 4 (headless, 2026-09-21T17:33:33Z): NEEDS ATTENTION, 8.5
 
 All seven acceptance criteria confirmed met. Verify independently confirmed that the deployed `auth.role()` returns NULL in a bare postgres session, so the guard trigger never blocks future migrations. One Codex finding (confidence 1.0): the REST script's `--allow-production` flag still allowed the mutating probe against production, where a write that commits after the process exits cannot be rolled back by any client-side sweep. Verify named the fix: remove production-mutation support entirely. Done: the flag is gone and the production ref is refused unconditionally, which matches the AC 4 decision that the transactional SQL suite is the production check. The `--allow-production` mention in the round 2 note above is historical.
@@ -174,7 +179,7 @@ A client-side detector cannot close the lag window entirely; the transactional S
 
 ### How to re-run the suites independently
 
-REST suite self-test, no credentials: `python Testing/security/bf59_rest_stub_test.py` (expect `RESULT: PASS`).
+(The REST suite and its stub self-test were retired after round 5; see above.)
 
 Local copy (patched, production data from the 2026-09-20 backup): container `bf59-pg`, port 55433, superuser `postgres`, password `bf59local`. If it is not running: `docker run -d --name bf59-pg -e POSTGRES_PASSWORD=bf59local -p 127.0.0.1:55433:5432 public.ecr.aws/supabase/postgres@sha256:d97ae90aaf153598f2978a100c7b9c24098829df4a5c3f3c466bb56b6037b998`, then `python backups/2026-09-20T192106Z-pre-launch-tweaks/scripts/restore_local_docker.py bf59-pg`, then apply the migration with `docker cp` and `psql -f`.
 
