@@ -16,8 +16,8 @@ interface FormActionsProps {
   submissionId: string;
   /**
    * Optional: pass the form type + edit href to render an admin-only Edit button.
-   * Forms that haven't been refactored for in-place edit (NDEP-stormwater, NDEP-SAD,
-   * NNPH dust) render the button disabled with a "coming next sprint" tooltip.
+   * Forms that haven't been refactored for in-place edit (NDEP-SAD, NNPH dust)
+   * render the button disabled with a "coming next sprint" tooltip.
    */
   formType?: FormType;
   editHref?: string;
@@ -27,6 +27,7 @@ interface FormActionsProps {
 const EDIT_SUPPORTED: ReadonlySet<FormType> = new Set([
   // daily_dust_log uses its own "Add Entries" button on the view page (append-only model)
   "ndot_weekly_stormwater",
+  "ndep_weekly_stormwater",
 ]);
 
 export default function FormActions({
