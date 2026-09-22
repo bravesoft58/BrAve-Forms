@@ -92,6 +92,10 @@ Full data restoration. Anyone added to `profiles` between drop and rollback gets
 - Andy confirms Q&D UX unchanged.
 - First prospect org onboarded successfully on the multi-tenant codebase.
 
+## Prerequisite added by BF-59 (2026-09-21)
+
+BF-59 added trigger `profiles_guard_privilege_columns` (`BEFORE UPDATE OF role, platform_role`) and its function `guard_profile_privilege_columns()`, both of which reference `OLD.role` / `NEW.role`. Dropping `profiles.role` will fail until the trigger is dropped and recreated as `BEFORE UPDATE OF platform_role` with the `role` comparison removed. Include that in this story's migration, before the column drop, and keep the `platform_role` guard.
+
 ## Related
 
 - Plan: `C:\Users\Tim\.claude\plans\bright-whistling-knuth.md` (Phase 5b)

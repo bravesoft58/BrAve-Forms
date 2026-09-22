@@ -2,7 +2,7 @@
 
 **Status:** NOT STARTED
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-22T12:35:13Z
+**Last Updated:** 2026-09-22T12:35:58Z
 **Source:** Andy Breen (IT Director, Q&D) email "BrAve Forms Update", 2026-09-07, with attachment `WIW Daily Form.pdf`. Both filed under [docs/reference/](../../reference/).
 
 ## Why this sprint
@@ -23,7 +23,8 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-57](stories/BF-57-ndep-stormwater-edit.md) | NDEP Weekly Stormwater: enable Edit on submitted forms | 2 | HIGH | Edit button grayed out | NOT STARTED |
 | [BF-58](stories/BF-58-working-in-waterways-form.md) | Working in Waters of the State daily inspection form | 5 | HIGH | Add Working In Waterways forms | NOT STARTED |
 | [BF-59](stories/BF-59-profile-role-self-promotion.md) | Close the profile role self-promotion path | 2 | CRITICAL | (readiness blocker 1, added by Tim) | DONE (merged `125e1ab`) |
-| **Total** | | **14** | | | **2/6 DONE** |
+| [BF-60](stories/BF-60-default-table-grants.md) | Tighten Supabase default table grants across the public schema | 2 | HIGH | (BF-59 verify follow-up) | NOT STARTED |
+| **Total** | | **16** | | | **2/7 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
