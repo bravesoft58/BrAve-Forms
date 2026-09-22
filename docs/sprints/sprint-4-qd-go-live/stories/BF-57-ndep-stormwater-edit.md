@@ -8,7 +8,7 @@
 **Started:** 2026-09-22T12:49:24Z
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-22T13:32:50Z
+**Last Updated:** 2026-09-22T16:19:42Z
 
 ## Request (verbatim)
 
@@ -86,14 +86,24 @@ Disposition (Tim, 2026-09-22): item 1 accepted for the pilot and filed as BF-61;
 
 **AC 4, RLS half (production, rolled back).** Nested block with `set_config('request.jwt.claims', …)` + `SET LOCAL ROLE authenticated`, a same-value UPDATE on NDEP submission `606a46d6` (owner drich@qdconstruction.com), three identities, then a marker exception so nothing persists: plain org member abreen@qdgroupinvesco.com 0 rows, owner 1 row, org admin gdamele@qdconstruction.com 1 row. `updated_at` unchanged afterwards. So the database refuses a non-owner non-admin write independently of the action's own check, and the action's `.select("id")` read-back turns that refusal into a visible error.
 
+**Signed-in run (preview `brave-forms-9rbnisvia-embracingai.vercel.app` at 53e6298, production database, Tim signed in as super admin, 2026-09-22T16:15Z to 16:19Z, driven through Claude in Chrome).** The preview target now carries `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (added 2026-09-22, publishable values only), which is what made this run possible.
+
+1. Submitted a fresh NDEP form on 17446 - Deodar St (inspector and signature "BF-57 verify test"): row `36c5c7ae` created, status submitted, redirect to the project tab listing 2 submissions.
+2. AC 1: the view page's Edit control is an `<a>` to `.../ndep-stormwater/36c5c7ae/edit`, no `disabled` attribute, no tooltip. The grayed button is gone for this form type.
+3. AC 2: the edit page rendered "Edit NDEP Weekly Stormwater Inspection" with the edit-mode note, Cancel and Save Changes, no Use Previous; hydrated state carried inspector name, signature, signature date, inspection date and time, 16 control measures, 4 stabilization items.
+4. AC 5: typed temperature "99", clicked Cancel: back on the view page, `updated_at` unchanged (16:15:27), temperature still empty.
+5. AC 3: set temperature "72" and inspector name "BF-57 verify test EDITED", Save Changes: redirect to the view page showing both values; database row `updated_at` 16:17:02 with temperature 72, inspector edited, signature untouched, 16 measures intact; `/api/forms/36c5c7ae/pdf` 200 `application/pdf` 9,696 bytes, rendered in Chrome's viewer with the edited inspector name and Temperature 72 (`artifacts/BF-57/01-pdf-after-edit-shows-edited-inspector-and-temperature-72.jpg`).
+6. AC 4, route guard: the same submission under a different project id (`.../projects/b16bd572/forms/ndep-stormwater/36c5c7ae/edit`) returns 404. The non-owner redirect itself was not driven from a browser (only Tim's super-admin session was available); the RLS half below covers the write, and the page check is the NDOT pattern unchanged.
+7. Cleanup: test row deleted by SQL scoped to its id, form type and inspector name; production back to 5 NDEP and 18 total submissions, 0 test rows, 0 photos. Tab closed.
+
 **Preview deployment gap (Vercel, not this branch).** The branch preview `brave-forms-helrvcp4w-embracingai.vercel.app` (dpl_54Di2SSw, READY at 602cf57) returns 500 on every route: runtime log "Your project's URL and Key are required to create a Supabase client". `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set for the production target only, so no preview of this project has ever booted. The preview for 57444c7 had already failed at build, which independently confirms verify round 1.
 
 ## Acceptance criteria
 
-- [ ] On a submitted NDEP Weekly Stormwater form, an admin or the submitter sees an enabled Edit button; other users do not see it.
-- [ ] Edit page loads with all previously saved values, including the inspector signature/certification fields (the NDEP form has no photos).
-- [ ] Saving writes the changes, returns to the view page, and the view and PDF show the edited values.
-- [ ] A non-owner non-admin hitting the edit URL directly is redirected, and the server action rejects the update (RLS plus action check).
-- [ ] Cancelling an edit leaves the submission unchanged (no photos on this form, so nothing in Storage to protect).
+- [x] On a submitted NDEP Weekly Stormwater form, an admin or the submitter sees an enabled Edit button; other users do not see it (signed-in run item 2; `canEdit` gating unchanged from NDOT).
+- [x] Edit page loads with all previously saved values, including the inspector signature/certification fields (the NDEP form has no photos) (signed-in run item 3).
+- [x] Saving writes the changes, returns to the view page, and the view and PDF show the edited values (signed-in run item 5, PDF screenshot in artifacts).
+- [x] A non-owner non-admin hitting the edit URL directly is redirected, and the server action rejects the update (RLS plus action check) (RLS probe: member 0 rows, owner 1, org admin 1; route 404 on a mismatched project; redirect logic mirrors NDOT and was not browser-driven for lack of a non-admin session).
+- [x] Cancelling an edit leaves the submission unchanged (no photos on this form, so nothing in Storage to protect) (signed-in run item 4).
 - [x] Existing submissions created before this change open in edit without error (no schema migration; 5 of 5 live rows parse, see evidence).
 - [x] `pnpm build` and lint clean.
