@@ -3,11 +3,13 @@
 **Type:** Production data cleanup
 **Priority:** HIGH (blocks clean first-day use)
 **Points:** 1
-**Status:** NOT STARTED
+**Status:** DONE
 **Sprint:** 4
+**Started:** 2026-09-21T18:17:34Z
+**Completed:** 2026-09-22T12:24:37Z
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-20T19:30:55Z
+**Last Updated:** 2026-09-22T12:24:37Z
 
 ## Request (verbatim)
 
@@ -51,11 +53,82 @@ Seven projects to remove, carrying 21 form submissions between them plus their p
 
 ## Acceptance criteria
 
-- [ ] Exactly three projects remain, the ones Andy named.
-- [ ] No submissions, photos, documents, permits, requirements, assignments, or QR tokens reference a removed project.
-- [ ] No Storage objects remain under a removed project's prefix in either bucket.
-- [ ] The three kept projects and their 18 submissions are untouched (spot-check one submission per project renders and its PDF downloads).
-- [ ] Before/after counts and the executed SQL are recorded in this ticket.
+- [x] Exactly three projects remain, the ones Andy named.
+- [x] No submissions, photos, documents, permits, requirements, assignments, or QR tokens reference a removed project.
+- [x] No Storage objects remain under a removed project's prefix in either bucket.
+- [x] The three kept projects and their 18 submissions are untouched (spot-check one submission per project renders and its PDF downloads).
+- [x] Before/after counts and the executed SQL are recorded in this ticket.
+
+## Execution record (production, 2026-09-21T18:17Z to 18:19Z, Tim's go)
+
+Precondition: `backups/2026-09-20T192106Z-pre-launch-tweaks/scripts/validate_dump.py` re-run, RESULT: OK. Read-only inventory first; Tim gave the delete go on the exact list below.
+
+**Removed projects and what the cascade took with them**
+
+| Project | id | subs | photos | docs | permits | reqs | assign | QR | Storage |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| BF 32 Test | 4dff54b4 | 1 | 1 | 0 | 5 | 5 | 1 | 0 | 1 |
+| E2E Test Project - Full Verification | 06c0610c | 4 | 0 | 1 | 5 | 5 | 1 | 3 | 1 |
+| I-15 Bridge Repair Phase 1 | f0244e03 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
+| Q&D Parking Lot | 6a92e761 | 6 | 0 | 2 | 3 | 4 | 1 | 9 | 2 |
+| South Meadows Mall | 1ef41705 | 7 | 3 | 0 | 5 | 5 | 1 | 3 | 3 |
+| US-95 Test Project | 1a5c83b5 | 2 | 0 | 0 | 5 | 5 | 1 | 0 | 0 |
+| US-95 Widening Phase 2 | 00000000-…-0001 | 1 | 0 | 0 | 3 | 3 | 0 | 1 | 0 |
+| **Total** | | **21** | **4** | **3** | **26** | **27** | **6** | **16** | **7** |
+
+`based_on_id` links from kept projects into any removal target: 0.
+
+**Steps executed**
+
+1. One transaction via Supabase MCP: `DELETE FROM public.projects WHERE id IN (<7 ids>) AND name NOT IN (<3 keep names>) RETURNING id, name` inside `BEGIN … COMMIT`. Returned 7 rows, the seven names above.
+2. `Testing/security/bf54_delete_storage_objects.py` (service role, Storage API): dry run listed 4 objects in `form-attachments` and 3 in `project-documents` under the removed prefixes; real run deleted 4 + 3, HTTP 200 each.
+
+**Before and after**
+
+| Table | Before | After | Expected |
+| --- | --- | --- | --- |
+| projects | 10 | 3 (all Q&D Construction) | 3 |
+| form_submissions | 39 | 18 | 18 |
+| form_photos | 5 | 1 | 1 |
+| project_documents | 14 | 11 | 11 |
+| project_permits | 35 | 9 | 9 |
+| project_form_requirements | 38 | 11 | 11 |
+| project_users | 9 | 3 | 3 |
+| qr_tokens | 24 | 8 | 8 |
+| storage.objects | 19 | 12 (0 under removed prefixes) | 12 |
+
+Orphan submissions 0, orphan photos 0.
+
+**Spot-check through Tim's signed-in session** (Claude in Chrome): projects list shows exactly 17254 NDOT 4541 7 Bridges, 17446 - Deodar St, 17446 - Microsoft NVE Easement. Latest submission of each renders (NDOT Weekly Stormwater 671de7bb with its photo; Daily Dust Log 017396e9; Daily Dust Log 449bc1e6). `/api/forms/<id>/pdf` returned 200 `application/pdf` with `%PDF-` bytes for all three (1,514,793 / 4,624 / 4,649 bytes).
+
+Note: the earlier BF-59 regression submission on BF 32 Test had already been deleted on 2026-09-21; the "1 submission" on that project was Andy's June NDOT test.
+
+## Verify round 1 (headless, 2026-09-21T18:34:36Z): NEEDS ATTENTION, 8.5
+
+Verify re-checked production read-only (3 projects, 0 child rows referencing removed ids, 18 submissions, 0 Storage objects under removed prefixes via the script's own dry run) and confirmed every acceptance criterion. Two Codex findings on `bf54_delete_storage_objects.py`, both confirmed: (1) any argument other than exactly `--dry-run` fell through to real-delete mode; (2) a failed list was skipped silently and a failed DELETE still printed DONE with exit 0. Fixed the same session: argparse rejects unknown arguments before anything runs, dry run is the default and deletion needs `--execute`, list and delete failures print and exit 1, and a post-delete re-list must be empty. Exercised: default run lists 0 and exits 0; `--dryrun` typo is rejected; `--execute` on the clean state deletes 0 and reports "re-list clean".
+
+## Verify round 2 (headless, 2026-09-21T19:15:18Z): NEEDS ATTENTION, 9.0
+
+Acceptance criteria unchanged (MET). One Codex finding, confirmed: argparse's default prefix matching let `--exec`, `--ex` and `--e` reach delete mode, contradicting the round-1 docstring claim. Fixed: `allow_abbrev=False`; docstring corrected; `Testing/security/bf54_args_test.py` pins the contract with no network (eight rejected forms exit 2, `--help` exits 0 and runs nothing). Two minor nits also closed: `load_env` uses a `with` block and reports missing env keys plainly instead of a bare KeyError. Lesson extended with the abbreviation trap.
+
+## Verify round 3 (headless, 2026-09-21, stopped before verdict)
+
+Stopped by Tim before it wrote a stamp. Before that it had rewritten `Testing/security/bf54_args_test.py` to import the script and stub `load_env`/`call` with fail-on-use stubs (cef9689: 11 checks, no I/O possible), and its Codex lane returned approve with zero findings against cef9689 ("closes the live-deletion test vector ... production was not contacted"). It also wrote `Testing/security/bf54_verify_dbstate.mjs`, a read-only after-state check (15 checks: kept set, no child rows on removed ids, 18 submissions at 9/3/6, no dangling `based_on_id`). Re-run 2026-09-22T12:06:32Z: 15/15 PASS. Kept as a point-in-time check; the count lines will drift once Q&D submits new forms.
+
+## Verify round 4 (headless, 2026-09-22T12:24:37Z): PASS, 9.6 — DONE
+
+Fresh headless session, zero-trust pass on the three helper scripts on the branch. All five acceptance criteria re-confirmed against live production, read-only:
+
+- `bf54_verify_dbstate.mjs` re-run: 15/15 PASS. Exactly the three kept projects remain, every one owned by Q&D Construction (org id `3ba1e650-…`); 0 child rows across all six cascade tables reference a removed id; 18 submissions at 9/3/6; no dangling `based_on_id`.
+- `bf54_delete_storage_objects.py` default (dry-run) against production: 0 objects under any removed prefix in either bucket (AC3).
+- `bf54_args_test.py`: 11/11 PASS — every abbreviation / typo / stray argument is rejected with exit 2 before any I/O, and the accepted paths hit the fail-on-use stub, so no test run can reach real Storage.
+
+Two verify fixes to `bf54_verify_dbstate.mjs`, both committed to the branch:
+
+1. Removed a vacuous integrity check that compared a submission-id foreign key (`based_on_id`) against project ids — those UUID sets never intersect, so it could never fail. The adjacent dangling-link check is the correct post-deletion test and is retained. Also added an error check on the id-set select. (commit 4664024)
+2. Codex adversarial review (`gpt-6-astra` at xhigh, confidence 1.0, reproduced with isolated fixtures) found the AC1 org check asserted only `new Set(org names).length === 1` — a false PASS if all three projects were assigned to the wrong org or had a null organization join. Replaced with a genuine ownership assertion: relation present, named Q&D Construction, single non-null organization_id. (commit 6aaee53)
+
+Two-reviewer reconciliation: verify clean after the fix loop; Codex's single finding fixed and re-verified live. The destructive Storage script's argument safety, idempotency, partial-failure accounting, and credential handling all passed both reviewers.
 
 ## Notes
 
