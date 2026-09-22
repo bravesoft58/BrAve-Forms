@@ -8,7 +8,7 @@
 **Started:** 2026-09-21T18:17:34Z
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-22T01:31:33Z
+**Last Updated:** 2026-09-22T12:06:32Z
 
 ## Request (verbatim)
 
@@ -109,6 +109,10 @@ Verify re-checked production read-only (3 projects, 0 child rows referencing rem
 ## Verify round 2 (headless, 2026-09-21T19:15:18Z): NEEDS ATTENTION, 9.0
 
 Acceptance criteria unchanged (MET). One Codex finding, confirmed: argparse's default prefix matching let `--exec`, `--ex` and `--e` reach delete mode, contradicting the round-1 docstring claim. Fixed: `allow_abbrev=False`; docstring corrected; `Testing/security/bf54_args_test.py` pins the contract with no network (eight rejected forms exit 2, `--help` exits 0 and runs nothing). Two minor nits also closed: `load_env` uses a `with` block and reports missing env keys plainly instead of a bare KeyError. Lesson extended with the abbreviation trap.
+
+## Verify round 3 (headless, 2026-09-21, stopped before verdict)
+
+Stopped by Tim before it wrote a stamp. Before that it had rewritten `Testing/security/bf54_args_test.py` to import the script and stub `load_env`/`call` with fail-on-use stubs (cef9689: 11 checks, no I/O possible), and its Codex lane returned approve with zero findings against cef9689 ("closes the live-deletion test vector ... production was not contacted"). It also wrote `Testing/security/bf54_verify_dbstate.mjs`, a read-only after-state check (15 checks: kept set, no child rows on removed ids, 18 submissions at 9/3/6, no dangling `based_on_id`). Re-run 2026-09-22T12:06:32Z: 15/15 PASS. Kept as a point-in-time check; the count lines will drift once Q&D submits new forms.
 
 ## Notes
 
