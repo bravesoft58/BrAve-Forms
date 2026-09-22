@@ -8,7 +8,7 @@
 **Started:** 2026-09-21T18:17:34Z
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-21T18:54:37Z
+**Last Updated:** 2026-09-22T01:31:33Z
 
 ## Request (verbatim)
 
@@ -105,6 +105,10 @@ Note: the earlier BF-59 regression submission on BF 32 Test had already been del
 ## Verify round 1 (headless, 2026-09-21T18:34:36Z): NEEDS ATTENTION, 8.5
 
 Verify re-checked production read-only (3 projects, 0 child rows referencing removed ids, 18 submissions, 0 Storage objects under removed prefixes via the script's own dry run) and confirmed every acceptance criterion. Two Codex findings on `bf54_delete_storage_objects.py`, both confirmed: (1) any argument other than exactly `--dry-run` fell through to real-delete mode; (2) a failed list was skipped silently and a failed DELETE still printed DONE with exit 0. Fixed the same session: argparse rejects unknown arguments before anything runs, dry run is the default and deletion needs `--execute`, list and delete failures print and exit 1, and a post-delete re-list must be empty. Exercised: default run lists 0 and exits 0; `--dryrun` typo is rejected; `--execute` on the clean state deletes 0 and reports "re-list clean".
+
+## Verify round 2 (headless, 2026-09-21T19:15:18Z): NEEDS ATTENTION, 9.0
+
+Acceptance criteria unchanged (MET). One Codex finding, confirmed: argparse's default prefix matching let `--exec`, `--ex` and `--e` reach delete mode, contradicting the round-1 docstring claim. Fixed: `allow_abbrev=False`; docstring corrected; `Testing/security/bf54_args_test.py` pins the contract with no network (eight rejected forms exit 2, `--help` exits 0 and runs nothing). Two minor nits also closed: `load_env` uses a `with` block and reports missing env keys plainly instead of a bare KeyError. Lesson extended with the abbreviation trap.
 
 ## Notes
 

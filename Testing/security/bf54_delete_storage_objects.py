@@ -7,8 +7,10 @@ Run AFTER the project rows are deleted. Idempotent: re-running deletes nothing a
 Never prints the key.
 
 Safety contract (verify round 1 findings):
-  * Default mode is a dry run. Deletion requires the explicit `--execute` flag. Unknown arguments
-    are rejected by argparse, so a typo can never fall through into real-delete mode.
+  * Default mode is a dry run. Deletion requires the exact flag `--execute`. argparse runs with
+    `allow_abbrev=False`, so unknown arguments AND truncations such as `--exec` or `--e` are
+    rejected with exit 2 before anything runs (verify round 2 finding). The contract is pinned
+    by `bf54_args_test.py`.
   * A failed list or a failed DELETE is an error: the script prints it, skips nothing silently,
     and exits 1. After deleting, it re-lists every prefix and exits 1 if anything remains.
 
@@ -37,11 +39,15 @@ class StorageError(Exception):
 def load_env():
     env = {}
     p = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env.local")
-    for line in open(p, encoding="utf-8"):
-        line = line.strip()
-        if line and not line.startswith("#") and "=" in line:
-            k, v = line.split("=", 1)
-            env[k.strip()] = v.strip().strip('"').strip("'")
+    with open(p, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, v = line.split("=", 1)
+                env[k.strip()] = v.strip().strip('"').strip("'")
+    missing = [k for k in ("NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY") if not env.get(k)]
+    if missing:
+        raise SystemExit(f"missing in .env.local: {', '.join(missing)}")
     return env
 
 
@@ -83,9 +89,9 @@ def targets_for(url, key, bucket):
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0], allow_abbrev=False)
     ap.add_argument("--execute", action="store_true", help="actually delete; without it the script only lists")
-    args = ap.parse_args()  # unknown arguments are rejected here, before anything runs
+    args = ap.parse_args()  # unknown arguments and abbreviations are rejected here, before anything runs
     env = load_env()
     url, key = env["NEXT_PUBLIC_SUPABASE_URL"].rstrip("/"), env["SUPABASE_SERVICE_ROLE_KEY"]
 
