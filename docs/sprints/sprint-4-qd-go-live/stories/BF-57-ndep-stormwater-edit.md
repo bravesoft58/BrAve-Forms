@@ -73,6 +73,21 @@ Not exercised in the build stage: the authenticated browser path (Edit button vi
 
 Reproduced twice: `next build` and `tsc --noEmit` failed on `Testing/forms/bf57_ndep_edit_readiness.ts` ("An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled"). The story's build/typecheck evidence had been taken before that script existed, so the committed tree never built; the false evidence, not the defect, drove the score. Feature code itself was judged well implemented; lint confirmed clean. Verify tested the remedy in-session (exclude `Testing` in tsconfig, build exit 0) and reverted it. Applied here as the fix commit, with the gates re-run on the final tree and the lesson recorded.
 
+## Verify round 2 (headless, 2026-09-22T13:51:01Z): NEEDS ATTENTION, 8.0
+
+Verify re-ran all three gates on 602cf57 itself (tsc clean, eslint 0 errors, `next build` exit 0 with the edit route) and confirmed round 1 is resolved; Tier 1 pattern scan clean; Codex leg completed. Two items, no code change made:
+
+1. **Concurrent edits are last-writer-wins** (Codex, confidence 0.99). The update replaces the whole `form_submissions.data` document with no revision check, so two editors on one submission, or a retried save, overwrite each other silently. Pre-existing: the NDOT update this story mirrors does the same. A correct fix is cross-cutting (optimistic concurrency on `updated_at` across every edit path) and is not this 2-point story. Decision for Tim: fix at the shared level, accept for the pilot, or file a follow-up.
+2. **ACs 1 to 4 need a signed-in session** against live RLS (Edit button visibility, save round trip, PDF after edit, non-owner redirect). Server logic judged sound by inspection; not exercised end to end in a headless run.
+
+Disposition (Tim, 2026-09-22): item 1 accepted for the pilot and filed as BF-61; item 2 to be run through Tim's signed-in browser.
+
+## Post-verify checks (2026-09-22T16:09:16Z)
+
+**AC 4, RLS half (production, rolled back).** Nested block with `set_config('request.jwt.claims', …)` + `SET LOCAL ROLE authenticated`, a same-value UPDATE on NDEP submission `606a46d6` (owner drich@qdconstruction.com), three identities, then a marker exception so nothing persists: plain org member abreen@qdgroupinvesco.com 0 rows, owner 1 row, org admin gdamele@qdconstruction.com 1 row. `updated_at` unchanged afterwards. So the database refuses a non-owner non-admin write independently of the action's own check, and the action's `.select("id")` read-back turns that refusal into a visible error.
+
+**Preview deployment gap (Vercel, not this branch).** The branch preview `brave-forms-helrvcp4w-embracingai.vercel.app` (dpl_54Di2SSw, READY at 602cf57) returns 500 on every route: runtime log "Your project's URL and Key are required to create a Supabase client". `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set for the production target only, so no preview of this project has ever booted. The preview for 57444c7 had already failed at build, which independently confirms verify round 1.
+
 ## Acceptance criteria
 
 - [ ] On a submitted NDEP Weekly Stormwater form, an admin or the submitter sees an enabled Edit button; other users do not see it.
