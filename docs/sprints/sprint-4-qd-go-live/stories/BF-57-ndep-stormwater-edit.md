@@ -8,7 +8,7 @@
 **Started:** 2026-09-22T12:49:24Z
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-22T12:49:24Z
+**Last Updated:** 2026-09-22T13:32:50Z
 
 ## Request (verbatim)
 
@@ -55,17 +55,23 @@ Branch `feature/BF-57-ndep-stormwater-edit`, worktree `e:/brave-forms-worktrees/
 | `src/components/forms/ndep-stormwater/NdepStormwaterForm.tsx` | Props `submissionId`, `initialData`, `cancelHref`; edit mode binds the update action, seeds state from `initialData`, hides Use Previous, shows Cancel and "Save Changes". |
 | `src/components/form-actions.tsx` | `ndep_weekly_stormwater` added to `EDIT_SUPPORTED`; comment updated. |
 | `.../ndep-stormwater/[submissionId]/page.tsx` | Passes `editHref`. |
-| `Testing/forms/bf57_ndep_edit_readiness.ts` | Read-only AC 6 check: every live NDEP submission parsed through the current schema. |
+| `Testing/forms/bf57_ndep_edit_readiness.ts` | Read-only AC 6 check: every live NDEP submission parsed through the current schema. Imports the schema with an explicit `.ts` extension because Node type stripping requires it. |
+| `tsconfig.json` | `Testing` added to `exclude` so hand-run scripts there stay out of the app's type-check (verify round 1 finding). |
+| `.claude/lessons-learned.md` | Lesson: take build evidence on the tree you commit. |
 
 Size: 123 insertions, 17 deletions across four existing files plus a 59-line edit page; the 2 SP budget is about 160 lines, ceiling 320.
 
-Evidence (worktree, 2026-09-22T12:49:24Z):
+Evidence (worktree, re-run 2026-09-22T13:32:50Z on the tree committed after round 1; the first run at 12:49 predated the readiness script and was not valid for the commit):
 - `eslint`: 0 errors, 9 pre-existing warnings (none in touched files).
 - `tsc --noEmit`: clean.
-- `next build`: clean; route table lists `/dashboard/projects/[id]/forms/ndep-stormwater/[submissionId]/edit`.
+- `next build`: compiled; route table lists `/dashboard/projects/[id]/forms/ndep-stormwater/[submissionId]/edit`.
 - `node Testing/forms/bf57_ndep_edit_readiness.ts`: 5 NDEP submissions on production, 5 parse, RESULT: PASS. So the pre-existing rows hydrate the edit form and would save unchanged without a validation error (AC 6, no migration).
 
 Not exercised in the build stage: the authenticated browser path (Edit button visibility, save round trip, PDF after edit, non-owner redirect). Those need a signed-in session and are left to verify.
+
+## Verify round 1 (headless, 2026-09-22T13:04Z): FAIL, 5.0
+
+Reproduced twice: `next build` and `tsc --noEmit` failed on `Testing/forms/bf57_ndep_edit_readiness.ts` ("An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled"). The story's build/typecheck evidence had been taken before that script existed, so the committed tree never built; the false evidence, not the defect, drove the score. Feature code itself was judged well implemented; lint confirmed clean. Verify tested the remedy in-session (exclude `Testing` in tsconfig, build exit 0) and reverted it. Applied here as the fix commit, with the gates re-run on the final tree and the lesson recorded.
 
 ## Acceptance criteria
 
