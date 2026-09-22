@@ -2,7 +2,7 @@
 
 **Status:** NOT STARTED
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-22T16:38:57Z
+**Last Updated:** 2026-09-22T16:46:52Z
 **Source:** Andy Breen (IT Director, Q&D) email "BrAve Forms Update", 2026-09-07, with attachment `WIW Daily Form.pdf`. Both filed under [docs/reference/](../../reference/).
 
 ## Why this sprint
@@ -39,9 +39,11 @@ Points are first-pass estimates made while filing the tickets, not scoped estima
 
 ## Open questions for Andy
 
-- BF-55: drich@qdconstruction.com and abreen@qdgroupinvesco.com are not on the keep list. Confirm they go.
-- BF-56: a stable QR URL can always be reloaded. The ticket proposes a scan-to-short-lived-session design; confirm the expiry window.
-- BF-58: how sites (waterway locations) are configured per project, and whether the form is required daily like the dust log.
+Sent by Tim 2026-09-22 (BF-54, BF-57 and the Plenium removal reported as done in the same message). Awaiting answers.
+
+- BF-55: drich@qdconstruction.com (David Rich, submitted the September NDEP inspections) and abreen@qdgroupinvesco.com (Andy's sending address, regular user) are not on the keep list. Keep or remove? Default if unanswered: keep both.
+- BF-58: site model (proposed: a list of site names per project, admin-editable), whether sites change mid-project, whether the form is daily for the project's life or only during the in-water phase and who toggles that phase, and whether the paper form's "Photo taken?" yes/no stays alongside attached photos.
+- BF-56: session length after a scan (proposed 12 hours), and once BF-58 lands, one QR per project or one per site.
 
 ## Execution
 
