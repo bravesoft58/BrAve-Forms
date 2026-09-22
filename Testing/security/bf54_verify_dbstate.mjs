@@ -48,6 +48,7 @@ const KEEP_NAMES = [
   "17446 - Deodar St",
   "17446 - Microsoft NVE Easement",
 ];
+const QD_ORG = "Q&D Construction"; // the single tenant; all kept projects must be owned by it
 const CHILD_TABLES = [
   "form_submissions",
   "project_documents",
@@ -91,8 +92,23 @@ async function main() {
     JSON.stringify(names) === JSON.stringify([...KEEP_NAMES].sort()),
     `[${names.join(" | ")}]`,
   );
-  const orgs = [...new Set(projects.map((p) => p.organizations?.name ?? "?"))];
-  check("AC1 all kept projects under one org (Q&D)", orgs.length === 1, `orgs: ${orgs.join(", ")}`);
+  // Every kept project must be OWNED BY Q&D, not merely share "some single org". A bare
+  // `new Set(names).length === 1` false-PASSes when all three are assigned to the wrong org, or
+  // when the organization join is null for all three (it would collapse to one "?" value). Both
+  // were reproduced by the Codex round-4 review, so assert the relation is present AND names Q&D,
+  // and that the three rows share one non-null organization_id.
+  const orgNames = projects.map((p) => p.organizations?.name ?? null);
+  check(
+    "AC1 every kept project owned by Q&D Construction",
+    projects.length > 0 && orgNames.every((n) => n === QD_ORG),
+    `orgs: [${orgNames.map((n) => n ?? "<null join>").join(" | ")}]`,
+  );
+  const orgIds = [...new Set(projects.map((p) => p.organization_id))];
+  check(
+    "AC1 all kept projects share one non-null organization_id",
+    orgIds.length === 1 && orgIds[0] != null,
+    `organization_id(s): [${orgIds.join(" | ")}]`,
+  );
   const removedStillPresent = projects.filter((p) => REMOVED.includes(p.id));
   check("AC1 no removed id still a project row", removedStillPresent.length === 0, `${removedStillPresent.length} present`);
 
