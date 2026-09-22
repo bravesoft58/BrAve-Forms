@@ -3,11 +3,12 @@
 **Type:** Form enhancement (in-place edit, existing pattern)
 **Priority:** HIGH (Q&D reported it as a bug; it is unfinished scope)
 **Points:** 2
-**Status:** NOT STARTED
+**Status:** IN PROGRESS
 **Sprint:** 4
+**Started:** 2026-09-22T12:49:24Z
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-20T19:30:55Z
+**Last Updated:** 2026-09-22T12:49:24Z
 
 ## Request (verbatim)
 
@@ -33,12 +34,45 @@ The NDOT form has the complete pattern: an `edit/page.tsx` route under the submi
 
 NDEP SAD and NNPH dust permit edit. Andy asked only about NDEP Weekly Stormwater. Filing them separately if Q&D needs them keeps this ticket at 2 points. Note them in the sprint README if Andy raises them.
 
+## Technical Approach (build stage, 2026-09-22)
+
+**Build vs Use:** COPY — the in-repo NDOT edit pattern (`updateNdotStormwater`, `ndot-stormwater/[submissionId]/edit/page.tsx`, `NdotStormwaterForm` edit props). No new dependencies; no library exists for "edit this app's own form", so the risk step is skipped per its skip condition.
+
+Pre-flight facts (verified 2026-09-22): Node 22.23.2, pnpm 8.15.9 pinned in `packageManager`, Next 16.1.6, React 19.2.3, Zod 3.24.4, no test framework (patterns Section 6). Live RLS for `form_submissions` UPDATE is owner OR org admin OR super admin (migration `20260504170000_submission_edit_ownership.sql`, BF-43). The NDEP form has no `PhotoAttachment` and its schema has no `photos` field, so proposed-change item 5 and the photo halves of AC 2 and AC 5 have nothing to preserve; recorded rather than built.
+
+Research log (URLs from tool results only):
+- firecrawl_search "Next.js server action bind extra argument useActionState" → https://github.com/nextjsargentina/next.js-docs/blob/c06b074ee0003b5229be49bb6048fffc91ec05f2/src/docs/02-app/01-building-your-application/02-data-fetching/02-server-actions-and-mutations.mdx → `action.bind(null, id)` is the documented way to pass an id next to FormData; matches the NDOT form.
+- firecrawl_search "Supabase RLS UPDATE policy USING without WITH CHECK" → https://supabase.com/docs/guides/database/postgres/row-level-security → without WITH CHECK the USING clause governs both old and new rows, and UPDATE needs a SELECT policy (present, org-scoped). https://makerkit.dev/blog/tutorials/supabase-rls-best-practices → an RLS-denied UPDATE affects 0 rows silently. The NDOT action does not detect that; the NDEP update selects the row back and returns a permission error when nothing comes back.
+
+## Implementation record
+
+Branch `feature/BF-57-ndep-stormwater-edit`, worktree `e:/brave-forms-worktrees/BF-57`.
+
+| File | Change |
+| --- | --- |
+| `src/app/dashboard/projects/[id]/forms/ndep-stormwater/actions.ts` | `updateNdepStormwater(submissionId, prev, formData)`: auth, ownership check (admin or submitter, same as NDOT), Zod re-validation, UPDATE scoped by id + project + form type, `.select("id")` so an RLS-denied update is reported not swallowed, revalidate view and project, redirect to view. `collectFieldErrors` shared with submit. |
+| `.../ndep-stormwater/[submissionId]/edit/page.tsx` | New. Mirrors the NDOT edit page: login redirect, project and submission load, 404 when the submission is not this project's NDEP form, `canEdit` redirect to the view page, form in edit mode with `initialData` and `cancelHref`. |
+| `src/components/forms/ndep-stormwater/NdepStormwaterForm.tsx` | Props `submissionId`, `initialData`, `cancelHref`; edit mode binds the update action, seeds state from `initialData`, hides Use Previous, shows Cancel and "Save Changes". |
+| `src/components/form-actions.tsx` | `ndep_weekly_stormwater` added to `EDIT_SUPPORTED`; comment updated. |
+| `.../ndep-stormwater/[submissionId]/page.tsx` | Passes `editHref`. |
+| `Testing/forms/bf57_ndep_edit_readiness.ts` | Read-only AC 6 check: every live NDEP submission parsed through the current schema. |
+
+Size: 123 insertions, 17 deletions across four existing files plus a 59-line edit page; the 2 SP budget is about 160 lines, ceiling 320.
+
+Evidence (worktree, 2026-09-22T12:49:24Z):
+- `eslint`: 0 errors, 9 pre-existing warnings (none in touched files).
+- `tsc --noEmit`: clean.
+- `next build`: clean; route table lists `/dashboard/projects/[id]/forms/ndep-stormwater/[submissionId]/edit`.
+- `node Testing/forms/bf57_ndep_edit_readiness.ts`: 5 NDEP submissions on production, 5 parse, RESULT: PASS. So the pre-existing rows hydrate the edit form and would save unchanged without a validation error (AC 6, no migration).
+
+Not exercised in the build stage: the authenticated browser path (Edit button visibility, save round trip, PDF after edit, non-owner redirect). Those need a signed-in session and are left to verify.
+
 ## Acceptance criteria
 
 - [ ] On a submitted NDEP Weekly Stormwater form, an admin or the submitter sees an enabled Edit button; other users do not see it.
-- [ ] Edit page loads with all previously saved values, including photos and the inspector signature/certification fields.
+- [ ] Edit page loads with all previously saved values, including the inspector signature/certification fields (the NDEP form has no photos).
 - [ ] Saving writes the changes, returns to the view page, and the view and PDF show the edited values.
 - [ ] A non-owner non-admin hitting the edit URL directly is redirected, and the server action rejects the update (RLS plus action check).
-- [ ] Cancelling an edit leaves the submission and its photos unchanged.
-- [ ] Existing submissions created before this change open in edit without error (no schema migration expected; confirm).
-- [ ] `pnpm build` and lint clean.
+- [ ] Cancelling an edit leaves the submission unchanged (no photos on this form, so nothing in Storage to protect).
+- [x] Existing submissions created before this change open in edit without error (no schema migration; 5 of 5 live rows parse, see evidence).
+- [x] `pnpm build` and lint clean.

@@ -284,6 +284,7 @@ export default async function NdepStormwaterViewPage({
         backHref={`/dashboard/projects/${id}?tab=ndep_weekly_stormwater`}
         submissionId={submissionId}
         formType="ndep_weekly_stormwater"
+        editHref={`/dashboard/projects/${id}/forms/ndep-stormwater/${submissionId}/edit`}
         canEdit={canEdit}
       />
     </div>
