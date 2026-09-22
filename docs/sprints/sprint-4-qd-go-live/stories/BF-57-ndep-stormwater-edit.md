@@ -3,12 +3,13 @@
 **Type:** Form enhancement (in-place edit, existing pattern)
 **Priority:** HIGH (Q&D reported it as a bug; it is unfinished scope)
 **Points:** 2
-**Status:** IN PROGRESS
+**Status:** DONE
 **Sprint:** 4
 **Started:** 2026-09-22T12:49:24Z
+**Completed:** 2026-09-22T16:34:47Z
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-22T16:19:42Z
+**Last Updated:** 2026-09-22T16:34:47Z
 
 ## Request (verbatim)
 
@@ -97,6 +98,17 @@ Disposition (Tim, 2026-09-22): item 1 accepted for the pilot and filed as BF-61;
 7. Cleanup: test row deleted by SQL scoped to its id, form type and inspector name; production back to 5 NDEP and 18 total submissions, 0 test rows, 0 photos. Tab closed.
 
 **Preview deployment gap (Vercel, not this branch).** The branch preview `brave-forms-helrvcp4w-embracingai.vercel.app` (dpl_54Di2SSw, READY at 602cf57) returns 500 on every route: runtime log "Your project's URL and Key are required to create a Supabase client". `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set for the production target only, so no preview of this project has ever booted. The preview for 57444c7 had already failed at build, which independently confirms verify round 1.
+
+## Verify round 3 (headless, 2026-09-22T16:34:47Z): PASS, 9.5
+
+Two-reviewer gate held and both reviewers are clean this round.
+
+- **Gates re-run on the committed tree (b30daa0), independently:** `tsc --noEmit` exit 0, `eslint` exit 0 (0 errors, 9 pre-existing warnings, none in touched files), `next build` exit 0 with the `ndep-stormwater/[submissionId]/edit` route present. Round 1's false-build-evidence failure is confirmed resolved.
+- **Tier 1 pattern scan clean.** The only `console.*`/`catch` hits are in `Testing/forms/bf57_ndep_edit_readiness.ts`, a hand-run diagnostic excluded from the app build; no secrets, no raw SQL, no `any`, no empty returns. All changed files under 300 lines.
+- **AC 6 independently re-run:** `node Testing/forms/bf57_ndep_edit_readiness.ts` → 5 production NDEP rows, 5 parse, RESULT PASS.
+- **Codex (`gpt-6-astra` @ xhigh, 6m 4s):** verdict `approve`, zero findings — "No new material blocker beyond the accepted BF-61 concurrency risk. Preservation, authorization, and failure-path checks passed."
+- **Round 2 items disposition:** (1) concurrency last-writer-wins — re-raise recognized; Tim accepted for the pilot and filed BF-61 (exists, NOT STARTED); does not bar this round. (2) interactive ACs 1-4 — resolved by the signed-in run + RLS probe recorded above (AC 3 has the PDF artifact).
+- **Note (not a blocker, shared with NDOT):** the action's `role !== "admin"` ownership pre-filter reads the legacy `profiles.role`; the authoritative boundary is the BF-43 RLS policy (super_admin/owner/org-admin), which the update surfaces via `.select("id")`. The pre-filter is fail-closed and a faithful mirror of the shipping NDOT path; any org-admin edge case belongs with the shared edit-model cleanup, not this 2-point story.
 
 ## Acceptance criteria
 
