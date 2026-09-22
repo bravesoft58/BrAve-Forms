@@ -127,17 +127,23 @@ async function main() {
     JSON.stringify(perProject),
   );
 
-  // AC2/integrity -- no dangling based_on_id (a kept submission pointing at a deleted one)
+  // AC2/integrity -- no dangling based_on_id. based_on_id (the "Use Previous" link) references
+  // form_submissions.id, NOT a project id. After the removed projects' submissions were cascade-
+  // deleted, a kept submission that had pointed at one of them would now reference a row that no
+  // longer exists. A still-resolving link therefore proves the referenced submission survived; a
+  // non-resolving one is the only post-deletion signal that a kept row referenced a removed
+  // project's submission. (An earlier draft also compared based_on_id against the removed *project*
+  // ids -- a vacuous check, since those UUID sets never intersect; removed in verify round 4.)
   const { data: basedRows, error: bErr } = await sb
     .from("form_submissions")
     .select("id, based_on_id")
     .not("based_on_id", "is", null);
   if (bErr) throw new Error(`based_on_id select failed: ${bErr.message}`);
-  const existing = new Set((await sb.from("form_submissions").select("id")).data.map((r) => r.id));
+  const { data: idRows, error: idErr } = await sb.from("form_submissions").select("id");
+  if (idErr) throw new Error(`form_submissions id select failed: ${idErr.message}`);
+  const existing = new Set(idRows.map((r) => r.id));
   const dangling = basedRows.filter((r) => !existing.has(r.based_on_id));
   check("integrity: no dangling based_on_id link", dangling.length === 0, `${dangling.length} dangling`);
-  const basedIntoRemoved = basedRows.filter((r) => REMOVED.includes(r.based_on_id));
-  check("integrity: no based_on_id into a removed project", basedIntoRemoved.length === 0, `${basedIntoRemoved.length}`);
 
   console.log(`\nRESULT: ${fails === 0 ? "PASS (all DB acceptance checks confirmed)" : fails + " FAIL"}`);
   process.exit(fails ? 1 : 0);
