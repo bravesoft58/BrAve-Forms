@@ -3,12 +3,13 @@
 **Type:** Production data cleanup
 **Priority:** HIGH (blocks clean first-day use)
 **Points:** 1
-**Status:** IN PROGRESS
+**Status:** DONE
 **Sprint:** 4
 **Started:** 2026-09-21T18:17:34Z
+**Completed:** 2026-09-22T12:24:37Z
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-22T12:06:32Z
+**Last Updated:** 2026-09-22T12:24:37Z
 
 ## Request (verbatim)
 
@@ -113,6 +114,21 @@ Acceptance criteria unchanged (MET). One Codex finding, confirmed: argparse's de
 ## Verify round 3 (headless, 2026-09-21, stopped before verdict)
 
 Stopped by Tim before it wrote a stamp. Before that it had rewritten `Testing/security/bf54_args_test.py` to import the script and stub `load_env`/`call` with fail-on-use stubs (cef9689: 11 checks, no I/O possible), and its Codex lane returned approve with zero findings against cef9689 ("closes the live-deletion test vector ... production was not contacted"). It also wrote `Testing/security/bf54_verify_dbstate.mjs`, a read-only after-state check (15 checks: kept set, no child rows on removed ids, 18 submissions at 9/3/6, no dangling `based_on_id`). Re-run 2026-09-22T12:06:32Z: 15/15 PASS. Kept as a point-in-time check; the count lines will drift once Q&D submits new forms.
+
+## Verify round 4 (headless, 2026-09-22T12:24:37Z): PASS, 9.6 — DONE
+
+Fresh headless session, zero-trust pass on the three helper scripts on the branch. All five acceptance criteria re-confirmed against live production, read-only:
+
+- `bf54_verify_dbstate.mjs` re-run: 15/15 PASS. Exactly the three kept projects remain, every one owned by Q&D Construction (org id `3ba1e650-…`); 0 child rows across all six cascade tables reference a removed id; 18 submissions at 9/3/6; no dangling `based_on_id`.
+- `bf54_delete_storage_objects.py` default (dry-run) against production: 0 objects under any removed prefix in either bucket (AC3).
+- `bf54_args_test.py`: 11/11 PASS — every abbreviation / typo / stray argument is rejected with exit 2 before any I/O, and the accepted paths hit the fail-on-use stub, so no test run can reach real Storage.
+
+Two verify fixes to `bf54_verify_dbstate.mjs`, both committed to the branch:
+
+1. Removed a vacuous integrity check that compared a submission-id foreign key (`based_on_id`) against project ids — those UUID sets never intersect, so it could never fail. The adjacent dangling-link check is the correct post-deletion test and is retained. Also added an error check on the id-set select. (commit 4664024)
+2. Codex adversarial review (`gpt-6-astra` at xhigh, confidence 1.0, reproduced with isolated fixtures) found the AC1 org check asserted only `new Set(org names).length === 1` — a false PASS if all three projects were assigned to the wrong org or had a null organization join. Replaced with a genuine ownership assertion: relation present, named Q&D Construction, single non-null organization_id. (commit 6aaee53)
+
+Two-reviewer reconciliation: verify clean after the fix loop; Codex's single finding fixed and re-verified live. The destructive Storage script's argument safety, idempotency, partial-failure accounting, and credential handling all passed both reviewers.
 
 ## Notes
 
