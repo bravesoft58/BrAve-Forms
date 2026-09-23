@@ -22,8 +22,8 @@
 | --- | --- | --- | --- | --- |
 | gdamele@qdconstruction.com (Gracie) | admin | member | Q&D | KEEP |
 | abreen@qdconstruction.com | admin | member | Q&D | KEEP |
-| abreen@qdgroupinvesco.com | user | member | Q&D | Andy sent the email from this address but did not list it. CONFIRM with Andy. |
-| drich@qdconstruction.com | user | member | Q&D | Not on the keep list. CONFIRM with Andy. |
+| abreen@qdgroupinvesco.com | user | member | Q&D | KEEP (Andy, 2026-09-23) |
+| drich@qdconstruction.com | user | member | Q&D | KEEP (Andy, 2026-09-23; David Rich, active inspector) |
 | claude.test@braveforms.dev | admin | member | Q&D | test account; KEEP for now (Tim, 2026-09-22), remove at the end of the go-live work |
 | timsaverill@protonmail.com | admin | super_admin | platform | KEEP (Tim, "any you need for testing/fixing") |
 | adminbreen@pleniumbuilders.com | admin | member | Plenium Builders (owner) | REMOVED 2026-09-22 (Tim's call; Plenium was the multi-tenant test org) |
