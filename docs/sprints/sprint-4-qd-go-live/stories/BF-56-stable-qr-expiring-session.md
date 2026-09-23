@@ -7,7 +7,8 @@
 **Sprint:** 4
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-23T13:42:52Z
+**Depends On:** BF-62 (Next.js security upgrade), Tim 2026-09-23
+**Last Updated:** 2026-09-23T13:46:48Z
 
 ## Request (verbatim)
 
@@ -55,7 +56,7 @@ A stable URL can always be typed or bookmarked. Anyone who has it can re-open it
 1. **Migration.**
    - `qr_tokens`: make `expires_at` nullable (NULL = stable, never expires), add `revoked_at timestamptz`. Partial unique index `(project_id) WHERE expires_at IS NULL AND revoked_at IS NULL` so a project has at most one active stable code.
    - New table `inspector_sessions (id uuid pk default gen_random_uuid(), qr_token_id uuid not null references qr_tokens(id) on delete cascade, created_at timestamptz not null default now(), expires_at timestamptz not null)`. RLS enabled with no policies; revoke anon/authenticated table privileges explicitly (BF-60 direction). Only the service client touches it. Prefer this over a `kind` column on `qr_tokens`, which would put session rows under the org-member-readable `qr_tokens_all` policy.
-   - Decide on `qr_tokens_all`: either tighten writes to `is_org_admin` in this migration (matches the admin-only UI) or correct the AC to say "org members, unchanged". Operator call; see corrections.
+   - Tighten `qr_tokens` writes to org admins (and super admin) in this migration; reads stay org-scoped. Decided by Tim 2026-09-23.
 2. **Scan endpoint** `src/app/inspector/[token]/route.ts` (GET), replacing today's page at the same path. Validate: token exists, `revoked_at IS NULL`, and `expires_at IS NULL OR expires_at > now()`. Insert an `inspector_sessions` row with `expires_at = now() + 12 h`, set cookie `inspector_session=<session id>` (`httpOnly`, `secure`, `sameSite: "lax"`, `path: "/inspector"`, `maxAge: 43200`) on a `NextResponse.redirect` to `/inspector`. Invalid or revoked token: redirect to `/inspector?e=invalid` (or render a static message) without setting a cookie. Keeping the `/inspector/[token]` URL shape means every QR already printed keeps working as a scan entry until its own 30-day expiry, with no reprint forced on release day.
 3. **Portal page** `src/app/inspector/page.tsx`: read the cookie with `await cookies()`, load the session joined to its token, require `session.expires_at > now()`, `token.revoked_at IS NULL`, and token not expired. On any failure render "Session expired, scan the QR code on site again" and no project data. Enforce this in the page, not in `proxy.ts` (see the Next.js advisories below).
 4. **Admin side.** Replace "insert on every open" with get-or-create of the project's one stable token. Add `revokeAndReissueQrToken(projectId)` that stamps `revoked_at` on the active stable token and creates a new one; sessions die with it because the portal re-checks the token on every load. Put an admin check inside both server actions, not only around the button (lessons-learned: admin-only UI must check role server-side).
@@ -100,9 +101,15 @@ Recommended: legacy 30-day tokens keep working as scan entries until they expire
 - [ ] After the session window (12 hours, confirmed by Andy 2026-09-23), refreshing the portal shows an expired message and does not render project data.
 - [ ] Re-scanning the same QR after expiry works.
 - [ ] Admin can revoke and reissue a project's QR; the old one stops working immediately.
-- [ ] Existing 30-day tokens keep working until their expiry (no break for already-printed codes) or are migrated to stable tokens in the same release, decision recorded here.
+- [ ] Existing 30-day tokens keep working as scan entries until their own expiry (no break for already-printed codes); each project gets one new stable code that the admin prints once. No bulk migration of existing rows. (Tim, 2026-09-23)
 - [ ] Signed photo and document URLs expire no later than the session.
-- [ ] RLS on `qr_tokens` still restricts writes to org admins (BF-36 policy) and the inspector path still uses the service client with token validation.
+- [ ] RLS on `qr_tokens` restricts INSERT, UPDATE and DELETE to org admins and super admins (tightened from the BF-42 org-member policy), proven by a rolled-back impersonation probe (member refused, org admin allowed); the QR server actions also check admin role server-side; the inspector path still uses the service client with token validation. (Tim, 2026-09-23)
+
+## Decisions (Tim, 2026-09-23)
+
+- Only admins manage QR codes: the database policy and the server actions both enforce it, not just the button.
+- Already-printed 30-day codes keep working until they expire; one new stable code per project, printed once.
+- Upgrade Next.js first, as its own ticket (BF-62), so BF-56 is built and verified on a patched framework.
 
 ## Decisions (Andy, 2026-09-23)
 

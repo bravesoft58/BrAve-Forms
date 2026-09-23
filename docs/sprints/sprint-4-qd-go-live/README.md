@@ -2,7 +2,7 @@
 
 **Status:** NOT STARTED
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-23T13:26:20Z
+**Last Updated:** 2026-09-23T13:46:48Z
 **Source:** Andy Breen (IT Director, Q&D) email "BrAve Forms Update", 2026-09-07, with attachment `WIW Daily Form.pdf`. Both filed under [docs/reference/](../../reference/).
 
 ## Why this sprint
@@ -25,7 +25,8 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-59](stories/BF-59-profile-role-self-promotion.md) | Close the profile role self-promotion path | 2 | CRITICAL | (readiness blocker 1, added by Tim) | DONE (merged `125e1ab`) |
 | [BF-60](stories/BF-60-default-table-grants.md) | Tighten Supabase default table grants across the public schema | 2 | HIGH | (BF-59 verify follow-up) | NOT STARTED |
 | [BF-61](stories/BF-61-submission-edit-concurrency.md) | Optimistic concurrency on submission edits | 2 | MEDIUM | (BF-57 verify follow-up; last-writer-wins accepted for the pilot) | NOT STARTED |
-| **Total** | | **18** | | | **3/8 DONE** |
+| [BF-62](stories/BF-62-nextjs-security-upgrade.md) | Upgrade Next.js out of the 2026 proxy-bypass advisory ranges | 2 | HIGH | (BF-56 scout finding; Tim 2026-09-23, before BF-56) | NOT STARTED |
+| **Total** | | **20** | | | **3/9 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
