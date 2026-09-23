@@ -28,7 +28,7 @@
 | timsaverill@protonmail.com | admin | super_admin | platform | KEEP (Tim, "any you need for testing/fixing") |
 | adminbreen@pleniumbuilders.com | admin | member | Plenium Builders (owner) | REMOVED 2026-09-22 (Tim's call; Plenium was the multi-tenant test org) |
 | itadmin@pleniumbuilders.com | admin | member | Q&D (admin; no Plenium membership) | REMOVED 2026-09-22 (Tim's call) |
-| tim@me.com | (no profile) | (no profile) | none | orphaned auth user from 2025-04-15, never used, remove |
+| tim@me.com | (no profile) | (no profile) | none | REMOVED 2026-09-23 (orphaned auth user from 2025-04-15, never used) |
 
 ## What deletion actually does
 
