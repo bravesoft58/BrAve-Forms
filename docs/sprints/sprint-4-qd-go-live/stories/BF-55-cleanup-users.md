@@ -8,7 +8,7 @@
 **Started:** 2026-09-22T12:42:17Z
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-23T13:26:20Z
+**Last Updated:** 2026-09-23T13:38:49Z
 
 ## Request (verbatim)
 
@@ -71,15 +71,29 @@ Rows matching `pleniumbuilders` or `plenium` in auth.users, profiles, organizati
 
 **Andy, 2026-09-23:** keep both drich@qdconstruction.com (David Rich) and abreen@qdgroupinvesco.com.
 
-**Still open:** tim@me.com orphan (uncontested, not yet run), claude.test@braveforms.dev (kept until the go-live work is done).
+## Execution record, part 2: tim@me.com orphan (production, 2026-09-23T13:38:49Z, Tim's go)
+
+Pre-check: auth user `600dfb65` (tim@me.com, created and last signed in 2025-04-15), 0 profiles, 0 QR tokens, 0 sessions, 1 identity (cascades with the user).
+
+```sql
+BEGIN;
+DELETE FROM auth.users WHERE id = '600dfb65-9bb3-40f0-8d56-1bd8250964d5' AND email = 'tim@me.com';
+COMMIT;
+```
+
+After: auth.users 6, profiles 6. Auth users without profile 0, profiles without auth user 0, memberships without profile 0, project assignments without profile 0, orphaned identities 0.
+
+Final user list: abreen@qdconstruction.com, abreen@qdgroupinvesco.com, claude.test@braveforms.dev, drich@qdconstruction.com, gdamele@qdconstruction.com, timsaverill@protonmail.com.
+
+**Still open:** claude.test@braveforms.dev, kept by Tim until the go-live work is done; remove or ban it then.
 
 ## Acceptance criteria
 
 - [x] Andy confirms the disposition of drich@qdconstruction.com and abreen@qdgroupinvesco.com.
-- [ ] Removed accounts cannot sign in (deleted, or banned with the reason recorded).
-- [ ] Kept accounts sign in and see their projects.
-- [ ] No orphaned membership or assignment rows; auth user count equals profile count.
-- [ ] Before/after user lists and the executed operations are recorded in this ticket.
+- [x] Removed accounts cannot sign in (deleted, or banned with the reason recorded). All three removed accounts are deleted from auth.users.
+- [ ] Kept accounts sign in and see their projects. Evidence so far: Tim signed in 2026-09-22 (BF-57 run); drich@ submitted NDEP inspections through September. Not checked per account.
+- [x] No orphaned membership or assignment rows; auth user count equals profile count (6 and 6).
+- [x] Before/after user lists and the executed operations are recorded in this ticket.
 
 ## Notes
 
