@@ -8,7 +8,7 @@
 **Started:** 2026-09-22T12:42:17Z
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-22T12:42:17Z
+**Last Updated:** 2026-09-23T13:26:20Z
 
 ## Request (verbatim)
 
@@ -69,11 +69,13 @@ COMMIT;
 
 Rows matching `pleniumbuilders` or `plenium` in auth.users, profiles, organizations: 0. Orphan check: members without profile 0, members without org 0, project_users without profile 0, profiles without auth user 0, projects without org 0, auth users without profile 1 (the known tim@me.com orphan, still pending).
 
-**Still open:** drich@qdconstruction.com and abreen@qdgroupinvesco.com (Andy), tim@me.com orphan (uncontested, not yet run), claude.test@braveforms.dev (kept until the go-live work is done).
+**Andy, 2026-09-23:** keep both drich@qdconstruction.com (David Rich) and abreen@qdgroupinvesco.com.
+
+**Still open:** tim@me.com orphan (uncontested, not yet run), claude.test@braveforms.dev (kept until the go-live work is done).
 
 ## Acceptance criteria
 
-- [ ] Andy confirms the disposition of drich@qdconstruction.com and abreen@qdgroupinvesco.com.
+- [x] Andy confirms the disposition of drich@qdconstruction.com and abreen@qdgroupinvesco.com.
 - [ ] Removed accounts cannot sign in (deleted, or banned with the reason recorded).
 - [ ] Kept accounts sign in and see their projects.
 - [ ] No orphaned membership or assignment rows; auth user count equals profile count.

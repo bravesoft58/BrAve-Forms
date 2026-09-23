@@ -7,7 +7,7 @@
 **Sprint:** 4
 **Reported by:** Gracie Damele via Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`), sample attached as `docs/reference/WIW Daily Form.pdf`
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-20T19:30:55Z
+**Last Updated:** 2026-09-23T13:26:20Z
 
 ## Request (verbatim)
 
@@ -67,6 +67,9 @@ Gracie's requirements reduce to: one submission per site per day, the six items 
 - [ ] `pnpm build` and lint clean.
 
 ## Open questions
+
+Andy, 2026-09-23: reviewing the site model, daily-vs-phase and photo questions with Gracie; answer pending. Settled elsewhere: inspectors reach this form through the project's single QR code (BF-56 decision).
+
 
 - Confirm the site model (column on projects vs table) and whether sites can change mid-project.
 - Confirm whether this form is required daily (like the dust log's expectation) or only during the "working in waterways" phase, and who decides the phase is active.

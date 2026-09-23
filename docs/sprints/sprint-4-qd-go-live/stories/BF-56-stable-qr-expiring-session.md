@@ -7,7 +7,7 @@
 **Sprint:** 4
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-20T19:30:55Z
+**Last Updated:** 2026-09-23T13:26:20Z
 
 ## Request (verbatim)
 
@@ -41,14 +41,19 @@ A stable URL can always be typed or bookmarked. Anyone who has it can re-open it
 
 - [ ] A project's QR code, once generated, resolves to the same URL indefinitely.
 - [ ] Scanning it opens the inspector portal without an account.
-- [ ] After the session window (default to confirm with Andy; propose 12 hours), refreshing the portal shows an expired message and does not render project data.
+- [ ] After the session window (12 hours, confirmed by Andy 2026-09-23), refreshing the portal shows an expired message and does not render project data.
 - [ ] Re-scanning the same QR after expiry works.
 - [ ] Admin can revoke and reissue a project's QR; the old one stops working immediately.
 - [ ] Existing 30-day tokens keep working until their expiry (no break for already-printed codes) or are migrated to stable tokens in the same release, decision recorded here.
 - [ ] Signed photo and document URLs expire no later than the session.
 - [ ] RLS on `qr_tokens` still restricts writes to org admins (BF-36 policy) and the inspector path still uses the service client with token validation.
 
-## Open questions
+## Decisions (Andy, 2026-09-23)
+
+- Session length: 12 hours after a scan.
+- One QR code per project. Every form type on the project, including Working in Waterways once BF-58 lands, is reachable from that single code. No per-site codes.
+
+## Open questions (resolved)
 
 - Session length. Andy's intent is "must be on site", which suggests hours, not days.
 - Should the stable token be per project, or per project per waterway site (relevant once BF-58 lands and projects have multiple inspection locations)?

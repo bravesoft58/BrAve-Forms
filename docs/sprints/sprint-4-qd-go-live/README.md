@@ -2,7 +2,7 @@
 
 **Status:** NOT STARTED
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-22T16:46:52Z
+**Last Updated:** 2026-09-23T13:26:20Z
 **Source:** Andy Breen (IT Director, Q&D) email "BrAve Forms Update", 2026-09-07, with attachment `WIW Daily Form.pdf`. Both filed under [docs/reference/](../../reference/).
 
 ## Why this sprint
@@ -39,7 +39,7 @@ Points are first-pass estimates made while filing the tickets, not scoped estima
 
 ## Open questions for Andy
 
-Sent by Tim 2026-09-22 (BF-54, BF-57 and the Plenium removal reported as done in the same message). Awaiting answers.
+Sent by Tim 2026-09-22. Andy answered 2026-09-23: BF-55 keep both accounts; BF-56 12-hour session, one QR per project covering all forms; BF-58 pending his review with Gracie.
 
 - BF-55: drich@qdconstruction.com (David Rich, submitted the September NDEP inspections) and abreen@qdgroupinvesco.com (Andy's sending address, regular user) are not on the keep list. Keep or remove? Default if unanswered: keep both.
 - BF-58: site model (proposed: a list of site names per project, admin-editable), whether sites change mid-project, whether the form is daily for the project's life or only during the in-water phase and who toggles that phase, and whether the paper form's "Photo taken?" yes/no stays alongside attached photos.
