@@ -19,14 +19,14 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | --- | --- | --- | --- | --- | --- |
 | [BF-54](stories/BF-54-cleanup-test-projects.md) | Remove test projects, keep the three live Q&D projects | 1 | HIGH | Clean up test projects | DONE (merged `04adaa5`) |
 | [BF-55](stories/BF-55-cleanup-users.md) | Remove or deactivate test users | 1 | HIGH | Cleanup users | IN PROGRESS |
-| [BF-56](stories/BF-56-stable-qr-expiring-session.md) | Inspector QR never changes; the scanned session expires | 3 | MEDIUM | Make inspection QR Code not expire | NOT STARTED |
+| [BF-56](stories/BF-56-stable-qr-expiring-session.md) | Inspector QR never changes; the scanned session expires | 3 | MEDIUM | Make inspection QR Code not expire | DONE (merged `00e9d82`) |
 | [BF-57](stories/BF-57-ndep-stormwater-edit.md) | NDEP Weekly Stormwater: enable Edit on submitted forms | 2 | HIGH | Edit button grayed out | DONE (merged `8bf7f24`) |
 | [BF-58](stories/BF-58-working-in-waterways-form.md) | Working in Waters of the State daily inspection form | 5 | HIGH | Add Working In Waterways forms | NOT STARTED |
 | [BF-59](stories/BF-59-profile-role-self-promotion.md) | Close the profile role self-promotion path | 2 | CRITICAL | (readiness blocker 1, added by Tim) | DONE (merged `125e1ab`) |
 | [BF-60](stories/BF-60-default-table-grants.md) | Tighten Supabase default table grants across the public schema | 2 | HIGH | (BF-59 verify follow-up) | NOT STARTED |
 | [BF-61](stories/BF-61-submission-edit-concurrency.md) | Optimistic concurrency on submission edits | 2 | MEDIUM | (BF-57 verify follow-up; last-writer-wins accepted for the pilot) | NOT STARTED |
 | [BF-62](stories/BF-62-nextjs-security-upgrade.md) | Upgrade Next.js out of the 2026 advisory ranges, on Node 24 and pnpm 10 | 3 | HIGH | (BF-56 scout finding; Tim 2026-09-23, before BF-56; Node 24 + pnpm 10 added 2026-09-24) | DONE (merged `1dc0bab`) |
-| **Total** | | **21** | | | **4/9 DONE** |
+| **Total** | | **21** | | | **5/9 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
