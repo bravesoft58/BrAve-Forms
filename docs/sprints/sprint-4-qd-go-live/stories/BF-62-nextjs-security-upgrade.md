@@ -7,7 +7,7 @@
 **Sprint:** 4
 **Reported by:** BF-56 scout, 2026-09-23; Tim directed it into this sprint the same day
 **Created:** 2026-09-23
-**Last Updated:** 2026-09-24T14:44:02Z
+**Last Updated:** 2026-09-24T16:08:23Z
 **Completed:** 2026-09-24T14:44:02Z
 **Blocks:** BF-56
 
@@ -128,7 +128,10 @@ Re-estimated at 3 SP on 2026-09-24. The scouted work was two version bumps, a lo
 - [x] `eslint` 0 errors, `tsc --noEmit` clean, `next build` clean on the committed tree.
 - [x] Signed-in smoke on the branch preview passes (dashboard, project, form view, PDF, inspector portal), and signed-out `/dashboard` redirects to login.
 - [x] Audit output before and after is recorded here.
-- [ ] Production deploy after merge reaches READY and the same signed-out redirect holds on production. (Post-merge; checked at /closeout.)
+- [x] Production deploy after merge reaches READY and the same signed-out redirect holds on production. Checked at /closeout on 2026-09-24T16:08:23Z:
+  - Deployment `dpl_Fcd9SP7zcdGbKUodyzGSceUwsgFy` (master `13d8568`) reached READY and is aliased to `brave-forms.vercel.app`.
+  - `/dashboard` returned 307 to `/login`; `/login` returned 200; the PDF route returned 401 when signed out.
+  - No error or fatal runtime logs.
 
 ## Comprehensive Validation (2026-09-24T13:54:24Z)
 
