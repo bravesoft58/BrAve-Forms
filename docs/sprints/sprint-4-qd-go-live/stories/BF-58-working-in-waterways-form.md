@@ -7,7 +7,7 @@
 **Sprint:** 4
 **Reported by:** Gracie Damele via Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`), sample attached as `docs/reference/WIW Daily Form.pdf`
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-24T12:53:30Z
+**Last Updated:** 2026-09-24T21:04:57Z
 
 ## Request (verbatim)
 
@@ -53,6 +53,104 @@ Gracie's requirements reduce to: one submission per site per day, the six items 
 6. **PDF.** One page per submission, Q&D header, project, site, the table above, equipment block, photos appended. Matches the information in the sample; layout is ours.
 7. **Inspector portal.** Add the per-type renderer so inspectors see these forms under the project.
 8. **Two per day.** Enforce at the UI level: the project's form list shows which sites have a submission for today and which do not. Do not hard-block a second submission for the same site-day (corrections happen); show it as a duplicate warning.
+
+## Technical Approach (scout, 2026-09-24T21:04:57Z)
+
+**Build vs Use:** BUILD by COPYING the repo's own form pattern (NDEP stormwater, with the BF-57 edit action), plus USE of what is already installed (`@react-pdf/renderer`, Zod, `PhotoAttachment`, `Intl`). No new dependencies.
+
+| Component | Library found? | Verdict | Why / reopen when |
+| --- | :---: | --- | --- |
+| Form engine for the inspection form | Yes: schema-driven form engines exist, for example the MIT HSE platform `braedonsaunders/beaconhs` | BUILD (copy the NDEP pattern) | Every shipped form is hand-built on server actions, `useActionState` and Zod. One more form does not justify a platform change. Reopen when three or more further per-project-variable forms are requested (Gracie called these "forms that vary depending on the project"). |
+| Editable waterway sites list (name + optional descriptor) | Yes: react-hook-form `useFieldArray` (7.88.0, MIT) | BUILD (small `useState` list rendering repeated named inputs, read with `formData.getAll`) | The repo does not use react-hook-form; the project form already submits repeated permit inputs this way. Adding a form library for one field diverges from every other form. Reopen when the app adopts react-hook-form. |
+| Project-local date ("today" in Nevada) | Yes: `@date-fns/tz` 1.5.0, `date-fns-tz` 3.2.0 | USE the built-in `Intl.DateTimeFormat` with `timeZone: "America/Los_Angeles"` | The runtime supports named time zones natively, so no dependency is needed. |
+| PDF | Installed: `@react-pdf/renderer` (lockfile 4.3.2; 4.9.0 current) | USE | Snyk lists no direct vulnerabilities as of 4.9.0. The NDOT PDF already embeds signed-URL photos in production. No upgrade needed for this story. [verified 2026-09-24] |
+| Validation | Installed: Zod 3.24.4 (3.25.76 latest 3.x; Zod 4 ships inside 3.25 as a subpath) | USE Zod 3 as is | No migration in scope. [verified 2026-09-24] |
+
+### What exists (codebase recon, master `57ba781`, graph fresh)
+
+- **Every form type is hand-wired in about 13 places.** Each needs the new `working_in_waterways` entry:
+  - `FORM_TYPES`, `FORM_LABELS` and `PERMIT_FORM_MAP` (`src/lib/constants/permits.ts`).
+  - `FORM_ROUTE_MAP` in `ProjectTabs.tsx` and in `dashboard/forms/page.tsx`.
+  - The `FormType` union and `EDIT_SUPPORTED` in `form-actions.tsx`.
+  - The PDF `registry`, `getPdfFilename`'s `typeMap`, and the PDF route's `permitTypeMap` and `PHOTO_SUBPATH`.
+  - `PHOTO_STORAGE_PATHS` in `queries/inspector.ts`.
+  - The `FormDetail` switch.
+  - The two database CHECK constraints below.
+- **Database constraints.** `form_submissions_form_type_check` and `project_form_requirements_form_type_check` both enumerate the five form types. The migration must drop and re-add both with `working_in_waterways`. The tables are small, so a plain validating `ADD CONSTRAINT` is fine and `NOT VALID` is unnecessary. `project_permits` already allows `waterway`.
+- **Two production projects already carry the Waterway permit but have no requirement row:** `17254 NDOT 4541 7 Bridges` and `17446 - RNO 18 Main Campus` (the Microsoft project in Gracie's sample). Requirements are only derived when a project is created or edited (`deriveFormTypes` in the project actions). The migration must backfill `project_form_requirements (project_id, 'working_in_waterways', 'auto_permit')` for every project with a `waterway` permit, or neither project shows the tab until someone edits it.
+- **The BF-41 placeholder** (`WATERWAY_PLACEHOLDER_KEY`, "queued for the next sprint") lives in `ProjectTabs.tsx`. Remove it once the real tab exists.
+- **`getProjectById` selects `*`** (graph god node #2, 31 edges), so a new `projects.waterway_sites` column flows through with no query change.
+- **Photos:**
+  - Storage policies key on path segment 2 (the project ID), so `projects/{id}/working-in-waterways/` needs no storage change.
+  - `photoSchema` is private to `lib/schemas/ndot-stormwater.ts` (only the `FormPhoto` type is exported). With a second user, move it to a shared schema module.
+  - The photo subfolder is hand-listed in the PDF route and in the inspector queries. Make it one shared map.
+  - The NDOT actions dual-write `form_photos`; copy that.
+- **Dates:** every existing form defaults its date with `toISOString().split("T")[0]` (UTC), so after 5 pm PDT the default is tomorrow. BF-58 needs a small helper that returns the date in `America/Los_Angeles`. The server-side "sites with a form today" check needs the same helper, because Vercel functions run in UTC. Fixing the other five forms is out of scope; file it separately.
+
+### Recommended design
+
+1. **Migration.**
+   - Add `projects.waterway_sites jsonb NOT NULL DEFAULT '[]'` with `CHECK (jsonb_typeof(waterway_sites) = 'array')`.
+   - Extend both form-type CHECKs.
+   - Backfill the requirement rows.
+   - Include a rollback pair and rehearse it rolled back, as BF-56 did.
+2. **Sites editor.** Add a new `WaterwaySitesField.tsx`, shown in the project form when the Waterway permit is ticked. It renders repeated `waterway_site_name` / `waterway_site_descriptor` inputs. `parseProjectForm` reads them with `getAll`, and the Zod schema validates non-empty, de-duplicated names. `buildProjectFields` writes `waterway_sites`.
+3. **Form data.**
+   - Fields: `site_name` and `site_descriptor`, snapshotted into the submission; `inspection_date`, `inspection_time` and `initials`.
+   - **Four** check items, each with a value and a comment:
+     - water in the waterway: Yes/No
+     - daily vehicle inspection: Pass/Fail
+     - BMPs visual inspection: Pass/Fail
+     - visible sheen or plume: Yes/No/N/A
+   - `equipment_in_use`, and `photos.min(1)`.
+4. **Server actions** (copy the NDEP actions from BF-57):
+   - The submit action re-reads the project's sites and rejects a site name that is not in the list.
+   - The edit action accepts either the stored snapshot name or a current site, so renaming a site later does not lock the old record.
+   - Ownership: admin or submitter.
+   - Chain `.select("id").maybeSingle()` on the update, so an RLS refusal is reported instead of silently affecting 0 rows.
+5. **Pages:** `new`, `[submissionId]` (view) and `[submissionId]/edit` under `forms/working-in-waterways/`, mirroring NDEP.
+6. **Inspector:** a new `WorkingInWaterwaysDetail.tsx` imported by `FormDetail`, not written inside it (see the modularity note).
+7. **"Sites with a form today"** (AC 4): information only, in the project's Working in Waterways tab, comparing today's date in `America/Los_Angeles` against `form_date`.
+
+### Gotchas to carry into /story
+
+- **The story's count is wrong.** Dropping "Photo taken?" leaves **four** check items, not five.
+- **Phone photos can render rotated in PDFs.** `@react-pdf/renderer` ignores EXIF orientation in some cases (react-pdf issues #1848, #2972). `PhotoAttachment` compresses in the browser, which usually normalizes orientation; confirm with a real phone photo in the Gracie review.
+- **`@react-pdf/renderer` has a reported memory growth under repeated `renderToBuffer` in Node** (#3051). This is existing behaviour, not new; watch function memory if PDFs are generated in bulk.
+- **Service-layer duplication** (photo schema, photo subfolder map): extract on this second caller, per the service-layer rule.
+- **BF-49 conflict.** BF-49 (stormwater auto-assign choice, not started) rewrites `PERMIT_FORM_MAP` and quotes `waterway: []`. Whichever merges second rebases.
+
+### Modularity
+
+- `FormDetail.tsx` is already 579 lines and `project-form.tsx` is 291. Put the new renderer and the sites editor in their own files.
+- Keep the entry form under 300 lines. A header section plus a checks section, as NDEP splits its sections, will do.
+
+### Feasibility
+
+**FEASIBILITY CONCERN.** The closest comparable, NDEP stormwater, is about 1,700 lines across schema, actions, form, pages and PDF. BF-58 is smaller per form, but it adds a migration with a backfill, a project-setup editor, an inspector renderer, the today indicator and shared-code extractions. The estimate is about 900 to 1,100 production lines, against a 5 SP budget of 400 (800 at the 2x ceiling). Recommend one of:
+- **Split:**
+  - **BF-58a (5 SP):** migration and backfill, sites editor, constants, schema, entry, view and edit.
+  - **BF-58b (3 SP):** PDF, inspector renderer, today indicator, and Gracie's sign-off.
+- **Or re-estimate** as a single 8 SP story.
+
+Either way, `/story` runs through EnterPlanMode (5+ SP).
+
+## Research Sources
+
+- Codebase and production reads (2026-09-24): CHECK constraint definitions via `pg_constraint`; `form-attachments` storage policies via `pg_policies`; project permits against form requirements for all 5 projects. `graphify update .` at `57ba781`: `getProjectById` has 31 edges (god node #2); `PhotoAttachment` has one container edge. [verified 2026-09-24]
+- `npm view`: `@react-pdf/renderer` 4.9.0 (2026-08-27); zod 4.6.5, latest 3.x 3.25.76; react-hook-form 7.88.0; `date-fns-tz` 3.2.0; `@date-fns/tz` 1.5.0. [verified 2026-09-24]
+- firecrawl_search "@react-pdf/renderer vulnerability OR CVE…" → https://security.snyk.io/package/npm/%40react-pdf%2Frenderer → no direct vulnerabilities, latest 4.9.0. The same search's CVE-2024-34342 hit is the separate `react-pdf` viewer package, not the renderer. [verified 2026-09-24]
+- firecrawl_search "react-pdf renderer Image remote URL…" → https://github.com/diegomura/react-pdf/issues/3051 → memory growth under repeated `renderToBuffer` in Node.
+- firecrawl_search "react-pdf.org Image component src object…" → https://react-pdf.org/docs/v2/components → Image takes network or local JPG/PNG or base64; https://github.com/diegomura/react-pdf/issues/1736 → the `{uri, method, headers}` form for remote images.
+- firecrawl_search "react-pdf renderer 4.x Image … EXIF rotated…" → https://github.com/diegomura/react-pdf/issues/1848 and https://github.com/diegomura/react-pdf/issues/2972 → phone JPEGs rendered rotated (EXIF orientation).
+- firecrawl_search "zod 3 maintenance status after zod 4…" → https://github.com/colinhacks/zod/issues/5239 → Zod 3.25+ ships both v3 and v4. https://zod.dev/v4 → v4 release notes. No reason to migrate for this story.
+- firecrawl_search "get today's date in a specific time zone Intl.DateTimeFormat…" → https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat → the `timeZone` option with IANA zones such as `America/Los_Angeles`.
+- firecrawl_search "PostgreSQL add value to CHECK constraint…" → https://www.postgresql.org/docs/current/sql-altertable.html → drop and re-add the CHECK; `NOT VALID` only skips the scan of existing rows (not needed for small tables).
+- firecrawl_search "react dynamic repeating field list … useFieldArray…" → https://react-hook-form.com/docs/usefieldarray → the field-array API (considered, not adopted; see Build vs Use).
+- firecrawl_search "Next.js server actions useActionState dynamic list inputs FormData getAll…" → https://www.robinwieruch.de/next-forms/ and https://ui.shadcn.com/docs/forms/next → native `useActionState` + Zod server-action forms with dynamic fields; this matches the repo's pattern.
+- firecrawl_search "open source daily inspection checklist form builder…" → https://github.com/braedonsaunders/beaconhs → a full HSE platform with its own form engine (considered, not adopted).
+- firecrawl_scrape https://react-pdf.org/components → the page did not answer the Image-source question (docs moved to /docs/v4); covered by the search results above.
+- Not run: Phase 2g literature search. The story is plumbing on established patterns, with no technique to ground.
 
 ## Acceptance criteria
 
