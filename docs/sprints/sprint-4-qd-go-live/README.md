@@ -40,7 +40,7 @@ Points are first-pass estimates made while filing the tickets, not scoped estima
 
 ## Open questions for Andy
 
-Sent by Tim 2026-09-22. Andy answered 2026-09-23: BF-55 keep both accounts; BF-56 12-hour session, one QR per project covering all forms; BF-58 pending his review with Gracie. BF-58 answered 2026-09-24:
+Sent by Tim 2026-09-22. Andy answered 2026-09-23: BF-55 keep both accounts; BF-56 12-hour session, one QR per project covering all forms; BF-58 pending his review with Gracie. BF-58 answered by Gracie 2026-09-24:
 - Sites are a name plus an optional descriptor and stay fixed for the project.
 - The form is filled in only on days of in-water work, so no phase switch is needed.
 - Drop "Photo taken?"; at least one photo is required.

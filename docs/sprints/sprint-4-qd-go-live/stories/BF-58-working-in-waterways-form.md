@@ -68,7 +68,7 @@ Gracie's requirements reduce to: one submission per site per day, the six items 
 
 ## Open questions (answered 2026-09-24)
 
-Q&D's answers came back through Tim on 2026-09-24, after Andy's review with Gracie. The answers are written in the first person; who "I" is has not been confirmed. Also settled: inspectors reach this form through the project's single QR code (BF-56 decision).
+Q&D's answers came back through Tim on 2026-09-24, after Andy's review with Gracie. The first-person answers are Gracie's, confirmed by Tim. Also settled: inspectors reach this form through the project's single QR code (BF-56 decision).
 
 1. **Sites.** Site names are sufficient. When one job has several locations, Q&D sometimes adds a second descriptor such as coordinates or mile markers. Sites are not added or removed during the project. They suggested an optional field on the project setup page.
 2. **Daily vs phase.** The form is filled in only on days a crew works in the water. That phase is usually a part of a larger job and ends before the job does. The respondent would own an on/off switch but called it "not the most important thing". When the in-water work ends, the foreman simply stops filling in forms.
