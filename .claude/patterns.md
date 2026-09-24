@@ -4,14 +4,14 @@
 
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| Next.js | 16.1.6 | App Router, frontend + server actions |
+| Next.js | see `package.json` (16.3.6 as of BF-62) | App Router, frontend + server actions |
 | React | 19.2.3 | UI framework |
 | Tailwind CSS | 4.x | Styling |
 | @supabase/ssr | 0.9.0 | Supabase SSR client (browser + server) |
 | @supabase/supabase-js | 2.98.0 | Supabase JS client |
 | TypeScript | 5.x | Type safety |
 | PostgreSQL | 15.8.1 | Database (Supabase hosted) |
-| pnpm | - | Package manager |
+| pnpm | `package.json` `packageManager` (10.34.5 as of BF-62) | Package manager; Node from `engines.node` / `.nvmrc` (24) |
 
 ## Section 2: Schema Patterns
 
