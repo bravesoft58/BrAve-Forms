@@ -8,7 +8,7 @@
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
 **Depends On:** BF-62 (Next.js security upgrade), Tim 2026-09-23
-**Last Updated:** 2026-09-24T18:11:53Z
+**Last Updated:** 2026-09-24T18:39:00Z
 
 ## Request (verbatim)
 
@@ -105,7 +105,7 @@ Recommended: legacy 30-day tokens keep working as scan entries until they expire
   - Probe T12 to T15 cover the atomic, retry-safe database function.
   - The modal's button was not clicked on a live project (Tim, 2026-09-24); see the validation table.
 - [x] Existing 30-day tokens keep working as scan entries until their own expiry (no break for already-printed codes); each project gets one new stable code that the admin prints once. No bulk migration of existing rows. (Tim, 2026-09-23)
-- [x] Signed photo and document URLs expire no later than the session. The lifetime is min(1 h, session time left) since verify round 1; the e2e check shows 119 s links with 120 s of session left.
+- [x] Signed photo and document URLs expire no later than the session. The lifetime is min(1 h, time left until `accessUntil`), where `accessUntil` is the earlier of the session end and a legacy token's own expiry, and it is computed at signing time. e2e results: 119 s links with 120 s of session left, and 90 s links for a legacy token with 90 s left.
 - [x] RLS on `qr_tokens` restricts INSERT, UPDATE and DELETE to org admins and super admins (tightened from the BF-42 org-member policy), proven by a rolled-back impersonation probe (member refused, org admin allowed); the QR server actions also check admin role server-side; the inspector path still uses the service client with token validation. (Tim, 2026-09-23)
 
 ## Implementation (2026-09-24)
@@ -136,9 +136,19 @@ Codex raised three findings, and verify upheld all three. All are fixed in `e840
 
 Verify's ledger-drift note is cleared: both migration files are named for their applied versions.
 
+### Verify round 2 (NEEDS ATTENTION 8.6) and fixes
+
+Codex raised three findings, and verify upheld all three. They are fixed in `64a4102`, with no database change.
+
+1. **HIGH: legacy tokens.** A legacy token scanned near its own expiry minted a 12 h session and cookie plus 3600 s links. The portal did lock at token expiry, but the links outlived it. Fix: access ends at `accessUntil = min(now + 12 h, token expires_at)`, and that value drives the session row, the cookie Max-Age and every link lifetime. RED on the round-1 build: the session ran 43110 s past the token, Max-Age was 43200 and links lasted 3601 s. GREEN: 0 s past the token, Max-Age 89 and links at 90 s, for a token with 90 s left.
+2. **MEDIUM: TTL computed too early.** The TTL was computed before the async queries, so elapsed time let links overrun. Fix: `getPortalData` takes the absolute deadline and computes each batch's lifetime at signing time. With under 1 s left it signs nothing and the page says "Session Expired".
+3. **MEDIUM: stale code in the modal.** It could keep a stale or revoked code if the recovery read also failed. Fix: the code is dropped on open and on revoke failure, and shown again only after a successful read.
+
+Lesson recorded in `.claude/lessons-learned.md`: every derived credential expires at the minimum of all upstream deadlines, computed at issue time.
+
 ## Comprehensive Validation (2026-09-24T17:23:31Z, round 1 fixes 2026-09-24T18:11:53Z)
 
-Two suites: `Testing/security/bf56_qr_rls_probe.sql` (15 checks, rolled back) and `Testing/security/bf56_session_e2e.mjs` (20 checks, its own test rows only). All pass on commit `e8404cd`.
+Two suites: `Testing/security/bf56_qr_rls_probe.sql` (15 checks, rolled back) and `Testing/security/bf56_session_e2e.mjs` (23 checks, its own test rows only). The probe passes on production, and the e2e passes on commit `64a4102`.
 
 | # | Check | Result | Key finding |
 |---|---|---|---|
@@ -154,6 +164,9 @@ Two suites: `Testing/security/bf56_qr_rls_probe.sql` (15 checks, rolled back) an
 | 10 | Probe against production after applying the function | PASS 15/15 | T11: a member calling the function gets 42501. T12: reissue with the current code revokes every token, including a live legacy sentinel, and leaves exactly the new stable one. T13: a retry with the old code is a no-op that returns the current code, with the row count unchanged. T14: a random expected code is a no-op. T15: with no active stable code, reissue issues one. |
 | 11 | e2e signed-URL checks, RED on the pre-fix build | FAIL as expected | 7 portal URLs; with 120 s of session left they still lasted 3601 s. |
 | 12 | e2e on `e8404cd` (:3156) against production | PASS 20/20 | The 17 earlier checks, plus: 7 signed URLs present (sentinel); ~3600 s with 12 h left; 119 s with 120 s left. Cleanup left 0 test tokens and 0 test sessions. |
+| 13 | e2e near-expiry legacy checks, RED on the round-1 build | FAIL as expected (3) | Legacy token with 90 s left: the session ran 43110 s past the token, the cookie had Max-Age 43200, and the links lasted 3601 s. |
+| 14 | e2e on `64a4102` (:3156) against production | PASS 23/23 | The 20 earlier checks, plus near-expiry legacy: session end - token end = 0 s, Max-Age 89, links 90 s. The normal cookie Max-Age is now 43199, derived from the stored session end. Cleanup left 0 test tokens and 0 test sessions. |
+| 15 | tsc, eslint, next build on `64a4102` | PASS | tsc is clean; eslint shows 0 errors and 9 pre-existing warnings; the build is clean. The first attempt hit React's "impure function during render" rule for `Date.now()` in the page; it was fixed by delegating to `signedUrlTtlSec` and amended into the unpushed commit before these gates ran. |
 
 Operational notes:
 - The modal builds the QR link from the host it is opened on (`NEXT_PUBLIC_SITE_URL`, else `window.location.origin`). Admins should print codes from production. The token is what stays stable.
