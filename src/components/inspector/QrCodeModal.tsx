@@ -35,10 +35,13 @@ export default function QrCodeModal({ projectId }: { projectId: string }) {
   }
 
   // Always re-read on open: another admin may have reissued since last time.
+  // Drop the cached code first so a failed read cannot leave a stale one up.
   function handleOpen() {
     setOpen(true);
     setError("");
     setConfirmRevoke(false);
+    setToken(null);
+    setIssuedAt(null);
     startTransition(async () => {
       applyResult(await getOrCreateStableQrToken(projectId));
     });
@@ -54,9 +57,11 @@ export default function QrCodeModal({ projectId }: { projectId: string }) {
         applyResult(result);
         return;
       }
-      // Never keep showing a code that may have been revoked: reload the
-      // project's current code and keep the error visible.
+      // Never keep showing a code that may have been revoked: drop it, then
+      // show a code again only if the project's current one reads back.
       setError(result.error);
+      setToken(null);
+      setIssuedAt(null);
       const current = await getOrCreateStableQrToken(projectId);
       if (current.token) {
         setToken(current.token);

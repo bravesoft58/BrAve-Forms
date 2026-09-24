@@ -38,17 +38,18 @@ export default async function InspectorPortalPage({
   const session = await getActiveSession(
     cookieStore.get(INSPECTOR_SESSION_COOKIE)?.value,
   );
-  if (!session) {
-    return (
-      <Notice
-        title="Session Expired"
-        body="Your inspection session has ended. Scan the QR code on site again to continue."
-      />
-    );
-  }
+  const expired = (
+    <Notice
+      title="Session Expired"
+      body="Your inspection session has ended. Scan the QR code on site again to continue."
+    />
+  );
+  if (!session) return expired;
 
-  const data = await getPortalData(session.projectId, signedUrlTtlSec(session));
+  const data = await getPortalData(session.projectId, session.accessUntil);
   if (!data) {
+    // Access can run out while the portal is loading; say so, not "not found".
+    if (signedUrlTtlSec(session.accessUntil) === null) return expired;
     return (
       <Notice
         title="Project Not Found"

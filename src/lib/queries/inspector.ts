@@ -1,5 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { signFileUrlsService } from "@/lib/supabase/signed-urls";
+import { signedUrlTtlSec } from "@/lib/inspector/session";
 
 // Token validation lives in src/lib/inspector/session.ts (BF-56): the portal
 // is gated on an inspector session, not on the token URL itself.
@@ -64,8 +65,8 @@ interface PhotoLike {
 async function signSubmissionPhotos(
   submissions: PortalData["submissions"],
   projectId: string,
-  ttlSec: number,
-): Promise<PortalData["submissions"]> {
+  accessUntil: Date,
+): Promise<PortalData["submissions"] | null> {
   // Collect every photo path across submissions, sign in one batch, then
   // splice the signed URLs back in by index. Avoids N+1 round-trips when
   // many submissions each carry photos.
@@ -90,6 +91,8 @@ async function signSubmissionPhotos(
 
   if (paths.length === 0) return submissions;
 
+  const ttlSec = signedUrlTtlSec(accessUntil);
+  if (ttlSec === null) return null;
   const signed = await signFileUrlsService("form-attachments", paths, ttlSec);
 
   // Clone the affected submissions/photos so we don't mutate query results.
@@ -107,13 +110,15 @@ async function signSubmissionPhotos(
 }
 
 /**
- * `ttlSec` bounds every signed photo and document URL. The portal passes the
- * inspector session's remaining lifetime (capped at an hour), so no link
- * outlives the session that rendered it (BF-56 AC 7).
+ * `accessUntil` is the absolute end of the inspector's access. Each signed
+ * photo and document URL's lifetime is computed from it right before that
+ * batch is signed (never more than an hour), so no link outlives access even
+ * if the queries above are slow (BF-56 AC 7). Returns null if access ends
+ * before the URLs can be signed.
  */
 export async function getPortalData(
   projectId: string,
-  ttlSec: number,
+  accessUntil: Date,
 ): Promise<PortalData | null> {
   const supabase = createServiceClient();
 
@@ -143,7 +148,9 @@ export async function getPortalData(
 
   const rawDocuments = documentsRes.data ?? [];
   const docPaths = rawDocuments.map((d) => d.file_path);
-  const signedDocUrls = await signFileUrlsService("project-documents", docPaths, ttlSec);
+  const docTtlSec = signedUrlTtlSec(accessUntil);
+  if (docTtlSec === null) return null;
+  const signedDocUrls = await signFileUrlsService("project-documents", docPaths, docTtlSec);
   const documents = rawDocuments.map((doc, i) => ({
     ...doc,
     download_url: signedDocUrls[i],
@@ -152,8 +159,9 @@ export async function getPortalData(
   const submissions = await signSubmissionPhotos(
     submissionsRes.data ?? [],
     projectId,
-    ttlSec,
+    accessUntil,
   );
+  if (submissions === null) return null;
 
   return {
     project: projectRes.data,

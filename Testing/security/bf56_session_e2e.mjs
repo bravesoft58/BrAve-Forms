@@ -111,9 +111,11 @@ async function main() {
   const stable = await insertToken(project.id, null);
   const s1 = await scan(stable.token);
   check("scan returns 303 to /inspector", s1.status === 303 && new URL(s1.location, args.baseUrl).pathname === "/inspector" && !s1.location.includes("link="), `${s1.status} ${s1.location}`);
-  check("cookie is HttpOnly, Secure, SameSite=lax, Path=/inspector, Max-Age=43200",
+  const maxAgeOf = (sc) => Number((sc.match(/Max-Age=(\d+)/i) ?? [])[1] ?? -1);
+  check("cookie is HttpOnly, Secure, SameSite=lax, Path=/inspector, Max-Age ~12 h",
     /HttpOnly/i.test(s1.setCookie) && /Secure/i.test(s1.setCookie) && /SameSite=lax/i.test(s1.setCookie) &&
-    /Path=\/inspector(;|$)/i.test(s1.setCookie) && /Max-Age=43200/i.test(s1.setCookie), s1.setCookie);
+    /Path=\/inspector(;|$)/i.test(s1.setCookie) && maxAgeOf(s1.setCookie) >= 43190 && maxAgeOf(s1.setCookie) <= 43200,
+    s1.setCookie);
 
   const { data: row1 } = await db.from("inspector_sessions").select("qr_token_id, expires_at").eq("id", s1.session).single();
   const hours = row1 ? (new Date(row1.expires_at) - Date.now()) / 3.6e6 : -1;
@@ -172,6 +174,21 @@ async function main() {
   const legacyLive = await insertToken(project.id, new Date(Date.now() + 3600e3).toISOString());
   const s4 = await scan(legacyLive.token);
   check("unexpired legacy token still opens a session", s4.session && (await portal(s4.session)).body.includes(project.name));
+  // Verify round 2: a legacy token scanned near its own expiry must not grant
+  // access (session, cookie, or signed file URLs) beyond that expiry.
+  const nearEnd = Math.floor(Date.now() / 1000) + 90;
+  const legacyNear = await insertToken(project.id, new Date(nearEnd * 1000).toISOString());
+  const s8 = await scan(legacyNear.token);
+  const { data: rowNear } = await db.from("inspector_sessions").select("expires_at").eq("id", s8.session).single();
+  const rowNearEnd = rowNear ? Math.floor(new Date(rowNear.expires_at).getTime() / 1000) : Infinity;
+  check("session from a near-expiry legacy token ends with the token",
+    s8.session && rowNearEnd <= nearEnd, `session end - token end = ${rowNearEnd - nearEnd} s`);
+  check("its cookie lives no longer than the token", maxAgeOf(s8.setCookie) > 0 && maxAgeOf(s8.setCookie) <= 90,
+    `Max-Age=${maxAgeOf(s8.setCookie)}`);
+  const nearExp = signedUrlExpiries((await portal(s8.session)).body);
+  check("its signed URLs expire no later than the token",
+    nearExp.length > 0 && nearExp.every((e) => e <= nearEnd), nearExp.map((e) => e - nowS()).join(","));
+
   const legacyDead = await insertToken(project.id, new Date(Date.now() - 3600e3).toISOString());
   const s5 = await scan(legacyDead.token);
   check("expired legacy token is refused", s5.location.includes("link=invalid") && !s5.session);

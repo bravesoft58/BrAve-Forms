@@ -3,7 +3,6 @@ import { openSessionForToken } from "@/lib/inspector/session";
 import {
   INSPECTOR_COOKIE_PATH,
   INSPECTOR_SESSION_COOKIE,
-  INSPECTOR_SESSION_HOURS,
 } from "@/lib/inspector/constants";
 
 // BF-56: the URL encoded in the printed QR. Scanning it opens a short session
@@ -15,21 +14,24 @@ export async function GET(
   { params }: { params: Promise<{ token: string }> },
 ) {
   const { token } = await params;
-  const sessionId = await openSessionForToken(token);
+  const session = await openSessionForToken(token);
 
   const target = new URL(INSPECTOR_COOKIE_PATH, request.url);
-  if (!sessionId) target.searchParams.set("link", "invalid");
+  if (!session) target.searchParams.set("link", "invalid");
 
   const response = NextResponse.redirect(target, 303);
   response.headers.set("Cache-Control", "no-store");
 
-  if (sessionId) {
-    response.cookies.set(INSPECTOR_SESSION_COOKIE, sessionId, {
+  if (session) {
+    // 12 h, or less when a legacy token expires sooner: the cookie never
+    // outlives the session row it points at.
+    const maxAge = Math.max(1, Math.floor((session.expiresAt.getTime() - Date.now()) / 1000));
+    response.cookies.set(INSPECTOR_SESSION_COOKIE, session.id, {
       httpOnly: true,
       secure: true,
       sameSite: "lax",
       path: INSPECTOR_COOKIE_PATH,
-      maxAge: INSPECTOR_SESSION_HOURS * 3600,
+      maxAge,
     });
   } else {
     // A bad scan must not leave an older session for another project in place.
