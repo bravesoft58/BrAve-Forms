@@ -83,6 +83,14 @@ async function scan(token) {
   return { status: res.status, location: res.headers.get("location") ?? "", setCookie, session: m ? m[1] : null };
 }
 
+/** Expiry (unix s) of every Supabase signed URL embedded in a portal page. */
+function signedUrlExpiries(body) {
+  const tokens = new Set(
+    [...body.matchAll(/token=([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)/g)].map((m) => m[1]),
+  );
+  return [...tokens].map((t) => JSON.parse(Buffer.from(t.split(".")[1], "base64url").toString()).exp);
+}
+
 async function portal(sessionId) {
   const headers = sessionId ? { cookie: `inspector_session=${sessionId}` } : {};
   const res = await fetch(`${args.baseUrl}/inspector`, { headers, redirect: "manual" });
@@ -114,6 +122,21 @@ async function main() {
 
   const p1 = await portal(s1.session);
   check("portal with session renders the scanned project", p1.status === 200 && p1.body.includes(project.name));
+
+  // AC7: no signed file URL outlives the session. With 12 h left the cap is
+  // one hour; with 2 minutes left every URL must expire within those 2 minutes.
+  const nowS = () => Math.floor(Date.now() / 1000);
+  const fullExp = signedUrlExpiries(p1.body);
+  check("portal carries signed file URLs to test (sentinel)", fullExp.length > 0, `${fullExp.length} URLs`);
+  check("with 12 h left, signed URLs last ~1 h (cap)",
+    fullExp.length > 0 && fullExp.every((e) => e - nowS() > 3500 && e - nowS() <= 3605),
+    fullExp.map((e) => e - nowS()).join(","));
+  const shortEnd = nowS() + 120;
+  await db.from("inspector_sessions").update({ expires_at: new Date(shortEnd * 1000).toISOString() }).eq("id", s1.session);
+  const shortExp = signedUrlExpiries((await portal(s1.session)).body);
+  check("with 2 min left, every signed URL expires no later than the session",
+    shortExp.length > 0 && shortExp.every((e) => e <= shortEnd && e > nowS()),
+    shortExp.map((e) => e - nowS()).join(","));
 
   const pNone = await portal(null);
   check("portal without cookie shows Session Expired, no project data",

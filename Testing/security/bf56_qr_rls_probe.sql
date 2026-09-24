@@ -1,4 +1,5 @@
--- BF-56: qr_tokens write policy + inspector_sessions lockdown probe.
+-- BF-56: qr_tokens write policy, inspector_sessions lockdown, and the atomic
+-- reissue_inspector_qr function (T11-T15, verify round 1 findings 1 and 2).
 --
 -- Non-destructive by construction: the whole probe is one DO block that ends
 -- in RAISE EXCEPTION (SQLSTATE P0999), so every insert/update it makes rolls
@@ -23,6 +24,9 @@ DECLARE
   n      int;
   st     text;
   new_id uuid;
+  tok_a  uuid;
+  tok_b  uuid;
+  rec    record;
 BEGIN
   -- ---------------------------------------------------------------- member
   PERFORM set_config('request.jwt.claims',
@@ -59,6 +63,14 @@ BEGIN
   END;
   IF st = '42501' THEN r := r || 'PASS T5 authenticated cannot read inspector_sessions (42501)' || E'\n';
   ELSE r := r || 'FAIL T5 authenticated inspector_sessions read result ' || st || E'\n'; fails := fails + 1; END IF;
+
+  st := 'ok';
+  BEGIN
+    PERFORM * FROM public.reissue_inspector_qr(proj, NULL);
+  EXCEPTION WHEN OTHERS THEN st := SQLSTATE;
+  END;
+  IF st = '42501' THEN r := r || 'PASS T11 member cannot call reissue_inspector_qr (42501)' || E'\n';
+  ELSE r := r || 'FAIL T11 member reissue result ' || st || E'\n'; fails := fails + 1; END IF;
 
   RESET ROLE;
 
@@ -102,6 +114,41 @@ BEGIN
   IF st = 'ok' THEN r := r || 'PASS T9 after revoke a new stable token is allowed (reissue)' || E'\n';
   ELSE r := r || 'FAIL T9 reissue insert result ' || st || E'\n'; fails := fails + 1; END IF;
 
+  -- reissue_inspector_qr: atomic, and a no-op for stale or retried calls.
+  SELECT token INTO tok_a FROM public.qr_tokens
+   WHERE project_id = proj AND expires_at IS NULL AND revoked_at IS NULL;
+  -- A live legacy sentinel, so T12 proves legacy tokens are revoked too.
+  INSERT INTO public.qr_tokens (project_id, expires_at, created_by)
+  VALUES (proj, now() + interval '1 day', admin);
+
+  SELECT * INTO rec FROM public.reissue_inspector_qr(proj, tok_a);
+  tok_b := rec.qr_token;
+  SELECT count(*) INTO n FROM public.qr_tokens WHERE project_id = proj AND revoked_at IS NULL;
+  IF rec.reissued AND tok_b IS DISTINCT FROM tok_a AND n = 1
+     AND EXISTS (SELECT 1 FROM public.qr_tokens WHERE token = tok_b AND expires_at IS NULL AND revoked_at IS NULL)
+  THEN r := r || 'PASS T12 reissue with the current code revokes every token (stable + legacy) and leaves exactly the new one' || E'\n';
+  ELSE r := r || format('FAIL T12 reissued=%s new=%s old=%s active=%s', rec.reissued, tok_b, tok_a, n) || E'\n'; fails := fails + 1; END IF;
+
+  SELECT count(*) INTO n FROM public.qr_tokens WHERE project_id = proj;
+  SELECT * INTO rec FROM public.reissue_inspector_qr(proj, tok_a);
+  IF NOT rec.reissued AND rec.qr_token = tok_b
+     AND (SELECT count(*) FROM public.qr_tokens WHERE project_id = proj) = n
+     AND EXISTS (SELECT 1 FROM public.qr_tokens WHERE token = tok_b AND revoked_at IS NULL)
+  THEN r := r || 'PASS T13 retry with the old code is a no-op and returns the current code' || E'\n';
+  ELSE r := r || format('FAIL T13 retry reissued=%s returned=%s expected=%s', rec.reissued, rec.qr_token, tok_b) || E'\n'; fails := fails + 1; END IF;
+
+  SELECT * INTO rec FROM public.reissue_inspector_qr(proj, gen_random_uuid());
+  IF NOT rec.reissued AND rec.qr_token = tok_b
+  THEN r := r || 'PASS T14 stale expected code is a no-op' || E'\n';
+  ELSE r := r || format('FAIL T14 stale reissued=%s returned=%s', rec.reissued, rec.qr_token) || E'\n'; fails := fails + 1; END IF;
+
+  UPDATE public.qr_tokens SET revoked_at = now() WHERE token = tok_b;
+  SELECT * INTO rec FROM public.reissue_inspector_qr(proj, tok_b);
+  IF rec.reissued AND rec.qr_token IS DISTINCT FROM tok_b
+     AND (SELECT count(*) FROM public.qr_tokens WHERE project_id = proj AND expires_at IS NULL AND revoked_at IS NULL) = 1
+  THEN r := r || 'PASS T15 reissue with no active stable code issues a new one' || E'\n';
+  ELSE r := r || format('FAIL T15 reissued=%s returned=%s', rec.reissued, rec.qr_token) || E'\n'; fails := fails + 1; END IF;
+
   RESET ROLE;
 
   -- ------------------------------------------------------------------ anon
@@ -116,7 +163,7 @@ BEGIN
   ELSE r := r || 'FAIL T10 anon inspector_sessions read result ' || st || E'\n'; fails := fails + 1; END IF;
   RESET ROLE;
 
-  r := r || format('RESULT: %s of 10 failed', fails);
+  r := r || format('RESULT: %s of 15 failed', fails);
   RAISE EXCEPTION USING ERRCODE = 'P0999', MESSAGE = 'BF56 PROBE (rolled back)' || r;
 END
 $probe$;

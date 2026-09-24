@@ -70,35 +70,28 @@ export async function getOrCreateStableQrToken(
 
 /**
  * Revokes every active token on the project (the stable code and any legacy
- * 30-day codes) and issues a new stable code. Open inspector sessions end on
- * their next page load, because the portal re-checks the token each time.
+ * 30-day codes) and issues a new stable code, atomically, in the
+ * reissue_inspector_qr database function. `expectedToken` is the code the
+ * admin was looking at: if it is no longer the current one (a retry, or
+ * another admin reissued first) nothing is revoked and the current code is
+ * returned. Open inspector sessions end on their next page load, because the
+ * portal re-checks the token each time.
  */
 export async function revokeAndReissueQrToken(
   projectId: string,
+  expectedToken: string,
 ): Promise<StableQrResult> {
   const auth = await requireAdmin();
   if ("error" in auth) return { error: auth.error };
   const supabase = await createClient();
 
-  const revoked = await supabase
-    .from("qr_tokens")
-    .update({ revoked_at: new Date().toISOString() })
-    .eq("project_id", projectId)
-    .is("revoked_at", null)
-    .select("id");
-  if (revoked.error) return { error: revoked.error.message };
+  const { data, error } = await supabase
+    .rpc("reissue_inspector_qr", {
+      p_project_id: projectId,
+      p_expected_token: expectedToken,
+    })
+    .single<{ qr_token: string; issued_at: string; reissued: boolean }>();
 
-  // An RLS-refused UPDATE returns no error and no rows. If the project still
-  // has an unrevoked token visible to us, the revoke did not happen.
-  const leftover = await supabase
-    .from("qr_tokens")
-    .select("id", { count: "exact", head: true })
-    .eq("project_id", projectId)
-    .is("revoked_at", null);
-  if (leftover.error) return { error: leftover.error.message };
-  if ((leftover.count ?? 0) > 0) return { error: NOT_ADMIN };
-
-  const created = await insertStable(supabase, projectId, auth.user.id);
-  if (created.error) return { error: created.error.message };
-  return { token: created.data.token, issuedAt: created.data.created_at };
+  if (error) return { error: error.code === "42501" ? NOT_ADMIN : error.message };
+  return { token: data.qr_token, issuedAt: data.issued_at };
 }

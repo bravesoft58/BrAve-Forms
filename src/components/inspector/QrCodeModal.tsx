@@ -34,23 +34,34 @@ export default function QrCodeModal({ projectId }: { projectId: string }) {
     }
   }
 
+  // Always re-read on open: another admin may have reissued since last time.
   function handleOpen() {
     setOpen(true);
     setError("");
     setConfirmRevoke(false);
-
-    if (!token) {
-      startTransition(async () => {
-        applyResult(await getOrCreateStableQrToken(projectId));
-      });
-    }
+    startTransition(async () => {
+      applyResult(await getOrCreateStableQrToken(projectId));
+    });
   }
 
   function handleRevoke() {
+    if (!token || isPending) return;
     setError("");
     setConfirmRevoke(false);
     startTransition(async () => {
-      applyResult(await revokeAndReissueQrToken(projectId));
+      const result = await revokeAndReissueQrToken(projectId, token);
+      if (!result.error) {
+        applyResult(result);
+        return;
+      }
+      // Never keep showing a code that may have been revoked: reload the
+      // project's current code and keep the error visible.
+      setError(result.error);
+      const current = await getOrCreateStableQrToken(projectId);
+      if (current.token) {
+        setToken(current.token);
+        setIssuedAt(current.issuedAt ?? null);
+      }
     });
   }
 

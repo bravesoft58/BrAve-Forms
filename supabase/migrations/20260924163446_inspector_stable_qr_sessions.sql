@@ -1,5 +1,5 @@
 -- BF-56: Stable inspector QR codes plus short-lived scan sessions
--- Pair: supabase/migrations/_rollback/20260924162749_rollback.sql
+-- Pair: supabase/migrations/_rollback/20260924163446_rollback.sql
 --
 -- Before this migration every "Inspector QR" modal open inserted a new
 -- 30-day qr_tokens row, and the token URL itself was the access: expiry meant

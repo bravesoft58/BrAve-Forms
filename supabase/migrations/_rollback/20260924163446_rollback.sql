@@ -1,5 +1,5 @@
 -- BF-56 ROLLBACK: return qr_tokens to the pre-BF-56 shape.
--- Pair: supabase/migrations/20260924162749_inspector_stable_qr_sessions.sql
+-- Pair: supabase/migrations/20260924163446_inspector_stable_qr_sessions.sql
 --
 -- Drops inspector_sessions (all open inspector sessions end), restores the
 -- BF-42 org-member qr_tokens_all policy, and makes expires_at NOT NULL again.

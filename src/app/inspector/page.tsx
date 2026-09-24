@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { getSessionProjectId } from "@/lib/inspector/session";
+import { getActiveSession, signedUrlTtlSec } from "@/lib/inspector/session";
 import { INSPECTOR_SESSION_COOKIE } from "@/lib/inspector/constants";
 import { getPortalData } from "@/lib/queries/inspector";
 import InspectorPortal from "@/components/inspector/InspectorPortal";
@@ -35,10 +35,10 @@ export default async function InspectorPortalPage({
   }
 
   const cookieStore = await cookies();
-  const projectId = await getSessionProjectId(
+  const session = await getActiveSession(
     cookieStore.get(INSPECTOR_SESSION_COOKIE)?.value,
   );
-  if (!projectId) {
+  if (!session) {
     return (
       <Notice
         title="Session Expired"
@@ -47,7 +47,7 @@ export default async function InspectorPortalPage({
     );
   }
 
-  const data = await getPortalData(projectId);
+  const data = await getPortalData(session.projectId, signedUrlTtlSec(session));
   if (!data) {
     return (
       <Notice

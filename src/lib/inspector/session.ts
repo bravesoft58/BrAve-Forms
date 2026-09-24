@@ -61,13 +61,18 @@ export async function openSessionForToken(token: string): Promise<string | null>
   return session.id;
 }
 
+export interface ActiveSession {
+  projectId: string;
+  expiresAt: Date;
+}
+
 /**
- * Resolves a session cookie to its project id. Null when the session is
- * missing or expired, or when its token has since been revoked or expired.
+ * Resolves a session cookie to its project and expiry. Null when the session
+ * is missing or expired, or when its token has since been revoked or expired.
  */
-export async function getSessionProjectId(
+export async function getActiveSession(
   sessionId: string | undefined,
-): Promise<string | null> {
+): Promise<ActiveSession | null> {
   if (!isUuid(sessionId)) return null;
   const supabase = createServiceClient();
 
@@ -84,7 +89,16 @@ export async function getSessionProjectId(
   if (!data) return null;
 
   const now = new Date();
-  if (new Date(data.expires_at) <= now) return null;
+  const expiresAt = new Date(data.expires_at);
+  if (expiresAt <= now) return null;
   if (!tokenIsUsable(data.qr_tokens, now)) return null;
-  return data.qr_tokens.project_id;
+  return { projectId: data.qr_tokens.project_id, expiresAt };
+}
+
+/** Longest a portal file link may live: one hour, never past the session. */
+const MAX_SIGNED_URL_SEC = 3600;
+
+export function signedUrlTtlSec(session: ActiveSession, now = Date.now()): number {
+  const remaining = Math.floor((session.expiresAt.getTime() - now) / 1000);
+  return Math.max(1, Math.min(MAX_SIGNED_URL_SEC, remaining));
 }

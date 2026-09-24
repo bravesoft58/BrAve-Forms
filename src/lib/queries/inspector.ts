@@ -64,6 +64,7 @@ interface PhotoLike {
 async function signSubmissionPhotos(
   submissions: PortalData["submissions"],
   projectId: string,
+  ttlSec: number,
 ): Promise<PortalData["submissions"]> {
   // Collect every photo path across submissions, sign in one batch, then
   // splice the signed URLs back in by index. Avoids N+1 round-trips when
@@ -89,7 +90,7 @@ async function signSubmissionPhotos(
 
   if (paths.length === 0) return submissions;
 
-  const signed = await signFileUrlsService("form-attachments", paths);
+  const signed = await signFileUrlsService("form-attachments", paths, ttlSec);
 
   // Clone the affected submissions/photos so we don't mutate query results.
   const cloned = submissions.map((sub) => ({ ...sub, data: sub.data }));
@@ -105,7 +106,15 @@ async function signSubmissionPhotos(
   return cloned;
 }
 
-export async function getPortalData(projectId: string): Promise<PortalData | null> {
+/**
+ * `ttlSec` bounds every signed photo and document URL. The portal passes the
+ * inspector session's remaining lifetime (capped at an hour), so no link
+ * outlives the session that rendered it (BF-56 AC 7).
+ */
+export async function getPortalData(
+  projectId: string,
+  ttlSec: number,
+): Promise<PortalData | null> {
   const supabase = createServiceClient();
 
   const [projectRes, permitsRes, documentsRes, submissionsRes] = await Promise.all([
@@ -134,7 +143,7 @@ export async function getPortalData(projectId: string): Promise<PortalData | nul
 
   const rawDocuments = documentsRes.data ?? [];
   const docPaths = rawDocuments.map((d) => d.file_path);
-  const signedDocUrls = await signFileUrlsService("project-documents", docPaths);
+  const signedDocUrls = await signFileUrlsService("project-documents", docPaths, ttlSec);
   const documents = rawDocuments.map((doc, i) => ({
     ...doc,
     download_url: signedDocUrls[i],
@@ -143,6 +152,7 @@ export async function getPortalData(projectId: string): Promise<PortalData | nul
   const submissions = await signSubmissionPhotos(
     submissionsRes.data ?? [],
     projectId,
+    ttlSec,
   );
 
   return {
