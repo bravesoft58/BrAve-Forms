@@ -1,23 +1,8 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { signFileUrlsService } from "@/lib/supabase/signed-urls";
 
-export async function validateToken(token: string): Promise<string | null> {
-  const supabase = createServiceClient();
-
-  const { data, error } = await supabase
-    .from("qr_tokens")
-    .select("project_id")
-    .eq("token", token)
-    .gt("expires_at", new Date().toISOString())
-    .single();
-
-  if (error) {
-    console.error("[inspector] Token validation failed:", error.message);
-    return null;
-  }
-  if (!data) return null;
-  return data.project_id;
-}
+// Token validation lives in src/lib/inspector/session.ts (BF-56): the portal
+// is gated on an inspector session, not on the token URL itself.
 
 export interface PortalData {
   project: {
