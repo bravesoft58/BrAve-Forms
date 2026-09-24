@@ -7,7 +7,7 @@
 **Sprint:** 4
 **Reported by:** Gracie Damele via Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`), sample attached as `docs/reference/WIW Daily Form.pdf`
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-23T13:26:20Z
+**Last Updated:** 2026-09-24T12:53:30Z
 
 ## Request (verbatim)
 
@@ -57,20 +57,25 @@ Gracie's requirements reduce to: one submission per site per day, the six items 
 ## Acceptance criteria
 
 - [ ] A project with the Waterway NDEP permit lists the Working in Waterways form with no placeholder text.
-- [ ] Project admins can define the project's waterway sites; the Microsoft project can carry "Western Drainage" and "Eastern Drainage".
-- [ ] A user can submit one form per site with every field from the sample, including a comment per check item and photos.
-- [ ] The project's daily view shows, for today, which sites are done and which are outstanding.
+- [ ] Project admins can define the project's waterway sites in project setup: a name plus an optional descriptor such as coordinates or mile markers. The Microsoft project can carry "Western Drainage" and "Eastern Drainage".
+- [ ] A user can submit one form per site with every field from the sample except "Photo taken?", including a comment for each check item. The server rejects a submission that has no photo.
+- [ ] The project's daily view shows which sites have a submission today. This is information only, with no outstanding warning, because forms are filled in only on days of in-water work.
 - [ ] View page, Edit (owner or admin), and PDF work; the PDF contains every field and the site name.
 - [ ] The inspector portal renders the form read-only.
 - [ ] RLS: same organization-scoped visibility and BF-43 edit ownership as the other forms, verified with an ordinary user and an admin.
 - [ ] Gracie reviews the rendered form and PDF against the sample and signs off that the information matches.
 - [ ] `pnpm build` and lint clean.
 
-## Open questions
+## Open questions (answered 2026-09-24)
 
-Andy, 2026-09-23: reviewing the site model, daily-vs-phase and photo questions with Gracie; answer pending. Settled elsewhere: inspectors reach this form through the project's single QR code (BF-56 decision).
+Q&D's answers came back through Tim on 2026-09-24, after Andy's review with Gracie. The answers are written in the first person; who "I" is has not been confirmed. Also settled: inspectors reach this form through the project's single QR code (BF-56 decision).
 
+1. **Sites.** Site names are sufficient. When one job has several locations, Q&D sometimes adds a second descriptor such as coordinates or mile markers. Sites are not added or removed during the project. They suggested an optional field on the project setup page.
+2. **Daily vs phase.** The form is filled in only on days a crew works in the water. That phase is usually a part of a larger job and ends before the job does. The respondent would own an on/off switch but called it "not the most important thing". When the in-water work ends, the foreman simply stops filling in forms.
+3. **Photo taken?** Drop the Yes/No box, because photos are attached directly. Make it clear that at least one photo is expected for every day of in-water work.
 
-- Confirm the site model (column on projects vs table) and whether sites can change mid-project.
-- Confirm whether this form is required daily (like the dust log's expectation) or only during the "working in waterways" phase, and who decides the phase is active.
-- "Photo taken?" is answered by attaching photos; keep the explicit Yes/No as well so the record matches the paper form.
+### Design impact (proposed, confirm at /story)
+
+- **Sites model.** Each site is a name plus an optional descriptor. The earlier `text[]` proposal no longer fits. Use a `waterway_sites jsonb` column on `projects` holding `[{name, descriptor}]`, edited in the project setup form when the Waterway NDEP permit is checked. There is no separate table. Admins can still edit the list to fix setup mistakes. Each submission copies the site name and descriptor into its own data, so a later edit to the list cannot rewrite past records.
+- **No phase switch.** Drop the on/off control. Rewrite AC 4 as information only: show which sites have a submission today. There is no "outstanding" warning, because a day with no in-water work legitimately has no form.
+- **Photos.** Remove the "Photo taken?" row, which leaves five check items. The Zod schema requires at least one photo (`photos.min(1)`), enforced on the server at submit and at edit. This works because `PhotoAttachment` uploads photos before submit and they arrive in the form data. The form states the one-photo rule next to the photo control.

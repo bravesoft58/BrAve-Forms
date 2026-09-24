@@ -40,7 +40,12 @@ Points are first-pass estimates made while filing the tickets, not scoped estima
 
 ## Open questions for Andy
 
-Sent by Tim 2026-09-22. Andy answered 2026-09-23: BF-55 keep both accounts; BF-56 12-hour session, one QR per project covering all forms; BF-58 pending his review with Gracie.
+Sent by Tim 2026-09-22. Andy answered 2026-09-23: BF-55 keep both accounts; BF-56 12-hour session, one QR per project covering all forms; BF-58 pending his review with Gracie. BF-58 answered 2026-09-24:
+- Sites are a name plus an optional descriptor and stay fixed for the project.
+- The form is filled in only on days of in-water work, so no phase switch is needed.
+- Drop "Photo taken?"; at least one photo is required.
+
+Design impact is in the ticket.
 
 - BF-55: drich@qdconstruction.com (David Rich, submitted the September NDEP inspections) and abreen@qdgroupinvesco.com (Andy's sending address, regular user) are not on the keep list. Keep or remove? Default if unanswered: keep both.
 - BF-58: site model (proposed: a list of site names per project, admin-editable), whether sites change mid-project, whether the form is daily for the project's life or only during the in-water phase and who toggles that phase, and whether the paper form's "Photo taken?" yes/no stays alongside attached photos.
