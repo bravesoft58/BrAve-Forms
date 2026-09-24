@@ -3,12 +3,13 @@
 **Type:** Inspector portal design change
 **Priority:** MEDIUM (posted QR codes on site should not go stale)
 **Points:** 3
-**Status:** IN PROGRESS
+**Status:** DONE
+**Completed:** 2026-09-24T19:37:56Z
 **Sprint:** 4
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
 **Depends On:** BF-62 (Next.js security upgrade), Tim 2026-09-23
-**Last Updated:** 2026-09-24T19:21:49Z
+**Last Updated:** 2026-09-24T19:37:56Z
 
 ## Request (verbatim)
 
@@ -158,6 +159,15 @@ Codex raised two new findings, and verify upheld both. They are fixed in `d138dd
    - A post-sign check of each URL's own `exp`, which drops overrunning links.
    - An access re-check after the last signing call.
    - `bf56_signed_url_deadline_test.mjs` models 0 to 15 s of signing delay against the real helpers: 17/17 pass, and 5 fail with a zero margin (RED).
+
+### Verify round 4 (PASS 9.6) — 2026-09-24T19:37:56Z
+
+Fresh headless verify session (no implementer in session). Both reviewers clean; no new findings, no fixes applied.
+
+- **Verify (zero-trust):** Pattern scan clean in BF-56 scope (the one `TODO` in `actions.ts:43` is pre-existing BF-33 debt, outside this diff, which only *removes* the unguarded `generateQrToken`). Hostile 7-lens review of every changed file found no blockers: session/token logic fails closed and is service-client only; the scan route is idempotent (safe against link-prefetch); RLS split and the CAS + advisory-lock reissue function are sound; signed-URL lifetimes are capped to `min(1 h, accessUntil)` at signing time with a post-sign `exp` check. Server-action admin check is a coarse first gate; the org-scoped DB policy is the real gate (defense in depth).
+- **Gates re-run independently on Node 24:** `tsc --noEmit` clean; `eslint` 0 errors + 9 pre-existing warnings (none in BF-56 files); `next build` clean, `/inspector` and `/inspector/[token]` both dynamic. `bf56_signed_url_deadline_test.mjs` 17/17 (pure).
+- **Production-touching suites (`bf56_qr_rls_probe.sql`, `bf56_session_e2e.mjs`) not re-run** — HEAD `aeaca02` is docs-only over the last code commit `d138dd4`, so code state is identical to their last green run (probe 16/16, e2e 23/23). Not re-run to avoid production writes.
+- **Codex (`gpt-6-astra` @ xhigh, independent):** `approve`, zero findings; confirmed prior-round revocation and signing-deadline fixes hold.
 
 ## Comprehensive Validation (2026-09-24T17:23:31Z, round 1 fixes 2026-09-24T18:11:53Z)
 
