@@ -3,11 +3,12 @@
 **Type:** Security upgrade (framework dependency) plus toolchain pin
 **Priority:** HIGH (the dashboard's login redirect runs in `proxy.ts`)
 **Points:** 3 (was 2; the Node 24 and pnpm 10 pins were added 2026-09-24)
-**Status:** IN PROGRESS
+**Status:** DONE
 **Sprint:** 4
 **Reported by:** BF-56 scout, 2026-09-23; Tim directed it into this sprint the same day
 **Created:** 2026-09-23
-**Last Updated:** 2026-09-24T14:23:56Z
+**Last Updated:** 2026-09-24T14:44:02Z
+**Completed:** 2026-09-24T14:44:02Z
 **Blocks:** BF-56
 
 ## Decisions (Tim, 2026-09-24)
@@ -148,6 +149,10 @@ Commits on `feature/BF-62-nextjs-security-upgrade`: `f7403eb` (A, toolchain), `c
 | 11 | Allow-list moved to `pnpm-workspace.yaml` (`e8581a7`, verify round 1 finding) | PASS | The `package.json` `pnpm` field works in pnpm 10.34.5, but the global pnpm 11 launcher warns "The 'pnpm' field in package.json is no longer read" and drops it, so the allow-list would vanish on the next pnpm major. Negative control on pnpm 10.34.5 with a clean `node_modules`: without the file, "Ignored build scripts: unrs-resolver@1.11.1"; with it, nothing ignored. `sharp` 0.35.4 ships no install script; it stays listed for the 16.2.x fallback, whose `sharp` 0.34.x has one. Gates on `e8581a7`: eslint 0 errors (9 warnings), tsc clean, build clean. Vercel preview `dpl_FtUWdTeqAesbhxBPjnQxmMzJbq7r` is READY on pnpm 10.34.5 and Next 16.3.6. Its install reused the build cache, so the local control is the evidence for the allow-list. |
 
 The signed-in walkthrough ran once, on commit B's preview. Commit B's tree contains all of commit A, and a second login on commit A's separate preview URL would have repeated the same toolchain path.
+
+### Verify round 2 (2026-09-24T14:44:02Z) — PASS 9.6
+
+Independent headless re-verify at `2daf1ce`. Local re-run on the committed tree (pnpm 10.34.5): `pnpm install --frozen-lockfile` reported "Lockfile is up to date" (exit 0, CI/Vercel-equivalent sync check); `eslint` 0 errors / 9 warnings; `tsc --noEmit` clean; `next build` clean (33 routes, proxy middleware present, no `sharp` module-load failure); `pnpm audit` = 33 (0 critical / 21 high / 11 moderate / 1 low), matching the "after" table exactly. Commit A no-drift re-confirmed: base and commit A both 511 packages with identical sentinel versions (`@supabase/supabase-js@2.98.0`, `eslint-plugin-react-hooks@7.0.1`, `next@16.1.6`); HEAD is 517 (+6 from the 16.3.6 bump). Round 1's finding (allow-list location) was fixed in `e8581a7`; the lockfile never records `onlyBuiltDependencies` under `settings` even when it lived in the `package.json` `pnpm` field, so its absence is pnpm 10.34.5 behaviour, not a sync defect. Codex adversarial review (`gpt-6-astra` @ xhigh): **approve, zero findings** — independently confirmed the 511-entry/integrity/snapshot preservation and the pnpm-docs-conformant allow-list. Two independent reviews, both clean.
 
 ### Audit before and after [verified 2026-09-24]
 
