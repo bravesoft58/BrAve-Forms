@@ -3,12 +3,13 @@
 **Type:** Inspector portal design change
 **Priority:** MEDIUM (posted QR codes on site should not go stale)
 **Points:** 3
-**Status:** NOT STARTED
+**Status:** DONE
+**Completed:** 2026-09-24T19:37:56Z
 **Sprint:** 4
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
 **Depends On:** BF-62 (Next.js security upgrade), Tim 2026-09-23
-**Last Updated:** 2026-09-23T13:46:48Z
+**Last Updated:** 2026-09-24T19:37:56Z
 
 ## Request (verbatim)
 
@@ -96,14 +97,111 @@ Recommended: legacy 30-day tokens keep working as scan entries until they expire
 
 ## Acceptance criteria
 
-- [ ] A project's QR code, once generated, resolves to the same URL indefinitely.
-- [ ] Scanning it opens the inspector portal without an account.
-- [ ] After the session window (12 hours, confirmed by Andy 2026-09-23), refreshing the portal shows an expired message and does not render project data.
-- [ ] Re-scanning the same QR after expiry works.
-- [ ] Admin can revoke and reissue a project's QR; the old one stops working immediately.
-- [ ] Existing 30-day tokens keep working as scan entries until their own expiry (no break for already-printed codes); each project gets one new stable code that the admin prints once. No bulk migration of existing rows. (Tim, 2026-09-23)
-- [ ] Signed photo and document URLs expire no later than the session.
-- [ ] RLS on `qr_tokens` restricts INSERT, UPDATE and DELETE to org admins and super admins (tightened from the BF-42 org-member policy), proven by a rolled-back impersonation probe (member refused, org admin allowed); the QR server actions also check admin role server-side; the inspector path still uses the service client with token validation. (Tim, 2026-09-23)
+- [x] A project's QR code, once generated, resolves to the same URL indefinitely.
+- [x] Scanning it opens the inspector portal without an account.
+- [x] After the session window (12 hours, confirmed by Andy 2026-09-23), refreshing the portal shows an expired message and does not render project data.
+- [x] Re-scanning the same QR after expiry works.
+- [x] Admin can revoke and reissue a project's QR; the old one stops working immediately. Proof:
+  - The e2e script shows the old code refused and open sessions ended on their next load.
+  - Probe T12 to T15 cover the atomic, retry-safe database function.
+  - The modal's button was not clicked on a live project (Tim, 2026-09-24); see the validation table.
+- [x] Existing 30-day tokens keep working as scan entries until their own expiry (no break for already-printed codes); each project gets one new stable code that the admin prints once. No bulk migration of existing rows. (Tim, 2026-09-23)
+- [x] Signed photo and document URLs expire no later than the session. The lifetime is min(1 h, time left until `accessUntil`), where `accessUntil` is the earlier of the session end and a legacy token's own expiry, and it is computed at signing time. e2e results: 119 s links with 120 s of session left, and 90 s links for a legacy token with 90 s left.
+- [x] RLS on `qr_tokens` restricts INSERT, UPDATE and DELETE to org admins and super admins (tightened from the BF-42 org-member policy), proven by a rolled-back impersonation probe (member refused, org admin allowed); the QR server actions also check admin role server-side; the inspector path still uses the service client with token validation. (Tim, 2026-09-23)
+
+## Implementation (2026-09-24)
+
+**Build vs Use:** BUILD, per the scout's verdict above. There are no new dependencies.
+
+| File | Change |
+| --- | --- |
+| `supabase/migrations/20260924163446_inspector_stable_qr_sessions.sql` (+ `_rollback/`) | Stable tokens (`expires_at` NULL) and `revoked_at`; one active stable token per project; `inspector_sessions` (RLS on, no policies, grants revoked); `qr_tokens` writes limited to org admins and super admins. Applied to production 2026-09-24 (Tim's go). The file was renamed to its applied version after verify round 1; it was written as `…162749`. |
+| `supabase/migrations/20260924180712_inspector_qr_reissue_fn.sql` (+ `_rollback/`) | `reissue_inspector_qr(project, expected_token)`, added after verify round 1.<br>- Serialized per project and SECURITY INVOKER, so the admin-only policies still apply; non-admins get an explicit 42501.<br>- Revokes and reissues in one transaction.<br>- Compare-and-swap on the code the admin saw, so a retry or a stale confirm returns the current code unchanged.<br>Applied 2026-09-24 (Tim's go). |
+| `supabase/migrations/20260924191740_inspector_qr_reissue_caps_legacy_expiry.sql` (+ `_rollback/`) | Verify round 3: revoke also caps a legacy token's `expires_at` to now, so validators that only check expiry (the pre-BF-56 code still in production until merge, or a code rollback) refuse it too. Stable tokens keep NULL. The rollback restores the `180712` body. Applied 2026-09-24 (Tim's go). |
+| `src/lib/inspector/signed-url-deadline.ts` | Pure helpers with no imports: `signedUrlTtlSec(accessUntil)`, which is min(3600, time left minus a 10 s signing margin) or null when too close, and `signedUrlWithin(url, accessUntil)`, which checks a signed URL's own `exp` claim against the deadline and fails closed. |
+| `src/lib/inspector/constants.ts` | Session hours (12), cookie name and path; safe to import on the client. |
+| `src/lib/inspector/session.ts` | `openSessionForToken` and `getActiveSession`, using the service client. The access deadline is `accessUntil = min(session end, token expires_at)`. Token rule: not revoked, and `expires_at` NULL or in the future. |
+| `src/app/inspector/[token]/route.ts` | GET handler that replaces the old page at the same URL. Mints a session, then sets an httpOnly, secure, lax cookie scoped to `/inspector`. Its Max-Age is the session's own remaining life: 12 h, or less for a legacy token near expiry. Returns 303 to `/inspector`. A bad scan goes to `?link=invalid` and clears the cookie. |
+| `src/app/inspector/page.tsx` | Portal gated on the session. The token is re-checked on every load, so a revoke takes effect on the next request. |
+| `src/app/dashboard/projects/qr-actions.ts` | `getOrCreateStableQrToken`, and `revokeAndReissueQrToken(projectId, expectedToken)`, which calls the database function. Both check the admin role server-side. Split out of `actions.ts`, which would otherwise pass 300 lines. |
+| `src/components/inspector/QrCodeModal.tsx` | Stable code, issue date, and revoke confirmed inline in the page (no browser dialog). Re-reads the current code on every open and after a failed revoke, so it never keeps showing a dead code. |
+| `src/lib/queries/inspector.ts` | `validateToken` removed (superseded by `session.ts`). `getPortalData(projectId, accessUntil)` does three things:<br>- Computes each batch's lifetime at signing time.<br>- Drops any returned URL whose own `exp` passes the deadline.<br>- Re-checks access after the last signing call. |
+
+Decision made during the build: revoke-and-reissue revokes every active token on the project, including legacy 30-day codes. An admin who revokes means "cut access", and a surviving legacy code would quietly defeat that. Consequence: revoking on a project with posted legacy codes kills those codes too.
+
+### Verify round 1 (NEEDS ATTENTION 8.3) and fixes
+
+Codex raised three findings, and verify upheld all three. All are fixed in `e8404cd`.
+
+1. **Revoke-and-reissue was not atomic.** It ran as three autocommitted requests, so a failed insert could leave the project with no active code while the modal kept showing the dead one. Fix: the `reissue_inspector_qr` function (one transaction), plus the modal re-reading the current code after any failure.
+2. **Retries and stale confirms could revoke the fresh replacement.** Fix: compare-and-swap on the code the admin saw (probe T13 and T14).
+3. **Signed URLs could outlive the session by up to an hour.** Fix: the lifetime is min(3600 s, session time left). RED on the pre-fix build: 3601 s links with 120 s of session left. GREEN: 119 s.
+
+Verify's ledger-drift note is cleared: both migration files are named for their applied versions.
+
+### Verify round 2 (NEEDS ATTENTION 8.6) and fixes
+
+Codex raised three findings, and verify upheld all three. They are fixed in `64a4102`, with no database change.
+
+1. **HIGH: legacy tokens.** A legacy token scanned near its own expiry minted a 12 h session and cookie plus 3600 s links. The portal did lock at token expiry, but the links outlived it. Fix: access ends at `accessUntil = min(now + 12 h, token expires_at)`, and that value drives the session row, the cookie Max-Age and every link lifetime. RED on the round-1 build: the session ran 43110 s past the token, Max-Age was 43200 and links lasted 3601 s. GREEN: 0 s past the token, Max-Age 89 and links at 90 s, for a token with 90 s left.
+2. **MEDIUM: TTL computed too early.** The TTL was computed before the async queries, so elapsed time let links overrun. Fix: `getPortalData` takes the absolute deadline and computes each batch's lifetime at signing time. With under 1 s left it signs nothing and the page says "Session Expired".
+3. **MEDIUM: stale code in the modal.** It could keep a stale or revoked code if the recovery read also failed. Fix: the code is dropped on open and on revoke failure, and shown again only after a successful read.
+
+Lesson recorded in `.claude/lessons-learned.md`: every derived credential expires at the minimum of all upstream deadlines, computed at issue time.
+
+### Verify round 3 (NEEDS ATTENTION 8.7) and fixes
+
+Codex raised two new findings, and verify upheld both. They are fixed in `d138dd4`, with one migration applied under Tim's go.
+
+1. **HIGH: revoke vs the old validator.** Production still runs the pre-BF-56 validator until merge, as would any code rollback, and it checks only `expires_at > now()`. Revoke set only `revoked_at`, so a revoked legacy token stayed live there until its own expiry. Fix: the reissue function also caps a legacy token's `expires_at` to now (migration `20260924191740`). Probe T16 was RED on the old function ("still passes expires_at > now()") and is GREEN after.
+2. **MEDIUM: signing latency.** Storage stamps `exp` at sign time, so latency could push a link a few seconds past the deadline. Fix:
+   - A 10 s signing margin.
+   - A post-sign check of each URL's own `exp`, which drops overrunning links.
+   - An access re-check after the last signing call.
+   - `bf56_signed_url_deadline_test.mjs` models 0 to 15 s of signing delay against the real helpers: 17/17 pass, and 5 fail with a zero margin (RED).
+
+### Verify round 4 (PASS 9.6) — 2026-09-24T19:37:56Z
+
+Fresh headless verify session (no implementer in session). Both reviewers clean; no new findings, no fixes applied.
+
+- **Verify (zero-trust):** Pattern scan clean in BF-56 scope (the one `TODO` in `actions.ts:43` is pre-existing BF-33 debt, outside this diff, which only *removes* the unguarded `generateQrToken`). Hostile 7-lens review of every changed file found no blockers: session/token logic fails closed and is service-client only; the scan route is idempotent (safe against link-prefetch); RLS split and the CAS + advisory-lock reissue function are sound; signed-URL lifetimes are capped to `min(1 h, accessUntil)` at signing time with a post-sign `exp` check. Server-action admin check is a coarse first gate; the org-scoped DB policy is the real gate (defense in depth).
+- **Gates re-run independently on Node 24:** `tsc --noEmit` clean; `eslint` 0 errors + 9 pre-existing warnings (none in BF-56 files); `next build` clean, `/inspector` and `/inspector/[token]` both dynamic. `bf56_signed_url_deadline_test.mjs` 17/17 (pure).
+- **Production-touching suites (`bf56_qr_rls_probe.sql`, `bf56_session_e2e.mjs`) not re-run** — HEAD `aeaca02` is docs-only over the last code commit `d138dd4`, so code state is identical to their last green run (probe 16/16, e2e 23/23). Not re-run to avoid production writes.
+- **Codex (`gpt-6-astra` @ xhigh, independent):** `approve`, zero findings; confirmed prior-round revocation and signing-deadline fixes hold.
+
+## Comprehensive Validation (2026-09-24T17:23:31Z, round 1 fixes 2026-09-24T18:11:53Z)
+
+Three suites, all passing on commit `d138dd4`:
+- `Testing/security/bf56_qr_rls_probe.sql`: 16 checks, rolled back, run on production.
+- `Testing/security/bf56_session_e2e.mjs`: 23 checks, using only its own test rows.
+- `Testing/security/bf56_signed_url_deadline_test.mjs`: 17 checks, pure, needs Node 24.
+
+| # | Check | Result | Key finding |
+|---|---|---|---|
+| 1 | Probe against pre-migration production (RED) | FAIL as expected | A plain member could INSERT, and could UPDATE and DELETE 7 `qr_tokens` rows on the NDOT project. This is the gap the policy closes. Rolled back. |
+| 2 | Migration and probe rehearsal in one rolled-back block | PASS 10/10 | Production confirmed unchanged afterwards (no `inspector_sessions`, still `qr_tokens_all`, `expires_at` NOT NULL). |
+| 3 | Probe against production after applying the migration | PASS 10/10 | Member reads 6 NDOT tokens but INSERT gets 42501 and UPDATE/DELETE touch 0 of them. Org admin can insert, a second stable token gets 23505, revoke hits exactly 1 row, reissue works. `authenticated` and `anon` get 42501 on `inspector_sessions`. |
+| 4 | e2e on `next start` (:3156) against production | PASS 17/17 | The cookie carries HttpOnly, Secure, SameSite=lax, Path=/inspector and Max-Age=43200. The session row is bound to the scanned token and expires in 12.000 h. The portal renders the scanned project's name. No cookie, a forged cookie, or an expired session all show "Session Expired" with no project data. Re-scan gives a new session while the token stays unchanged. Revoke ends the open session on the next load. A revoked scan goes to `link=invalid` and clears the cookie. A live legacy token works and an expired one is refused. Malformed and unknown tokens are refused. Cleanup left 0 test tokens and 0 test sessions. |
+| 5 | Preview `dpl_2yRBMPbohLB4fwNTWy2Kxxqr4qmS`, signed in as Tim | PASS | The Deodar St modal showed stable token `e7de7102…`. After a page reload the modal showed the same token. The database holds 1 stable row. The scan landed on `/inspector` with the Deodar St portal. Evidence in [artifacts/BF-56](../artifacts/BF-56/README.md). |
+| 6 | Revoke button in the modal | NOT CLICKED | Tim, 2026-09-24: clicking it on a live project would also revoke that project's 30-day code. The action's database and route effects are covered by #3 and #4. |
+| 7 | Supabase security advisor after the migration | PASS | The only new item is INFO `rls_enabled_no_policy` on `inspector_sessions`, which is intended because only the service client touches it. Other items predate this story. |
+| 8 | tsc, eslint, next build (Node 24, pnpm 10.34.5) | PASS | tsc is clean; eslint shows 0 errors and the 9 pre-existing warnings; the build lists `/inspector` and `/inspector/[token]` as dynamic. Re-run on `e8404cd`: same result. |
+| 9 | Reissue function rehearsal (function DDL + 15-check probe, rolled back) | PASS 15/15 | The function was confirmed absent from production afterwards, then applied. |
+| 10 | Probe against production after applying the function | PASS 15/15 | T11: a member calling the function gets 42501. T12: reissue with the current code revokes every token, including a live legacy sentinel, and leaves exactly the new stable one. T13: a retry with the old code is a no-op that returns the current code, with the row count unchanged. T14: a random expected code is a no-op. T15: with no active stable code, reissue issues one. |
+| 11 | e2e signed-URL checks, RED on the pre-fix build | FAIL as expected | 7 portal URLs; with 120 s of session left they still lasted 3601 s. |
+| 12 | e2e on `e8404cd` (:3156) against production | PASS 20/20 | The 17 earlier checks, plus: 7 signed URLs present (sentinel); ~3600 s with 12 h left; 119 s with 120 s left. Cleanup left 0 test tokens and 0 test sessions. |
+| 13 | e2e near-expiry legacy checks, RED on the round-1 build | FAIL as expected (3) | Legacy token with 90 s left: the session ran 43110 s past the token, the cookie had Max-Age 43200, and the links lasted 3601 s. |
+| 14 | e2e on `64a4102` (:3156) against production | PASS 23/23 | The 20 earlier checks, plus near-expiry legacy: session end - token end = 0 s, Max-Age 89, links 90 s. The normal cookie Max-Age is now 43199, derived from the stored session end. Cleanup left 0 test tokens and 0 test sessions. |
+| 15 | tsc, eslint, next build on `64a4102` | PASS | tsc is clean; eslint shows 0 errors and 9 pre-existing warnings; the build is clean. The first attempt hit React's "impure function during render" rule for `Date.now()` in the page; it was fixed by delegating to `signedUrlTtlSec` and amended into the unpushed commit before these gates ran. |
+| 16 | Probe T16 on the round-2 function (RED) | FAIL as expected | A revoked legacy token still passed `expires_at > now()`, so the pre-BF-56 validator would admit it. |
+| 17 | Function v2 rehearsal (DDL + 16-check probe, rolled back), then applied as `20260924191740` | PASS 16/16 | Probe re-run on production after apply: 16/16. |
+| 18 | `bf56_signed_url_deadline_test.mjs` | PASS 17/17 | RED with `SIGNING_MARGIN_SEC = 0`: 5 failures, including "signing up to 9.9 s late still expires by the deadline". GREEN with 10 s: 15 s late signing either stays inside or is rejected by `signedUrlWithin`. Unparsable URLs are rejected. |
+| 19 | e2e on `d138dd4` (:3156) against production | PASS 23/23 | 109 s links with 120 s left; 80 s links for a legacy token with 90 s left (session and token end 0 s apart, Max-Age 89). Cleanup left 0 test tokens and 0 test sessions. |
+| 20 | tsc, eslint, next build on `d138dd4` | PASS | Run sequentially. tsc is clean; eslint shows 0 errors and 9 pre-existing warnings; the build is clean. |
+
+Operational notes:
+- The modal builds the QR link from the host it is opened on (`NEXT_PUBLIC_SITE_URL`, else `window.location.origin`). Admins should print codes from production. The token is what stays stable.
+- Production now has one stable code: 17446 Deodar St, token `e7de7102…`, created during check #5.
 
 ## Decisions (Tim, 2026-09-23)
 

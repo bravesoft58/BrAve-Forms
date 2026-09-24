@@ -1,23 +1,9 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { signFileUrlsService } from "@/lib/supabase/signed-urls";
+import { signedUrlTtlSec, signedUrlWithin } from "@/lib/inspector/signed-url-deadline";
 
-export async function validateToken(token: string): Promise<string | null> {
-  const supabase = createServiceClient();
-
-  const { data, error } = await supabase
-    .from("qr_tokens")
-    .select("project_id")
-    .eq("token", token)
-    .gt("expires_at", new Date().toISOString())
-    .single();
-
-  if (error) {
-    console.error("[inspector] Token validation failed:", error.message);
-    return null;
-  }
-  if (!data) return null;
-  return data.project_id;
-}
+// Token validation lives in src/lib/inspector/session.ts (BF-56): the portal
+// is gated on an inspector session, not on the token URL itself.
 
 export interface PortalData {
   project: {
@@ -79,7 +65,8 @@ interface PhotoLike {
 async function signSubmissionPhotos(
   submissions: PortalData["submissions"],
   projectId: string,
-): Promise<PortalData["submissions"]> {
+  accessUntil: Date,
+): Promise<PortalData["submissions"] | null> {
   // Collect every photo path across submissions, sign in one batch, then
   // splice the signed URLs back in by index. Avoids N+1 round-trips when
   // many submissions each carry photos.
@@ -104,7 +91,9 @@ async function signSubmissionPhotos(
 
   if (paths.length === 0) return submissions;
 
-  const signed = await signFileUrlsService("form-attachments", paths);
+  const ttlSec = signedUrlTtlSec(accessUntil);
+  if (ttlSec === null) return null;
+  const signed = await signFileUrlsService("form-attachments", paths, ttlSec);
 
   // Clone the affected submissions/photos so we don't mutate query results.
   const cloned = submissions.map((sub) => ({ ...sub, data: sub.data }));
@@ -113,14 +102,27 @@ async function signSubmissionPhotos(
     const data = sub.data as { photos?: PhotoLike[] };
     if (!data.photos) return;
     const nextPhotos = [...data.photos];
-    nextPhotos[photoIdx] = { ...nextPhotos[photoIdx], url: signed[i] ?? "" };
+    // Drop any link whose own expiry overran the deadline (signing latency).
+    const url = signedUrlWithin(signed[i], accessUntil) ? signed[i]! : "";
+    nextPhotos[photoIdx] = { ...nextPhotos[photoIdx], url };
     cloned[subIdx] = { ...sub, data: { ...data, photos: nextPhotos } };
   });
 
   return cloned;
 }
 
-export async function getPortalData(projectId: string): Promise<PortalData | null> {
+/**
+ * `accessUntil` is the absolute end of the inspector's access. Each signed
+ * photo and document URL's lifetime is computed from it right before that
+ * batch is signed (never more than an hour, with a signing margin), and each
+ * returned URL's own expiry is checked against the deadline; an overrunning
+ * link is dropped (BF-56 AC 7). Returns null if access ends before or while
+ * the URLs are signed.
+ */
+export async function getPortalData(
+  projectId: string,
+  accessUntil: Date,
+): Promise<PortalData | null> {
   const supabase = createServiceClient();
 
   const [projectRes, permitsRes, documentsRes, submissionsRes] = await Promise.all([
@@ -149,16 +151,23 @@ export async function getPortalData(projectId: string): Promise<PortalData | nul
 
   const rawDocuments = documentsRes.data ?? [];
   const docPaths = rawDocuments.map((d) => d.file_path);
-  const signedDocUrls = await signFileUrlsService("project-documents", docPaths);
+  const docTtlSec = signedUrlTtlSec(accessUntil);
+  if (docTtlSec === null) return null;
+  const signedDocUrls = await signFileUrlsService("project-documents", docPaths, docTtlSec);
   const documents = rawDocuments.map((doc, i) => ({
     ...doc,
-    download_url: signedDocUrls[i],
+    download_url: signedUrlWithin(signedDocUrls[i], accessUntil) ? signedDocUrls[i] : null,
   }));
 
   const submissions = await signSubmissionPhotos(
     submissionsRes.data ?? [],
     projectId,
+    accessUntil,
   );
+  if (submissions === null) return null;
+
+  // Access may have ended during the signing round-trips; render nothing then.
+  if (accessUntil.getTime() <= Date.now()) return null;
 
   return {
     project: projectRes.data,

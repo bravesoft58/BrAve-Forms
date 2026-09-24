@@ -3,13 +3,20 @@
 import { useEffect, useCallback, useState, useTransition } from "react";
 import QRCode from "react-qr-code";
 import { X, QrCode, Copy, Check } from "lucide-react";
-import { generateQrToken } from "@/app/dashboard/projects/actions";
+import {
+  getOrCreateStableQrToken,
+  revokeAndReissueQrToken,
+  type StableQrResult,
+} from "@/app/dashboard/projects/qr-actions";
+import { INSPECTOR_SESSION_HOURS } from "@/lib/inspector/constants";
 
 export default function QrCodeModal({ projectId }: { projectId: string }) {
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [issuedAt, setIssuedAt] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [confirmRevoke, setConfirmRevoke] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const siteUrl =
@@ -18,20 +25,49 @@ export default function QrCodeModal({ projectId }: { projectId: string }) {
       : "";
   const inspectorUrl = token ? `${siteUrl}/inspector/${token}` : "";
 
+  function applyResult(result: StableQrResult) {
+    if (result.error) {
+      setError(result.error);
+    } else if (result.token) {
+      setToken(result.token);
+      setIssuedAt(result.issuedAt ?? null);
+    }
+  }
+
+  // Always re-read on open: another admin may have reissued since last time.
+  // Drop the cached code first so a failed read cannot leave a stale one up.
   function handleOpen() {
     setOpen(true);
     setError("");
+    setConfirmRevoke(false);
+    setToken(null);
+    setIssuedAt(null);
+    startTransition(async () => {
+      applyResult(await getOrCreateStableQrToken(projectId));
+    });
+  }
 
-    if (!token) {
-      startTransition(async () => {
-        const result = await generateQrToken(projectId);
-        if (result.error) {
-          setError(result.error);
-        } else if (result.token) {
-          setToken(result.token);
-        }
-      });
-    }
+  function handleRevoke() {
+    if (!token || isPending) return;
+    setError("");
+    setConfirmRevoke(false);
+    startTransition(async () => {
+      const result = await revokeAndReissueQrToken(projectId, token);
+      if (!result.error) {
+        applyResult(result);
+        return;
+      }
+      // Never keep showing a code that may have been revoked: drop it, then
+      // show a code again only if the project's current one reads back.
+      setError(result.error);
+      setToken(null);
+      setIssuedAt(null);
+      const current = await getOrCreateStableQrToken(projectId);
+      if (current.token) {
+        setToken(current.token);
+        setIssuedAt(current.issuedAt ?? null);
+      }
+    });
   }
 
   const handleClose = useCallback(() => setOpen(false), []);
@@ -81,7 +117,9 @@ export default function QrCodeModal({ projectId }: { projectId: string }) {
               Inspector QR Code
             </h2>
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-              Scan this code on-site for read-only access. Valid for 30 days.
+              This code does not expire. Scanning it on site opens read-only
+              access for {INSPECTOR_SESSION_HOURS} hours; after that the inspector
+              scans again.
             </p>
 
             {error && (
@@ -124,6 +162,47 @@ export default function QrCodeModal({ projectId }: { projectId: string }) {
                       </>
                     )}
                   </button>
+                </div>
+
+                {issuedAt && (
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Issued {new Date(issuedAt).toLocaleDateString()}
+                  </p>
+                )}
+
+                <div className="border-t border-zinc-200 pt-3 dark:border-zinc-700">
+                  {!confirmRevoke ? (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmRevoke(true)}
+                      className="text-xs font-medium text-red-600 hover:underline dark:text-red-400"
+                    >
+                      Revoke and reissue
+                    </button>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-xs text-zinc-600 dark:text-zinc-300">
+                        The printed code stops working immediately and open
+                        inspector sessions end. You will need to print the new code.
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handleRevoke}
+                          className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+                        >
+                          Revoke and issue new code
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmRevoke(false)}
+                          className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
