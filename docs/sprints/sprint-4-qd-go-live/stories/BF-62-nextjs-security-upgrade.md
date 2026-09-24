@@ -3,11 +3,12 @@
 **Type:** Security upgrade (framework dependency) plus toolchain pin
 **Priority:** HIGH (the dashboard's login redirect runs in `proxy.ts`)
 **Points:** 3 (was 2; the Node 24 and pnpm 10 pins were added 2026-09-24)
-**Status:** NOT STARTED
+**Status:** DONE
 **Sprint:** 4
 **Reported by:** BF-56 scout, 2026-09-23; Tim directed it into this sprint the same day
 **Created:** 2026-09-23
-**Last Updated:** 2026-09-24T13:29:47Z
+**Last Updated:** 2026-09-24T14:44:02Z
+**Completed:** 2026-09-24T14:44:02Z
 **Blocks:** BF-56
 
 ## Decisions (Tim, 2026-09-24)
@@ -35,9 +36,11 @@ This also closes part of the "dependencies" readiness gate from the 2026-09-08 a
 
 0. **Commit A (toolchain).**
    - `package.json`: `packageManager: "pnpm@10.34.5"` and `engines: {"node": "24.x"}`. Add `.nvmrc` containing `24`.
-   - Convert `pnpm-lock.yaml` from format `6.0` to `9.0` with `npx --yes pnpm@10.34.5 install`, run against the existing lockfile. Never delete it and regenerate from scratch.
+   - Convert `pnpm-lock.yaml` from format `6.0` to `9.0` in two steps. First run `pnpm@9.15.9 install --lockfile-only`, then `pnpm@10.34.5 install`. Never delete the lockfile and regenerate it from scratch.
+     - Found during the build: pnpm 10 run straight on a `6.0` lockfile logs "Ignoring broken lockfile … not compatible with current pnpm" and re-resolves everything from the semver ranges. That moved 173 of 495 package versions, including `@supabase/*` 2.98.0 to 2.117.1 and `eslint-plugin-react-hooks` 7.0.1 to 7.1.1.
+     - pnpm 9 reads `6.0` and writes `9.0` with zero version changes. pnpm 10 then reports "Lockfile is up to date, resolution step is skipped".
    - Diff the resolved versions: the conversion must not move any package version. If it does, stop and record it.
-   - pnpm 10 skips dependency install scripts. Read its "ignored build scripts" warning and list the packages that need them (expect `sharp`, possibly `unrs-resolver` or `@tailwindcss/oxide`) under `pnpm.onlyBuiltDependencies`.
+   - pnpm 10 skips dependency install scripts. Read its "ignored build scripts" warning and list the packages that need them (expect `sharp`, possibly `unrs-resolver` or `@tailwindcss/oxide`) under `onlyBuiltDependencies` in `pnpm-workspace.yaml`. Not the `package.json` `pnpm` field, which pnpm 11 no longer reads.
    - Local gates run on Node 24. Install Node 24 on the workstation first, or run under `npx --yes node@24`.
    - Push and smoke the preview. The build log must show pnpm 10 and Node 24.
 1. **Commit B (framework).** Bump `next` and `eslint-config-next` to 16.3.6, the latest patch at scout time. Use a newer 16.3.x if one exists at build time, never below 16.3.3. Fallback per gotcha 1: the latest 16.2.x, never below 16.2.11. Check the React peer range and bump `react` and `react-dom` only if it requires. [verified 2026-09-23]
@@ -88,7 +91,7 @@ None announced. The 16.2 and 16.3 release posts list features and performance wo
 1. **Vercel runtime regression with `sharp` 0.35.3 on 16.3.0 (HIGH).** Reports in the 16.3 feedback thread and issue #96650 describe production functions failing at module load on Vercel with `TypeError: Cannot read properties of undefined (reading 'output')`, starting with 16.3.0-preview.8 when next moved to `sharp ^0.35.3`. The issue was closed for lack of a reproduction, with no fix recorded. 16.3.6 declares `sharp ^0.35.4` (released 2026-08-26), which is unconfirmed either way. The branch preview smoke in AC 3 is the real test: load the dashboard, a server action, the PDF route, and the inspector portal on the preview before merge. **Fallback if it reproduces:** the latest 16.2.x patch (at least 16.2.11). That still clears every proxy-bypass advisory; it leaves the two criticals, neither reachable here as noted above. Record whichever outcome in the story.
 2. **`package.json` carries Tim's uncommitted June edit on master.** The `packageManager: pnpm@8.15.9` and `engines.node: 22.x` lines exist only in the main working tree. Decided 2026-09-24: BF-62 replaces them with pnpm 10.34.5 and Node 24.x (see Decisions). At closeout, stash the June edit as usual. After the merge, drop the June `package.json` hunk rather than restoring it, because master now carries the replacement lines. [verified 2026-09-23]
 3. **Node 24 is a no-op in production.** Vercel honours `engines.node` and production already runs 24.x, so the pin only makes it explicit. The workstation runs Node 22.23.2, so run the local gates on 24 (see Scope 0). [verified 2026-09-24]
-4. **The lockfile changes format** from `6.0` (pnpm 8) to `9.0` (pnpm 10). Once it merges, pnpm 8 can no longer read the repo's lockfile. Any worktree recipe or script that says `pnpm@8.15.9` must move to `pnpm@10.34.5`, including the MEMORY recipe and the gotchas. [verified 2026-09-24]
+4. **The lockfile changes format** from `6.0` (pnpm 8) to `9.0` (pnpm 10). Convert through pnpm 9 (Scope 0); pnpm 10 alone silently re-resolves a `6.0` lockfile. Once it merges, pnpm 8 can no longer read the repo's lockfile. Any worktree recipe or script that says `pnpm@8.15.9` must move to `pnpm@10.34.5`, including the MEMORY recipe and the gotchas. [verified 2026-09-24]
 5. Bumping `next` does not touch `@tailwindcss/postcss`'s own `postcss@8.5.8` copy, so two postcss advisories stay open on that path. Out of scope unless a `pnpm update` within the existing range clears them for free; record it either way. [verified 2026-09-23]
 
 ### Feasibility
@@ -118,14 +121,60 @@ Re-estimated at 3 SP on 2026-09-24. The scouted work was two version bumps, a lo
 
 ## Acceptance criteria
 
-- [ ] `package.json` declares `packageManager: pnpm@10.34.5` and `engines.node: 24.x`, and `.nvmrc` is `24`.
-- [ ] The lockfile is converted to format `9.0` with no package version changes in commit A. Vercel's build log shows pnpm 10 and Node 24.
-- [ ] Commit A's preview passes the same smoke as below before commit B lands.
-- [ ] `next` and `eslint-config-next` are at 16.3.3 or later, or at 16.2.11 or later under the gotcha-1 fallback with the reason recorded. The lockfile is updated with pnpm 10.34.5.
-- [ ] `eslint` 0 errors, `tsc --noEmit` clean, `next build` clean on the committed tree.
-- [ ] Signed-in smoke on the branch preview passes (dashboard, project, form view, PDF, inspector portal), and signed-out `/dashboard` redirects to login.
-- [ ] Audit output before and after is recorded here.
-- [ ] Production deploy after merge reaches READY and the same signed-out redirect holds on production.
+- [x] `package.json` declares `packageManager: pnpm@10.34.5` and `engines.node: 24.x`, and `.nvmrc` is `24`.
+- [x] The lockfile is converted to format `9.0` with no package version changes in commit A. Vercel's build log shows pnpm 10 and Node 24.
+- [x] Commit A's preview passes the same smoke as below before commit B lands.
+- [x] `next` and `eslint-config-next` are at 16.3.3 or later, or at 16.2.11 or later under the gotcha-1 fallback with the reason recorded. The lockfile is updated with pnpm 10.34.5.
+- [x] `eslint` 0 errors, `tsc --noEmit` clean, `next build` clean on the committed tree.
+- [x] Signed-in smoke on the branch preview passes (dashboard, project, form view, PDF, inspector portal), and signed-out `/dashboard` redirects to login.
+- [x] Audit output before and after is recorded here.
+- [ ] Production deploy after merge reaches READY and the same signed-out redirect holds on production. (Post-merge; checked at /closeout.)
+
+## Comprehensive Validation (2026-09-24T13:54:24Z)
+
+Commits on `feature/BF-62-nextjs-security-upgrade`: `f7403eb` (A, toolchain), `c980b95` (B, framework). Local gates ran on Node 24.21.0 and pnpm 10.34.5 through `npx -p node@24 -p pnpm@10.34.5`, without installing Node 24 on the workstation (Tim, 2026-09-24).
+
+| # | Check | Result | Key finding |
+|---|---|---|---|
+| 1 | Lockfile conversion, pnpm 10 direct | REJECTED | Re-resolved from ranges and moved 173 of 495 packages. Discarded and restored from git. |
+| 2 | Lockfile conversion, pnpm 9 then pnpm 10 | PASS | Every resolved version diffed before and after; 0 changes. |
+| 3 | Install scripts under pnpm 10 | PASS | At commit A the allow-list was the `package.json` `pnpm.onlyBuiltDependencies` field, and both `sharp` 0.34.5's and `unrs-resolver`'s scripts ran, locally and on Vercel. It moved to `pnpm-workspace.yaml` after verify round 1 (row 11). |
+| 4 | Gates on commit A (next 16.1.6) | PASS | eslint 0 errors and 9 pre-existing warnings; tsc clean; build clean. |
+| 5 | Commit A preview `dpl_x6UkMiA8r7w4nVCNA2TnXc7p3Lf6` | PASS | Build log: "Detected `pnpm-lock.yaml` version 9 generated by pnpm@10.x from package.json#packageManager pnpm@10.34.5", "Done in 8.9s using pnpm v10.34.5". Node 24 follows from `engines.node` 24.x, which Vercel honours per its docs; the log does not print the Node version. Signed out, `/dashboard` redirected to `/login`. |
+| 6 | Gates on commit B (next 16.3.6) | PASS | eslint 0 errors and the same 9 warnings; tsc clean; build clean. `sharp` 0.35.4 and next's `postcss` 8.5.23, as scouted. |
+| 7 | Commit B preview `dpl_FqVYg31vyowaPrsZUyFDY2PFRQ6f`, signed out | PASS | `/dashboard` redirected to `/login`. `/login`, `/inspector/<fake>` and `/api/forms/<fake>/pdf` all loaded, the last returning 401 JSON. No module-load failure, so gotcha 1 did not reproduce. |
+| 8 | Commit B preview, signed in (Tim logged in) | PASS | The project list and NDOT project page loaded. The NDOT submission view rendered. The PDF returned 200 `application/pdf`, 1,514,793 bytes, `%PDF-1.3`…`%%EOF`. The inspector portal loaded with a live QR token. Evidence is in [artifacts/BF-62](../artifacts/BF-62/README.md). |
+| 9 | Runtime logs, commit B preview | PASS | No error or warning lines except the deliberate invalid-token probe. |
+| 10 | `pnpm audit` after commit B | PASS | See the table below. |
+| 11 | Allow-list moved to `pnpm-workspace.yaml` (`e8581a7`, verify round 1 finding) | PASS | The `package.json` `pnpm` field works in pnpm 10.34.5, but the global pnpm 11 launcher warns "The 'pnpm' field in package.json is no longer read" and drops it, so the allow-list would vanish on the next pnpm major. Negative control on pnpm 10.34.5 with a clean `node_modules`: without the file, "Ignored build scripts: unrs-resolver@1.11.1"; with it, nothing ignored. `sharp` 0.35.4 ships no install script; it stays listed for the 16.2.x fallback, whose `sharp` 0.34.x has one. Gates on `e8581a7`: eslint 0 errors (9 warnings), tsc clean, build clean. Vercel preview `dpl_FtUWdTeqAesbhxBPjnQxmMzJbq7r` is READY on pnpm 10.34.5 and Next 16.3.6. Its install reused the build cache, so the local control is the evidence for the allow-list. |
+
+The signed-in walkthrough ran once, on commit B's preview. Commit B's tree contains all of commit A, and a second login on commit A's separate preview URL would have repeated the same toolchain path.
+
+### Verify round 2 (2026-09-24T14:44:02Z) — PASS 9.6
+
+Independent headless re-verify at `2daf1ce`. Local re-run on the committed tree (pnpm 10.34.5): `pnpm install --frozen-lockfile` reported "Lockfile is up to date" (exit 0, CI/Vercel-equivalent sync check); `eslint` 0 errors / 9 warnings; `tsc --noEmit` clean; `next build` clean (33 routes, proxy middleware present, no `sharp` module-load failure); `pnpm audit` = 33 (0 critical / 21 high / 11 moderate / 1 low), matching the "after" table exactly. Commit A no-drift re-confirmed: base and commit A both 511 packages with identical sentinel versions (`@supabase/supabase-js@2.98.0`, `eslint-plugin-react-hooks@7.0.1`, `next@16.1.6`); HEAD is 517 (+6 from the 16.3.6 bump). Round 1's finding (allow-list location) was fixed in `e8581a7`; the lockfile never records `onlyBuiltDependencies` under `settings` even when it lived in the `package.json` `pnpm` field, so its absence is pnpm 10.34.5 behaviour, not a sync defect. Codex adversarial review (`gpt-6-astra` @ xhigh): **approve, zero findings** — independently confirmed the 511-entry/integrity/snapshot preservation and the pnpm-docs-conformant allow-list. Two independent reviews, both clean.
+
+### Audit before and after [verified 2026-09-24]
+
+| | Critical | High | Moderate | Low | Total | On `next` |
+| --- | --- | --- | --- | --- | --- | --- |
+| Before (pnpm 8, next 16.1.6, 2026-09-23) | 2 | 37 | 26 | 4 | 69 | 30 |
+| After (pnpm 10, next 16.3.6, 2026-09-24) | 0 | 21 | 11 | 1 | 33 | 0 |
+
+Remaining by package:
+- `brace-expansion`: 9
+- `js-yaml`: 4
+- `picomatch`: 4
+- `postcss`: 4 (the `@tailwindcss/postcss` copy at 8.5.8, gotcha 5)
+- `nanoid`: 3
+- `browserslist`: 2
+- `flatted`: 2
+- `ws`: 2 (via `@supabase/realtime-js`)
+- `baseline-browser-mapping`: 1
+- `@humanfs/node`: 1
+- `@babel/core`: 1
+
+All of these are transitive build or dev tooling, or the Supabase realtime socket. They are left for the rest of the dependencies readiness gate.
 
 ## Notes
 

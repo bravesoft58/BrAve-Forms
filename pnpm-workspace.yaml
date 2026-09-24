@@ -1,0 +1,7 @@
+# pnpm settings only; this repo is a single package, not a workspace.
+# pnpm 10 skips dependency install scripts unless the package is listed here.
+# (pnpm 11 no longer reads the "pnpm" field in package.json, so this file is
+# the one location both majors honour.)
+onlyBuiltDependencies:
+  - sharp
+  - unrs-resolver
