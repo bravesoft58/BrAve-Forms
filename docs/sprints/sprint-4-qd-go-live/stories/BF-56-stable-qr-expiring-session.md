@@ -8,7 +8,7 @@
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
 **Depends On:** BF-62 (Next.js security upgrade), Tim 2026-09-23
-**Last Updated:** 2026-09-24T17:23:31Z
+**Last Updated:** 2026-09-24T18:11:53Z
 
 ## Request (verbatim)
 
@@ -100,9 +100,12 @@ Recommended: legacy 30-day tokens keep working as scan entries until they expire
 - [x] Scanning it opens the inspector portal without an account.
 - [x] After the session window (12 hours, confirmed by Andy 2026-09-23), refreshing the portal shows an expired message and does not render project data.
 - [x] Re-scanning the same QR after expiry works.
-- [x] Admin can revoke and reissue a project's QR; the old one stops working immediately. The revoke itself (the old code refused, open sessions ended on their next load) was proven by the e2e script, and the database side by probe T8 and T9. The modal's button was not clicked on a live project (Tim, 2026-09-24); see the validation table.
+- [x] Admin can revoke and reissue a project's QR; the old one stops working immediately. Proof:
+  - The e2e script shows the old code refused and open sessions ended on their next load.
+  - Probe T12 to T15 cover the atomic, retry-safe database function.
+  - The modal's button was not clicked on a live project (Tim, 2026-09-24); see the validation table.
 - [x] Existing 30-day tokens keep working as scan entries until their own expiry (no break for already-printed codes); each project gets one new stable code that the admin prints once. No bulk migration of existing rows. (Tim, 2026-09-23)
-- [x] Signed photo and document URLs expire no later than the session.
+- [x] Signed photo and document URLs expire no later than the session. The lifetime is min(1 h, session time left) since verify round 1; the e2e check shows 119 s links with 120 s of session left.
 - [x] RLS on `qr_tokens` restricts INSERT, UPDATE and DELETE to org admins and super admins (tightened from the BF-42 org-member policy), proven by a rolled-back impersonation probe (member refused, org admin allowed); the QR server actions also check admin role server-side; the inspector path still uses the service client with token validation. (Tim, 2026-09-23)
 
 ## Implementation (2026-09-24)
@@ -111,22 +114,31 @@ Recommended: legacy 30-day tokens keep working as scan entries until they expire
 
 | File | Change |
 | --- | --- |
-| `supabase/migrations/20260924162749_inspector_stable_qr_sessions.sql` (+ `_rollback/`) | Stable tokens (`expires_at` NULL) and `revoked_at`; one active stable token per project; `inspector_sessions` (RLS on, no policies, grants revoked); `qr_tokens` writes limited to org admins and super admins. Applied to production 2026-09-24 as version `20260924163446` (Tim's go). |
+| `supabase/migrations/20260924163446_inspector_stable_qr_sessions.sql` (+ `_rollback/`) | Stable tokens (`expires_at` NULL) and `revoked_at`; one active stable token per project; `inspector_sessions` (RLS on, no policies, grants revoked); `qr_tokens` writes limited to org admins and super admins. Applied to production 2026-09-24 (Tim's go). The file was renamed to its applied version after verify round 1; it was written as `…162749`. |
+| `supabase/migrations/20260924180712_inspector_qr_reissue_fn.sql` (+ `_rollback/`) | `reissue_inspector_qr(project, expected_token)`, added after verify round 1.<br>- Serialized per project and SECURITY INVOKER, so the admin-only policies still apply; non-admins get an explicit 42501.<br>- Revokes and reissues in one transaction.<br>- Compare-and-swap on the code the admin saw, so a retry or a stale confirm returns the current code unchanged.<br>Applied 2026-09-24 (Tim's go). |
 | `src/lib/inspector/constants.ts` | Session hours (12), cookie name and path; safe to import on the client. |
-| `src/lib/inspector/session.ts` | `openSessionForToken` and `getSessionProjectId`, using the service client. Token rule: not revoked, and `expires_at` NULL or in the future. |
+| `src/lib/inspector/session.ts` | `openSessionForToken`, `getActiveSession` (project and expiry) and `signedUrlTtlSec` (min of 3600 s and the session's time left), using the service client. Token rule: not revoked, and `expires_at` NULL or in the future. |
 | `src/app/inspector/[token]/route.ts` | GET handler that replaces the old page at the same URL. Mints a session, sets an httpOnly, secure, lax cookie scoped to `/inspector` for 43200 s, and returns 303 to `/inspector`. A bad scan goes to `?link=invalid` and clears the cookie. |
 | `src/app/inspector/page.tsx` | Portal gated on the session. The token is re-checked on every load, so a revoke takes effect on the next request. |
-| `src/app/dashboard/projects/qr-actions.ts` | `getOrCreateStableQrToken` and `revokeAndReissueQrToken`, both with a server-side admin check. Revoke covers stable and legacy tokens, and detects an RLS-refused update. Split out of `actions.ts`, which would otherwise pass 300 lines. |
-| `src/components/inspector/QrCodeModal.tsx` | Stable code, issue date, and revoke confirmed inline in the page (no browser dialog). |
-| `src/lib/queries/inspector.ts` | `validateToken` removed (superseded by `session.ts`). |
+| `src/app/dashboard/projects/qr-actions.ts` | `getOrCreateStableQrToken`, and `revokeAndReissueQrToken(projectId, expectedToken)`, which calls the database function. Both check the admin role server-side. Split out of `actions.ts`, which would otherwise pass 300 lines. |
+| `src/components/inspector/QrCodeModal.tsx` | Stable code, issue date, and revoke confirmed inline in the page (no browser dialog). Re-reads the current code on every open and after a failed revoke, so it never keeps showing a dead code. |
+| `src/lib/queries/inspector.ts` | `validateToken` removed (superseded by `session.ts`). `getPortalData(projectId, ttlSec)` signs every photo and document URL with the session-bounded lifetime. |
 
 Decision made during the build: revoke-and-reissue revokes every active token on the project, including legacy 30-day codes. An admin who revokes means "cut access", and a surviving legacy code would quietly defeat that. Consequence: revoking on a project with posted legacy codes kills those codes too.
 
-Signed URLs: the portal signs photo and document URLs for 3600 s (`signFileUrlsService` default), which is under the 12 h session. No change was needed.
+### Verify round 1 (NEEDS ATTENTION 8.3) and fixes
 
-## Comprehensive Validation (2026-09-24T17:23:31Z)
+Codex raised three findings, and verify upheld all three. All are fixed in `e8404cd`.
 
-Two suites: `Testing/security/bf56_qr_rls_probe.sql` (10 checks, rolled back) and `Testing/security/bf56_session_e2e.mjs` (17 checks, its own test rows only). All pass.
+1. **Revoke-and-reissue was not atomic.** It ran as three autocommitted requests, so a failed insert could leave the project with no active code while the modal kept showing the dead one. Fix: the `reissue_inspector_qr` function (one transaction), plus the modal re-reading the current code after any failure.
+2. **Retries and stale confirms could revoke the fresh replacement.** Fix: compare-and-swap on the code the admin saw (probe T13 and T14).
+3. **Signed URLs could outlive the session by up to an hour.** Fix: the lifetime is min(3600 s, session time left). RED on the pre-fix build: 3601 s links with 120 s of session left. GREEN: 119 s.
+
+Verify's ledger-drift note is cleared: both migration files are named for their applied versions.
+
+## Comprehensive Validation (2026-09-24T17:23:31Z, round 1 fixes 2026-09-24T18:11:53Z)
+
+Two suites: `Testing/security/bf56_qr_rls_probe.sql` (15 checks, rolled back) and `Testing/security/bf56_session_e2e.mjs` (20 checks, its own test rows only). All pass on commit `e8404cd`.
 
 | # | Check | Result | Key finding |
 |---|---|---|---|
@@ -137,7 +149,11 @@ Two suites: `Testing/security/bf56_qr_rls_probe.sql` (10 checks, rolled back) an
 | 5 | Preview `dpl_2yRBMPbohLB4fwNTWy2Kxxqr4qmS`, signed in as Tim | PASS | The Deodar St modal showed stable token `e7de7102…`. After a page reload the modal showed the same token. The database holds 1 stable row. The scan landed on `/inspector` with the Deodar St portal. Evidence in [artifacts/BF-56](../artifacts/BF-56/README.md). |
 | 6 | Revoke button in the modal | NOT CLICKED | Tim, 2026-09-24: clicking it on a live project would also revoke that project's 30-day code. The action's database and route effects are covered by #3 and #4. |
 | 7 | Supabase security advisor after the migration | PASS | The only new item is INFO `rls_enabled_no_policy` on `inspector_sessions`, which is intended because only the service client touches it. Other items predate this story. |
-| 8 | tsc, eslint, next build (Node 24, pnpm 10.34.5) | PASS | tsc is clean; eslint shows 0 errors and the 9 pre-existing warnings; the build lists `/inspector` and `/inspector/[token]` as dynamic. |
+| 8 | tsc, eslint, next build (Node 24, pnpm 10.34.5) | PASS | tsc is clean; eslint shows 0 errors and the 9 pre-existing warnings; the build lists `/inspector` and `/inspector/[token]` as dynamic. Re-run on `e8404cd`: same result. |
+| 9 | Reissue function rehearsal (function DDL + 15-check probe, rolled back) | PASS 15/15 | The function was confirmed absent from production afterwards, then applied. |
+| 10 | Probe against production after applying the function | PASS 15/15 | T11: a member calling the function gets 42501. T12: reissue with the current code revokes every token, including a live legacy sentinel, and leaves exactly the new stable one. T13: a retry with the old code is a no-op that returns the current code, with the row count unchanged. T14: a random expected code is a no-op. T15: with no active stable code, reissue issues one. |
+| 11 | e2e signed-URL checks, RED on the pre-fix build | FAIL as expected | 7 portal URLs; with 120 s of session left they still lasted 3601 s. |
+| 12 | e2e on `e8404cd` (:3156) against production | PASS 20/20 | The 17 earlier checks, plus: 7 signed URLs present (sentinel); ~3600 s with 12 h left; 119 s with 120 s left. Cleanup left 0 test tokens and 0 test sessions. |
 
 Operational notes:
 - The modal builds the QR link from the host it is opened on (`NEXT_PUBLIC_SITE_URL`, else `window.location.origin`). Admins should print codes from production. The token is what stays stable.
