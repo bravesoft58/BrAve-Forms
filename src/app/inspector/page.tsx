@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
-import { getActiveSession, signedUrlTtlSec } from "@/lib/inspector/session";
+import { getActiveSession } from "@/lib/inspector/session";
+import { signedUrlTtlSec } from "@/lib/inspector/signed-url-deadline";
 import { INSPECTOR_SESSION_COOKIE } from "@/lib/inspector/constants";
 import { getPortalData } from "@/lib/queries/inspector";
 import InspectorPortal from "@/components/inspector/InspectorPortal";

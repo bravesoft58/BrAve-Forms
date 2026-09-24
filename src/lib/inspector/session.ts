@@ -113,17 +113,3 @@ export async function getActiveSession(
   if (accessUntil <= now || !tokenIsUsable(data.qr_tokens, now)) return null;
   return { projectId: data.qr_tokens.project_id, accessUntil };
 }
-
-/** Longest a portal file link may live: one hour, never past the access deadline. */
-const MAX_SIGNED_URL_SEC = 3600;
-
-/**
- * Signed-URL lifetime computed at the moment of signing, from the absolute
- * deadline. Null when less than a second of access remains (Supabase needs
- * at least 1 s), so the caller signs nothing rather than overrunning.
- */
-export function signedUrlTtlSec(accessUntil: Date, now = Date.now()): number | null {
-  const remaining = Math.floor((accessUntil.getTime() - now) / 1000);
-  if (remaining < 1) return null;
-  return Math.min(MAX_SIGNED_URL_SEC, remaining);
-}

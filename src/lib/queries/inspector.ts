@@ -1,6 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { signFileUrlsService } from "@/lib/supabase/signed-urls";
-import { signedUrlTtlSec } from "@/lib/inspector/session";
+import { signedUrlTtlSec, signedUrlWithin } from "@/lib/inspector/signed-url-deadline";
 
 // Token validation lives in src/lib/inspector/session.ts (BF-56): the portal
 // is gated on an inspector session, not on the token URL itself.
@@ -102,7 +102,9 @@ async function signSubmissionPhotos(
     const data = sub.data as { photos?: PhotoLike[] };
     if (!data.photos) return;
     const nextPhotos = [...data.photos];
-    nextPhotos[photoIdx] = { ...nextPhotos[photoIdx], url: signed[i] ?? "" };
+    // Drop any link whose own expiry overran the deadline (signing latency).
+    const url = signedUrlWithin(signed[i], accessUntil) ? signed[i]! : "";
+    nextPhotos[photoIdx] = { ...nextPhotos[photoIdx], url };
     cloned[subIdx] = { ...sub, data: { ...data, photos: nextPhotos } };
   });
 
@@ -112,9 +114,10 @@ async function signSubmissionPhotos(
 /**
  * `accessUntil` is the absolute end of the inspector's access. Each signed
  * photo and document URL's lifetime is computed from it right before that
- * batch is signed (never more than an hour), so no link outlives access even
- * if the queries above are slow (BF-56 AC 7). Returns null if access ends
- * before the URLs can be signed.
+ * batch is signed (never more than an hour, with a signing margin), and each
+ * returned URL's own expiry is checked against the deadline; an overrunning
+ * link is dropped (BF-56 AC 7). Returns null if access ends before or while
+ * the URLs are signed.
  */
 export async function getPortalData(
   projectId: string,
@@ -153,7 +156,7 @@ export async function getPortalData(
   const signedDocUrls = await signFileUrlsService("project-documents", docPaths, docTtlSec);
   const documents = rawDocuments.map((doc, i) => ({
     ...doc,
-    download_url: signedDocUrls[i],
+    download_url: signedUrlWithin(signedDocUrls[i], accessUntil) ? signedDocUrls[i] : null,
   }));
 
   const submissions = await signSubmissionPhotos(
@@ -162,6 +165,9 @@ export async function getPortalData(
     accessUntil,
   );
   if (submissions === null) return null;
+
+  // Access may have ended during the signing round-trips; render nothing then.
+  if (accessUntil.getTime() <= Date.now()) return null;
 
   return {
     project: projectRes.data,

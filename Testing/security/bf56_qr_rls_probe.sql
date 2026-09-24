@@ -1,5 +1,6 @@
 -- BF-56: qr_tokens write policy, inspector_sessions lockdown, and the atomic
--- reissue_inspector_qr function (T11-T15, verify round 1 findings 1 and 2).
+-- reissue_inspector_qr function (T11-T15, verify round 1 findings 1 and 2),
+-- and revoked legacy tokens failing the pre-BF-56 validator (T16, round 3).
 --
 -- Non-destructive by construction: the whole probe is one DO block that ends
 -- in RAISE EXCEPTION (SQLSTATE P0999), so every insert/update it makes rolls
@@ -26,6 +27,7 @@ DECLARE
   new_id uuid;
   tok_a  uuid;
   tok_b  uuid;
+  legacy_tok uuid;
   rec    record;
 BEGIN
   -- ---------------------------------------------------------------- member
@@ -119,7 +121,7 @@ BEGIN
    WHERE project_id = proj AND expires_at IS NULL AND revoked_at IS NULL;
   -- A live legacy sentinel, so T12 proves legacy tokens are revoked too.
   INSERT INTO public.qr_tokens (project_id, expires_at, created_by)
-  VALUES (proj, now() + interval '1 day', admin);
+  VALUES (proj, now() + interval '1 day', admin) RETURNING token INTO legacy_tok;
 
   SELECT * INTO rec FROM public.reissue_inspector_qr(proj, tok_a);
   tok_b := rec.qr_token;
@@ -128,6 +130,15 @@ BEGIN
      AND EXISTS (SELECT 1 FROM public.qr_tokens WHERE token = tok_b AND expires_at IS NULL AND revoked_at IS NULL)
   THEN r := r || 'PASS T12 reissue with the current code revokes every token (stable + legacy) and leaves exactly the new one' || E'\n';
   ELSE r := r || format('FAIL T12 reissued=%s new=%s old=%s active=%s', rec.reissued, tok_b, tok_a, n) || E'\n'; fails := fails + 1; END IF;
+
+  -- Verify round 3: the pre-BF-56 validator (still deployed until merge, and
+  -- again after a code rollback) checks only expires_at > now(). A revoked
+  -- legacy token must fail that check too, while staying a legacy row.
+  IF NOT EXISTS (SELECT 1 FROM public.qr_tokens WHERE token = legacy_tok AND expires_at > now())
+     AND EXISTS (SELECT 1 FROM public.qr_tokens WHERE token = legacy_tok AND expires_at IS NOT NULL AND revoked_at IS NOT NULL)
+     AND EXISTS (SELECT 1 FROM public.qr_tokens WHERE token = tok_a AND expires_at IS NULL AND revoked_at IS NOT NULL)
+  THEN r := r || 'PASS T16 revoked legacy token also fails the old validator (expires_at capped); revoked stable keeps expires_at NULL' || E'\n';
+  ELSE r := r || 'FAIL T16 revoked legacy token still passes expires_at > now(), or stable row altered' || E'\n'; fails := fails + 1; END IF;
 
   SELECT count(*) INTO n FROM public.qr_tokens WHERE project_id = proj;
   SELECT * INTO rec FROM public.reissue_inspector_qr(proj, tok_a);
@@ -163,7 +174,7 @@ BEGIN
   ELSE r := r || 'FAIL T10 anon inspector_sessions read result ' || st || E'\n'; fails := fails + 1; END IF;
   RESET ROLE;
 
-  r := r || format('RESULT: %s of 15 failed', fails);
+  r := r || format('RESULT: %s of 16 failed', fails);
   RAISE EXCEPTION USING ERRCODE = 'P0999', MESSAGE = 'BF56 PROBE (rolled back)' || r;
 END
 $probe$;
