@@ -2,7 +2,7 @@
 
 **Status:** NOT STARTED
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-25T14:41:20Z
+**Last Updated:** 2026-09-25T16:25:28Z
 **Source:** Andy Breen (IT Director, Q&D) email "BrAve Forms Update", 2026-09-07, with attachment `WIW Daily Form.pdf`. Both filed under [docs/reference/](../../reference/).
 
 ## Why this sprint
@@ -27,7 +27,8 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-60](stories/BF-60-default-table-grants.md) | Tighten Supabase default table grants across the public schema | 2 | HIGH | (BF-59 verify follow-up) | NOT STARTED |
 | [BF-61](stories/BF-61-submission-edit-concurrency.md) | Optimistic concurrency on submission edits | 2 | MEDIUM | (BF-57 verify follow-up; last-writer-wins accepted for the pilot) | NOT STARTED |
 | [BF-62](stories/BF-62-nextjs-security-upgrade.md) | Upgrade Next.js out of the 2026 advisory ranges, on Node 24 and pnpm 10 | 3 | HIGH | (BF-56 scout finding; Tim 2026-09-23, before BF-56; Node 24 + pnpm 10 added 2026-09-24) | DONE (merged `1dc0bab`) |
-| **Total** | | **24** | | | **5/10 DONE** |
+| [BF-63](stories/BF-63-submission-revision-history.md) | Append-only revision history for form submissions | 2 | HIGH | (Tim, 2026-09-25, record integrity) | NOT STARTED |
+| **Total** | | **26** | | | **5/11 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
@@ -37,6 +38,7 @@ Points are first-pass estimates made while filing the tickets, not scoped estima
 2. BF-54 and BF-55 are data operations against production, independent of code. Run them next, from the backup-verified state, in that order (projects before users, because user deletion is blocked by records the user created).
 3. BF-57 is a self-contained code change with an existing pattern to copy (NDOT edit).
 4. BF-58 is the largest item and the only new form. It reuses the shared photo attachment and form-actions components. Split 2026-09-25 (Tim) into BF-58.1 then BF-58.2.
+6. BF-63 (revision history) right after BF-58.1 merges, alongside BF-61: capture cannot be backfilled, so every in-place edit before it ships is lost.
 5. BF-56 is a design change to the inspector portal; confirm the design with Andy before building (see the ticket's open question).
 
 ## Open questions for Andy
