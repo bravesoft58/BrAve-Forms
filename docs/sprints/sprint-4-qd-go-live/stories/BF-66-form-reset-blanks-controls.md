@@ -4,11 +4,11 @@
 **Priority:** HIGH (a correction can save answers the screen showed as blank; affects every live form)
 **Points:** 2
 **Status:** DONE
-**Completed:** 2026-09-25T17:55:20Z
+**Completed:** 2026-09-25T20:39:36Z
 **Sprint:** 4
 **Reported by:** BF-58.1 signed-in preview pass, 2026-09-25 (fixed there for the new form only); filed by Tim's direction the same day
 **Created:** 2026-09-25
-**Last Updated:** 2026-09-25T20:15:54Z
+**Last Updated:** 2026-09-25T20:39:36Z
 
 ## Problem
 
@@ -130,4 +130,14 @@ Browser checks on the preview at `d7d3026`, signed in as Tim:
 | Production afterwards | 0 new submissions in 90 minutes; real dust log still 1 entry; RNO 18 phone unchanged. |
 
 F1, F2 and F3 are all resolved on this branch. Nothing from verify rounds 1 and 2 remains to file.
+
+## Verify (authoritative round 1, fresh cycle, 2026-09-25T20:39:36Z) — PASS 9.0/10
+
+The round-2 hydration-gate fix (`d7d3026`) landed past the prior PASS stamp, so `verify_rounds.py` opened a fresh round 1. Gates re-run by verify on this HEAD (`ec4ed1a`): BF-66 tests 4/4, BF-58.1 Waterways regression 16/16, BF-57 NDEP-edit + BF-58.1 NDOT-photo readiness PASS, `tsc --noEmit` exit 0, `eslint` on all changed files exit 0, `next build` exit 0. Tier-1 pattern scan clean; every `<button>` in all eight forms is explicitly typed (submit-count + button-count == total `<button>` per file), so the single-disabled-submit Enter-block holds.
+
+Two independent reviews reconciled (verify + Codex `gpt-6-astra` xhigh). Codex verdict needs-attention with one finding, adjudicated **medium** (its own label) against the actual code, so the verdict engine files it as a fast-follow and the story PASSes:
+
+- **BF-66-F4 (medium, pre-hydration edit loss — file as fast-follow, do NOT reopen this story):** the F3 gate disables *submit* until hydrated but leaves the controlled fields *editable*. On a slow-hydrating client a user can change a select/radio/text/initials during the pre-hydration window; that native edit is not in React state, and when `ready` flips true the re-render re-asserts `value=initial`, discarding it — a later post-hydration submit then saves the old value with no validation error. Bounded to the pre-hydration timing race, and after the revert screen==saved (no shows-X-saves-Y at submit); the controlled-field revert is largely pre-existing React SSR behaviour for the seven already-controlled forms. Fix is a design tradeoff for Tim: `fieldset disabled={!ready}` across the eight forms, or reconcile visible edits into state before enabling submit, plus a delayed-script browser regression. Codex confidence 0.97 (SSR + host-function probe, not a full-browser hydration test).
+
+Two lows noted, non-blocking: the regression test does not enforce that non-submit buttons stay explicitly `type="button"` (a future untyped button would slip the guard); `project-form.tsx` remains at the 300-line ceiling. Machine-stamped round 1 PASS 9.0 under the two-round rule.
 
