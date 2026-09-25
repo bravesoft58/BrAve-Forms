@@ -2,7 +2,7 @@
 
 **Status:** NOT STARTED
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-23T13:46:48Z
+**Last Updated:** 2026-09-25T14:41:20Z
 **Source:** Andy Breen (IT Director, Q&D) email "BrAve Forms Update", 2026-09-07, with attachment `WIW Daily Form.pdf`. Both filed under [docs/reference/](../../reference/).
 
 ## Why this sprint
@@ -21,12 +21,13 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-55](stories/BF-55-cleanup-users.md) | Remove or deactivate test users | 1 | HIGH | Cleanup users | IN PROGRESS |
 | [BF-56](stories/BF-56-stable-qr-expiring-session.md) | Inspector QR never changes; the scanned session expires | 3 | MEDIUM | Make inspection QR Code not expire | DONE (merged `00e9d82`) |
 | [BF-57](stories/BF-57-ndep-stormwater-edit.md) | NDEP Weekly Stormwater: enable Edit on submitted forms | 2 | HIGH | Edit button grayed out | DONE (merged `8bf7f24`) |
-| [BF-58](stories/BF-58-working-in-waterways-form.md) | Working in Waters of the State daily inspection form | 5 | HIGH | Add Working In Waterways forms | NOT STARTED |
+| [BF-58.1](stories/BF-58.1-waterways-form-core.md) | Working in Waterways form, core: sites, entry, view, edit (split from [BF-58](stories/BF-58-working-in-waterways-form.md)) | 5 | HIGH | Add Working In Waterways forms | NOT STARTED |
+| [BF-58.2](stories/BF-58.2-waterways-form-pdf-inspector.md) | Working in Waterways form: PDF, inspector view, today indicator, Gracie sign-off | 3 | HIGH | Add Working In Waterways forms | NOT STARTED |
 | [BF-59](stories/BF-59-profile-role-self-promotion.md) | Close the profile role self-promotion path | 2 | CRITICAL | (readiness blocker 1, added by Tim) | DONE (merged `125e1ab`) |
 | [BF-60](stories/BF-60-default-table-grants.md) | Tighten Supabase default table grants across the public schema | 2 | HIGH | (BF-59 verify follow-up) | NOT STARTED |
 | [BF-61](stories/BF-61-submission-edit-concurrency.md) | Optimistic concurrency on submission edits | 2 | MEDIUM | (BF-57 verify follow-up; last-writer-wins accepted for the pilot) | NOT STARTED |
 | [BF-62](stories/BF-62-nextjs-security-upgrade.md) | Upgrade Next.js out of the 2026 advisory ranges, on Node 24 and pnpm 10 | 3 | HIGH | (BF-56 scout finding; Tim 2026-09-23, before BF-56; Node 24 + pnpm 10 added 2026-09-24) | DONE (merged `1dc0bab`) |
-| **Total** | | **21** | | | **5/9 DONE** |
+| **Total** | | **24** | | | **5/10 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
@@ -35,7 +36,7 @@ Points are first-pass estimates made while filing the tickets, not scoped estima
 1. BF-59 first. It is one migration plus negative tests, and every later step puts real users on the database it protects.
 2. BF-54 and BF-55 are data operations against production, independent of code. Run them next, from the backup-verified state, in that order (projects before users, because user deletion is blocked by records the user created).
 3. BF-57 is a self-contained code change with an existing pattern to copy (NDOT edit).
-4. BF-58 is the largest item and the only new form. It reuses the shared photo attachment and form-actions components.
+4. BF-58 is the largest item and the only new form. It reuses the shared photo attachment and form-actions components. Split 2026-09-25 (Tim) into BF-58.1 then BF-58.2.
 5. BF-56 is a design change to the inspector portal; confirm the design with Andy before building (see the ticket's open question).
 
 ## Open questions for Andy
