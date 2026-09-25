@@ -8,7 +8,7 @@
 **Sprint:** 4
 **Reported by:** BF-58.1 signed-in preview pass, 2026-09-25 (fixed there for the new form only); filed by Tim's direction the same day
 **Created:** 2026-09-25
-**Last Updated:** 2026-09-25T19:15:52Z
+**Last Updated:** 2026-09-25T19:34:39Z
 
 ## Problem
 
@@ -95,4 +95,14 @@ Browser checks on the preview at `8eee79b`, signed in as Tim:
 | Rejected submit, Daily Dust Log (new) | Exactly one server-action request; 4 dropdowns unchanged. |
 | Rejected submit, project setup (phone "123") | Exactly one server-action request; "Invalid US phone number"; typed phone, 4 permits and both site rows unchanged. |
 | Production afterwards | RNO 18 phone unchanged (`updated_at` 15:22:34Z, before this pass), 0 new submissions in the last hour. |
+
+## Verify (authoritative round 1, 2026-09-25T19:34:39Z) — PASS 8.8/10
+
+Machine-stamped round 1 under the two-round rule (the earlier "round 1 PASS 8.8" predated the ledger, so it did not count). Re-ran the gates on the committed tree: BF-66 tests 3/3, BF-58.1 regression 16/16, `tsc --noEmit` clean, `pnpm lint` 9 pre-existing warnings / 0 in changed files, `pnpm build` exit 0.
+
+Two independent reviews reconciled (verify + Codex `gpt-6-astra` xhigh). Codex verdict needs-attention with one finding, adjudicated **medium** (its own label), so the verdict engine files it as a fast-follow and the story PASSes:
+
+- **BF-66-F3 (medium, pre-hydration data integrity — file as fast-follow, do NOT reopen this story):** the F1 fix re-added `action={formAction}` to restore the pre-hydration server-action POST. Because these forms serialize React state into one hidden JSON `data` field that the server parses exclusively, a submit *before* hydration (or with JS disabled/failed) POSTs the server-rendered (initial/saved) JSON — native select/radio changes made pre-hydration never reach it. The server then saves the OLD value and redirects as success while the screen shows the NEW one: the same "shows X, saves Y" desync this story fixed, moved into the pre-hydration window. Introduced for Waterways by F1 (it was `onSubmit`-only on master); **pre-existing on master for the other 7 forms** (they already had `action={formAction}`). No AC covers the pre-hydration window and the common post-hydration path is correct and evidenced, so it does not block. Fix is a design tradeoff for Tim: gate submit-until-hydrated (removes F1's progressive-enhancement benefit) or reconstruct the payload from named visible controls (fleet-wide), plus an edit regression with JS blocked. Codex confidence 0.99, reproduced with real SSR + the real parser.
+
+Evidence note carried forward: NDEP Weekly Stormwater has no screenshot (capture blocked by a password-manager overlay twice); the form was still browser-verified twice. Low, documented, no code defect.
 
