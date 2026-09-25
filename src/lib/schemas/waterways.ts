@@ -74,20 +74,20 @@ export function parseWaterwaysForm(formData: FormData): unknown {
 }
 
 /**
- * The site a submission may record. A current project site wins, and its
- * descriptor comes from the server's list, not the client. On edit, the
- * record's own snapshot is also accepted, so renaming or removing a site in
- * project setup never locks an old record.
+ * The site a submission may record. On edit, keeping the record's own site
+ * keeps its own snapshot (descriptor included), so a later change in project
+ * setup never rewrites where an old inspection was taken, and a renamed or
+ * removed site never locks the record. Otherwise the site must be a current
+ * project site, and its descriptor comes from the server's list, not the client.
  */
 export function resolveSite(
   siteName: string,
   projectSites: readonly WaterwaySite[],
   snapshot?: WaterwaySite,
 ): WaterwaySite | null {
-  const current = projectSites.find((s) => s.name === siteName);
-  if (current) return { name: current.name, descriptor: current.descriptor };
   if (snapshot && snapshot.name === siteName) return snapshot;
-  return null;
+  const current = projectSites.find((s) => s.name === siteName);
+  return current ? { name: current.name, descriptor: current.descriptor } : null;
 }
 
 /** Reads `projects.waterway_sites`, tolerating anything malformed as "no sites". */

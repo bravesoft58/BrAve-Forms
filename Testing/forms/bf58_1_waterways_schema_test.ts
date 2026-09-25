@@ -6,7 +6,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { pacificTime, pacificToday } from "@/lib/dates";
-import { photoSchema } from "@/lib/schemas/form-photo";
+import * as formPhoto from "@/lib/schemas/form-photo";
+const { photoSchema } = formPhoto;
+// Looked up at call time so a missing export fails its own test, not the whole file.
+const removedPhotoNames = (...args: unknown[]) =>
+  (formPhoto as unknown as Record<string, (...a: unknown[]) => unknown>).removedPhotoNames(...args);
 import { projectCreateSchema } from "@/lib/schemas/project";
 import {
   readProjectSites,
@@ -141,6 +145,28 @@ test("resolveSite: a renamed site still resolves to the record's own snapshot on
   const snapshot = { name: "Western Drainage", descriptor: "old" };
   assert.deepEqual(resolveSite("Western Drainage", sites, snapshot), snapshot);
   assert.equal(resolveSite("Other", sites, snapshot), null);
+});
+
+test("resolveSite: an edit that keeps the site keeps the record's own descriptor (Codex round 1)", () => {
+  // The admin later changed the site's descriptor in project setup; correcting
+  // only the initials on an old record must not rewrite where it was taken.
+  const sites = [{ name: "Western Drainage", descriptor: "mile 4.2 (moved)" }];
+  const snapshot = { name: "Western Drainage", descriptor: "mile 3.1" };
+  assert.deepEqual(resolveSite("Western Drainage", sites, snapshot), snapshot);
+  // An explicit move to a different current site takes that site's current descriptor.
+  const two = [...sites, { name: "Eastern Drainage", descriptor: "east culvert" }];
+  assert.deepEqual(resolveSite("Eastern Drainage", two, snapshot), { name: "Eastern Drainage", descriptor: "east culvert" });
+});
+
+test("removedPhotoNames: only the stored photos the edit dropped, and only valid names", () => {
+  const a = { ...photo, file_name: "1758800000000-aaaaaa.jpg" };
+  const b = { ...photo, file_name: "1758800000000-bbbbbb.jpg" };
+  const c = { ...photo, file_name: "1758800000000-cccccc.jpg" };
+  assert.deepEqual(removedPhotoNames([a, b], [b, c]), ["1758800000000-aaaaaa.jpg"]);
+  assert.deepEqual(removedPhotoNames([a, b], [a, b]), []);
+  // Stored data is not trusted to be well formed: junk never becomes a delete path.
+  assert.deepEqual(removedPhotoNames([{ file_name: "../../x/y.jpg" }, null, "str", a], []), ["1758800000000-aaaaaa.jpg"]);
+  assert.deepEqual(removedPhotoNames(undefined, [a]), []);
 });
 
 test("readProjectSites treats malformed stored values as no sites", () => {

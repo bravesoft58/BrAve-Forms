@@ -34,6 +34,10 @@ export default function PhotoAttachment({
   // Render-time signed URLs keyed by file_name. Not persisted to JSONB —
   // BF-32 dropped `photo.url` from the storage contract.
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
+  // Files uploaded in this visit and not yet saved with the form. Only these are
+  // deleted from storage on Remove; a photo already saved with the submission
+  // stays until the edit is saved, so Cancel or a rejected save cannot destroy it.
+  const uploadedHere = useRef<Set<string>>(new Set());
 
   // Sign any photos we don't yet have a preview for (covers both newly
   // uploaded photos and edits that load existing photos from JSONB).
@@ -99,6 +103,7 @@ export default function PhotoAttachment({
           break;
         }
 
+        uploadedHere.current.add(fileName);
         newPhotos.push({
           caption: "",
           file_name: fileName,
@@ -124,7 +129,10 @@ export default function PhotoAttachment({
 
   async function removePhoto(index: number) {
     const photo = photos[index];
-    // Try to delete from storage (best-effort — don't block UI on failure)
+    onPhotosChange(photos.filter((_, i) => i !== index));
+    if (!uploadedHere.current.has(photo.file_name)) return;
+    uploadedHere.current.delete(photo.file_name);
+    // An unsaved upload: delete it now (best-effort — don't block UI on failure)
     try {
       const supabase = createClient();
       const filePath = `${storagePath}/${photo.file_name}`;
@@ -132,7 +140,6 @@ export default function PhotoAttachment({
     } catch (err) {
       console.error("Storage cleanup failed:", err);
     }
-    onPhotosChange(photos.filter((_, i) => i !== index));
   }
 
   return (

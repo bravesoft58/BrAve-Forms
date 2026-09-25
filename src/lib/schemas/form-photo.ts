@@ -17,3 +17,17 @@ export const photoSchema = z.object({
 });
 
 export type FormPhoto = z.infer<typeof photoSchema>;
+
+/**
+ * File names of stored photos that an edit dropped, for deletion after the
+ * edit has saved. Stored data is not trusted: only entries whose name matches
+ * the uploader's shape can become a storage path.
+ */
+export function removedPhotoNames(before: unknown, after: readonly FormPhoto[]): string[] {
+  if (!Array.isArray(before)) return [];
+  const kept = new Set(after.map((p) => p.file_name));
+  return before.flatMap((p) => {
+    const parsed = photoSchema.safeParse(p);
+    return parsed.success && !kept.has(parsed.data.file_name) ? [parsed.data.file_name] : [];
+  });
+}
