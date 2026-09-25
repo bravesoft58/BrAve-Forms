@@ -3,13 +3,7 @@
 import { ArrowLeft, Download, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-type FormType =
-  | "daily_dust_log"
-  | "ndot_weekly_stormwater"
-  | "ndep_weekly_stormwater"
-  | "ndep_sad_application"
-  | "nnph_dust_permit";
+import type { FormType } from "@/lib/constants/permits";
 
 interface FormActionsProps {
   backHref: string;
@@ -28,6 +22,16 @@ const EDIT_SUPPORTED: ReadonlySet<FormType> = new Set([
   // daily_dust_log uses its own "Add Entries" button on the view page (append-only model)
   "ndot_weekly_stormwater",
   "ndep_weekly_stormwater",
+  "working_in_waterways",
+]);
+
+// Types with a PDF template. TODO(BF-58.2): add working_in_waterways with its template.
+const PDF_SUPPORTED: ReadonlySet<FormType> = new Set([
+  "daily_dust_log",
+  "ndot_weekly_stormwater",
+  "ndep_weekly_stormwater",
+  "ndep_sad_application",
+  "nnph_dust_permit",
 ]);
 
 export default function FormActions({
@@ -42,6 +46,8 @@ export default function FormActions({
   const showEdit =
     canEdit && formType !== undefined && formType !== "daily_dust_log";
   const editEnabled = showEdit && EDIT_SUPPORTED.has(formType!) && Boolean(editHref);
+  // Callers that omit formType predate this check and all have templates.
+  const showPdf = formType === undefined || PDF_SUPPORTED.has(formType);
 
   return (
     <div className="flex items-center gap-3 border-t border-zinc-200 pt-6 dark:border-zinc-800 print:hidden">
@@ -75,13 +81,15 @@ export default function FormActions({
           </button>
         ))}
 
-      <a
-        href={`/api/forms/${submissionId}/pdf`}
-        className="inline-flex items-center gap-2 rounded-md bg-[#233B5C] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1a2d47]"
-      >
-        <Download className="h-4 w-4" />
-        Download PDF
-      </a>
+      {showPdf && (
+        <a
+          href={`/api/forms/${submissionId}/pdf`}
+          className="inline-flex items-center gap-2 rounded-md bg-[#233B5C] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1a2d47]"
+        >
+          <Download className="h-4 w-4" />
+          Download PDF
+        </a>
+      )}
     </div>
   );
 }

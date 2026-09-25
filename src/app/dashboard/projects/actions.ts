@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
+import { collectFieldErrors } from "@/lib/forms/field-errors";
 import { projectCreateSchema, parseProjectForm } from "@/lib/schemas/project";
 import { PERMIT_FORM_MAP, type FormType } from "@/lib/constants/permits";
 
@@ -28,13 +29,7 @@ export async function createProject(
   const result = projectCreateSchema.safeParse(raw);
 
   if (!result.success) {
-    const fieldErrors: Record<string, string[]> = {};
-    for (const issue of result.error.issues) {
-      const key = issue.path.join(".");
-      if (!fieldErrors[key]) fieldErrors[key] = [];
-      fieldErrors[key].push(issue.message);
-    }
-    return { error: "Please fix the errors below.", fieldErrors };
+    return { error: "Please fix the errors below.", fieldErrors: collectFieldErrors(result.error.issues) };
   }
 
   const data = result.data;
@@ -129,6 +124,7 @@ export async function createProject(
 }
 
 function buildProjectFields(data: ReturnType<typeof projectCreateSchema.parse>) {
+  const hasWaterwayPermit = data.permits.some((p) => p.permit_type === "waterway");
   return {
     name: data.name,
     address: data.address,
@@ -151,6 +147,9 @@ function buildProjectFields(data: ReturnType<typeof projectCreateSchema.parse>) 
     owner_rep_phone: data.owner_rep_phone || null,
     owner_rep_email: data.owner_rep_email || null,
     owner_rep_address: data.owner_rep_address || null,
+    // Unticking the Waterway permit leaves the stored site list alone: it is
+    // setup data, and past submissions keep their own copy of their site.
+    ...(hasWaterwayPermit ? { waterway_sites: data.waterway_sites } : {}),
   };
 }
 
@@ -181,13 +180,7 @@ export async function updateProject(
   const result = projectCreateSchema.safeParse(raw);
 
   if (!result.success) {
-    const fieldErrors: Record<string, string[]> = {};
-    for (const issue of result.error.issues) {
-      const key = issue.path.join(".");
-      if (!fieldErrors[key]) fieldErrors[key] = [];
-      fieldErrors[key].push(issue.message);
-    }
-    return { error: "Please fix the errors below.", fieldErrors };
+    return { error: "Please fix the errors below.", fieldErrors: collectFieldErrors(result.error.issues) };
   }
 
   const data = result.data;

@@ -5,7 +5,7 @@ import { X, Camera, Loader2 } from "lucide-react";
 import imageCompression from "browser-image-compression";
 import { createClient } from "@/lib/supabase/client";
 import { inputClass, labelClass } from "@/components/forms/formStyles";
-import type { FormPhoto } from "@/lib/schemas/ndot-stormwater";
+import type { FormPhoto } from "@/lib/schemas/form-photo";
 
 interface PhotoAttachmentProps {
   photos: FormPhoto[];
@@ -82,7 +82,8 @@ export default function PhotoAttachment({
 
       for (const file of toUpload) {
         const compressed = await imageCompression(file, COMPRESSION_OPTIONS);
-        const ext = file.name.split(".").pop() || "jpg";
+        // Letters and digits only: the stored name must match the photo schema.
+        const ext = (file.name.split(".").pop() ?? "").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
         const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
         const filePath = `${storagePath}/${fileName}`;
 

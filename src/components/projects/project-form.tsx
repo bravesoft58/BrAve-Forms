@@ -10,6 +10,8 @@ import {
   type PermitType,
   type FormType,
 } from "@/lib/constants/permits";
+import type { WaterwaySite } from "@/lib/schemas/waterways";
+import WaterwaySitesField from "./WaterwaySitesField";
 
 const initialState: ProjectState = { error: "" };
 
@@ -78,6 +80,7 @@ interface ProjectFormProps {
   pendingLabel?: string;
   defaults?: Record<string, string | number | null>;
   existingPermits?: Permit[];
+  existingSites?: WaterwaySite[];
 }
 
 export default function ProjectForm({
@@ -86,6 +89,7 @@ export default function ProjectForm({
   pendingLabel = "Creating...",
   defaults,
   existingPermits,
+  existingSites = [],
 }: ProjectFormProps = {}) {
   const serverAction = action ?? createProject;
   const [state, formAction, pending] = useActionState(serverAction, initialState);
@@ -257,6 +261,9 @@ export default function ProjectForm({
                     defaultValue={permitNumbers[permit] ?? ""}
                     className={`${inputClass} max-w-xs`}
                   />
+                  {permit === "waterway" && (
+                    <WaterwaySitesField initialSites={existingSites} errors={state.fieldErrors} />
+                  )}
                 </div>
               )}
             </div>

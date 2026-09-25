@@ -15,6 +15,7 @@ const FORM_ROUTE_MAP: Partial<Record<FormType, string>> = {
   ndot_weekly_stormwater: "ndot-stormwater",
   ndep_sad_application: "ndep-sad",
   nnph_dust_permit: "nnph-dust-permit",
+  working_in_waterways: "working-in-waterways",
 };
 
 export default async function FormsPage() {

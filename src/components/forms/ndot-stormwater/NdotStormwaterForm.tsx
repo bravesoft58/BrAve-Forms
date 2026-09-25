@@ -15,7 +15,7 @@ import Section1SiteInfo from "./Section1SiteInfo";
 import Section2BmpCategories from "./Section2BmpCategories";
 import Section3DischargeSignatures from "./Section3DischargeSignatures";
 import PhotoAttachment from "@/components/forms/shared/PhotoAttachment";
-import type { FormPhoto } from "@/lib/schemas/ndot-stormwater";
+import type { FormPhoto } from "@/lib/schemas/form-photo";
 import { NDOT_INSTRUCTIONS } from "@/lib/constants/ndot-form-text";
 
 interface NdotStormwaterFormProps {

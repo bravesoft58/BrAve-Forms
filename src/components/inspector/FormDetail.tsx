@@ -3,6 +3,7 @@
 import { NDEP_CONTROL_MEASURES, NDEP_STABILIZATION_ITEMS } from "@/lib/schemas/ndep-stormwater";
 import { NDOT_BMP_CATEGORIES } from "@/lib/schemas/ndot-stormwater";
 import { NDEP_SAD_BMP_OPTIONS, NDEP_SAD_ATTACHMENT_ITEMS } from "@/lib/schemas/ndep-sad";
+import WorkingInWaterwaysSummary from "./WorkingInWaterwaysSummary";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type FormData = Record<string, any>;
@@ -562,6 +563,8 @@ export default function InspectorFormDetail({
       return <NdepSadDetail data={data as FormData} />;
     case "nnph_dust_permit":
       return <NnphDustPermitDetail data={data as FormData} />;
+    case "working_in_waterways":
+      return <WorkingInWaterwaysSummary data={data} />;
     default:
       // Fallback: render as key-value pairs
       return (

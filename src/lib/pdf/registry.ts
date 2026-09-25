@@ -16,7 +16,9 @@ interface PdfContext {
 
 type PdfComponent = (ctx: PdfContext) => React.ReactElement;
 
-const registry: Record<FormType, PdfComponent> = {
+// Partial until every form type has a template; FormActions hides the PDF button
+// for types missing here. TODO(BF-58.2): add working_in_waterways.
+const registry: Partial<Record<FormType, PdfComponent>> = {
   daily_dust_log: (ctx) =>
     React.createElement(DustLogPdf, {
       data: ctx.data as Parameters<typeof DustLogPdf>[0]["data"],
@@ -68,6 +70,7 @@ export function getPdfFilename(formType: FormType, projectName: string, formDate
     ndot_weekly_stormwater: "NDOT-Stormwater",
     ndep_sad_application: "NDEP-SAD",
     nnph_dust_permit: "NNPH-DustPermit",
+    working_in_waterways: "WorkingInWaterways",
   };
   const safeName = projectName.replace(/[^a-zA-Z0-9]+/g, "-").replace(/-+$/, "");
   return `${typeMap[formType]}_${safeName}_${formDate}.pdf`;
