@@ -8,7 +8,7 @@
 **Sprint:** 4
 **Reported by:** BF-58.1 signed-in preview pass, 2026-09-25 (fixed there for the new form only); filed by Tim's direction the same day
 **Created:** 2026-09-25
-**Last Updated:** 2026-09-25T19:34:39Z
+**Last Updated:** 2026-09-25T20:15:54Z
 
 ## Problem
 
@@ -105,4 +105,29 @@ Two independent reviews reconciled (verify + Codex `gpt-6-astra` xhigh). Codex v
 - **BF-66-F3 (medium, pre-hydration data integrity — file as fast-follow, do NOT reopen this story):** the F1 fix re-added `action={formAction}` to restore the pre-hydration server-action POST. Because these forms serialize React state into one hidden JSON `data` field that the server parses exclusively, a submit *before* hydration (or with JS disabled/failed) POSTs the server-rendered (initial/saved) JSON — native select/radio changes made pre-hydration never reach it. The server then saves the OLD value and redirects as success while the screen shows the NEW one: the same "shows X, saves Y" desync this story fixed, moved into the pre-hydration window. Introduced for Waterways by F1 (it was `onSubmit`-only on master); **pre-existing on master for the other 7 forms** (they already had `action={formAction}`). No AC covers the pre-hydration window and the common post-hydration path is correct and evidenced, so it does not block. Fix is a design tradeoff for Tim: gate submit-until-hydrated (removes F1's progressive-enhancement benefit) or reconstruct the payload from named visible controls (fleet-wide), plus an edit regression with JS blocked. Codex confidence 0.99, reproduced with real SSR + the real parser.
 
 Evidence note carried forward: NDEP Weekly Stormwater has no screenshot (capture blocked by a password-manager overlay twice); the form was still browser-verified twice. Low, documented, no code defect.
+
+## Round-2 fix: submit gated on hydration (2026-09-25T20:15:54Z)
+
+Tim asked for the best-practice fix, then chose it for this branch rather than filing F3. Commit `d7d3026`.
+
+**Decision.** Standard practice for forms that depend on JavaScript is to keep submit unavailable until the page has hydrated. For example, Remix's `remix-utils` ships `useHydrated` for this, catching slow or failed script loads [verified 2026-09-25, remix-utils docs]. The alternative, true no-JS forms that read named visible fields on the server, would mean rebuilding all eight forms and their parsers around nested JSON (BMP tables, control measures). Crews on phones run JavaScript; the only exposure is the moment before hydration on a weak signal, and gating closes it.
+
+**Change.**
+- `useNoResetSubmit` now returns `{ submit, ready }`.
+- `ready` comes from `useSyncExternalStore`: `false` on the server and until hydration, then `true`, with no hydration mismatch.
+- Each form's single submit button is `disabled={pending || !ready}` and reads "Loading..." until ready. Being the form's only submit button (checked: one per form, every `<button>` explicitly typed), disabling it also blocks Enter-key implicit submission.
+- `action={formAction}` stays. It is harmless now and keeps the F1 fix's GET-leak protection.
+
+**RED first.** The regression test gained a case requiring exactly one submit button per form with `disabled={pending || !ready}`, and the F2 case now requires `const { submit, ready } = useNoResetSubmit(formAction);`. Both failed before the change; the suite is 4/4 after. BF-58.1 16/16; `tsc`, lint (9 pre-existing warnings) and build clean. `project-form.tsx` stays at 300 lines.
+
+Browser checks on the preview at `d7d3026`, signed in as Tim:
+
+| Check | Result |
+| --- | --- |
+| Server-rendered HTML (before JavaScript) of all eight form pages: waterways, dust log new, dust log append (real log `b1e9831b`, read only), NDEP stormwater, NDEP SAD, NNPH, NDOT (NDOT 4541), project edit | Every page: one submit button, `disabled`, label "Loading...", form `method="POST"`. |
+| Live page after hydration | Submit enabled, normal label ("Submit Inspection"). |
+| Rejected submit after hydration: Working in Waterways, Daily Dust Log | Exactly one server-action request each, no navigation, all values unchanged. |
+| Production afterwards | 0 new submissions in 90 minutes; real dust log still 1 entry; RNO 18 phone unchanged. |
+
+F1, F2 and F3 are all resolved on this branch. Nothing from verify rounds 1 and 2 remains to file.
 
