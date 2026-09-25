@@ -2,7 +2,7 @@
 
 **Status:** NOT STARTED
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-25T16:25:28Z
+**Last Updated:** 2026-09-25T17:04:32Z
 **Source:** Andy Breen (IT Director, Q&D) email "BrAve Forms Update", 2026-09-07, with attachment `WIW Daily Form.pdf`. Both filed under [docs/reference/](../../reference/).
 
 ## Why this sprint
@@ -28,7 +28,9 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-61](stories/BF-61-submission-edit-concurrency.md) | Optimistic concurrency on submission edits | 2 | MEDIUM | (BF-57 verify follow-up; last-writer-wins accepted for the pilot) | NOT STARTED |
 | [BF-62](stories/BF-62-nextjs-security-upgrade.md) | Upgrade Next.js out of the 2026 advisory ranges, on Node 24 and pnpm 10 | 3 | HIGH | (BF-56 scout finding; Tim 2026-09-23, before BF-56; Node 24 + pnpm 10 added 2026-09-24) | DONE (merged `1dc0bab`) |
 | [BF-63](stories/BF-63-submission-revision-history.md) | Append-only revision history for form submissions | 2 | HIGH | (Tim, 2026-09-25, record integrity) | NOT STARTED |
-| **Total** | | **26** | | | **6/12 DONE** |
+| [BF-64](stories/BF-64-submit-waits-for-photo-uploads.md) | Submit must wait for photo uploads in flight | 1 | MEDIUM | (BF-58.1 verify follow-up C1) | NOT STARTED |
+| [BF-65](stories/BF-65-submission-idempotency.md) | Idempotent form submission (no duplicate inspections on retry) | 2 | MEDIUM | (BF-58.1 verify follow-up C2) | NOT STARTED |
+| **Total** | | **29** | | | **6/14 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
