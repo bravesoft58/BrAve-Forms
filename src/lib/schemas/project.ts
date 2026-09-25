@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PERMIT_TYPES } from "@/lib/constants/permits";
+import { waterwaySitesSchema } from "@/lib/schemas/waterways";
 
 const optionalEmail = z
   .string()
@@ -56,6 +57,9 @@ export const projectCreateSchema = z
         permit_number: z.string().optional(),
       })
     ),
+
+    // Written to the project only while the Waterway permit is ticked.
+    waterway_sites: waterwaySitesSchema,
   })
   .refine(
     (data) => data.completion_date >= data.start_date,
@@ -82,6 +86,14 @@ export function parseProjectForm(formData: FormData): unknown {
     permit_type: pt,
     permit_number: permitNumbers[i] ?? "",
   }));
+
+  // WaterwaySitesField renders one name + descriptor pair per row; rows left
+  // entirely blank are dropped rather than rejected.
+  const siteNames = formData.getAll("waterway_site_name") as string[];
+  const siteDescriptors = formData.getAll("waterway_site_descriptor") as string[];
+  const waterway_sites = siteNames
+    .map((name, i) => ({ name, descriptor: siteDescriptors[i] ?? "" }))
+    .filter((site) => site.name.trim() !== "" || site.descriptor.trim() !== "");
 
   return {
     name: get("name"),
@@ -112,5 +124,6 @@ export function parseProjectForm(formData: FormData): unknown {
     description: get("description"),
 
     permits,
+    waterway_sites,
   };
 }

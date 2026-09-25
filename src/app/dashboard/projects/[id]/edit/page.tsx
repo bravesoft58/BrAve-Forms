@@ -3,6 +3,7 @@ import { getProjectById } from "@/lib/queries/projects";
 import { getCurrentUser } from "@/lib/auth";
 import { updateProject } from "@/app/dashboard/projects/actions";
 import ProjectForm from "@/components/projects/project-form";
+import { readProjectSites } from "@/lib/schemas/waterways";
 
 export default async function EditProjectPage({
   params,
@@ -35,6 +36,7 @@ export default async function EditProjectPage({
           pendingLabel="Saving..."
           defaults={project}
           existingPermits={project.project_permits ?? []}
+          existingSites={readProjectSites(project.waterway_sites)}
         />
       </div>
     </div>

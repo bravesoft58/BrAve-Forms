@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
+import { collectFieldErrors } from "@/lib/forms/field-errors";
 import { dustLogSchema, parseDustLogForm } from "@/lib/schemas/dust-log";
 
 export type DustLogState = {
@@ -29,13 +30,7 @@ export async function submitDustLog(
   const result = dustLogSchema.safeParse(raw);
 
   if (!result.success) {
-    const fieldErrors: Record<string, string[]> = {};
-    for (const issue of result.error.issues) {
-      const key = issue.path.join(".");
-      if (!fieldErrors[key]) fieldErrors[key] = [];
-      fieldErrors[key].push(issue.message);
-    }
-    return { error: "Please fix the errors below.", fieldErrors };
+    return { error: "Please fix the errors below.", fieldErrors: collectFieldErrors(result.error.issues) };
   }
 
   const { entries } = result.data;
@@ -80,13 +75,7 @@ export async function appendDustLogEntries(
   const result = dustLogSchema.safeParse(raw);
 
   if (!result.success) {
-    const fieldErrors: Record<string, string[]> = {};
-    for (const issue of result.error.issues) {
-      const key = issue.path.join(".");
-      if (!fieldErrors[key]) fieldErrors[key] = [];
-      fieldErrors[key].push(issue.message);
-    }
-    return { error: "Please fix the errors below.", fieldErrors };
+    return { error: "Please fix the errors below.", fieldErrors: collectFieldErrors(result.error.issues) };
   }
 
   const { entries: newEntries } = result.data;

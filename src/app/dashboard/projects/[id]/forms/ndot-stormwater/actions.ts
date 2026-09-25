@@ -4,22 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
+import { collectFieldErrors } from "@/lib/forms/field-errors";
 import { ndotStormwaterSchema, parseNdotStormwaterForm } from "@/lib/schemas/ndot-stormwater";
 
 export type NdotStormwaterState = {
   error: string;
   fieldErrors?: Record<string, string[]>;
 };
-
-function collectFieldErrors(issues: { path: (string | number)[]; message: string }[]) {
-  const fieldErrors: Record<string, string[]> = {};
-  for (const issue of issues) {
-    const key = issue.path.join(".");
-    if (!fieldErrors[key]) fieldErrors[key] = [];
-    fieldErrors[key].push(issue.message);
-  }
-  return fieldErrors;
-}
 
 export async function submitNdotStormwater(
   _prevState: NdotStormwaterState,

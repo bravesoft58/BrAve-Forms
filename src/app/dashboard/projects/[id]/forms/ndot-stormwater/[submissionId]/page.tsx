@@ -7,8 +7,8 @@ import {
   NDOT_BMP_CATEGORIES,
   type NdotStormwaterData,
   type BmpCategory,
-  type FormPhoto,
 } from "@/lib/schemas/ndot-stormwater";
+import type { FormPhoto } from "@/lib/schemas/form-photo";
 import {
   headerCellClass,
   cellClass,

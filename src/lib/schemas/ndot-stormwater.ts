@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { photoSchema } from "@/lib/schemas/form-photo";
 
 const YN = ["Y", "N"] as const;
 // N/A | Yes | No — official Form 018-001 tri-state for spill-response items (BF-53).
@@ -34,16 +35,6 @@ const bmpCategorySchema = z.object({
   required: z.enum(YN),
   implemented: z.enum(YN),
   comments: z.string().optional().default(""),
-});
-
-// `url` is deprecated as of BF-32 (storage privatized). Renderers reconstruct
-// the storage path from `${storagePath}/${file_name}` and sign at display
-// time. Kept optional so legacy submissions written before BF-32 still parse.
-const photoSchema = z.object({
-  url: z.string().optional(),
-  caption: z.string().optional().default(""),
-  file_name: z.string(),
-  uploaded_at: z.string(),
 });
 
 // --- Main schema ---
@@ -128,7 +119,6 @@ export const ndotStormwaterSchema = z.object({
 
 export type NdotStormwaterData = z.infer<typeof ndotStormwaterSchema>;
 export type BmpCategory = z.infer<typeof bmpCategorySchema>;
-export type FormPhoto = z.infer<typeof photoSchema>;
 
 export const WEATHER_OPTIONS_LIST = WEATHER_OPTIONS;
 export const INTENSITY_OPTIONS_LIST = INTENSITY_OPTIONS;

@@ -16,6 +16,7 @@ export const FORM_TYPES = [
   "ndot_weekly_stormwater",
   "ndep_sad_application",
   "nnph_dust_permit",
+  "working_in_waterways",
 ] as const;
 export type FormType = (typeof FORM_TYPES)[number];
 
@@ -35,6 +36,7 @@ export const FORM_LABELS: Record<FormType, string> = {
   ndot_weekly_stormwater: "NDOT Weekly Stormwater",
   ndep_sad_application: "NDEP SAD Application",
   nnph_dust_permit: "NNPH Dust Permit",
+  working_in_waterways: "Working in Waterways",
 };
 
 // Business logic: which permits trigger which forms
@@ -43,6 +45,6 @@ export const PERMIT_FORM_MAP: Record<PermitType, FormType[]> = {
   dust_control: ["daily_dust_log", "nnph_dust_permit"],
   stormwater_ndot: ["ndot_weekly_stormwater"],
   stormwater_ndep: ["ndep_weekly_stormwater"],
-  waterway: [],
+  waterway: ["working_in_waterways"],
   other: [],
 };

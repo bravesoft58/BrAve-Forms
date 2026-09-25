@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
+import { collectFieldErrors } from "@/lib/forms/field-errors";
 import { ndepStormwaterSchema, parseNdepStormwaterForm } from "@/lib/schemas/ndep-stormwater";
 
 export type NdepStormwaterState = {
@@ -12,16 +13,6 @@ export type NdepStormwaterState = {
 };
 
 const FORM_TYPE = "ndep_weekly_stormwater";
-
-function collectFieldErrors(issues: { path: (string | number)[]; message: string }[]) {
-  const fieldErrors: Record<string, string[]> = {};
-  for (const issue of issues) {
-    const key = issue.path.join(".");
-    if (!fieldErrors[key]) fieldErrors[key] = [];
-    fieldErrors[key].push(issue.message);
-  }
-  return fieldErrors;
-}
 
 export async function submitNdepStormwater(
   _prevState: NdepStormwaterState,
