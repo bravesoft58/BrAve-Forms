@@ -21,7 +21,7 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-55](stories/BF-55-cleanup-users.md) | Remove or deactivate test users | 1 | HIGH | Cleanup users | IN PROGRESS |
 | [BF-56](stories/BF-56-stable-qr-expiring-session.md) | Inspector QR never changes; the scanned session expires | 3 | MEDIUM | Make inspection QR Code not expire | DONE (merged `00e9d82`) |
 | [BF-57](stories/BF-57-ndep-stormwater-edit.md) | NDEP Weekly Stormwater: enable Edit on submitted forms | 2 | HIGH | Edit button grayed out | DONE (merged `8bf7f24`) |
-| [BF-58.1](stories/BF-58.1-waterways-form-core.md) | Working in Waterways form, core: sites, entry, view, edit (split from [BF-58](stories/BF-58-working-in-waterways-form.md)) | 5 | HIGH | Add Working In Waterways forms | NOT STARTED |
+| [BF-58.1](stories/BF-58.1-waterways-form-core.md) | Working in Waterways form, core: sites, entry, view, edit | 5 | HIGH | Add Working In Waterways forms | NOT STARTED |
 | [BF-58.2](stories/BF-58.2-waterways-form-pdf-inspector.md) | Working in Waterways form: PDF, inspector view, today indicator, Gracie sign-off | 3 | HIGH | Add Working In Waterways forms | NOT STARTED |
 | [BF-59](stories/BF-59-profile-role-self-promotion.md) | Close the profile role self-promotion path | 2 | CRITICAL | (readiness blocker 1, added by Tim) | DONE (merged `125e1ab`) |
 | [BF-60](stories/BF-60-default-table-grants.md) | Tighten Supabase default table grants across the public schema | 2 | HIGH | (BF-59 verify follow-up) | NOT STARTED |
@@ -37,7 +37,7 @@ Points are first-pass estimates made while filing the tickets, not scoped estima
 1. BF-59 first. It is one migration plus negative tests, and every later step puts real users on the database it protects.
 2. BF-54 and BF-55 are data operations against production, independent of code. Run them next, from the backup-verified state, in that order (projects before users, because user deletion is blocked by records the user created).
 3. BF-57 is a self-contained code change with an existing pattern to copy (NDOT edit).
-4. BF-58 is the largest item and the only new form. It reuses the shared photo attachment and form-actions components. Split 2026-09-25 (Tim) into BF-58.1 then BF-58.2.
+4. BF-58 is the largest item and the only new form. It reuses the shared photo attachment and form-actions components. Split 2026-09-25 (Tim) into BF-58.1 then BF-58.2; the parent [BF-58](stories/BF-58-working-in-waterways-form.md) is the design record both children point at.
 6. BF-63 (revision history) right after BF-58.1 merges, alongside BF-61: capture cannot be backfilled, so every in-place edit before it ships is lost.
 5. BF-56 is a design change to the inspector portal; confirm the design with Andy before building (see the ticket's open question).
 
