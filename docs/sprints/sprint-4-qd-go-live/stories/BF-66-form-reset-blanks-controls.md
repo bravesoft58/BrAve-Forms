@@ -3,11 +3,12 @@
 **Type:** Bug (shared form pattern; what the user sees differs from what is saved)
 **Priority:** HIGH (a correction can save answers the screen showed as blank; affects every live form)
 **Points:** 2
-**Status:** IN PROGRESS
+**Status:** DONE
+**Completed:** 2026-09-25T17:55:20Z
 **Sprint:** 4
 **Reported by:** BF-58.1 signed-in preview pass, 2026-09-25 (fixed there for the new form only); filed by Tim's direction the same day
 **Created:** 2026-09-25
-**Last Updated:** 2026-09-25T17:20:38Z
+**Last Updated:** 2026-09-25T17:55:20Z
 
 ## Problem
 
@@ -64,4 +65,11 @@ Branch `feature/BF-66-form-reset`, fix commit `ba20a46`. The shared helper is sp
 **Scope note:** the auth forms (login, signup, forgot and reset password) and the users invite form still use `<form action>`. Their fields are all uncontrolled, so after a reset the screen matches what would be sent (empty). That means retyping after an error, not a desync, so it is out of this ticket's scope. The regression test documents this.
 
 **Size:** `src` +56 / -18. `project-form.tsx` is exactly 300 lines, the modularity ceiling. The next change to it should split it (for example, the permits section into its own component).
+
+## Verify (round 1, 2026-09-25T17:55:20Z) — PASS 8.8/10
+
+Two independent reviews reconciled (verify + Codex `gpt-6-astra` xhigh). Tests 3/3 + 16/16 regression, `tsc --noEmit` and lint on changed files clean. No blocking findings. Two mediums to file as fast follow-ups (do NOT reopen this story):
+
+- **BF-66-F1 (medium, progressive enhancement):** moving all eight forms off `action={formAction}` to `onSubmit`-only removed the server-action POST fallback. A submit before hydration or with JS disabled/failed now does a GET navigation to the current URL — the edit is not saved and named required fields + the hidden JSON `data` land in the query string. Edge window only; the hydrated path this story evidenced is unaffected, so the change is still a net fix. Proposed: keep `action={formAction}` alongside `onSubmit` (React skips the reset when onSubmit preventDefaults even with `action` present) or disable submit until hydrated; verify in a browser, then relax the test's `action={fn}` ban for the paired form.
+- **BF-66-F2 (medium, test guard):** `bf66_form_reset_test.ts` asserts `useNoResetSubmit(` and `onSubmit={` presence separately, not that the form's `onSubmit` is the hook's output — a disconnected handler still passes 3/3 (Codex demonstrated). Production wiring is currently correct. Proposed: a component-render test with a dispatch spy that fails on the disconnected-handler mutation (needs a component test framework, not yet configured).
 
