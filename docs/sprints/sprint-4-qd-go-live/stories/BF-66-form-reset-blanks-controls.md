@@ -8,7 +8,7 @@
 **Sprint:** 4
 **Reported by:** BF-58.1 signed-in preview pass, 2026-09-25 (fixed there for the new form only); filed by Tim's direction the same day
 **Created:** 2026-09-25
-**Last Updated:** 2026-09-25T17:55:20Z
+**Last Updated:** 2026-09-25T19:15:52Z
 
 ## Problem
 
@@ -72,4 +72,27 @@ Two independent reviews reconciled (verify + Codex `gpt-6-astra` xhigh). Tests 3
 
 - **BF-66-F1 (medium, progressive enhancement):** moving all eight forms off `action={formAction}` to `onSubmit`-only removed the server-action POST fallback. A submit before hydration or with JS disabled/failed now does a GET navigation to the current URL — the edit is not saved and named required fields + the hidden JSON `data` land in the query string. Edge window only; the hydrated path this story evidenced is unaffected, so the change is still a net fix. Proposed: keep `action={formAction}` alongside `onSubmit` (React skips the reset when onSubmit preventDefaults even with `action` present) or disable submit until hydrated; verify in a browser, then relax the test's `action={fn}` ban for the paired form.
 - **BF-66-F2 (medium, test guard):** `bf66_form_reset_test.ts` asserts `useNoResetSubmit(` and `onSubmit={` presence separately, not that the form's `onSubmit` is the hook's output — a disconnected handler still passes 3/3 (Codex demonstrated). Production wiring is currently correct. Proposed: a component-render test with a dispatch spy that fails on the disconnected-handler mutation (needs a component test framework, not yet configured).
+
+## Round-1 fixes (2026-09-25T19:15:52Z)
+
+Tim chose to fix both on this branch rather than file them. Commit `8eee79b`.
+
+- **F1 fixed.** Every form is `<form action={formAction} onSubmit={submit}>` again. Checked in the installed react-dom 19.2.3 (`react-dom-client.development.js`):
+  - The form-action listener checks `nativeEvent.defaultPrevented`. When our `onSubmit` has already cancelled, it does not call the action. Because a transition was scheduled in the same event, it calls `startHostTransition(..., null, formData)`.
+  - `startHostTransition` maps a null action to `noop`, so `requestFormReset` never runs. No automatic reset after hydration; the server-action POST fallback before hydration is back.
+- **F2 fixed without a component framework.**
+  - The test captures the variable from `const x = useNoResetSubmit(formAction);`. It then requires exactly one `<form>` per component with `action={formAction}` and `onSubmit={x}`, the same variable.
+  - A second test requires every `<form>` under `src/components` to carry `action` and `onSubmit` together or neither.
+  - A disconnected handler (onSubmit bound to anything else) now fails.
+- **RED first:** the tightened test failed 2/3 before the fix and passes 3/3 after. BF-58.1 suite 16/16; `tsc`, lint (9 pre-existing warnings) and build clean.
+
+Browser checks on the preview at `8eee79b`, signed in as Tim:
+
+| Check | Result |
+| --- | --- |
+| Server-rendered HTML, before JavaScript: waterways, dust log, NDEP stormwater, project edit | Each form is `method="POST"`, `enctype="multipart/form-data"`, with Next's `$ACTION` hidden input: the pre-hydration fallback exists. |
+| Rejected submit, Working in Waterways | Exactly one server-action request; no navigation, empty query string; site and four answers unchanged. |
+| Rejected submit, Daily Dust Log (new) | Exactly one server-action request; 4 dropdowns unchanged. |
+| Rejected submit, project setup (phone "123") | Exactly one server-action request; "Invalid US phone number"; typed phone, 4 permits and both site rows unchanged. |
+| Production afterwards | RNO 18 phone unchanged (`updated_at` 15:22:34Z, before this pass), 0 new submissions in the last hour. |
 
