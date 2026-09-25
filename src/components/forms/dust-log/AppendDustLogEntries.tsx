@@ -71,7 +71,7 @@ export default function AppendDustLogEntries({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-6">
+    <form action={formAction} onSubmit={submit} className="space-y-6">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="submission_id" value={submissionId} />
       <input type="hidden" name="entries" value={JSON.stringify(entries)} />

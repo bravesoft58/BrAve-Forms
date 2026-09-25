@@ -132,7 +132,7 @@ export default function ProjectForm({
   const d = defaults ?? {};
 
   return (
-    <form onSubmit={submit} className="space-y-8">
+    <form action={formAction} onSubmit={submit} className="space-y-8">
       {state.error && (
         <div ref={errorRef} role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-400">
           {state.error}

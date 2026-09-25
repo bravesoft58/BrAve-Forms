@@ -79,7 +79,7 @@ export default function WaterwaysForm({
   const errors = state.fieldErrors;
 
   return (
-    <form onSubmit={submit} className="space-y-8">
+    <form action={formAction} onSubmit={submit} className="space-y-8">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="data" value={JSON.stringify(draft)} />
 

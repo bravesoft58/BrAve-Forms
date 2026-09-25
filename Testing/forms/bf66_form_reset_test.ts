@@ -41,18 +41,35 @@ const FORM_COMPONENTS = [
 // the users invite form under src/app use <form action> with uncontrolled
 // fields only, so a reset shows exactly what would be sent (empty); that is a
 // retype-after-error annoyance, not a desync, and out of BF-66's scope.
-test("no component under src/components passes an action function to <form action>", () => {
-  const offenders = tsxFiles(join(SRC, "components")).filter((f) =>
-    /<form\b[^>]*\baction=\{/.test(readFileSync(f, "utf-8")),
-  );
+//
+// Each form keeps `action={formAction}` (verify round 1, F1): before hydration
+// the browser posts to the server action, as before BF-66. After hydration the
+// onSubmit handler calls preventDefault, and react-dom 19.2.3's form-action
+// listener then skips the action and its automatic reset (it runs a no-op host
+// transition). Without the action prop, a pre-hydration submit is a plain GET
+// that saves nothing and puts the fields in the URL.
+test("every <form> under src/components pairs its action with the no-reset onSubmit", () => {
+  const offenders = tsxFiles(join(SRC, "components")).filter((f) => {
+    const src = readFileSync(f, "utf-8");
+    return [...src.matchAll(/<form\b[^>]*>/g)].some(
+      ([tag]) => /\baction=\{/.test(tag) !== /\bonSubmit=\{/.test(tag),
+    );
+  });
   assert.deepEqual(offenders.map((f) => f.slice(SRC.length).replace(/\\/g, "/")), []);
 });
 
-test("every stateful form submits through the shared no-reset handler", () => {
+test("each stateful form wires onSubmit to the handler built from its own formAction (F2)", () => {
   for (const rel of FORM_COMPONENTS) {
     const src = readFileSync(join(SRC, rel), "utf-8");
-    assert.match(src, /useNoResetSubmit\(/, `${rel} does not use useNoResetSubmit`);
-    assert.match(src, /<form\b[^>]*\bonSubmit=\{/, `${rel} has no onSubmit on its <form>`);
+    // The variable must come from useNoResetSubmit(formAction), and the <form>
+    // must use that same variable for onSubmit and formAction for its action.
+    const hook = src.match(/const (\w+) = useNoResetSubmit\(formAction\);/);
+    assert.ok(hook, `${rel}: no \`const x = useNoResetSubmit(formAction);\``);
+    const handler = hook[1];
+    const tags = [...src.matchAll(/<form\b[^>]*>/g)].map(([t]) => t);
+    assert.equal(tags.length, 1, `${rel}: expected exactly one <form>`);
+    assert.match(tags[0], new RegExp(`\\baction=\\{formAction\\}`), `${rel}: <form> lost action={formAction}`);
+    assert.match(tags[0], new RegExp(`\\bonSubmit=\\{${handler}\\}`), `${rel}: onSubmit is not the useNoResetSubmit handler`);
   }
 });
 
