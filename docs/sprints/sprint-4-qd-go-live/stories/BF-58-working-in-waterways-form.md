@@ -1,15 +1,16 @@
 # BF-58: Working in Waters of the State daily inspection form
 
-> **SPLIT 2026-09-25T14:41:20Z (Tim):** built as [BF-58.1](BF-58.1-waterways-form-core.md) (5 SP: migration, sites, entry, view, edit) and [BF-58.2](BF-58.2-waterways-form-pdf-inspector.md) (3 SP: PDF, inspector, today indicator, Gracie sign-off). This file stays the design record both children point at; it is not worked directly.
+> **SPLIT 2026-09-25T14:41:20Z (Tim):** built as [BF-58.1](BF-58.1-waterways-form-core.md) (5 SP: migration, sites, entry, view, edit) and [BF-58.2](BF-58.2-waterways-form-pdf-inspector.md) (3 SP: PDF, inspector, today indicator, Gracie sign-off). This file stays the design record both children point at; it is not worked directly. BF-58.1 merged 2026-09-25 (`e96a8df`). When BF-58.2 closes out, set this file to DONE with the same Completed time, so sprint progress (which counts this file) can reach complete.
 
 **Type:** New form type (schema, entry, view, PDF, inspector)
 **Priority:** HIGH (needed for the Microsoft project phase; permit already advertises it)
 **Points:** 8 (5 + 3, see children; was 5)
 **Status:** SPLIT
+**Depends On:** BF-58.1 (merged), BF-58.2 (pending)
 **Sprint:** 4
 **Reported by:** Gracie Damele via Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`), sample attached as `docs/reference/WIW Daily Form.pdf`
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-25T14:41:20Z
+**Last Updated:** 2026-09-25T17:07:55Z
 
 ## Request (verbatim)
 
