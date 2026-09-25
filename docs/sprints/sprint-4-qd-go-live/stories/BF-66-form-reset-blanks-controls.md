@@ -3,11 +3,11 @@
 **Type:** Bug (shared form pattern; what the user sees differs from what is saved)
 **Priority:** HIGH (a correction can save answers the screen showed as blank; affects every live form)
 **Points:** 2
-**Status:** NOT STARTED
+**Status:** IN PROGRESS
 **Sprint:** 4
 **Reported by:** BF-58.1 signed-in preview pass, 2026-09-25 (fixed there for the new form only); filed by Tim's direction the same day
 **Created:** 2026-09-25
-**Last Updated:** 2026-09-25T17:06:44Z
+**Last Updated:** 2026-09-25T17:20:38Z
 
 ## Problem
 
@@ -41,7 +41,27 @@ If the same change repeats across seven forms, consider one small shared hook, f
 
 ## Acceptance criteria
 
-- [ ] On each affected form, a submit rejected by the server leaves every select, radio, checkbox and text field showing exactly what will be sent. Check in a browser on a preview, one screenshot per form, in `artifacts/BF-66/`.
-- [ ] On the project form, a rejected save keeps the user's typed edits.
-- [ ] A successful submit still redirects as before.
-- [ ] `pnpm build` and lint clean.
+- [x] On each affected form, a submit rejected by the server leaves every select, radio, checkbox and text field showing exactly what will be sent. Check in a browser on a preview, one screenshot per form, in `artifacts/BF-66/`.
+- [x] On the project form, a rejected save keeps the user's typed edits.
+- [x] A successful submit still redirects as before.
+- [x] `pnpm build` and lint clean.
+
+## Build vs Use
+
+**Build vs Use:** COPY. This is the React team's documented opt-out (`onSubmit` + `startTransition`, react/react#29034, verified 2026-09-25), wrapped in a small shared hook. There is no library to adopt for a 20-line handler.
+
+## Comprehensive Validation (2026-09-25T17:20:38Z)
+
+Branch `feature/BF-66-form-reset`, fix commit `ba20a46`. The shared helper is split in two: `src/lib/forms/no-reset-submit.ts` (`buildNoResetSubmit`, React-free so Node can test it) and `src/lib/forms/use-no-reset-submit.ts` (`useNoResetSubmit`, which supplies React's `startTransition`). The eight stateful forms use the hook; WaterwaysForm's inline copy from BF-58.1 is replaced by it.
+
+| # | Check | Result | Key finding |
+| --- | --- | --- | --- |
+| 1 | `Testing/forms/bf66_form_reset_test.ts` | 0/3 before the fix, 3/3 after | No `<form action={fn}>` under `src/components`; all eight forms call `useNoResetSubmit` on an `onSubmit`; the handler cancels the native submit, then runs the action inside a transition with exactly the form's own data. |
+| 2 | `Testing/forms/bf58_1_waterways_schema_test.ts` | 16/16 | No regression in BF-58.1. |
+| 3 | `tsc --noEmit`, `pnpm lint`, `pnpm build` (Node 24, pnpm 10.34.5) | PASS | 0 errors; the 9 lint warnings are pre-existing. |
+| 4 | Signed-in preview pass, one server-rejected submit per form | PASS on all 8 forms | See [artifacts/BF-66/README.md](../artifacts/BF-66/README.md). Production confirmed untouched afterwards. |
+
+**Scope note:** the auth forms (login, signup, forgot and reset password) and the users invite form still use `<form action>`. Their fields are all uncontrolled, so after a reset the screen matches what would be sent (empty). That means retyping after an error, not a desync, so it is out of this ticket's scope. The regression test documents this.
+
+**Size:** `src` +56 / -18. `project-form.tsx` is exactly 300 lines, the modularity ceiling. The next change to it should split it (for example, the permits section into its own component).
+
