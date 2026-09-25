@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
 import { useRouter } from "next/navigation";
 import { appendDustLogEntries, type DustLogState } from "@/app/dashboard/projects/[id]/forms/dust-log/actions";
 import {
@@ -51,6 +52,7 @@ export default function AppendDustLogEntries({
 }: AppendDustLogEntriesProps) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState(appendDustLogEntries, initialState);
+  const submit = useNoResetSubmit(formAction);
   const [entries, setEntries] = useState<DustLogEntry[]>([makeEmptyEntry()]);
 
   function updateEntry(index: number, field: keyof DustLogEntry, value: string) {
@@ -69,7 +71,7 @@ export default function AppendDustLogEntries({
   }
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form onSubmit={submit} className="space-y-6">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="submission_id" value={submissionId} />
       <input type="hidden" name="entries" value={JSON.stringify(entries)} />

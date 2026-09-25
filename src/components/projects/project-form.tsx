@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
 import { createProject, type ProjectState } from "@/app/dashboard/projects/actions";
 import {
   PERMIT_TYPES,
@@ -93,6 +94,7 @@ export default function ProjectForm({
 }: ProjectFormProps = {}) {
   const serverAction = action ?? createProject;
   const [state, formAction, pending] = useActionState(serverAction, initialState);
+  const submit = useNoResetSubmit(formAction);
   const errorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -130,7 +132,7 @@ export default function ProjectForm({
   const d = defaults ?? {};
 
   return (
-    <form action={formAction} className="space-y-8">
+    <form onSubmit={submit} className="space-y-8">
       {state.error && (
         <div ref={errorRef} role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-400">
           {state.error}

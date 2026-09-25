@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
 import {
   submitNnphDustPermit,
   type NnphDustPermitState,
@@ -104,6 +105,7 @@ export default function NnphDustPermitForm({
   previousData,
 }: NnphDustPermitFormProps) {
   const [state, formAction, pending] = useActionState(submitNnphDustPermit, initialState);
+  const submit = useNoResetSubmit(formAction);
   const [data, setData] = useState<NnphDustPermitData>(() => makeEmptyData(project));
   const [usedPrevious, setUsedPrevious] = useState(false);
 
@@ -123,7 +125,7 @@ export default function NnphDustPermitForm({
   }
 
   return (
-    <form action={formAction} className="space-y-8">
+    <form onSubmit={submit} className="space-y-8">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="data" value={JSON.stringify(data)} />
 

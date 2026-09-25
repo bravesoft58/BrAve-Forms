@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
 import {
   submitNdepStormwater,
   updateNdepStormwater,
@@ -101,6 +102,7 @@ export default function NdepStormwaterForm({
     ? updateNdepStormwater.bind(null, submissionId as string)
     : submitNdepStormwater;
   const [state, formAction, pending] = useActionState(action, initialState);
+  const submit = useNoResetSubmit(formAction);
   const [data, setData] = useState<NdepStormwaterData>(() =>
     initialData ?? makeEmptyData(projectName, cswNumber, location)
   );
@@ -127,7 +129,7 @@ export default function NdepStormwaterForm({
   }
 
   return (
-    <form action={formAction} className="space-y-8">
+    <form onSubmit={submit} className="space-y-8">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="data" value={JSON.stringify(data)} />
 
