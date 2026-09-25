@@ -64,7 +64,7 @@ export default function WaterwaysForm({
   const isEdit = Boolean(submissionId);
   const action = isEdit ? updateWaterways.bind(null, submissionId as string) : submitWaterways;
   const [state, formAction, pending] = useActionState(action, initialState);
-  const submit = useNoResetSubmit(formAction);
+  const { submit, ready } = useNoResetSubmit(formAction);
   const [draft, setDraft] = useState<Draft>(() => initialData ?? emptyDraft(sites));
 
   function update<K extends keyof Draft>(field: K, value: Draft[K]) {
@@ -183,10 +183,12 @@ export default function WaterwaysForm({
         )}
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || !ready}
           className="rounded-md bg-[#233B5C] px-6 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1a2d47] focus:outline-none focus:ring-2 focus:ring-[#5C6F8A] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {pending ? (isEdit ? "Saving..." : "Submitting...") : isEdit ? "Save Changes" : "Submit Inspection"}
+          {!ready
+            ? "Loading..."
+            : pending ? (isEdit ? "Saving..." : "Submitting...") : isEdit ? "Save Changes" : "Submit Inspection"}
         </button>
       </div>
     </form>

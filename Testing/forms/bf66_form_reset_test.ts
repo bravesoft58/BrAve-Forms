@@ -61,15 +61,30 @@ test("every <form> under src/components pairs its action with the no-reset onSub
 test("each stateful form wires onSubmit to the handler built from its own formAction (F2)", () => {
   for (const rel of FORM_COMPONENTS) {
     const src = readFileSync(join(SRC, rel), "utf-8");
-    // The variable must come from useNoResetSubmit(formAction), and the <form>
+    // The handler must come from useNoResetSubmit(formAction), and the <form>
     // must use that same variable for onSubmit and formAction for its action.
-    const hook = src.match(/const (\w+) = useNoResetSubmit\(formAction\);/);
-    assert.ok(hook, `${rel}: no \`const x = useNoResetSubmit(formAction);\``);
-    const handler = hook[1];
+    const hook = src.match(/const \{ submit: (\w+), ready \} = useNoResetSubmit\(formAction\);|const \{ (submit), ready \} = useNoResetSubmit\(formAction\);/);
+    assert.ok(hook, `${rel}: no \`const { submit, ready } = useNoResetSubmit(formAction);\``);
+    const handler = hook[1] ?? hook[2];
     const tags = [...src.matchAll(/<form\b[^>]*>/g)].map(([t]) => t);
     assert.equal(tags.length, 1, `${rel}: expected exactly one <form>`);
     assert.match(tags[0], new RegExp(`\\baction=\\{formAction\\}`), `${rel}: <form> lost action={formAction}`);
     assert.match(tags[0], new RegExp(`\\bonSubmit=\\{${handler}\\}`), `${rel}: onSubmit is not the useNoResetSubmit handler`);
+  }
+});
+
+// Verify round 2, F3: these forms send one hidden JSON field built from React
+// state. Before hydration that field still holds the server-rendered values, so
+// a pre-hydration POST would save the old answers while the screen shows the
+// new ones. Submit stays disabled until the page has hydrated. Each form has
+// exactly one submit button (the form's default button), so disabling it also
+// blocks implicit submission with the Enter key.
+test("each stateful form's single submit button is disabled until hydrated (F3)", () => {
+  for (const rel of FORM_COMPONENTS) {
+    const src = readFileSync(join(SRC, rel), "utf-8");
+    const buttons = [...src.matchAll(/<button\b[\s\S]*?>/g)].map(([t]) => t).filter((t) => /type="submit"/.test(t));
+    assert.equal(buttons.length, 1, `${rel}: expected exactly one submit button`);
+    assert.match(buttons[0], /disabled=\{pending \|\| !ready\}/, `${rel}: submit is not gated on hydration`);
   }
 });
 

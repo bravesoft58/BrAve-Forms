@@ -105,7 +105,7 @@ export default function NdepSadApplication({
   previousData,
 }: NdepSadApplicationProps) {
   const [state, formAction, pending] = useActionState(submitNdepSad, initialState);
-  const submit = useNoResetSubmit(formAction);
+  const { submit, ready } = useNoResetSubmit(formAction);
   const [data, setData] = useState<NdepSadData>(() => makeEmptyData(project));
   const [usedPrevious, setUsedPrevious] = useState(false);
 
@@ -220,10 +220,12 @@ export default function NdepSadApplication({
       <div className="flex items-center gap-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || !ready}
           className="rounded-md bg-[#233B5C] px-6 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1a2d47] focus:outline-none focus:ring-2 focus:ring-[#5C6F8A] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {pending ? "Submitting..." : "Submit Application"}
+          {!ready
+            ? "Loading..."
+            : pending ? "Submitting..." : "Submit Application"}
         </button>
       </div>
     </form>
