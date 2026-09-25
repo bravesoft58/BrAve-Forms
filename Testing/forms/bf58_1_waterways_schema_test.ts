@@ -6,11 +6,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { pacificTime, pacificToday } from "@/lib/dates";
-import * as formPhoto from "@/lib/schemas/form-photo";
-const { photoSchema } = formPhoto;
-// Looked up at call time so a missing export fails its own test, not the whole file.
-const removedPhotoNames = (...args: unknown[]) =>
-  (formPhoto as unknown as Record<string, (...a: unknown[]) => unknown>).removedPhotoNames(...args);
+import { photoSchema } from "@/lib/schemas/form-photo";
 import { projectCreateSchema } from "@/lib/schemas/project";
 import {
   readProjectSites,
@@ -158,15 +154,21 @@ test("resolveSite: an edit that keeps the site keeps the record's own descriptor
   assert.deepEqual(resolveSite("Eastern Drainage", two, snapshot), { name: "Eastern Drainage", descriptor: "east culvert" });
 });
 
-test("removedPhotoNames: only the stored photos the edit dropped, and only valid names", () => {
-  const a = { ...photo, file_name: "1758800000000-aaaaaa.jpg" };
-  const b = { ...photo, file_name: "1758800000000-bbbbbb.jpg" };
-  const c = { ...photo, file_name: "1758800000000-cccccc.jpg" };
-  assert.deepEqual(removedPhotoNames([a, b], [b, c]), ["1758800000000-aaaaaa.jpg"]);
-  assert.deepEqual(removedPhotoNames([a, b], [a, b]), []);
-  // Stored data is not trusted to be well formed: junk never becomes a delete path.
-  assert.deepEqual(removedPhotoNames([{ file_name: "../../x/y.jpg" }, null, "str", a], []), ["1758800000000-aaaaaa.jpg"]);
-  assert.deepEqual(removedPhotoNames(undefined, [a]), []);
+test("no form path deletes photo files from Storage (Codex round 2)", async () => {
+  // A photo file is never deleted by the form or its actions: stale tabs and
+  // saves still in flight can each re-reference a photo, so a delete here can
+  // leave a saved record pointing at a missing file. An unreferenced file is
+  // harmless; cleanup belongs in a separate reference-aware job.
+  const { readFileSync } = await import("node:fs");
+  const root = new URL("../../", import.meta.url);
+  for (const rel of [
+    "src/components/forms/shared/PhotoAttachment.tsx",
+    "src/app/dashboard/projects/[id]/forms/working-in-waterways/actions.ts",
+    "src/components/forms/working-in-waterways/WaterwaysForm.tsx",
+  ]) {
+    const src = readFileSync(new URL(rel, root), "utf-8");
+    assert.equal(/\.storage[\s\S]{0,120}?\.remove\(/.test(src), false, `${rel} deletes from Storage`);
+  }
 });
 
 test("readProjectSites treats malformed stored values as no sites", () => {

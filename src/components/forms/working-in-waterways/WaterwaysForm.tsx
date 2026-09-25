@@ -174,6 +174,7 @@ export default function WaterwaysForm({
           photos={draft.photos}
           onPhotosChange={(photos) => update("photos", photos)}
           storagePath={`projects/${projectId}/working-in-waterways`}
+          disabled={pending}
         />
         <FieldError errors={errors} field="photos" />
       </section>

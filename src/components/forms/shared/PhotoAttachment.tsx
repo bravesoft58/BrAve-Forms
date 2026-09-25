@@ -12,6 +12,8 @@ interface PhotoAttachmentProps {
   onPhotosChange: (photos: FormPhoto[]) => void;
   storagePath: string; // e.g. "projects/{id}/ndot-stormwater"
   maxPhotos?: number;
+  /** Locks add, remove and caption edits, e.g. while the form is saving. */
+  disabled?: boolean;
 }
 
 const BUCKET = "form-attachments";
@@ -27,6 +29,7 @@ export default function PhotoAttachment({
   onPhotosChange,
   storagePath,
   maxPhotos = 10,
+  disabled = false,
 }: PhotoAttachmentProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -34,10 +37,6 @@ export default function PhotoAttachment({
   // Render-time signed URLs keyed by file_name. Not persisted to JSONB —
   // BF-32 dropped `photo.url` from the storage contract.
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
-  // Files uploaded in this visit and not yet saved with the form. Only these are
-  // deleted from storage on Remove; a photo already saved with the submission
-  // stays until the edit is saved, so Cancel or a rejected save cannot destroy it.
-  const uploadedHere = useRef<Set<string>>(new Set());
 
   // Sign any photos we don't yet have a preview for (covers both newly
   // uploaded photos and edits that load existing photos from JSONB).
@@ -103,7 +102,6 @@ export default function PhotoAttachment({
           break;
         }
 
-        uploadedHere.current.add(fileName);
         newPhotos.push({
           caption: "",
           file_name: fileName,
@@ -127,19 +125,12 @@ export default function PhotoAttachment({
     onPhotosChange(updated);
   }
 
-  async function removePhoto(index: number) {
-    const photo = photos[index];
+  // Remove only drops the photo from the draft; the file stays in Storage.
+  // Deleting here can strand a saved record: another tab's save, or a save
+  // already in flight, may still reference the file. An unreferenced file is
+  // harmless, and cleanup belongs in a reference-aware job (BF-58.1, Codex r2).
+  function removePhoto(index: number) {
     onPhotosChange(photos.filter((_, i) => i !== index));
-    if (!uploadedHere.current.has(photo.file_name)) return;
-    uploadedHere.current.delete(photo.file_name);
-    // An unsaved upload: delete it now (best-effort — don't block UI on failure)
-    try {
-      const supabase = createClient();
-      const filePath = `${storagePath}/${photo.file_name}`;
-      await supabase.storage.from(BUCKET).remove([filePath]);
-    } catch (err) {
-      console.error("Storage cleanup failed:", err);
-    }
   }
 
   return (
@@ -160,12 +151,12 @@ export default function PhotoAttachment({
           multiple
           className="hidden"
           onChange={(e) => handleFiles(e.target.files)}
-          disabled={uploading || photos.length >= maxPhotos}
+          disabled={disabled || uploading || photos.length >= maxPhotos}
         />
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          disabled={uploading || photos.length >= maxPhotos}
+          disabled={disabled || uploading || photos.length >= maxPhotos}
           className="inline-flex items-center gap-2 rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
         >
           {uploading ? (
@@ -195,7 +186,8 @@ export default function PhotoAttachment({
               <button
                 type="button"
                 onClick={() => removePhoto(i)}
-                className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white shadow-sm hover:bg-red-600"
+                disabled={disabled}
+                className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white shadow-sm hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label={`Remove photo ${i + 1}`}
               >
                 <X className="h-3 w-3" />
@@ -217,6 +209,7 @@ export default function PhotoAttachment({
                   type="text"
                   value={photo.caption}
                   onChange={(e) => updateCaption(i, e.target.value)}
+                  disabled={disabled}
                   placeholder="Describe the photo..."
                   className={inputClass}
                 />

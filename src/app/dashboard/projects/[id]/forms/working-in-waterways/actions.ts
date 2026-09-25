@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { collectFieldErrors } from "@/lib/forms/field-errors";
-import { removedPhotoNames } from "@/lib/schemas/form-photo";
 import {
   parseWaterwaysForm,
   readProjectSites,
@@ -155,17 +154,6 @@ export async function updateWaterways(
   if (!updated) return { error: "You do not have permission to edit this submission." };
 
   await replacePhotoRows(supabase, submissionId, data);
-
-  // PhotoAttachment leaves saved photos in storage when they are removed in the
-  // form, so a cancelled or rejected edit cannot destroy them. Now that the edit
-  // has saved, delete the ones it dropped (best-effort: an orphaned file is
-  // harmless, a record pointing at a deleted file is not).
-  const dropped = removedPhotoNames(stored?.photos, data.photos);
-  if (dropped.length > 0) {
-    await supabase.storage
-      .from("form-attachments")
-      .remove(dropped.map((name) => `projects/${projectId}/working-in-waterways/${name}`));
-  }
 
   const viewPath = `/dashboard/projects/${projectId}/forms/working-in-waterways/${submissionId}`;
   revalidatePath(`/dashboard/projects/${projectId}`);
