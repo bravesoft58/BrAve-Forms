@@ -1,5 +1,5 @@
 -- BF-58.1: Working in Waterways form type and per-project waterway sites
--- Pair: supabase/migrations/_rollback/PENDING_rollback.sql
+-- Pair: supabase/migrations/_rollback/20260925151239_rollback.sql
 --
 -- 1. projects.waterway_sites: the project's fixed list of waterway locations,
 --    a JSON array of {name, descriptor}. Only admins write it, through

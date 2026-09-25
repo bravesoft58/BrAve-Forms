@@ -1,5 +1,5 @@
 -- BF-58.1 ROLLBACK: remove the Working in Waterways form type and site list.
--- Pair: supabase/migrations/PENDING_working_in_waterways.sql
+-- Pair: supabase/migrations/20260925151239_working_in_waterways.sql
 --
 -- DESTRUCTIVE: deletes every working_in_waterways submission (and its
 -- form_photos rows through the FK cascade) and every project's waterway site
