@@ -1,5 +1,5 @@
 -- BF-60 ROLLBACK: restore the pre-BF-60 grants, policies and default privileges.
--- Pair: supabase/migrations/20260928192919_default_table_grants.sql
+-- Pair: supabase/migrations/20260928194436_default_table_grants.sql
 --
 -- Restores Supabase's defaults exactly as read from production on 2026-09-28:
 -- full table privileges for anon and authenticated on the 12 tables, the two

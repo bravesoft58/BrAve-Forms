@@ -13,8 +13,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-MIGRATION = ROOT / "supabase/migrations/20260928192919_default_table_grants.sql"
-ROLLBACK = ROOT / "supabase/migrations/_rollback/20260928192919_rollback.sql"
+MIGRATION = ROOT / "supabase/migrations/20260928194436_default_table_grants.sql"
+ROLLBACK = ROOT / "supabase/migrations/_rollback/20260928194436_rollback.sql"
 PROBE = ROOT / "Testing/security/bf60_grants_probe.sql"
 MIGRATION_MARKER = "      -- @@MIGRATION@@"
 ROLLBACK_MARKER = "  -- @@ROLLBACK@@"

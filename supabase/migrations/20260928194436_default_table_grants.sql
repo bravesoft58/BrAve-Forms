@@ -1,5 +1,5 @@
 -- BF-60: Tighten Supabase default grants across the public schema
--- Pair: supabase/migrations/_rollback/20260928192919_rollback.sql
+-- Pair: supabase/migrations/_rollback/20260928194436_rollback.sql
 --
 -- Before this migration anon and authenticated held every table privilege
 -- (SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER) on 12 public
