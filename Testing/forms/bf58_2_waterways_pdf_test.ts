@@ -50,6 +50,15 @@ function pdfText(buf: Buffer): string {
   return text;
 }
 
+const LOGO_SIZE = "288x153";
+const PHOTO_SIZE = "941x448"; // the BF-58.1 screenshot used as the fixture photo
+
+/** Width x height of every image object embedded in the PDF. */
+function imageSizes(buf: Buffer): string[] {
+  const raw = buf.toString("latin1");
+  return [...raw.matchAll(/\/Subtype \/Image[\s\S]{0,200}?\/Width (\d+)\s*\/Height (\d+)/g)].map((m) => `${m[1]}x${m[2]}`);
+}
+
 async function renderSample(data: Record<string, unknown>): Promise<Buffer> {
   const element = getPdfComponent("working_in_waterways")({
     data,
@@ -92,19 +101,19 @@ test("the Waterways PDF shows every field, answer, comment and the photo", async
   const lines = text.split("\n");
   const answerAfter = (label: string) => lines[lines.indexOf(label) + 1];
   assert.equal(answerAfter("Is there water in the waterway?"), "Yes");
-  assert.equal(answerAfter("Daily vehicle inspection"), "Pass");
-  assert.equal(answerAfter("BMPs visual inspection"), "Fail");
-  assert.equal(answerAfter("Visible sheen or plume?"), "N/A");
+  assert.equal(answerAfter("Daily Vehicle Inspection"), "Pass");
+  assert.equal(answerAfter("BMPs Visual Inspection"), "Fail");
+  assert.equal(answerAfter("Visible sheen/plume?"), "N/A");
 
-  // The photo is embedded as an image object, not just captioned.
-  assert.match(buf.toString("latin1"), /\/Subtype \/Image/);
+  // Two images: Q&D's logo (288x153, from their paper form) and the photo.
+  assert.deepEqual(imageSizes(buf).sort(), [LOGO_SIZE, PHOTO_SIZE].sort());
 });
 
 test("a photo whose signed URL is missing renders a placeholder, not a crash", async () => {
   const buf = await renderSample({ ...sample, photos: [{ file_name: "x.jpg", url: "" }] });
   const text = pdfText(buf);
   assert.ok(text.includes("Photo unavailable"));
-  assert.doesNotMatch(buf.toString("latin1"), /\/Subtype \/Image/);
+  assert.deepEqual(imageSizes(buf), [LOGO_SIZE]); // the logo only
 });
 
 test("the PDF route and the inspector sign Waterways photos from the form's own folder", () => {

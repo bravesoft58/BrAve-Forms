@@ -22,13 +22,14 @@ export type WaterwaySite = z.infer<typeof waterwaySiteSchema>;
 
 // --- The daily inspection form ---
 
+// Labels are worded as on Q&D's paper form (docs/reference/WIW Daily Form.pdf).
 // Gracie, 2026-09-24: the paper form's "Photo taken?" row is dropped because
 // photos are attached directly; at least one photo is required instead.
 export const WATERWAY_CHECKS = [
   { key: "water_in_waterway", label: "Is there water in the waterway?", options: ["Yes", "No"] },
-  { key: "vehicle_inspection", label: "Daily vehicle inspection", options: ["Pass", "Fail"] },
-  { key: "bmp_inspection", label: "BMPs visual inspection", options: ["Pass", "Fail"] },
-  { key: "sheen_or_plume", label: "Visible sheen or plume?", options: ["Yes", "No", "N/A"] },
+  { key: "vehicle_inspection", label: "Daily Vehicle Inspection", options: ["Pass", "Fail"] },
+  { key: "bmp_inspection", label: "BMPs Visual Inspection", options: ["Pass", "Fail"] },
+  { key: "sheen_or_plume", label: "Visible sheen/plume?", options: ["Yes", "No", "N/A"] },
 ] as const;
 
 export type WaterwayCheckKey = (typeof WATERWAY_CHECKS)[number]["key"];

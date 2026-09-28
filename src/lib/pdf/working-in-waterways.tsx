@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image } from "@react-pdf/renderer";
 import { FormDocument, Section, FieldRow, Field, s, colors } from "./primitives";
 import { WATERWAY_CHECKS, type WaterwaysData } from "@/lib/schemas/waterways";
+import { QD_LOGO_PNG } from "./qd-logo";
 
 interface Props {
   data: Partial<WaterwaysData> & { photos?: Array<{ file_name?: string; url?: string; caption?: string }> };
@@ -21,8 +22,11 @@ export function WorkingInWaterwaysPdf({ data, projectName, formDate }: Props) {
 
   return (
     <FormDocument title={`Working in Waterways - ${projectName} - ${formDate}`}>
+      <View style={{ alignItems: "center", marginBottom: 6 }}>
+        <Image src={QD_LOGO_PNG} style={{ width: 110, height: 58.4 }} />
+      </View>
       <View style={s.titleBanner}>
-        <Text style={s.titleText}>Q&amp;D Construction &mdash; Working in Waters of the State Daily Inspection</Text>
+        <Text style={s.titleText}>Working in Waters of the State Daily Inspection</Text>
       </View>
 
       <FieldRow>
@@ -55,7 +59,7 @@ export function WorkingInWaterwaysPdf({ data, projectName, formDate }: Props) {
         );
       })}
 
-      <Section title="Equipment in Use" />
+      <Section title="Equipment in use in and around waterway today" />
       <View style={[s.mb8, { minHeight: 30 }]}>
         <Text>{data.equipment_in_use || "None listed"}</Text>
       </View>
