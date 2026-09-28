@@ -1,5 +1,5 @@
 -- BF-65 ROLLBACK: remove the submission idempotency key.
--- Pair: supabase/migrations/20260928172044_submission_client_key.sql
+-- Pair: supabase/migrations/20260928172859_submission_client_key.sql
 --
 -- ORDER MATTERS: revert the app code first (deploy the commit before BF-65).
 -- The BF-65 server actions write client_key on every new submission, so

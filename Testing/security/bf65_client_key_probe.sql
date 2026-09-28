@@ -100,9 +100,13 @@ BEGIN
   IF st = 'ok' THEN r := r || 'PASS T6 another user can use the same key value: keys never collide across users' || E'\n';
   ELSE r := r || format('FAIL T6 other user same key gave %s', st) || E'\n'; fails := fails + 1; END IF;
 
-  SELECT count(*) INTO n FROM public.form_submissions WHERE submitted_by = admin AND client_key = k AND id = sub1;
-  IF n = 0 THEN r := r || 'PASS T7 the other user''s lookup by (self, key) cannot reach the first user''s row' || E'\n';
-  ELSE r := r || 'FAIL T7 lookup crossed users' || E'\n'; fails := fails + 1; END IF;
+  -- The admin can SELECT the member's row (same org), so this proves the
+  -- submitter filter, not RLS, keeps the lookup on the admin's own row.
+  SELECT count(*), max(id::text)::uuid INTO n, hit FROM public.form_submissions WHERE submitted_by = admin AND client_key = k;
+  SELECT count(*) INTO st FROM public.form_submissions WHERE id = sub1;
+  IF n = 1 AND hit <> sub1 AND st = '1' THEN
+    r := r || 'PASS T7 the other user''s lookup by (self, key) gets only their own row, though the first user''s row is visible to them' || E'\n';
+  ELSE r := r || format('FAIL T7 admin lookup n=%s hit=%s, member row visible=%s', n, hit, st) || E'\n'; fails := fails + 1; END IF;
 
   RESET ROLE;
   PERFORM set_config('request.jwt.claims', '', true);

@@ -1,5 +1,5 @@
 -- BF-65: idempotent form submission (no duplicate inspections on retry)
--- Pair: supabase/migrations/_rollback/20260928172044_rollback.sql
+-- Pair: supabase/migrations/_rollback/20260928172859_rollback.sql
 --
 -- The browser makes a random key (crypto.randomUUID) the first time a new
 -- entry is submitted and sends the same key on every retry of that submit.
