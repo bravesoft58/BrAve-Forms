@@ -3,12 +3,13 @@
 **Type:** Record integrity (shared form-action layer)
 **Priority:** MEDIUM (needs a lost response plus a retry; field connectivity makes that plausible)
 **Points:** 2 (+2 for bundled [BF-61](BF-61-submission-edit-concurrency.md))
-**Status:** IN PROGRESS
+**Status:** DONE
 **Sprint:** 4 (backlog)
 **Reported by:** BF-58.1 `/verify` round 1 (finding C2, headless verify with Codex reconciled), filed at closeout 2026-09-25
 **Created:** 2026-09-25
 **Started:** 2026-09-28T17:20:44Z
-**Last Updated:** 2026-09-28T18:36:55Z
+**Completed:** 2026-09-28T18:51:28Z
+**Last Updated:** 2026-09-28T18:51:28Z
 
 > **BUNDLED WITH BF-61, 2026-09-28 (Tim: "bundle it if it makes sense").** One branch, one verify and one closeout cover both. The two meet at one point: once edits are guarded by the version they loaded, a retried edit whose first attempt already landed must succeed rather than be refused as a conflict, and that check is this story's same-content comparison. BF-61's acceptance criteria are copied below; its file is set to DONE by hand at this story's closeout.
 
@@ -167,3 +168,12 @@ Verify round 1: NEEDS ATTENTION 7.5 (`verify-BF-65-20260928-181537`). Two findin
   4. `1968d579` was then deleted under Tim's go for preview TEST records.
 
 **C2 (medium): not fixed here; to be filed at closeout.** An edit sent without a version (an old browser bundle during a deploy, or a crafted request) skips the BF-61 check, which the code documents as intentional backwards compatibility. The follow-up is to require the version once the deploy window has passed.
+
+## Verify round 2 — PASS (2026-09-28T18:51:28Z)
+
+Round 2 fix verification (headless `/verify`, Codex reconciled), verdict **PASS**, score 9.4/10. Two-round cap: this is the final automated round.
+
+- **C1 (high) — FIXED.** Both reviewers confirm. `appendRetryState` (`submission-writes.ts:41-49`) filters the entries stored under the append key and compares them against the batch being sent (`sameData`, key-order-insensitive); `appendDustLogEntries` (`dust-log/actions.ts:109-111`) returns `APPEND_ALREADY_SAVED_ERROR` on `changed` **before any write**, breaks only on an exact `replay`, and appends only on `new` — the same content rule as the create path. Unit test 13 asserts new/replay/changed/added-entry/no-key; the 15-test suite passes 15/15. Codex round-2 mocked-action probes reproduced changed-batch rejection and safe identical retries. No new critical/high introduced by the fix (the diff touches only `appendRetryState` + its wiring; `updateSubmissionIfUnchanged` is untouched).
+- **C2 (medium) — carried forward, unfixed, filed at closeout.** Both reviewers label it medium; bounded (every current edit page passes `submission.updated_at`; RLS still scopes the write, so no privilege escalation). Codex's wrapper verdict was `needs-attention` asking C2 be resolved, but the computed verdict rule treats an unfixed medium as PASS-with-ticket. Follow-up ticket at closeout: require the version once the deploy window has passed.
+
+Machine stamp: `BF-65 PASS 9.4/10` recorded to the pipeline ledger (round 2). Note for closeout: the verify stamp bound a dirty working tree (the pre-existing untracked `.mcp.json`, not part of this story) — reconcile at merge.
