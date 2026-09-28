@@ -5,12 +5,15 @@
 **Type:** Record integrity (shared edit model)
 **Priority:** MEDIUM (pilot-scale collision risk is low; grows with users)
 **Points:** 2
-**Status:** IN PROGRESS
+**Status:** DONE
 **Sprint:** 4 (backlog)
 **Reported by:** BF-57 verify round 2, Codex adversarial review (confidence 0.99), filed 2026-09-22
 **Created:** 2026-09-22
 **Started:** 2026-09-28T17:29:54Z
-**Last Updated:** 2026-09-28T17:29:54Z
+**Completed:** 2026-09-28T18:51:28Z
+**Last Updated:** 2026-09-28T18:56:51Z
+
+> **Closed with BF-65, 2026-09-28T18:56:51Z:** merged `9cf1519` (verify round 2 PASS 9.4). All five ACs below were met; the evidence is in [BF-65](BF-65-submission-idempotency.md) (two-tab conflict, artifact 02; SQL probe T5). The deploy-window gap, where a request without a version skips the check, is filed as [BF-69](BF-69-require-edit-version.md).
 
 ## Problem
 
@@ -27,11 +30,11 @@ Tim's decision 2026-09-22: accept last-writer-wins for the Q&D pilot (about a do
 
 ## Acceptance criteria
 
-- [ ] A save against a submission that changed since it was loaded is refused with a conflict message, and the earlier save is intact.
-- [ ] A permission failure and a conflict are reported as different messages.
-- [ ] Every in-place edit action uses the same check (no per-form drift).
-- [ ] A normal single-editor save is unchanged for the user.
-- [ ] Evidence recorded here.
+- [x] A save against a submission that changed since it was loaded is refused with a conflict message, and the earlier save is intact.
+- [x] A permission failure and a conflict are reported as different messages.
+- [x] Every in-place edit action uses the same check (no per-form drift).
+- [x] A normal single-editor save is unchanged for the user.
+- [x] Evidence recorded here (in BF-65, which delivered this story).
 
 ## Notes
 
