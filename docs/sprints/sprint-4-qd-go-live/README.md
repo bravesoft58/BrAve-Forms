@@ -24,7 +24,7 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-58.1](stories/BF-58.1-waterways-form-core.md) | Working in Waterways form, core: sites, entry, view, edit | 5 | HIGH | Add Working In Waterways forms | DONE (merged `e96a8df`) |
 | [BF-58.2](stories/BF-58.2-waterways-form-pdf-inspector.md) | Working in Waterways form: PDF, inspector view, today indicator, Gracie sign-off | 3 | HIGH | Add Working In Waterways forms | DONE (merged `1f559b4`) |
 | [BF-59](stories/BF-59-profile-role-self-promotion.md) | Close the profile role self-promotion path | 2 | CRITICAL | (readiness blocker 1, added by Tim) | DONE (merged `125e1ab`) |
-| [BF-60](stories/BF-60-default-table-grants.md) | Tighten Supabase default table grants across the public schema | 2 | HIGH | (BF-59 verify follow-up) | DONE (merged `b2b2aa6`) |
+| [BF-60](stories/BF-60-default-table-grants.md) | Tighten Supabase default table grants across the public schema | 3 | HIGH | (BF-59 verify follow-up) | DONE (merged `b2b2aa6`) |
 | [BF-61](stories/BF-61-submission-edit-concurrency.md) | Optimistic concurrency on submission edits | 2 | MEDIUM | (BF-57 verify follow-up; last-writer-wins accepted for the pilot) | DONE (with BF-65, merged `9cf1519`) |
 | [BF-62](stories/BF-62-nextjs-security-upgrade.md) | Upgrade Next.js out of the 2026 advisory ranges, on Node 24 and pnpm 10 | 3 | HIGH | (BF-56 scout finding; Tim 2026-09-23, before BF-56; Node 24 + pnpm 10 added 2026-09-24) | DONE (merged `1dc0bab`) |
 | [BF-63](stories/BF-63-submission-revision-history.md) | Append-only revision history for form submissions | 2 | HIGH | (Tim, 2026-09-25, record integrity) | DONE (merged `85f0f23`) |
@@ -34,7 +34,7 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-67](stories/BF-67-lock-fields-until-hydrated.md) | Lock form fields until the page has hydrated | 1 | MEDIUM | (BF-66 verify follow-up F4) | NOT STARTED |
 | [BF-68](stories/BF-68-pdf-photo-drop-fails-silently.md) | Photo PDFs must never drop a photo silently (WebP, failed fetch) | 2 | MEDIUM | (BF-58.2 verify follow-up C1) | NOT STARTED |
 | [BF-69](stories/BF-69-require-edit-version.md) | Require the loaded version on every submission edit | 1 | LOW | (BF-65 verify follow-up C2) | NOT STARTED |
-| **Total** | | **35** | | | **13/18 DONE** |
+| **Total** | | **36** | | | **13/18 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
