@@ -1,5 +1,19 @@
-import { startTransition, useMemo, useSyncExternalStore } from "react";
+import { startTransition, useMemo, useRef, useSyncExternalStore } from "react";
+import { unstable_rethrow } from "next/navigation";
 import { buildNoResetSubmit } from "@/lib/forms/no-reset-submit";
+import { catchLostReply } from "@/lib/forms/lost-reply";
+
+/**
+ * Pass the server action through this before useActionState:
+ *   useActionState(keepFormOnLostReply(submitX), initialState)
+ * A lost reply then shows as an error on the form, which stays mounted with
+ * its idempotency key, instead of Next's error page (BF-65).
+ */
+export function keepFormOnLostReply<S extends { error: string }>(
+  action: (state: S, formData: FormData) => Promise<S>,
+) {
+  return catchLostReply(action, unstable_rethrow);
+}
 
 const subscribeNever = () => () => {};
 
@@ -21,7 +35,14 @@ const subscribeNever = () => () => {};
  * client without a hydration mismatch.
  */
 export function useNoResetSubmit(action: (formData: FormData) => void) {
-  const submit = useMemo(() => buildNoResetSubmit(action, startTransition), [action]);
+  // BF-65: made on the first submit and kept while the form is mounted, so a
+  // retry after a lost reply resends the same key. Pages unmount on
+  // navigation, so a new visit (including browser Back) gets a new key.
+  const key = useRef<string | null>(null);
+  const submit = useMemo(
+    () => buildNoResetSubmit(action, startTransition, undefined, () => (key.current ??= crypto.randomUUID())),
+    [action],
+  );
   const ready = useSyncExternalStore(subscribeNever, () => true, () => false);
   return { submit, ready };
 }

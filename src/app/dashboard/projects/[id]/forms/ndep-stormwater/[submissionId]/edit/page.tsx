@@ -52,6 +52,7 @@ export default async function EditNdepStormwaterPage({
         location={project.address ?? ""}
         submissionId={submissionId}
         initialData={initialData}
+        version={submission.updated_at}
         cancelHref={`/dashboard/projects/${id}/forms/ndep-stormwater/${submissionId}`}
       />
     </div>

@@ -6,6 +6,12 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { collectFieldErrors } from "@/lib/forms/field-errors";
 import {
+  insertSubmissionOnce,
+  readClientKey,
+  readVersion,
+  updateSubmissionIfUnchanged,
+} from "@/lib/forms/submission-writes";
+import {
   parseWaterwaysForm,
   readProjectSites,
   resolveSite,
@@ -73,25 +79,15 @@ export async function submitWaterways(
 
   const data: WaterwaysData = { ...result.data, site_name: site.name, site_descriptor: site.descriptor };
 
-  const { data: submission, error: insertError } = await supabase
-    .from("form_submissions")
-    .insert({
-      project_id: projectId,
-      form_type: FORM_TYPE,
-      data,
-      form_date: data.inspection_date,
-      status: "submitted",
-      submitted_by: user.id,
-      submitted_at: new Date().toISOString(),
-    })
-    .select("id")
-    .single();
+  const saved = await insertSubmissionOnce(
+    supabase,
+    { project_id: projectId, form_type: FORM_TYPE, data, form_date: data.inspection_date, submitted_by: user.id },
+    readClientKey(formData),
+  );
+  if (!saved.ok) return { error: saved.error };
 
-  if (insertError || !submission) {
-    return { error: insertError?.message ?? "Failed to create submission." };
-  }
-
-  await replacePhotoRows(supabase, submission.id, data);
+  // A replay's first attempt already wrote the photo rows.
+  if (!saved.replay) await replacePhotoRows(supabase, saved.id, data);
 
   revalidatePath(`/dashboard/projects/${projectId}`);
   redirect(`/dashboard/projects/${projectId}?tab=${FORM_TYPE}`);
@@ -139,21 +135,16 @@ export async function updateWaterways(
 
   const data: WaterwaysData = { ...result.data, site_name: site.name, site_descriptor: site.descriptor };
 
-  // An RLS-denied UPDATE affects zero rows without raising, so select the row back
-  // and treat "nothing came back" as a rejection rather than a silent no-op.
-  const { data: updated, error: updateError } = await supabase
-    .from("form_submissions")
-    .update({ data, form_date: data.inspection_date })
-    .eq("id", submissionId)
-    .eq("project_id", projectId)
-    .eq("form_type", FORM_TYPE)
-    .select("id")
-    .maybeSingle();
+  const saved = await updateSubmissionIfUnchanged(
+    supabase,
+    { id: submissionId, project_id: projectId, form_type: FORM_TYPE },
+    { data, form_date: data.inspection_date },
+    readVersion(formData),
+  );
+  if (!saved.ok) return { error: saved.error };
 
-  if (updateError) return { error: updateError.message };
-  if (!updated) return { error: "You do not have permission to edit this submission." };
-
-  await replacePhotoRows(supabase, submissionId, data);
+  // A replay's first attempt already replaced the photo rows.
+  if (!saved.replay) await replacePhotoRows(supabase, submissionId, data);
 
   const viewPath = `/dashboard/projects/${projectId}/forms/working-in-waterways/${submissionId}`;
   revalidatePath(`/dashboard/projects/${projectId}`);

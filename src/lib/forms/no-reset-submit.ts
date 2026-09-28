@@ -15,10 +15,13 @@ export function buildNoResetSubmit(
   action: FormActionFn,
   runInTransition: (fn: () => void) => void,
   readForm: (form: HTMLFormElement) => FormData = (form) => new FormData(form),
+  // BF-65: the submit's idempotency key, the same value on every retry.
+  clientKey?: () => string,
 ) {
   return (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = readForm(event.currentTarget);
+    if (clientKey) formData.set("client_key", clientKey());
     runInTransition(() => action(formData));
   };
 }

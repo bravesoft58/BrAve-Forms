@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { collectFieldErrors } from "@/lib/forms/field-errors";
+import { insertSubmissionOnce, readClientKey } from "@/lib/forms/submission-writes";
 import { nnphDustPermitSchema, parseNnphDustPermitForm } from "@/lib/schemas/nnph-dust-permit";
 
 export type NnphDustPermitState = {
@@ -36,20 +37,13 @@ export async function submitNnphDustPermit(
   const data = result.data;
   const supabase = await createClient();
 
-  const { error: insertError } = await supabase
-    .from("form_submissions")
-    .insert({
-      project_id: projectId,
-      form_type: "nnph_dust_permit",
-      data,
-      form_date: data.signature_date,
-      status: "submitted",
-      submitted_by: user.id,
-      submitted_at: new Date().toISOString(),
-    });
-
-  if (insertError) {
-    return { error: insertError.message };
+  const saved = await insertSubmissionOnce(
+    supabase,
+    { project_id: projectId, form_type: "nnph_dust_permit", data, form_date: data.signature_date, submitted_by: user.id },
+    readClientKey(formData),
+  );
+  if (!saved.ok) {
+    return { error: saved.error };
   }
 
   revalidatePath(`/dashboard/projects/${projectId}`);

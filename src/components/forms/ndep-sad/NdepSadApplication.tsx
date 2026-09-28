@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
+import { keepFormOnLostReply, useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
 import {
   submitNdepSad,
   type NdepSadState,
@@ -104,7 +104,7 @@ export default function NdepSadApplication({
   project,
   previousData,
 }: NdepSadApplicationProps) {
-  const [state, formAction, pending] = useActionState(submitNdepSad, initialState);
+  const [state, formAction, pending] = useActionState(keepFormOnLostReply(submitNdepSad), initialState);
   const { submit, ready } = useNoResetSubmit(formAction);
   const [data, setData] = useState<NdepSadData>(() => makeEmptyData(project));
   const [usedPrevious, setUsedPrevious] = useState(false);

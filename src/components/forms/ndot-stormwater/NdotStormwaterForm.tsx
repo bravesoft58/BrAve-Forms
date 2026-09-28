@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
+import { keepFormOnLostReply, useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
 import {
   submitNdotStormwater,
   updateNdotStormwater,
@@ -30,6 +30,8 @@ interface NdotStormwaterFormProps {
   /** Pre-populated data for edit mode. Required when submissionId is set. */
   initialData?: NdotStormwaterData;
   cancelHref?: string;
+  /** Edit mode: the row's updated_at as loaded, sent back so a stale save is refused (BF-61). */
+  version?: string;
 }
 
 function makeDefaultBmpCategories(): BmpCategory[] {
@@ -114,12 +116,13 @@ export default function NdotStormwaterForm({
   submissionId,
   initialData,
   cancelHref,
+  version,
 }: NdotStormwaterFormProps) {
   const isEdit = Boolean(submissionId);
   const action = isEdit
     ? updateNdotStormwater.bind(null, submissionId as string)
     : submitNdotStormwater;
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const [state, formAction, pending] = useActionState(keepFormOnLostReply(action), initialState);
   const { submit, ready } = useNoResetSubmit(formAction);
   const [data, setData] = useState<NdotStormwaterData>(() =>
     initialData ?? makeEmptyData(projectName, contractNumber, location)
@@ -153,6 +156,7 @@ export default function NdotStormwaterForm({
     <form action={formAction} onSubmit={submit} className="space-y-8">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="data" value={JSON.stringify(data)} />
+      <input type="hidden" name="version" value={version ?? ""} />
 
       {state.error && (
         <div className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-400">
