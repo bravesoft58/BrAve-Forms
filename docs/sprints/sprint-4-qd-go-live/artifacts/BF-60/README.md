@@ -1,6 +1,6 @@
 # BF-60 evidence
 
-**Last Updated:** 2026-09-28T19:56:52Z
+**Last Updated:** 2026-09-28T20:31:46Z
 
 | File | What it shows |
 |---|---|
@@ -12,6 +12,7 @@
 | `06-app-document-upload.jpg` | `TEST-BF-60-doc.png` uploaded on RNO 18 Documents; the row is filed under Tim (`uploaded_by` binding). |
 | `07-app-project-edit-saved.jpg` | RNO 18 Edit Project saved unchanged. `updated_at` moved; the row content hash (excluding `updated_at`), permits and form requirements are identical before and after. |
 | `08-app-role-change-roundtrip.jpg` | Users page: Claude Test demoted to user, then promoted back to admin. The final DB state is profile admin, org member admin. |
+| `09-verify-r1-c1-correction.txt` | Verify round 1 finding C1: the schema-scoped function revoke was a no-op. Reproduced on production, the correction (20260928202957, global revoke) rehearsed with its rollback, applied, then the full probe (now with the effective-privilege check C10) run against live production: 44 of 44. |
 
 App regression on production (2026-09-28, after apply):
 

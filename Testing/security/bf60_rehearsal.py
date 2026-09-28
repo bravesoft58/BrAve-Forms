@@ -1,4 +1,4 @@
-"""BF-60 rehearsal builder: splice the migration (and optionally the rollback) into the probe.
+"""BF-60 rehearsal builder: splice the migrations (and optionally their rollbacks) into the probe.
 
 The probe ends in RAISE EXCEPTION (P0999), so running the combined block applies
 the grants, exercises them, and rolls everything back. Prints the combined SQL
@@ -6,15 +6,17 @@ to stdout, or writes it to the path given.
 
   python Testing/security/bf60_rehearsal.py [--roundtrip] [out.sql]
 
---roundtrip also splices the paired rollback after the checks and compares the
-full grant state with the state before the migration (probe check R1).
+BF-60 ships as two migrations: the grants themselves and the verify round 1
+correction for the built-in PUBLIC EXECUTE on new functions. Both are spliced
+in order. --roundtrip also splices the paired rollbacks in reverse order after
+the checks and compares the full grant state with the state before (probe R1).
 """
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-MIGRATION = ROOT / "supabase/migrations/20260928194436_default_table_grants.sql"
-ROLLBACK = ROOT / "supabase/migrations/_rollback/20260928194436_rollback.sql"
+MIGRATIONS = ROOT / "supabase/migrations"
+VERSIONS = ["20260928194436_default_table_grants", "20260928202957_default_function_execute_global"]
 PROBE = ROOT / "Testing/security/bf60_grants_probe.sql"
 MIGRATION_MARKER = "      -- @@MIGRATION@@"
 ROLLBACK_MARKER = "  -- @@ROLLBACK@@"
@@ -29,9 +31,14 @@ def splice(text: str, marker: str, body: str) -> str:
 
 
 def build(roundtrip: bool) -> str:
-    sql = splice(PROBE.read_text(encoding="utf-8"), MIGRATION_MARKER, MIGRATION.read_text(encoding="utf-8"))
+    forward = "\n".join((MIGRATIONS / f"{v}.sql").read_text(encoding="utf-8") for v in VERSIONS)
+    sql = splice(PROBE.read_text(encoding="utf-8"), MIGRATION_MARKER, forward)
     if roundtrip:
-        sql = splice(sql, ROLLBACK_MARKER, ROLLBACK.read_text(encoding="utf-8") + "\n  roundtrip := true;\n")
+        back = "\n".join(
+            (MIGRATIONS / "_rollback" / f"{v.split('_', 1)[0]}_rollback.sql").read_text(encoding="utf-8")
+            for v in reversed(VERSIONS)
+        )
+        sql = splice(sql, ROLLBACK_MARKER, back + "\n  roundtrip := true;\n")
     return sql
 
 

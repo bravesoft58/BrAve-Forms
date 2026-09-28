@@ -7,8 +7,9 @@
 --
 --   Production, after apply: run this file as is. "before" and "after" then
 --   both describe the applied state.
---   Rehearsal: Testing/security/bf60_rehearsal.py splices the migration in at
---   @@MIGRATION@@ (and, with --roundtrip, the rollback at @@ROLLBACK@@), so the
+--   Rehearsal: Testing/security/bf60_rehearsal.py splices both BF-60 migrations
+--   (20260928194436 grants, 20260928202957 function default) in at
+--   @@MIGRATION@@ (and, with --roundtrip, their rollbacks at @@ROLLBACK@@), so the
 --   same block shows the hole before, the fix after, and that nothing a user
 --   can see changed.
 --
@@ -72,8 +73,8 @@ BEGIN
     SELECT 'c:' || at.attrelid::regclass::text || '.' || at.attname || ':' || a::text FROM pg_attribute at, unnest(at.attacl) a
      WHERE at.attrelid IN (SELECT oid FROM pg_class WHERE relnamespace = 'public'::regnamespace AND relkind = 'r')
     UNION ALL
-    SELECT 'd:' || d.defaclobjtype::text || ':' || a::text FROM pg_default_acl d, unnest(d.defaclacl) a
-     WHERE d.defaclnamespace = 'public'::regnamespace AND d.defaclrole = 'postgres'::regrole
+    SELECT 'd:' || d.defaclnamespace::text || ':' || d.defaclobjtype::text || ':' || a::text FROM pg_default_acl d, unnest(d.defaclacl) a
+     WHERE d.defaclnamespace IN ('public'::regnamespace, 0) AND d.defaclrole = 'postgres'::regrole
     UNION ALL
     SELECT 'p:' || policyname || ':' || coalesce(with_check, '') FROM pg_policies
      WHERE schemaname = 'public' AND policyname IN ('submissions_insert', 'project_documents_insert')
@@ -235,9 +236,9 @@ BEGIN
   ELSE r := r || format('FAIL C6 %s of 2 insert policies bind the user', n) || E'\n'; fails := fails + 1; END IF;
 
   SELECT count(*) INTO n FROM pg_default_acl d, unnest(d.defaclacl) a
-   WHERE d.defaclnamespace = 'public'::regnamespace AND d.defaclrole = 'postgres'::regrole
+   WHERE d.defaclnamespace IN ('public'::regnamespace, 0) AND d.defaclrole = 'postgres'::regrole
      AND (a::text ~ '^(anon|authenticated|service_role)=' OR a::text LIKE '=%');
-  IF n = 0 THEN r := r || 'PASS C7 new postgres-created tables, sequences and functions grant nothing to anon, authenticated, service_role or PUBLIC' || E'\n';
+  IF n = 0 THEN r := r || 'PASS C7 stored default ACLs (public and global) for postgres name no anon, authenticated, service_role or PUBLIC' || E'\n';
   ELSE r := r || format('FAIL C7 %s default grants remain', n) || E'\n'; fails := fails + 1; END IF;
 
   SELECT NOT has_function_privilege('anon', 'public.handle_new_user()', 'EXECUTE')
@@ -261,6 +262,30 @@ BEGIN
   IF st = 'profiles=1' THEN r := r || 'PASS C9 a new auth user still gets its profile through handle_new_user' || E'\n';
   ELSE r := r || format('FAIL C9 new auth user: %s', st) || E'\n'; fails := fails + 1; END IF;
 
+  -- C10: the effect, not the catalog entry (verify round 1, C1). A stored
+  -- default ACL can look empty while PostgreSQL's built-in PUBLIC EXECUTE on
+  -- functions still applies, so create real objects the way a later migration
+  -- would and ask who can use them. Undone by its own marker.
+  BEGIN
+    CREATE FUNCTION public.bf60_probe_fn() RETURNS int LANGUAGE sql AS 'SELECT 1';
+    CREATE TABLE public.bf60_probe_tbl (id int);
+    CREATE SEQUENCE public.bf60_probe_seq;
+    SELECT string_agg(format('%s:fn=%s,tbl=%s,seq=%s', rl,
+             has_function_privilege(rl, 'public.bf60_probe_fn()', 'EXECUTE'),
+             has_table_privilege(rl, 'public.bf60_probe_tbl', 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER'),
+             has_sequence_privilege(rl, 'public.bf60_probe_seq', 'USAGE,SELECT,UPDATE')), ' ' ORDER BY rl)
+      INTO st FROM unnest(ARRAY['anon', 'authenticated', 'service_role']) rl;
+    SELECT st || ' public_fn_acl=' || coalesce((SELECT proacl::text FROM pg_proc WHERE oid = to_regprocedure('public.bf60_probe_fn()')), '(default)')
+      INTO st;
+    RAISE EXCEPTION USING ERRCODE = 'P0998';
+  EXCEPTION
+    WHEN SQLSTATE 'P0998' THEN NULL;
+    WHEN OTHERS THEN st := 'error ' || SQLSTATE || ' ' || SQLERRM;
+  END;
+  IF st NOT LIKE '%=t%' AND st NOT LIKE 'error%' AND st NOT LIKE '%(default)%' AND st NOT LIKE '%,=X%' AND st NOT LIKE '%{=X%' THEN
+    r := r || format('PASS C10 a new function, table and sequence in public are usable by no API role and not by PUBLIC (%s)', st) || E'\n';
+  ELSE r := r || format('FAIL C10 new objects: %s', st) || E'\n'; fails := fails + 1; END IF;
+
   -- -------------------------------------------------------- rollback round trip
   -- @@ROLLBACK@@
   IF roundtrip THEN
@@ -271,8 +296,8 @@ BEGIN
       SELECT 'c:' || at.attrelid::regclass::text || '.' || at.attname || ':' || a::text FROM pg_attribute at, unnest(at.attacl) a
        WHERE at.attrelid IN (SELECT oid FROM pg_class WHERE relnamespace = 'public'::regnamespace AND relkind = 'r')
       UNION ALL
-      SELECT 'd:' || d.defaclobjtype::text || ':' || a::text FROM pg_default_acl d, unnest(d.defaclacl) a
-       WHERE d.defaclnamespace = 'public'::regnamespace AND d.defaclrole = 'postgres'::regrole
+      SELECT 'd:' || d.defaclnamespace::text || ':' || d.defaclobjtype::text || ':' || a::text FROM pg_default_acl d, unnest(d.defaclacl) a
+       WHERE d.defaclnamespace IN ('public'::regnamespace, 0) AND d.defaclrole = 'postgres'::regrole
       UNION ALL
       SELECT 'p:' || policyname || ':' || coalesce(with_check, '') FROM pg_policies
        WHERE schemaname = 'public' AND policyname IN ('submissions_insert', 'project_documents_insert')

@@ -8,7 +8,7 @@
 **Reported by:** BF-59 verify rounds 1-6 (out-of-scope findings filed at closeout, 2026-09-21)
 **Created:** 2026-09-21
 **Started:** 2026-09-28T19:29:19Z
-**Last Updated:** 2026-09-28T19:56:52Z
+**Last Updated:** 2026-09-28T20:31:46Z
 **Branch:** `feature/BF-60-default-table-grants`
 
 ## Problem
@@ -49,12 +49,12 @@ BF-59 locked down `profiles`, and only `profiles`. Every other public table stil
 
 The after-state is asserted check by check in the rehearsal (artifact 01, C1 to C8) and was re-run against production after apply (artifact 03).
 
-## After-state (production, applied 2026-09-28 as version 20260928194436)
+## After-state (production, applied 2026-09-28 as versions 20260928194436 and 20260928202957)
 
 - `anon`: no privilege on the 12 tables; `profiles` SELECT only (unchanged, BF-59).
 - `authenticated`: no TRUNCATE, REFERENCES or TRIGGER anywhere. UPDATE limited to `form_submissions (data, form_date)`, the 22 `projects` edit-form columns, `qr_tokens (revoked_at, expires_at)`, `profiles (full_name, phone)` and full-row UPDATE on the five admin-policy tables. No UPDATE on `organization_members`, `form_photos`, `project_documents`, `audit_log`. No DELETE on `form_submissions`; nothing but SELECT on `audit_log`.
 - Insert policies on `form_submissions` and `project_documents` require the row's owner to be `auth.uid()`.
-- Default privileges (postgres, schema public) grant nothing to `anon`, `authenticated`, `service_role` or PUBLIC. The `supabase_admin` default ACL is unchanged (postgres cannot alter it).
+- Default privileges for postgres-created objects: a new table, sequence or function in `public` is usable by none of `anon`, `authenticated`, `service_role` or PUBLIC (probe C10 creates each and asks). Functions needed the second, global migration (20260928202957): PostgreSQL's built-in PUBLIC EXECUTE cannot be removed with `IN SCHEMA` (verify round 1, C1). The `supabase_admin` default ACL is unchanged (postgres cannot alter it).
 - `handle_new_user()`: EXECUTE for owner and `service_role` only; `search_path = ''`.
 
 ## Comprehensive Validation (2026-09-28T19:56:52Z)
@@ -71,6 +71,20 @@ The after-state is asserted check by check in the rehearsal (artifact 01, C1 to 
 | - | QR reissue | Not clicked | Would retire the live code; `reissue_inspector_qr` as an org admin passes on live production (probe A07, rolled back) |
 
 No application code changed, so there is no build or lint delta. Test records were deleted on Tim's go; two small TEST PNGs remain in Storage (SQL deletes are blocked by Supabase), as in BF-58.2 and BF-63.
+
+### Verify round 1 fix (2026-09-28T20:31:46Z)
+
+Round 1: NEEDS ATTENTION 7.5, one high finding (C1, Codex; confirmed by verify against the PostgreSQL 15 docs).
+
+- **Problem:** `ALTER DEFAULT PRIVILEGES ... IN SCHEMA public REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC` is a no-op. A function created after BF-60 was still callable by `anon` and `authenticated`. C7 passed because it read `pg_default_acl` storage rather than the effective privilege.
+- **Proof it was real:** reproduced on production in a rolled-back test.
+- **Fix:** corrective migration `20260928202957_default_function_execute_global` (global revoke, no `IN SCHEMA`) with its paired rollback. It was rehearsed (gap reproduced, then closed, and the rollback restores the default ACLs exactly) and applied on Tim's go.
+- **Probe changes:**
+  - C10 creates a real function, table and sequence and asserts that no API role or PUBLIC can use them.
+  - C7 now includes the global default-ACL entry.
+  - The rehearsal builder splices both migrations.
+- **Result:** the full probe on live production after the correction is 44/44 (artifact 09).
+- The first BF-60 migration file is left exactly as applied. Its schema-scoped PUBLIC revoke is harmless and the correction supersedes it.
 
 ## Notes
 
