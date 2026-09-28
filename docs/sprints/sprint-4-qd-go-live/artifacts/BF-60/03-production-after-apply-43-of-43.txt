@@ -1,0 +1,68 @@
+BF-60 applied to production on Tim's go, 2026-09-28.
+apply_migration name default_table_grants, recorded as version 20260928194436.
+The applied SQL is the statement body of
+supabase/migrations/20260928194436_default_table_grants.sql. The header and
+section comments were not sent; the statements were identical.
+
+Probe run against live production straight after apply (Supabase MCP execute_sql).
+Same cases and checks as Testing/security/bf60_grants_probe.sql, minus the
+rehearsal-only parts: no splice markers, no before column and no R1 round trip.
+Visibility is printed as INFO so it can be compared with the rehearsal. Ends in
+P0999; nothing persisted.
+
+PASS A01 member [UPDATE public.form_submissions SET data = '{"v":"edited"}', form_date ] after=allowed:1
+PASS A02 admin [UPDATE public.form_submissions SET data = '{"v":"admin"}' WHERE id = '] after=allowed:1
+PASS A03 member [INSERT INTO public.form_submissions (project_id, form_type, data, form] after=allowed:1
+PASS A04 member [INSERT INTO public.project_documents (project_id, name, file_path, fil] after=allowed:1
+PASS A05 member [DELETE FROM public.form_photos WHERE submission_id = '503cc2ec-002f-45] after=allowed:0
+PASS A06 admin [UPDATE public.projects SET name = name, address = address, waterway_si] after=allowed:1
+PASS A07 admin [SELECT * FROM public.reissue_inspector_qr('d80cdc1c-6199-4f58-a3bc-33b] after=allowed:1
+PASS A08 admin [DELETE FROM public.project_documents WHERE id = '2d82b3e4-f1e3-4e8a-b1] after=allowed:1
+PASS A09 admin [UPDATE public.project_users SET role = role WHERE project_id = 'd80cdc] after=allowed:1
+PASS X01 admin [TRUNCATE public.audit_log] after=42501
+PASS X02 member [TRUNCATE public.form_photos] after=42501
+PASS X03 admin [UPDATE public.form_submissions SET submitted_by = '284ff2a0-2ce2-4d19-] after=42501
+PASS X04 admin [UPDATE public.form_submissions SET project_id = '7164b7fb-063b-4050-a8] after=42501
+PASS X05 member [DELETE FROM public.form_submissions WHERE id = '503cc2ec-002f-45a3-bee] after=42501
+PASS X06 member [INSERT INTO public.form_submissions (project_id, form_type, data, form] after=42501 rls
+PASS X07 member [INSERT INTO public.project_documents (project_id, name, file_path, upl] after=42501 rls
+PASS X08 admin [UPDATE public.project_documents SET name = 'renamed' WHERE id = '2d82b] after=42501
+PASS X09 admin [UPDATE public.projects SET organization_id = organization_id WHERE id ] after=42501
+PASS X10 admin [UPDATE public.projects SET created_by = created_by WHERE id = 'd80cdc1] after=42501
+PASS X11 admin [UPDATE public.qr_tokens SET project_id = project_id WHERE project_id =] after=42501
+PASS X12 admin [UPDATE public.organization_members SET role = role WHERE user_id = '21] after=42501
+PASS X13 admin [DELETE FROM public.audit_log WHERE false] after=42501
+PASS X14 member [UPDATE public.form_photos SET file_path = file_path WHERE false] after=42501
+PASS X15 anon [SELECT count(*) FROM public.form_submissions] after=42501
+PASS X16 anon [DELETE FROM public.organizations WHERE false] after=42501
+PASS X17 anon [SELECT public.handle_new_user()] after=42501
+INFO V visibility (live, applied): audit_log/admin=0 audit_log/anon=-1 audit_log/member=0 audit_log/super=0 form_photos/admin=1 form_photos/anon=-1 form_photos/member=1 form_photos/super=1 form_submission_revisions/admin=13 form_submission_revisions/anon=-1 form_submission_revisions/member=13 form_submission_revisions/super=13 form_submissions/admin=31 form_submissions/anon=-1 form_submissions/member=31 form_submissions/super=31 inspector_sessions/admin=-1 inspector_sessions/anon=-1 inspector_sessions/member=-1 inspector_sessions/super=-1 organization_invitations/admin=0 organization_invitations/anon=-1 organization_invitations/member=0 organization_invitations/super=0 organization_members/admin=6 organization_members/anon=-1 organization_members/member=6 organization_members/super=6 organizations/admin=1 organizations/anon=-1 organizations/member=1 organizations/super=1 profiles/admin=6 profiles/anon=0 profiles/member=6 profiles/super=6 project_documents/admin=17 project_documents/anon=-1 project_documents/member=17 project_documents/super=17 project_form_requirements/admin=20 project_form_requirements/anon=-1 project_form_requirements/member=20 project_form_requirements/super=20 project_permits/admin=15 project_permits/anon=-1 project_permits/member=15 project_permits/super=15 projects/admin=5 projects/anon=-1 projects/member=5 projects/super=5 project_users/admin=5 project_users/anon=-1 project_users/member=0 project_users/super=5 qr_tokens/admin=12 qr_tokens/anon=-1 qr_tokens/member=12 qr_tokens/super=12
+PASS C1 anon holds no privilege on the 12 tables
+PASS C2 anon holds no write privilege on any public table
+PASS C3 no API role or PUBLIC holds TRUNCATE, REFERENCES or TRIGGER on any public table
+PASS C4 form_submissions updatable columns for authenticated: {data,form_date}
+PASS C4 projects updatable columns for authenticated: {acres_disturbed,address,completion_date,description,foreman_email,foreman_name,foreman_phone,name,owner_rep_address,owner_rep_email,owner_rep_name,owner_rep_phone,parcel_numbers,pm_email,pm_name,pm_phone,soil_type,start_date,superintendent_email,superintendent_name,superintendent_phone,waterway_sites}
+PASS C4 qr_tokens updatable columns for authenticated: {expires_at,revoked_at}
+PASS C4 organization_members updatable columns for authenticated: {}
+PASS C4 form_photos updatable columns for authenticated: {}
+PASS C4 project_documents updatable columns for authenticated: {}
+PASS C4 audit_log updatable columns for authenticated: {}
+PASS C4 profiles updatable columns for authenticated: {full_name,phone}
+PASS C5 no PUBLIC or anon column UPDATE anywhere in public
+PASS C6 both insert policies start with the signed-in-user binding
+PASS C7 new postgres-created tables, sequences and functions grant nothing to anon, authenticated, service_role or PUBLIC
+PASS C8 handle_new_user not callable by anon/authenticated; search_path pinned empty
+PASS C9 a new auth user still gets its profile through handle_new_user
+0 failures
+
+BF-59 suite (tightened T10/T12) on production after apply: T01-T13 all PASS, 13 of 13
+(same details as the baseline in artifact 02).
+
+Security advisor after apply (2026-09-28T19:46:10Z):
+- handle_new_user no longer appears: lint 0028 (anon-callable SECURITY DEFINER)
+  is gone, lint 0029 went from 6 to 5 functions, lint 0011 from 5 to 4.
+- Still listed, all pre-existing and out of BF-60 scope: the RLS helpers callable by
+  authenticated (they must be, for policies), four trigger or SQL functions without
+  search_path, citext in public, inspector_sessions RLS with no policy (by design,
+  service client only), leaked-password protection off, Postgres 15.8.1.070 patch
+  available.

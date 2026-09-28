@@ -1,0 +1,40 @@
+BF-60 verify round 1 finding C1 (Codex, high; confirmed by verify against the
+PostgreSQL 15 docs): ALTER DEFAULT PRIVILEGES ... IN SCHEMA public REVOKE EXECUTE
+ON FUNCTIONS FROM PUBLIC is a no-op. Per-schema default privileges only add to the
+global default, and PUBLIC EXECUTE on new functions is built in globally. Probe C7
+passed because it read pg_default_acl storage, not the effective privilege.
+
+1. Reproduced on production, rolled back, 2026-09-28
+   New function created in public after 20260928194436:
+     anon=t authenticated=t, proacl NULL (built-in default, PUBLIC EXECUTE)
+   Same, after ALTER DEFAULT PRIVILEGES FOR ROLE postgres REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC:
+     anon=f authenticated=f service_role=f, proacl {postgres=X/postgres}
+
+2. Focused rehearsal of the correction (rolled back; the first BF-60 migration was
+   already live, so only the correction and its rollback were exercised):
+   REPRODUCED C10 before correction (expect FAIL, the verify finding): anon:fn=t,tbl=f,seq=f authenticated:fn=t,tbl=f,seq=f service_role:fn=t,tbl=f,seq=f public_fn_acl=(default)
+   PASS C10 after correction: a new function, table and sequence in public are usable by no API role and not by PUBLIC (anon:fn=f,tbl=f,seq=f authenticated:fn=f,tbl=f,seq=f service_role:fn=f,tbl=f,seq=f public_fn_acl={postgres=X/postgres})
+   PASS C7 stored default ACLs (public and global) for postgres name no anon, authenticated, service_role or PUBLIC
+   PASS R1 correction rollback restores every postgres default ACL entry exactly
+   0 failures
+   (A first attempt reported FAIL C10 after correction with public_fn_acl=(default)
+   although all three roles showed fn=f: the ACL lookup used a '...'::regproc
+   constant that PL/pgSQL cached in its plan from the first loop pass, so it read
+   the rolled-back function's OID. Fixed with to_regprocedure() at run time, in the
+   probe file too.)
+
+3. Applied on Tim's go ("Fix now"): apply_migration default_function_execute_global,
+   recorded as version 20260928202957. The files were renamed to match.
+
+4. Full probe file (Testing/security/bf60_grants_probe.sql, with C10 added and C7
+   widened to the global entry) run as is against live production after the correction:
+   A01-A09 PASS (allowed), X01-X17 PASS (42501), V1 PASS (visibility identical on
+   15 tables x 3 signed-in tiers), C1-C9 PASS, and
+   PASS C10 a new function, table and sequence in public are usable by no API role and not by PUBLIC (anon:fn=f,tbl=f,seq=f authenticated:fn=f,tbl=f,seq=f service_role:fn=f,tbl=f,seq=f public_fn_acl={postgres=X/postgres})
+   0 failures (44 of 44).
+
+Side effect, documented in the migration header: the global revoke covers functions
+the postgres role creates in any schema. storage keeps its own per-schema grants.
+Any other new postgres-created function (including one installed by an extension
+run as postgres) needs an explicit GRANT EXECUTE. This is the same convention BF-60
+set for tables and sequences.

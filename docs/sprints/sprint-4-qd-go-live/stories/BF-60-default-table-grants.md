@@ -2,12 +2,15 @@
 
 **Type:** Security hardening (database grants) + test hygiene
 **Priority:** HIGH (same class as BF-59; RLS does not cover TRUNCATE)
-**Points:** 2
-**Status:** NOT STARTED
+**Points:** 3 (was 2; raised at scout, Tim approved 2026-09-28)
+**Status:** DONE
 **Sprint:** 4
 **Reported by:** BF-59 verify rounds 1-6 (out-of-scope findings filed at closeout, 2026-09-21)
 **Created:** 2026-09-21
-**Last Updated:** 2026-09-28T19:22:24Z
+**Started:** 2026-09-28T19:29:19Z
+**Completed:** 2026-09-28T20:45:50Z
+**Last Updated:** 2026-09-28T20:45:50Z
+**Branch:** `feature/BF-60-default-table-grants`
 
 ## Problem
 
@@ -20,21 +23,79 @@ BF-59 locked down `profiles`, and only `profiles`. Every other public table stil
 3. **authenticated.** Revoke TRUNCATE, REFERENCES and TRIGGER everywhere. Keep INSERT, UPDATE, DELETE only on tables that have a matching policy for that command; revoke on the rest (for example `audit_log`, which has no policies for `authenticated`).
 4. **Column-level UPDATE** on tables where a user should not change ownership or scope columns, following the BF-59 pattern (revoke table UPDATE, grant back the allowed columns): `form_submissions.submitted_by` and `project_id`, `project_documents.uploaded_by`, `organization_members.role`, `projects.organization_id`. Verify each with the visibility-matrix approach before and after (lesson 2026-04-30: count under impersonation per tier).
 5. **Suite hygiene** carried from the BF-59 round-6 review: T10 should also assert no `PUBLIC` grantee holds UPDATE on the locked columns; T12 should assert the exact `WITH CHECK` expression, not just that one exists.
-6. One migration, paired rollback, isolated-copy proof first (the BF-59 restore script rebuilds the copy), then production on Tim's go.
+6. One migration, paired rollback, then production on Tim's go. Proof is a rolled-back rehearsal in production (the BF-63/BF-65 pattern; DDL is transactional), replacing the isolated Docker copy first planned.
+7. **Added at scout (Tim, 2026-09-28):** revoke the schema's default privileges so future tables, sequences and functions no longer grant to `anon`, `authenticated` or `service_role`; bind `submissions_insert` and `project_documents_insert` to the signed-in user; revoke EXECUTE on `handle_new_user()` from the API roles and pin its `search_path`.
 
 ## Acceptance criteria
 
-- [ ] Before and after grant inventories recorded here.
-- [ ] `anon` holds no write privileges on any public table.
-- [ ] `authenticated` holds no TRUNCATE, REFERENCES or TRIGGER on any public table.
-- [ ] Ownership and scope columns listed above are not updatable by `authenticated`.
-- [ ] Per-tier visibility matrix identical before and after for every table touched.
-- [ ] BF-59 suite T10 and T12 tightened as described; still 13 of 13.
-- [ ] App regression: sign-in, form submit, photo upload, document upload, invite, role change.
+- [x] Before and after grant inventories recorded here.
+- [x] `anon` holds no write privileges on any public table.
+- [x] `authenticated` holds no TRUNCATE, REFERENCES or TRIGGER on any public table.
+- [x] Not updatable by `authenticated`: `form_submissions` ownership and scope columns (only `data`, `form_date` stay), `projects.organization_id` / `created_by` / `qr_token`, all of `organization_members`, `qr_tokens` except `revoked_at` / `expires_at`, and no UPDATE at all on `project_documents`, `form_photos`, `audit_log`.
+- [x] Per-tier visibility matrix identical before and after for every public table.
+- [x] BF-59 suite T10 and T12 tightened as described; still 13 of 13.
+- [x] Default privileges for postgres-created objects in `public` grant nothing to `anon`, `authenticated`, `service_role` or PUBLIC.
+- [x] An insert with another user's `submitted_by` or `uploaded_by` is refused; the user's own insert still works.
+- [x] `handle_new_user()` is not callable by `anon` / `authenticated`, and a new auth user still gets a profile.
+- [x] Rollback restores the pre-BF-60 state exactly.
+- [x] App regression: sign-in, form submit, form edit, photo upload, document upload, invite, role change, project edit, QR reissue. (Invite and QR reissue not clicked in the browser; see the validation table for why and what covers them.)
+
+## Before-state inventory (production, 2026-09-28)
+
+- `anon` and `authenticated`: all seven privileges on `audit_log`, `form_photos`, `form_submissions`, `organization_invitations`, `organization_members`, `organizations`, `project_documents`, `project_form_requirements`, `project_permits`, `project_users`, `projects`, `qr_tokens` (85 anon privileges including `profiles` SELECT).
+- `profiles`: `anon` SELECT; `authenticated` SELECT, INSERT, DELETE, TRUNCATE, REFERENCES, TRIGGER plus UPDATE (`full_name`, `phone`) from BF-59.
+- `inspector_sessions`: no API grants. `form_submission_revisions`: `authenticated` SELECT only.
+- Default privileges (postgres and supabase_admin, schema public): all table privileges, sequence USAGE/SELECT/UPDATE and function EXECUTE to `anon`, `authenticated`, `service_role`.
+- `handle_new_user()`: SECURITY DEFINER, no `search_path`, EXECUTE for PUBLIC, `anon`, `authenticated`.
+
+The after-state is asserted check by check in the rehearsal (artifact 01, C1 to C8) and was re-run against production after apply (artifact 03).
+
+## After-state (production, applied 2026-09-28 as versions 20260928194436 and 20260928202957)
+
+- `anon`: no privilege on the 12 tables; `profiles` SELECT only (unchanged, BF-59).
+- `authenticated`: no TRUNCATE, REFERENCES or TRIGGER anywhere. UPDATE limited to `form_submissions (data, form_date)`, the 22 `projects` edit-form columns, `qr_tokens (revoked_at, expires_at)`, `profiles (full_name, phone)` and full-row UPDATE on the five admin-policy tables. No UPDATE on `organization_members`, `form_photos`, `project_documents`, `audit_log`. No DELETE on `form_submissions`; nothing but SELECT on `audit_log`.
+- Insert policies on `form_submissions` and `project_documents` require the row's owner to be `auth.uid()`.
+- Default privileges for postgres-created objects: a new table, sequence or function in `public` is usable by none of `anon`, `authenticated`, `service_role` or PUBLIC (probe C10 creates each and asks). Functions needed the second, global migration (20260928202957): PostgreSQL's built-in PUBLIC EXECUTE cannot be removed with `IN SCHEMA` (verify round 1, C1). The `supabase_admin` default ACL is unchanged (postgres cannot alter it).
+- `handle_new_user()`: EXECUTE for owner and `service_role` only; `search_path = ''`.
+
+## Comprehensive Validation (2026-09-28T19:56:52Z)
+
+4 suites, 125 assertions, all passing. Evidence in `docs/sprints/sprint-4-qd-go-live/artifacts/BF-60/`.
+
+| # | Test | Result | Key finding |
+|---|---|---|---|
+| 1 | Rolled-back rehearsal with round trip (`bf60_rehearsal.py --roundtrip`), artifact 01 | 44/44 PASS | Every denial case was open before (e.g. X06 foreign `submitted_by` insert `allowed:1`, X11 `qr_tokens.project_id` update `allowed:6`) and 42501 after; the visibility matrix is identical on 15 tables x 3 tiers; the rollback restores the grant state hash exactly |
+| 2 | Probe on live production after apply, artifact 03 | 43/43 PASS | Same outcomes as the rehearsal "after" column; the advisor no longer lists `handle_new_user` |
+| 3 | BF-59 suite, tightened T10/T12, before and after apply (artifacts 02, 03) | 13/13 PASS both | No regression on the profile role guard |
+| 4 | App regression on production (artifacts 04 to 08) | 7/7 clicked checks PASS | Submit with photo, edit, document upload, project edit (content hash unchanged) and role change round trip all work; zero app-originated 42501 in the database logs since apply |
+| - | Invite | Not clicked | Sends a real email; the path is service-client only, untouched by BF-60 |
+| - | QR reissue | Not clicked | Would retire the live code; `reissue_inspector_qr` as an org admin passes on live production (probe A07, rolled back) |
+
+No application code changed, so there is no build or lint delta. Test records were deleted on Tim's go; two small TEST PNGs remain in Storage (SQL deletes are blocked by Supabase), as in BF-58.2 and BF-63.
+
+### Verify round 1 fix (2026-09-28T20:31:46Z)
+
+Round 1: NEEDS ATTENTION 7.5, one high finding (C1, Codex; confirmed by verify against the PostgreSQL 15 docs).
+
+- **Problem:** `ALTER DEFAULT PRIVILEGES ... IN SCHEMA public REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC` is a no-op. A function created after BF-60 was still callable by `anon` and `authenticated`. C7 passed because it read `pg_default_acl` storage rather than the effective privilege.
+- **Proof it was real:** reproduced on production in a rolled-back test.
+- **Fix:** corrective migration `20260928202957_default_function_execute_global` (global revoke, no `IN SCHEMA`) with its paired rollback. It was rehearsed (gap reproduced, then closed, and the rollback restores the default ACLs exactly) and applied on Tim's go.
+- **Probe changes:**
+  - C10 creates a real function, table and sequence and asserts that no API role or PUBLIC can use them.
+  - C7 now includes the global default-ACL entry.
+  - The rehearsal builder splices both migrations.
+- **Result:** the full probe on live production after the correction is 44/44 (artifact 09).
+- The first BF-60 migration file is left exactly as applied. Its schema-scoped PUBLIC revoke is harmless and the correction supersedes it.
+
+### Verify round 2 (2026-09-28T20:45:50Z) — PASS 9.4
+
+Fix verification. C1 confirmed **fixed** by both reviewers: the global revoke (`20260928202957`) matches the PostgreSQL 15 docs, probe C10 asserts the *effective* privilege on a newly-created function/table/sequence (closing the storage-proxy blind spot that gave C7 its false PASS), and artifact 09 records the live-production before/after reproduction and exact rollback (44/44). Codex (`gpt-6-astra` xhigh) independent verdict: **approve**, zero new critical/high. Carried forward as noted lows: V2 (probe A05/A09 `allowed0`, covered by app regression) and V3 (the global function revoke is a documented forward-operational constraint, same convention as tables/sequences). Rehearsal-builder smoke test and `git diff --check` clean. Status → DONE.
 
 ## Notes
 
-- Do not touch `profiles` here; BF-59 owns it.
+- `profiles` loses only TRUNCATE, REFERENCES and TRIGGER here (needed for the table-wide AC); every other `profiles` grant stays as BF-59 set it.
+- `form_submissions` keeps UPDATE on `data` and `form_date` only: those are the only columns any edit path writes (`submission-writes.ts`, dust-log append). `status` and `signatures` have no writer today; a feature that adds one grants the column in its own migration.
+- From this migration on, a new table, sequence or function needs explicit GRANTs in the migration that creates it, including `service_role` for anything the service client touches. Supabase applies the same default to existing projects on 2026-10-30 [verified 2026-09-28, GitHub discussion #45329].
 - `supabase/migrations/20260920194350_profile_role_guard.sql` is the pattern to copy, including the rollback shape.
 
 ## Technical Approach
