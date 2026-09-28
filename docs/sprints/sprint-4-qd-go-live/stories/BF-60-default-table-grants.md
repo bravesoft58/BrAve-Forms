@@ -8,7 +8,7 @@
 **Reported by:** BF-59 verify rounds 1-6 (out-of-scope findings filed at closeout, 2026-09-21)
 **Created:** 2026-09-21
 **Started:** 2026-09-28T19:29:19Z
-**Last Updated:** 2026-09-28T19:41:10Z
+**Last Updated:** 2026-09-28T19:56:52Z
 **Branch:** `feature/BF-60-default-table-grants`
 
 ## Problem
@@ -27,17 +27,17 @@ BF-59 locked down `profiles`, and only `profiles`. Every other public table stil
 
 ## Acceptance criteria
 
-- [ ] Before and after grant inventories recorded here.
-- [ ] `anon` holds no write privileges on any public table.
-- [ ] `authenticated` holds no TRUNCATE, REFERENCES or TRIGGER on any public table.
-- [ ] Not updatable by `authenticated`: `form_submissions` ownership and scope columns (only `data`, `form_date` stay), `projects.organization_id` / `created_by` / `qr_token`, all of `organization_members`, `qr_tokens` except `revoked_at` / `expires_at`, and no UPDATE at all on `project_documents`, `form_photos`, `audit_log`.
-- [ ] Per-tier visibility matrix identical before and after for every public table.
-- [ ] BF-59 suite T10 and T12 tightened as described; still 13 of 13.
-- [ ] Default privileges for postgres-created objects in `public` grant nothing to `anon`, `authenticated`, `service_role` or PUBLIC.
-- [ ] An insert with another user's `submitted_by` or `uploaded_by` is refused; the user's own insert still works.
-- [ ] `handle_new_user()` is not callable by `anon` / `authenticated`, and a new auth user still gets a profile.
-- [ ] Rollback restores the pre-BF-60 state exactly.
-- [ ] App regression: sign-in, form submit, form edit, photo upload, document upload, invite, role change, project edit, QR reissue.
+- [x] Before and after grant inventories recorded here.
+- [x] `anon` holds no write privileges on any public table.
+- [x] `authenticated` holds no TRUNCATE, REFERENCES or TRIGGER on any public table.
+- [x] Not updatable by `authenticated`: `form_submissions` ownership and scope columns (only `data`, `form_date` stay), `projects.organization_id` / `created_by` / `qr_token`, all of `organization_members`, `qr_tokens` except `revoked_at` / `expires_at`, and no UPDATE at all on `project_documents`, `form_photos`, `audit_log`.
+- [x] Per-tier visibility matrix identical before and after for every public table.
+- [x] BF-59 suite T10 and T12 tightened as described; still 13 of 13.
+- [x] Default privileges for postgres-created objects in `public` grant nothing to `anon`, `authenticated`, `service_role` or PUBLIC.
+- [x] An insert with another user's `submitted_by` or `uploaded_by` is refused; the user's own insert still works.
+- [x] `handle_new_user()` is not callable by `anon` / `authenticated`, and a new auth user still gets a profile.
+- [x] Rollback restores the pre-BF-60 state exactly.
+- [x] App regression: sign-in, form submit, form edit, photo upload, document upload, invite, role change, project edit, QR reissue. (Invite and QR reissue not clicked in the browser; see the validation table for why and what covers them.)
 
 ## Before-state inventory (production, 2026-09-28)
 
@@ -47,7 +47,30 @@ BF-59 locked down `profiles`, and only `profiles`. Every other public table stil
 - Default privileges (postgres and supabase_admin, schema public): all table privileges, sequence USAGE/SELECT/UPDATE and function EXECUTE to `anon`, `authenticated`, `service_role`.
 - `handle_new_user()`: SECURITY DEFINER, no `search_path`, EXECUTE for PUBLIC, `anon`, `authenticated`.
 
-The after-state is asserted check by check in the rehearsal (artifact 01, C1 to C8) and is re-run against production after apply.
+The after-state is asserted check by check in the rehearsal (artifact 01, C1 to C8) and was re-run against production after apply (artifact 03).
+
+## After-state (production, applied 2026-09-28 as version 20260928194436)
+
+- `anon`: no privilege on the 12 tables; `profiles` SELECT only (unchanged, BF-59).
+- `authenticated`: no TRUNCATE, REFERENCES or TRIGGER anywhere. UPDATE limited to `form_submissions (data, form_date)`, the 22 `projects` edit-form columns, `qr_tokens (revoked_at, expires_at)`, `profiles (full_name, phone)` and full-row UPDATE on the five admin-policy tables. No UPDATE on `organization_members`, `form_photos`, `project_documents`, `audit_log`. No DELETE on `form_submissions`; nothing but SELECT on `audit_log`.
+- Insert policies on `form_submissions` and `project_documents` require the row's owner to be `auth.uid()`.
+- Default privileges (postgres, schema public) grant nothing to `anon`, `authenticated`, `service_role` or PUBLIC. The `supabase_admin` default ACL is unchanged (postgres cannot alter it).
+- `handle_new_user()`: EXECUTE for owner and `service_role` only; `search_path = ''`.
+
+## Comprehensive Validation (2026-09-28T19:56:52Z)
+
+4 suites, 125 assertions, all passing. Evidence in `docs/sprints/sprint-4-qd-go-live/artifacts/BF-60/`.
+
+| # | Test | Result | Key finding |
+|---|---|---|---|
+| 1 | Rolled-back rehearsal with round trip (`bf60_rehearsal.py --roundtrip`), artifact 01 | 44/44 PASS | Every denial case was open before (e.g. X06 foreign `submitted_by` insert `allowed:1`, X11 `qr_tokens.project_id` update `allowed:6`) and 42501 after; the visibility matrix is identical on 15 tables x 3 tiers; the rollback restores the grant state hash exactly |
+| 2 | Probe on live production after apply, artifact 03 | 43/43 PASS | Same outcomes as the rehearsal "after" column; the advisor no longer lists `handle_new_user` |
+| 3 | BF-59 suite, tightened T10/T12, before and after apply (artifacts 02, 03) | 13/13 PASS both | No regression on the profile role guard |
+| 4 | App regression on production (artifacts 04 to 08) | 7/7 clicked checks PASS | Submit with photo, edit, document upload, project edit (content hash unchanged) and role change round trip all work; zero app-originated 42501 in the database logs since apply |
+| - | Invite | Not clicked | Sends a real email; the path is service-client only, untouched by BF-60 |
+| - | QR reissue | Not clicked | Would retire the live code; `reissue_inspector_qr` as an org admin passes on live production (probe A07, rolled back) |
+
+No application code changed, so there is no build or lint delta. Test records were deleted on Tim's go; two small TEST PNGs remain in Storage (SQL deletes are blocked by Supabase), as in BF-58.2 and BF-63.
 
 ## Notes
 
