@@ -5,9 +5,8 @@
 | File | What it shows |
 |---|---|
 | `01-rehearsal-roundtrip-44-of-44.txt` | Rolled-back rehearsal on production: migration spliced into `Testing/security/bf60_grants_probe.sql`, then the rollback. Each case shows the live pre-BF-60 outcome ("before", the hole) and the migrated one ("after"). Visibility is identical for every table and tier, and the rollback restores the grant state exactly. 44 of 44, nothing persisted. |
-| `03-production-after-apply-43-of-43.txt` | The migration applied (version 20260928194436), then the probe run against live production: every case and catalog check passes. Also the BF-59 suite after apply (13 of 13) and the security advisor delta. |
 | `02-bf59-suite-tightened-baseline-13-of-13.txt` | The BF-59 suite with T10 (now includes PUBLIC) and T12 (exact WITH CHECK) tightened, run on production before apply: 13 of 13. |
-
+| `03-production-after-apply-43-of-43.txt` | The migration applied (version 20260928194436), then the probe run against live production: every case and catalog check passes. Also the BF-59 suite after apply (13 of 13) and the security advisor delta. |
 | `04-app-waterways-submit-with-photo.jpg` | App regression on production after apply: a TEST Working in Waterways inspection with a generated photo, submitted as Tim on RNO 18. The DB row is filed under Tim with a client key and one photo row. |
 | `05-app-waterways-edit-saved.jpg` | The same TEST record edited and saved (column-level UPDATE on `data`, `form_date`). The photo row was deleted and re-inserted, and one revision row was recorded. |
 | `06-app-document-upload.jpg` | `TEST-BF-60-doc.png` uploaded on RNO 18 Documents; the row is filed under Tim (`uploaded_by` binding). |
