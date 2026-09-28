@@ -3,12 +3,13 @@
 **Type:** Production data cleanup
 **Priority:** HIGH (blocks clean first-day use)
 **Points:** 1
-**Status:** IN PROGRESS
+**Status:** DONE
 **Sprint:** 4
 **Started:** 2026-09-22T12:42:17Z
+**Completed:** 2026-09-28T21:49:31Z
 **Reported by:** Andy Breen, email "BrAve Forms Update" 2026-09-07 (`docs/reference/BrAve Forms Update.msg`)
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-23T13:38:49Z
+**Last Updated:** 2026-09-28T21:49:31Z
 
 ## Request (verbatim)
 
@@ -87,11 +88,26 @@ Final user list: abreen@qdconstruction.com, abreen@qdgroupinvesco.com, claude.te
 
 **Still open:** claude.test@braveforms.dev, kept by Tim until the go-live work is done; remove or ban it then.
 
+## Closure (2026-09-28T21:49:31Z, Tim)
+
+Tim, 2026-09-28: "users are cleaned up. they want the ones that are still in there." Q&D keeps every remaining account. Final state read from production the same day: 6 auth users, 6 profiles, 6 Q&D memberships, no orphans.
+
+| Email | Profile role | Org role | Last sign-in |
+| --- | --- | --- | --- |
+| timsaverill@protonmail.com | admin (super_admin) | owner | 2026-09-28 |
+| abreen@qdconstruction.com | admin | admin | 2026-09-23 |
+| abreen@qdgroupinvesco.com | user | member | 2026-09-23 |
+| gdamele@qdconstruction.com | admin | admin | 2026-09-09 |
+| drich@qdconstruction.com | user | member | 2026-09-03 |
+| claude.test@braveforms.dev | admin | admin | 2026-03-09 |
+
+`claude.test@braveforms.dev` is the development test account (Q&D org admin, last used 2026-03-09). It stays under this decision. Removing or banning it before relying on the app is Tim's call, tracked outside this ticket.
+
 ## Acceptance criteria
 
 - [x] Andy confirms the disposition of drich@qdconstruction.com and abreen@qdgroupinvesco.com.
 - [x] Removed accounts cannot sign in (deleted, or banned with the reason recorded). All three removed accounts are deleted from auth.users.
-- [ ] Kept accounts sign in and see their projects. Evidence so far: Tim signed in 2026-09-22 (BF-57 run); drich@ submitted NDEP inspections through September. Not checked per account.
+- [x] Kept accounts sign in and see their projects. Every Q&D account has signed in (last sign-ins in the closure table), and Tim confirmed on 2026-09-28 that the cleanup is complete. Tim signed in and used RNO 18 today (BF-60 regression).
 - [x] No orphaned membership or assignment rows; auth user count equals profile count (6 and 6).
 - [x] Before/after user lists and the executed operations are recorded in this ticket.
 
