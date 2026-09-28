@@ -3,11 +3,12 @@
 **Type:** Bug (shared form pattern; what the user sees differs from what is saved)
 **Priority:** HIGH (a correction can save answers the screen showed as blank; affects every live form)
 **Points:** 2
-**Status:** NOT STARTED
+**Status:** DONE
+**Completed:** 2026-09-25T20:39:36Z
 **Sprint:** 4
 **Reported by:** BF-58.1 signed-in preview pass, 2026-09-25 (fixed there for the new form only); filed by Tim's direction the same day
 **Created:** 2026-09-25
-**Last Updated:** 2026-09-25T17:06:44Z
+**Last Updated:** 2026-09-25T20:39:36Z
 
 ## Problem
 
@@ -41,7 +42,102 @@ If the same change repeats across seven forms, consider one small shared hook, f
 
 ## Acceptance criteria
 
-- [ ] On each affected form, a submit rejected by the server leaves every select, radio, checkbox and text field showing exactly what will be sent. Check in a browser on a preview, one screenshot per form, in `artifacts/BF-66/`.
-- [ ] On the project form, a rejected save keeps the user's typed edits.
-- [ ] A successful submit still redirects as before.
-- [ ] `pnpm build` and lint clean.
+- [x] On each affected form, a submit rejected by the server leaves every select, radio, checkbox and text field showing exactly what will be sent. Check in a browser on a preview, one screenshot per form, in `artifacts/BF-66/`.
+- [x] On the project form, a rejected save keeps the user's typed edits.
+- [x] A successful submit still redirects as before.
+- [x] `pnpm build` and lint clean.
+
+## Build vs Use
+
+**Build vs Use:** COPY. This is the React team's documented opt-out (`onSubmit` + `startTransition`, react/react#29034, verified 2026-09-25), wrapped in a small shared hook. There is no library to adopt for a 20-line handler.
+
+## Comprehensive Validation (2026-09-25T17:20:38Z)
+
+Branch `feature/BF-66-form-reset`, fix commit `ba20a46`. The shared helper is split in two: `src/lib/forms/no-reset-submit.ts` (`buildNoResetSubmit`, React-free so Node can test it) and `src/lib/forms/use-no-reset-submit.ts` (`useNoResetSubmit`, which supplies React's `startTransition`). The eight stateful forms use the hook; WaterwaysForm's inline copy from BF-58.1 is replaced by it.
+
+| # | Check | Result | Key finding |
+| --- | --- | --- | --- |
+| 1 | `Testing/forms/bf66_form_reset_test.ts` | 0/3 before the fix, 3/3 after | No `<form action={fn}>` under `src/components`; all eight forms call `useNoResetSubmit` on an `onSubmit`; the handler cancels the native submit, then runs the action inside a transition with exactly the form's own data. |
+| 2 | `Testing/forms/bf58_1_waterways_schema_test.ts` | 16/16 | No regression in BF-58.1. |
+| 3 | `tsc --noEmit`, `pnpm lint`, `pnpm build` (Node 24, pnpm 10.34.5) | PASS | 0 errors; the 9 lint warnings are pre-existing. |
+| 4 | Signed-in preview pass, one server-rejected submit per form | PASS on all 8 forms | See [artifacts/BF-66/README.md](../artifacts/BF-66/README.md). Production confirmed untouched afterwards. |
+
+**Scope note:** the auth forms (login, signup, forgot and reset password) and the users invite form still use `<form action>`. Their fields are all uncontrolled, so after a reset the screen matches what would be sent (empty). That means retyping after an error, not a desync, so it is out of this ticket's scope. The regression test documents this.
+
+**Size:** `src` +56 / -18. `project-form.tsx` is exactly 300 lines, the modularity ceiling. The next change to it should split it (for example, the permits section into its own component).
+
+## Verify (round 1, 2026-09-25T17:55:20Z) — PASS 8.8/10
+
+Two independent reviews reconciled (verify + Codex `gpt-6-astra` xhigh). Tests 3/3 + 16/16 regression, `tsc --noEmit` and lint on changed files clean. No blocking findings. Two mediums to file as fast follow-ups (do NOT reopen this story):
+
+- **BF-66-F1 (medium, progressive enhancement):** moving all eight forms off `action={formAction}` to `onSubmit`-only removed the server-action POST fallback. A submit before hydration or with JS disabled/failed now does a GET navigation to the current URL — the edit is not saved and named required fields + the hidden JSON `data` land in the query string. Edge window only; the hydrated path this story evidenced is unaffected, so the change is still a net fix. Proposed: keep `action={formAction}` alongside `onSubmit` (React skips the reset when onSubmit preventDefaults even with `action` present) or disable submit until hydrated; verify in a browser, then relax the test's `action={fn}` ban for the paired form.
+- **BF-66-F2 (medium, test guard):** `bf66_form_reset_test.ts` asserts `useNoResetSubmit(` and `onSubmit={` presence separately, not that the form's `onSubmit` is the hook's output — a disconnected handler still passes 3/3 (Codex demonstrated). Production wiring is currently correct. Proposed: a component-render test with a dispatch spy that fails on the disconnected-handler mutation (needs a component test framework, not yet configured).
+
+## Round-1 fixes (2026-09-25T19:15:52Z)
+
+Tim chose to fix both on this branch rather than file them. Commit `8eee79b`.
+
+- **F1 fixed.** Every form is `<form action={formAction} onSubmit={submit}>` again. Checked in the installed react-dom 19.2.3 (`react-dom-client.development.js`):
+  - The form-action listener checks `nativeEvent.defaultPrevented`. When our `onSubmit` has already cancelled, it does not call the action. Because a transition was scheduled in the same event, it calls `startHostTransition(..., null, formData)`.
+  - `startHostTransition` maps a null action to `noop`, so `requestFormReset` never runs. No automatic reset after hydration; the server-action POST fallback before hydration is back.
+- **F2 fixed without a component framework.**
+  - The test captures the variable from `const x = useNoResetSubmit(formAction);`. It then requires exactly one `<form>` per component with `action={formAction}` and `onSubmit={x}`, the same variable.
+  - A second test requires every `<form>` under `src/components` to carry `action` and `onSubmit` together or neither.
+  - A disconnected handler (onSubmit bound to anything else) now fails.
+- **RED first:** the tightened test failed 2/3 before the fix and passes 3/3 after. BF-58.1 suite 16/16; `tsc`, lint (9 pre-existing warnings) and build clean.
+
+Browser checks on the preview at `8eee79b`, signed in as Tim:
+
+| Check | Result |
+| --- | --- |
+| Server-rendered HTML, before JavaScript: waterways, dust log, NDEP stormwater, project edit | Each form is `method="POST"`, `enctype="multipart/form-data"`, with Next's `$ACTION` hidden input: the pre-hydration fallback exists. |
+| Rejected submit, Working in Waterways | Exactly one server-action request; no navigation, empty query string; site and four answers unchanged. |
+| Rejected submit, Daily Dust Log (new) | Exactly one server-action request; 4 dropdowns unchanged. |
+| Rejected submit, project setup (phone "123") | Exactly one server-action request; "Invalid US phone number"; typed phone, 4 permits and both site rows unchanged. |
+| Production afterwards | RNO 18 phone unchanged (`updated_at` 15:22:34Z, before this pass), 0 new submissions in the last hour. |
+
+## Verify (authoritative round 1, 2026-09-25T19:34:39Z) — PASS 8.8/10
+
+Machine-stamped round 1 under the two-round rule (the earlier "round 1 PASS 8.8" predated the ledger, so it did not count). Re-ran the gates on the committed tree: BF-66 tests 3/3, BF-58.1 regression 16/16, `tsc --noEmit` clean, `pnpm lint` 9 pre-existing warnings / 0 in changed files, `pnpm build` exit 0.
+
+Two independent reviews reconciled (verify + Codex `gpt-6-astra` xhigh). Codex verdict needs-attention with one finding, adjudicated **medium** (its own label), so the verdict engine files it as a fast-follow and the story PASSes:
+
+- **BF-66-F3 (medium, pre-hydration data integrity — file as fast-follow, do NOT reopen this story):** the F1 fix re-added `action={formAction}` to restore the pre-hydration server-action POST. Because these forms serialize React state into one hidden JSON `data` field that the server parses exclusively, a submit *before* hydration (or with JS disabled/failed) POSTs the server-rendered (initial/saved) JSON — native select/radio changes made pre-hydration never reach it. The server then saves the OLD value and redirects as success while the screen shows the NEW one: the same "shows X, saves Y" desync this story fixed, moved into the pre-hydration window. Introduced for Waterways by F1 (it was `onSubmit`-only on master); **pre-existing on master for the other 7 forms** (they already had `action={formAction}`). No AC covers the pre-hydration window and the common post-hydration path is correct and evidenced, so it does not block. Fix is a design tradeoff for Tim: gate submit-until-hydrated (removes F1's progressive-enhancement benefit) or reconstruct the payload from named visible controls (fleet-wide), plus an edit regression with JS blocked. Codex confidence 0.99, reproduced with real SSR + the real parser.
+
+Evidence note carried forward: NDEP Weekly Stormwater has no screenshot (capture blocked by a password-manager overlay twice); the form was still browser-verified twice. Low, documented, no code defect.
+
+## Round-2 fix: submit gated on hydration (2026-09-25T20:15:54Z)
+
+Tim asked for the best-practice fix, then chose it for this branch rather than filing F3. Commit `d7d3026`.
+
+**Decision.** Standard practice for forms that depend on JavaScript is to keep submit unavailable until the page has hydrated. For example, Remix's `remix-utils` ships `useHydrated` for this, catching slow or failed script loads [verified 2026-09-25, remix-utils docs]. The alternative, true no-JS forms that read named visible fields on the server, would mean rebuilding all eight forms and their parsers around nested JSON (BMP tables, control measures). Crews on phones run JavaScript; the only exposure is the moment before hydration on a weak signal, and gating closes it.
+
+**Change.**
+- `useNoResetSubmit` now returns `{ submit, ready }`.
+- `ready` comes from `useSyncExternalStore`: `false` on the server and until hydration, then `true`, with no hydration mismatch.
+- Each form's single submit button is `disabled={pending || !ready}` and reads "Loading..." until ready. Being the form's only submit button (checked: one per form, every `<button>` explicitly typed), disabling it also blocks Enter-key implicit submission.
+- `action={formAction}` stays. It is harmless now and keeps the F1 fix's GET-leak protection.
+
+**RED first.** The regression test gained a case requiring exactly one submit button per form with `disabled={pending || !ready}`, and the F2 case now requires `const { submit, ready } = useNoResetSubmit(formAction);`. Both failed before the change; the suite is 4/4 after. BF-58.1 16/16; `tsc`, lint (9 pre-existing warnings) and build clean. `project-form.tsx` stays at 300 lines.
+
+Browser checks on the preview at `d7d3026`, signed in as Tim:
+
+| Check | Result |
+| --- | --- |
+| Server-rendered HTML (before JavaScript) of all eight form pages: waterways, dust log new, dust log append (real log `b1e9831b`, read only), NDEP stormwater, NDEP SAD, NNPH, NDOT (NDOT 4541), project edit | Every page: one submit button, `disabled`, label "Loading...", form `method="POST"`. |
+| Live page after hydration | Submit enabled, normal label ("Submit Inspection"). |
+| Rejected submit after hydration: Working in Waterways, Daily Dust Log | Exactly one server-action request each, no navigation, all values unchanged. |
+| Production afterwards | 0 new submissions in 90 minutes; real dust log still 1 entry; RNO 18 phone unchanged. |
+
+F1, F2 and F3 are all resolved on this branch. Nothing from verify rounds 1 and 2 remains to file.
+
+## Verify (authoritative round 1, fresh cycle, 2026-09-25T20:39:36Z) — PASS 9.0/10
+
+The round-2 hydration-gate fix (`d7d3026`) landed past the prior PASS stamp, so `verify_rounds.py` opened a fresh round 1. Gates re-run by verify on this HEAD (`ec4ed1a`): BF-66 tests 4/4, BF-58.1 Waterways regression 16/16, BF-57 NDEP-edit + BF-58.1 NDOT-photo readiness PASS, `tsc --noEmit` exit 0, `eslint` on all changed files exit 0, `next build` exit 0. Tier-1 pattern scan clean; every `<button>` in all eight forms is explicitly typed (submit-count + button-count == total `<button>` per file), so the single-disabled-submit Enter-block holds.
+
+Two independent reviews reconciled (verify + Codex `gpt-6-astra` xhigh). Codex verdict needs-attention with one finding, adjudicated **medium** (its own label) against the actual code, so the verdict engine files it as a fast-follow and the story PASSes:
+
+- **BF-66-F4 (medium, pre-hydration edit loss — file as fast-follow, do NOT reopen this story):** the F3 gate disables *submit* until hydrated but leaves the controlled fields *editable*. On a slow-hydrating client a user can change a select/radio/text/initials during the pre-hydration window; that native edit is not in React state, and when `ready` flips true the re-render re-asserts `value=initial`, discarding it — a later post-hydration submit then saves the old value with no validation error. Bounded to the pre-hydration timing race, and after the revert screen==saved (no shows-X-saves-Y at submit); the controlled-field revert is largely pre-existing React SSR behaviour for the seven already-controlled forms. Fix is a design tradeoff for Tim: `fieldset disabled={!ready}` across the eight forms, or reconcile visible edits into state before enabling submit, plus a delayed-script browser regression. Codex confidence 0.97 (SSR + host-function probe, not a full-browser hydration test).
+
+Two lows noted, non-blocking: the regression test does not enforce that non-submit buttons stay explicitly `type="button"` (a future untyped button would slip the guard); `project-form.tsx` remains at the 300-line ceiling. Machine-stamped round 1 PASS 9.0 under the two-round rule.
+

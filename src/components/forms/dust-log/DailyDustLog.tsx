@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
 import { useRouter } from "next/navigation";
 import { submitDustLog, type DustLogState } from "@/app/dashboard/projects/[id]/forms/dust-log/actions";
 import {
@@ -50,6 +51,7 @@ export default function DailyDustLog({
 }: DailyDustLogProps) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState(submitDustLog, initialState);
+  const { submit, ready } = useNoResetSubmit(formAction);
   const [entries, setEntries] = useState<DustLogEntry[]>([makeEmptyEntry()]);
   const [usedPrevious, setUsedPrevious] = useState(false);
 
@@ -83,7 +85,7 @@ export default function DailyDustLog({
   }
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} onSubmit={submit} className="space-y-6">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="entries" value={JSON.stringify(entries)} />
 
@@ -253,10 +255,12 @@ export default function DailyDustLog({
         </button>
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || !ready}
           className="rounded-md bg-[#233B5C] px-6 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1a2d47] focus:outline-none focus:ring-2 focus:ring-[#5C6F8A] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {pending ? "Submitting..." : "Submit Dust Log"}
+          {!ready
+            ? "Loading..."
+            : pending ? "Submitting..." : "Submit Dust Log"}
         </button>
       </div>
     </form>

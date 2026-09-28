@@ -1,11 +1,12 @@
 "use client";
 
-import { startTransition, useActionState, useState, type FormEvent } from "react";
+import { useActionState, useState } from "react";
 import {
   submitWaterways,
   updateWaterways,
   type WaterwaysState,
 } from "@/app/dashboard/projects/[id]/forms/working-in-waterways/actions";
+import { useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
 import PhotoAttachment from "@/components/forms/shared/PhotoAttachment";
 import { inputClass, labelClass, selectClass } from "@/components/forms/formStyles";
 import { pacificTime, pacificToday } from "@/lib/dates";
@@ -63,16 +64,8 @@ export default function WaterwaysForm({
   const isEdit = Boolean(submissionId);
   const action = isEdit ? updateWaterways.bind(null, submissionId as string) : submitWaterways;
   const [state, formAction, pending] = useActionState(action, initialState);
+  const { submit, ready } = useNoResetSubmit(formAction);
   const [draft, setDraft] = useState<Draft>(() => initialData ?? emptyDraft(sites));
-
-  // Submit through onSubmit, not <form action>: React 19 resets a form after a
-  // form action, which blanks the controlled select and radios on screen while
-  // the draft (what is actually sent) keeps its values. BF-58.1 preview finding.
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    startTransition(() => formAction(formData));
-  }
 
   function update<K extends keyof Draft>(field: K, value: Draft[K]) {
     setDraft((prev) => ({ ...prev, [field]: value }));
@@ -86,7 +79,7 @@ export default function WaterwaysForm({
   const errors = state.fieldErrors;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form action={formAction} onSubmit={submit} className="space-y-8">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="data" value={JSON.stringify(draft)} />
 
@@ -190,10 +183,12 @@ export default function WaterwaysForm({
         )}
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || !ready}
           className="rounded-md bg-[#233B5C] px-6 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1a2d47] focus:outline-none focus:ring-2 focus:ring-[#5C6F8A] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {pending ? (isEdit ? "Saving..." : "Submitting...") : isEdit ? "Save Changes" : "Submit Inspection"}
+          {!ready
+            ? "Loading..."
+            : pending ? (isEdit ? "Saving..." : "Submitting...") : isEdit ? "Save Changes" : "Submit Inspection"}
         </button>
       </div>
     </form>
