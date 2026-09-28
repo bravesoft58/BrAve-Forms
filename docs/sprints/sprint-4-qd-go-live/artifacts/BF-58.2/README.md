@@ -11,4 +11,9 @@
 | `05-inspector-portal-waterways-detail-with-photo.jpg` | Inspector portal opened from the project's existing QR link (issued 2026-09-25, not reissued): the Waterways record with the new renderer and the signed photo, which loaded at 900x1200 (AC 2). |
 | `06-preview-pdf-extracted-text.txt` | The PDF fetched from that Download PDF link on the preview: 1 page, 1 embedded 900x1200 JPEG, and every field, answer and comment in the decoded text (AC 1). |
 
-The TEST photo was a portrait JPEG drawn on a canvas in the page and attached through the form's own file input, because the browser tool may only upload files shared with the session. It proves the pipeline, not phone EXIF rotation; that stays with Gracie's AC 5 check.
+| `07-iphone-portrait-photo-upright-on-view-page.jpg` | Tim's iPhone, Take Photo held upright (TEST `0e38c6f1`): stored as 1368x1824 with no EXIF orientation tag, so the pixels were already upright on arrival; view page shows the door upright; the PDF embeds the 1368x1824 image drawn with `165 0 0 -220 ... cm` (portrait, no rotation). |
+| `08-android-landscape-photo-upright-on-view-page.jpg` | Tim's Android tablet, the only Android device on hand (TEST `586af494`): stored as 1920x1440 with no EXIF at all; the shot was landscape, and the scene is upright; the PDF embeds 1920x1440 drawn with `259.2 0 0 -194.4 ... cm` (landscape, no rotation). A portrait photo from an Android phone was not exercised. |
+
+Both phone TESTs were deleted afterwards (guarded SQL delete, BF-63 revisions 9 and 10 kept, photo files stay in Storage). The PDFs could not be screenshotted (the browser tool cannot capture Chrome's PDF viewer), so orientation in the PDF is read from the image object's size and the drawing matrix.
+
+The first TEST photo (02-06) was a portrait JPEG drawn on a canvas in the page and attached through the form's own file input, because the browser tool may only upload files shared with the session. It proves the pipeline, not phone EXIF rotation; that stays with Gracie's AC 5 check.
