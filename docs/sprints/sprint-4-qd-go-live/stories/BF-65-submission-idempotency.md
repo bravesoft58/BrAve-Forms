@@ -2,12 +2,15 @@
 
 **Type:** Record integrity (shared form-action layer)
 **Priority:** MEDIUM (needs a lost response plus a retry; field connectivity makes that plausible)
-**Points:** 2
-**Status:** NOT STARTED
+**Points:** 2 (+2 for bundled [BF-61](BF-61-submission-edit-concurrency.md))
+**Status:** IN PROGRESS
 **Sprint:** 4 (backlog)
 **Reported by:** BF-58.1 `/verify` round 1 (finding C2, headless verify with Codex reconciled), filed at closeout 2026-09-25
 **Created:** 2026-09-25
-**Last Updated:** 2026-09-28T17:11:39Z
+**Started:** 2026-09-28T17:20:44Z
+**Last Updated:** 2026-09-28T18:13:13Z
+
+> **BUNDLED WITH BF-61, 2026-09-28 (Tim: "bundle it if it makes sense").** One branch, one verify and one closeout cover both. The two meet at one point: once edits are guarded by the version they loaded, a retried edit whose first attempt already landed must succeed rather than be refused as a conflict, and that check is this story's same-content comparison. BF-61's acceptance criteria are copied below; its file is set to DONE by hand at this story's closeout.
 
 ## Problem
 
@@ -25,11 +28,21 @@ Affected: all six submit actions (Daily Dust Log, NDEP Weekly Stormwater, NDOT W
 
 ## Acceptance criteria
 
-- [ ] Replaying the same submit payload twice (same key) creates one row. The second call returns the first row's id as a success.
-- [ ] Two genuinely separate submissions (two page loads) still create two rows.
-- [ ] A key from another user cannot be used to probe or redirect to their row.
-- [ ] The dust-log append path does not duplicate entries on a retried append.
-- [ ] Migration rehearsed rolled back before applying, with Tim's go; `pnpm build` and lint clean.
+- [x] Replaying the same submit payload twice (same key) creates one row. The second call returns the first row's id as a success.
+- [x] Two genuinely separate submissions (two page loads) still create two rows.
+- [x] A key from another user cannot be used to probe or redirect to their row.
+- [x] The dust-log append path does not duplicate entries on a retried append.
+- [x] Migration rehearsed rolled back before applying, with Tim's go; `pnpm build` and lint clean.
+
+**Added during build (preview finding):**
+- [x] A save whose reply is lost keeps the form on screen with a message instead of Next's error page, so the retry reuses the key.
+
+**From BF-61 (bundled):**
+- [x] A save against a submission that changed since it was loaded is refused with a conflict message, and the earlier save is intact.
+- [x] A permission failure and a conflict are reported as different messages.
+- [x] Every in-place edit action uses the same check (no per-form drift).
+- [x] A normal single-editor save is unchanged for the user.
+- [x] Evidence recorded here.
 
 ## Technical Approach
 
@@ -84,3 +97,52 @@ Scouted 2026-09-28T17:11:39Z. One small migration, no new dependency.
 
 - **BF-61** (optimistic concurrency) covers edit conflicts; this covers duplicate creates. Both belong to the record-integrity gate.
 - **BF-63** (revision history) would record a duplicate as a separate record; fixing this first keeps the history clean.
+
+## Implementation (2026-09-28T18:13:13Z)
+
+Branch `feature/BF-65-record-integrity`, commits `61dc999`, `9d6e599`, `34ec33f`. Production source: about 320 lines added, 170 removed, against a combined 4 SP budget of about 320. No production file over 300 lines.
+
+- **Migration `20260928172859_submission_client_key`** (the version `apply_migration` recorded) plus a rollback pair. The rollback must follow an app revert, because the new code writes the column. It adds `form_submissions.client_key uuid` and `UNIQUE (submitted_by, client_key)`, which is plain rather than partial and scoped per submitter. It was applied to production with Tim's go after a rolled-back rehearsal passed 7/7.
+- **`src/lib/forms/same-data.ts`:** a key-order-insensitive JSON comparison.
+- **`src/lib/forms/submission-writes.ts`:**
+  - `insertSubmissionOnce`: a unique violation on the key index leads to a lookup by submitter and key. The same project, form type, date and data is a replay, returned as success with the first row's id. Different content returns an "already saved" error.
+  - `updateSubmissionIfUnchanged`: the UPDATE is guarded by `updated_at = version`. On zero rows, a re-read tells apart:
+    - a permission refusal (version unchanged, or row not visible);
+    - a replay of a save that already landed (same content: success);
+    - a conflict.
+  - A missing key or version, from an old browser bundle mid-deploy, behaves as before.
+- **`src/lib/forms/lost-reply.ts`** plus `keepFormOnLostReply` in `use-no-reset-submit.ts`: a thrown server-action reply becomes an error on the form; `unstable_rethrow` passes Next's redirect through. It is applied to all seven create/edit/append forms.
+- **`useNoResetSubmit`** creates `crypto.randomUUID()` on the first submit and reuses it while the form is mounted, so a new visit gets a new key.
+- **Six create actions** use `insertSubmissionOnce`. NDOT and Waterways skip the photo-row mirror on a replay.
+- **Three edit actions** (NDEP, NDOT, Waterways) use `updateSubmissionIfUnchanged`. Their edit pages pass `submission.updated_at` as the `version` prop, as the database's text, never through `Date`.
+  - NDOT's edit had no read-back before, so an RLS refusal used to report success; it is now reported.
+- **Dust-log append:**
+  - New entries carry `append_key`; a retry that finds its key does nothing.
+  - The UPDATE is guarded by the `updated_at` just read. A concurrent append is re-read and re-merged once.
+  - An RLS refusal, which previously reported success, now shows the permission message.
+
+**Found during the preview pass:**
+- A lost reply made `useActionState` throw, and Next replaced the page with "This page couldn't load" (artifact 01). That unmounted the form and its key, so Reload would have created a duplicate: the case this story exists for.
+- Fixed by `keepFormOnLostReply` in `34ec33f`.
+- The app has no `error.tsx` anywhere, so any other thrown error still shows Next's default page. That is out of scope and noted for verify.
+
+## Comprehensive Validation (2026-09-28T18:13:13Z)
+
+| # | Check | Result | Key finding |
+|---|------|--------|-------------|
+| 1 | `Testing/forms/bf65_record_integrity_test.ts` (14 tests, stub Supabase client) | PASS 14/14 | Each test asserts the outcome and the returned id plus the exact filters sent: the lookup is scoped to (submitted_by, client_key), and the version reaches the filter with microseconds intact. Covered: replay versus changed content; another constraint's 23505 goes straight back without a lookup; permission versus conflict versus a landed retry; an unguarded update without a version; one key per mounted form; a lost reply becomes a message; Next's redirect still propagates. |
+| 2 | Mutation check | FAIL as intended, then restored | Treating every key hit as a replay failed "the same key with different content is refused". |
+| 3 | `Testing/security/bf65_client_key_probe.sql` via `bf65_rehearsal.py` | PASS 7/7 rolled back, then 7/7 against production after apply | Index shape; 23505 names the key index; the lookup finds the first row under RLS; NULL keys never collide; a second save from the same version updates 0 rows and the first save survives; another user may use the same key value; a same-org admin's lookup by (self, key) gets only their own row, though they can see the member's. |
+| 4 | Regression: BF-66 4/4, BF-58.1 16/16, BF-58.2 7/7 | PASS | |
+| 5 | `tsc --noEmit`, lint (0 errors, 12 existing warnings), `pnpm build` on the committed tree | PASS | |
+| 6 | Supabase security advisor after apply | No new findings | Every item predates this story. |
+| 7 | Preview, lost reply before the fix (artifact 01) | RED confirmed | Row saved with its key; the page became Next's error screen. |
+| 8 | Preview, lost reply after the fix (artifact 03) | PASS | The first attempt saved the row and showed the message. Submit again landed on the project list, with still exactly one row (`2fe6f8f1`). |
+| 9 | Preview, BF-61 two-tab conflict (artifact 02) | PASS | Tab B saved; tab A, holding the old version, got the conflict message, and the database kept tab B's text. |
+| 10 | Preview, retried Add Entries (artifact 04) | PASS | One entry appended, not two (the log has 2 entries). The first attempt showed the message and the retry landed on the log. |
+
+TEST records created on production data by the preview pass, to delete with Tim's go:
+- dust logs `d47d6722` (the RED run), `cfb0cb18` (an attempt interrupted by the Vercel toolbar extension) and `2fe6f8f1` (GREEN plus append);
+- Waterways `2ca1db8d` (conflict test).
+
+The three dust logs, each from a separate page load with its own key, also show AC 2: separate submissions still create separate rows.
