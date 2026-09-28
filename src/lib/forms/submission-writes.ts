@@ -10,6 +10,8 @@ export const ALREADY_SAVED_ERROR =
   "This inspection was already saved. Open it from the project's form list to make changes.";
 export const CONFLICT_ERROR = "This submission changed since you opened it. Reload to see the latest version.";
 export const FORBIDDEN_ERROR = "You do not have permission to edit this submission.";
+export const APPEND_ALREADY_SAVED_ERROR =
+  "These entries were already saved, and what you sent now is different. Open the log to check them, then add any changes as new entries.";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -28,6 +30,24 @@ export function readVersion(formData: FormData): string | null {
 // What the database will store: JSON drops undefined-valued keys, so compare
 // against the JSON form of what was sent, not the parsed object.
 const asStored = (data: unknown): unknown => JSON.parse(JSON.stringify(data));
+
+/**
+ * Dust-log append retry check (BF-65). "new": nothing is saved under this key
+ * yet. "replay": the entries saved under it are exactly the ones being sent
+ * again, so the first attempt landed. "changed": the key was used, but the user
+ * edited the entries before resending (the form stays up after a lost reply);
+ * that must be refused, never reported as saved.
+ */
+export function appendRetryState(
+  existingEntries: readonly unknown[],
+  newEntries: readonly unknown[],
+  appendKey: string | null,
+): "new" | "replay" | "changed" {
+  if (!appendKey) return "new";
+  const saved = existingEntries.filter((entry) => (entry as { append_key?: unknown })?.append_key === appendKey);
+  if (saved.length === 0) return "new";
+  return sameData(saved, asStored(newEntries)) ? "replay" : "changed";
+}
 
 export interface NewSubmission {
   project_id: string;

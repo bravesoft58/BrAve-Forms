@@ -5,7 +5,13 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { collectFieldErrors } from "@/lib/forms/field-errors";
-import { FORBIDDEN_ERROR, insertSubmissionOnce, readClientKey } from "@/lib/forms/submission-writes";
+import {
+  APPEND_ALREADY_SAVED_ERROR,
+  appendRetryState,
+  FORBIDDEN_ERROR,
+  insertSubmissionOnce,
+  readClientKey,
+} from "@/lib/forms/submission-writes";
 import { dustLogSchema, parseDustLogForm } from "@/lib/schemas/dust-log";
 
 export type DustLogState = {
@@ -75,7 +81,8 @@ export async function appendDustLogEntries(
   }
 
   // BF-65: each appended entry carries the submit's key, so a retry whose first
-  // attempt landed finds its own entries already there and adds nothing.
+  // attempt landed finds its own entries already there and adds nothing. A
+  // retry with edited entries is refused rather than reported as saved.
   const appendKey = readClientKey(formData);
   const newEntries = appendKey
     ? result.data.entries.map((entry) => ({ ...entry, append_key: appendKey }))
@@ -98,8 +105,10 @@ export async function appendDustLogEntries(
     const { data: existing } = await readLog();
     if (!existing) return { error: "Submission not found." };
 
-    const existingEntries: { append_key?: string }[] = Array.isArray(existing.data) ? existing.data : [];
-    if (appendKey && existingEntries.some((entry) => entry?.append_key === appendKey)) break;
+    const existingEntries: unknown[] = Array.isArray(existing.data) ? existing.data : [];
+    const retry = appendRetryState(existingEntries, newEntries, appendKey);
+    if (retry === "replay") break;
+    if (retry === "changed") return { error: APPEND_ALREADY_SAVED_ERROR };
 
     const { data: updated, error: updateError } = await supabase
       .from("form_submissions")

@@ -9,6 +9,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { sameData } from "@/lib/forms/same-data";
 import {
+  appendRetryState,
   ALREADY_SAVED_ERROR,
   CONFLICT_ERROR,
   DUPLICATE_KEY_INDEX,
@@ -175,6 +176,25 @@ test("the submit hook sends one key for every retry of a mounted form, and a new
   assert.equal(first[0], first[1]);
   assert.match(first[0], /^[0-9a-f-]{36}$/);
   assert.notEqual(run(makeKeyProvider())[0], first[0]);
+});
+
+test("dust-log append retry: same entries = replay; entries edited after a lost reply = refused, never 'saved'", () => {
+  const original = { date: "2026-09-28", time: "14:10", corrective_actions: "", append_key: undefined };
+  const sent = [{ date: "2026-09-28", time: "14:12", visible_dust: "N", corrective_actions: "watered", append_key: KEY }];
+  // The saved log as jsonb returns it: other key order, earlier entries without a key.
+  const saved = [
+    { date: "2026-09-28", time: "14:10", corrective_actions: "" },
+    { corrective_actions: "watered", visible_dust: "N", append_key: KEY, time: "14:12", date: "2026-09-28" },
+  ];
+  assert.equal(appendRetryState([original], sent, KEY), "new");
+  assert.equal(appendRetryState(saved, sent, KEY), "replay");
+  // Codex C1: the crew fixes the comment before pressing Submit again.
+  const edited = [{ ...sent[0], corrective_actions: "watered twice" }];
+  assert.equal(appendRetryState(saved, edited, KEY), "changed");
+  // Or adds a second entry to the same batch.
+  assert.equal(appendRetryState(saved, [...sent, { ...sent[0], time: "14:30" }], KEY), "changed");
+  // No key (old bundle): always a new append.
+  assert.equal(appendRetryState(saved, sent, null), "new");
 });
 
 // Stands in for next/navigation's unstable_rethrow: re-raises Next's own control-flow errors.
