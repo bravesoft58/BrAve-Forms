@@ -22,7 +22,7 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-56](stories/BF-56-stable-qr-expiring-session.md) | Inspector QR never changes; the scanned session expires | 3 | MEDIUM | Make inspection QR Code not expire | DONE (merged `00e9d82`) |
 | [BF-57](stories/BF-57-ndep-stormwater-edit.md) | NDEP Weekly Stormwater: enable Edit on submitted forms | 2 | HIGH | Edit button grayed out | DONE (merged `8bf7f24`) |
 | [BF-58.1](stories/BF-58.1-waterways-form-core.md) | Working in Waterways form, core: sites, entry, view, edit | 5 | HIGH | Add Working In Waterways forms | DONE (merged `e96a8df`) |
-| [BF-58.2](stories/BF-58.2-waterways-form-pdf-inspector.md) | Working in Waterways form: PDF, inspector view, today indicator, Gracie sign-off | 3 | HIGH | Add Working In Waterways forms | NOT STARTED |
+| [BF-58.2](stories/BF-58.2-waterways-form-pdf-inspector.md) | Working in Waterways form: PDF, inspector view, today indicator, Gracie sign-off | 3 | HIGH | Add Working In Waterways forms | DONE (merged `1f559b4`) |
 | [BF-59](stories/BF-59-profile-role-self-promotion.md) | Close the profile role self-promotion path | 2 | CRITICAL | (readiness blocker 1, added by Tim) | DONE (merged `125e1ab`) |
 | [BF-60](stories/BF-60-default-table-grants.md) | Tighten Supabase default table grants across the public schema | 2 | HIGH | (BF-59 verify follow-up) | NOT STARTED |
 | [BF-61](stories/BF-61-submission-edit-concurrency.md) | Optimistic concurrency on submission edits | 2 | MEDIUM | (BF-57 verify follow-up; last-writer-wins accepted for the pilot) | NOT STARTED |
@@ -32,7 +32,7 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-65](stories/BF-65-submission-idempotency.md) | Idempotent form submission (no duplicate inspections on retry) | 2 | MEDIUM | (BF-58.1 verify follow-up C2) | NOT STARTED |
 | [BF-66](stories/BF-66-form-reset-blanks-controls.md) | Rejected submits blank selects and radios while the old answers are still sent | 2 | HIGH | (BF-58.1 preview finding) | DONE (merged `d320394`) |
 | [BF-67](stories/BF-67-lock-fields-until-hydrated.md) | Lock form fields until the page has hydrated | 1 | MEDIUM | (BF-66 verify follow-up F4) | NOT STARTED |
-| **Total** | | **32** | | | **8/16 DONE** |
+| **Total** | | **32** | | | **9/16 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
