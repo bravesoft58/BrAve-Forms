@@ -141,7 +141,7 @@ Branch `feature/BF-65-record-integrity`, commits `61dc999`, `9d6e599`, `34ec33f`
 | 9 | Preview, BF-61 two-tab conflict (artifact 02) | PASS | Tab B saved; tab A, holding the old version, got the conflict message, and the database kept tab B's text. |
 | 10 | Preview, retried Add Entries (artifact 04) | PASS | One entry appended, not two (the log has 2 entries). The first attempt showed the message and the retry landed on the log. |
 
-TEST records created on production data by the preview pass, to delete with Tim's go:
+TEST records created on production data by the preview pass. All four were deleted with Tim's go (guarded SQL delete by id and TEST marker): 0 rows remain and their `form_photos` rows went with them. BF-63 kept 6 revisions (2 UPDATE from the append and the conflict test, 4 DELETE). The Waterways test photo file `1790618881458-k071r2.jpg` stays in Storage.
 - dust logs `d47d6722` (the RED run), `cfb0cb18` (an attempt interrupted by the Vercel toolbar extension) and `2fe6f8f1` (GREEN plus append);
 - Waterways `2ca1db8d` (conflict test).
 
