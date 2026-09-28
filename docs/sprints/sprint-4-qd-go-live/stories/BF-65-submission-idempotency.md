@@ -8,7 +8,7 @@
 **Reported by:** BF-58.1 `/verify` round 1 (finding C2, headless verify with Codex reconciled), filed at closeout 2026-09-25
 **Created:** 2026-09-25
 **Started:** 2026-09-28T17:20:44Z
-**Last Updated:** 2026-09-28T18:13:13Z
+**Last Updated:** 2026-09-28T18:36:55Z
 
 > **BUNDLED WITH BF-61, 2026-09-28 (Tim: "bundle it if it makes sense").** One branch, one verify and one closeout cover both. The two meet at one point: once edits are guarded by the version they loaded, a retried edit whose first attempt already landed must succeed rather than be refused as a conflict, and that check is this story's same-content comparison. BF-61's acceptance criteria are copied below; its file is set to DONE by hand at this story's closeout.
 
@@ -146,3 +146,24 @@ TEST records created on production data by the preview pass. All four were delet
 - Waterways `2ca1db8d` (conflict test).
 
 The three dust logs, each from a separate page load with its own key, also show AC 2: separate submissions still create separate rows.
+
+## Verify round 1 fixes (2026-09-28T18:36:55Z)
+
+Verify round 1: NEEDS ATTENTION 7.5 (`verify-BF-65-20260928-181537`). Two findings.
+
+**C1 (high, Codex), FIXED in `4c337d0`.**
+- *The problem:* the append retry only checked that its key was already in the log. Because the form now stays up after a lost reply, a crew member could correct an entry and resend. The server saw the key, skipped the write and reported success, silently dropping the correction.
+- *The fix:* `appendRetryState` (in `submission-writes.ts`) compares the entries saved under the key with the ones being sent:
+  - identical: replay (success);
+  - different: refused with "These entries were already saved, and what you sent now is different. Open the log to check them, then add any changes as new entries.";
+  - no key: a new append.
+
+  This is the same rule as the create path.
+- *Unit test:* test 15 covers an edited comment and an added entry. A mutation that always returns "replay" fails it. Unit tests 15/15; tsc, lint and build clean on the committed tree.
+- *Preview regression (artifact 05):*
+  1. On a TEST dust log (`1968d579`), "Add Entries" was sent with a lost reply, which showed the connection message.
+  2. The comment was then corrected and resent, and was refused with the new message.
+  3. The database holds exactly the base entry plus the first version: nothing dropped silently, nothing doubled.
+  4. `1968d579` was then deleted under Tim's go for preview TEST records.
+
+**C2 (medium): not fixed here; to be filed at closeout.** An edit sent without a version (an old browser bundle during a deploy, or a crafted request) skips the BF-61 check, which the code documents as intentional backwards compatibility. The follow-up is to require the version once the deploy window has passed.
