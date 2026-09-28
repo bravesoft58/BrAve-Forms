@@ -44,6 +44,7 @@ export default async function EditWaterwaysPage({
         sites={readProjectSites(project.waterway_sites)}
         submissionId={submissionId}
         initialData={initialData}
+        version={submission.updated_at}
         cancelHref={viewHref}
       />
     </div>

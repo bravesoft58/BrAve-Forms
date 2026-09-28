@@ -5,6 +5,12 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { collectFieldErrors } from "@/lib/forms/field-errors";
+import {
+  insertSubmissionOnce,
+  readClientKey,
+  readVersion,
+  updateSubmissionIfUnchanged,
+} from "@/lib/forms/submission-writes";
 import { ndepStormwaterSchema, parseNdepStormwaterForm } from "@/lib/schemas/ndep-stormwater";
 
 export type NdepStormwaterState = {
@@ -41,20 +47,13 @@ export async function submitNdepStormwater(
   const data = result.data;
   const supabase = await createClient();
 
-  const { error: insertError } = await supabase
-    .from("form_submissions")
-    .insert({
-      project_id: projectId,
-      form_type: FORM_TYPE,
-      data,
-      form_date: data.inspection_date,
-      status: "submitted",
-      submitted_by: user.id,
-      submitted_at: new Date().toISOString(),
-    });
-
-  if (insertError) {
-    return { error: insertError.message };
+  const saved = await insertSubmissionOnce(
+    supabase,
+    { project_id: projectId, form_type: FORM_TYPE, data, form_date: data.inspection_date, submitted_by: user.id },
+    readClientKey(formData),
+  );
+  if (!saved.ok) {
+    return { error: saved.error };
   }
 
   revalidatePath(`/dashboard/projects/${projectId}`);
@@ -105,25 +104,14 @@ export async function updateNdepStormwater(
 
   const data = result.data;
 
-  // An RLS-denied UPDATE affects zero rows without raising, so select the row back
-  // and treat "nothing came back" as a rejection rather than a silent no-op.
-  const { data: updated, error: updateError } = await supabase
-    .from("form_submissions")
-    .update({
-      data,
-      form_date: data.inspection_date,
-    })
-    .eq("id", submissionId)
-    .eq("project_id", projectId)
-    .eq("form_type", FORM_TYPE)
-    .select("id")
-    .maybeSingle();
-
-  if (updateError) {
-    return { error: updateError.message };
-  }
-  if (!updated) {
-    return { error: "You do not have permission to edit this submission." };
+  const saved = await updateSubmissionIfUnchanged(
+    supabase,
+    { id: submissionId, project_id: projectId, form_type: FORM_TYPE },
+    { data, form_date: data.inspection_date },
+    readVersion(formData),
+  );
+  if (!saved.ok) {
+    return { error: saved.error };
   }
 
   revalidatePath(`/dashboard/projects/${projectId}`);

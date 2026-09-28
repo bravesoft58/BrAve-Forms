@@ -53,6 +53,7 @@ export default function WaterwaysForm({
   submissionId,
   initialData,
   cancelHref,
+  version,
 }: {
   projectId: string;
   sites: WaterwaySite[];
@@ -60,6 +61,8 @@ export default function WaterwaysForm({
   submissionId?: string;
   initialData?: WaterwaysData;
   cancelHref?: string;
+  /** Edit mode: the row's updated_at as loaded, sent back so a stale save is refused (BF-61). */
+  version?: string;
 }) {
   const isEdit = Boolean(submissionId);
   const action = isEdit ? updateWaterways.bind(null, submissionId as string) : submitWaterways;
@@ -82,6 +85,7 @@ export default function WaterwaysForm({
     <form action={formAction} onSubmit={submit} className="space-y-8">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="data" value={JSON.stringify(draft)} />
+      <input type="hidden" name="version" value={version ?? ""} />
 
       {state.error && (
         <div className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-400">

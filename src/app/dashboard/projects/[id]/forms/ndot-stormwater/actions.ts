@@ -5,6 +5,12 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { collectFieldErrors } from "@/lib/forms/field-errors";
+import {
+  insertSubmissionOnce,
+  readClientKey,
+  readVersion,
+  updateSubmissionIfUnchanged,
+} from "@/lib/forms/submission-writes";
 import { ndotStormwaterSchema, parseNdotStormwaterForm } from "@/lib/schemas/ndot-stormwater";
 
 export type NdotStormwaterState = {
@@ -39,28 +45,20 @@ export async function submitNdotStormwater(
   const data = result.data;
   const supabase = await createClient();
 
-  const { data: submission, error: insertError } = await supabase
-    .from("form_submissions")
-    .insert({
-      project_id: projectId,
-      form_type: "ndot_weekly_stormwater",
-      data,
-      form_date: data.inspection_date,
-      status: "submitted",
-      submitted_by: user.id,
-      submitted_at: new Date().toISOString(),
-    })
-    .select("id")
-    .single();
-
-  if (insertError || !submission) {
-    return { error: insertError?.message ?? "Failed to create submission." };
+  const saved = await insertSubmissionOnce(
+    supabase,
+    { project_id: projectId, form_type: "ndot_weekly_stormwater", data, form_date: data.inspection_date, submitted_by: user.id },
+    readClientKey(formData),
+  );
+  if (!saved.ok) {
+    return { error: saved.error };
   }
 
-  // Insert photo records into form_photos table (best-effort — form data JSONB is the source of truth)
-  if (data.photos.length > 0) {
+  // Insert photo records into form_photos table (best-effort — form data JSONB is the source of truth).
+  // A replay's first attempt already wrote them.
+  if (!saved.replay && data.photos.length > 0) {
     const photoRows = data.photos.map((p) => ({
-      submission_id: submission.id,
+      submission_id: saved.id,
       file_path: p.file_name,
       caption: p.caption || null,
     }));
@@ -114,23 +112,22 @@ export async function updateNdotStormwater(
   const data = result.data;
   const supabase = supabasePre;
 
-  const { error: updateError } = await supabase
-    .from("form_submissions")
-    .update({
-      data,
-      form_date: data.inspection_date,
-    })
-    .eq("id", submissionId)
-    .eq("project_id", projectId)
-    .eq("form_type", "ndot_weekly_stormwater");
-
-  if (updateError) {
-    return { error: updateError.message };
+  const saved = await updateSubmissionIfUnchanged(
+    supabase,
+    { id: submissionId, project_id: projectId, form_type: "ndot_weekly_stormwater" },
+    { data, form_date: data.inspection_date },
+    readVersion(formData),
+  );
+  if (!saved.ok) {
+    return { error: saved.error };
   }
 
   // Replace photo rows so deletes propagate. JSONB stays authoritative.
-  await supabase.from("form_photos").delete().eq("submission_id", submissionId);
-  if (data.photos.length > 0) {
+  // A replay's first attempt already replaced them.
+  if (!saved.replay) {
+    await supabase.from("form_photos").delete().eq("submission_id", submissionId);
+  }
+  if (!saved.replay && data.photos.length > 0) {
     const photoRows = data.photos.map((p) => ({
       submission_id: submissionId,
       file_path: p.file_name,

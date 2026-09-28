@@ -1,4 +1,4 @@
-import { startTransition, useMemo, useSyncExternalStore } from "react";
+import { startTransition, useMemo, useRef, useSyncExternalStore } from "react";
 import { buildNoResetSubmit } from "@/lib/forms/no-reset-submit";
 
 const subscribeNever = () => () => {};
@@ -21,7 +21,14 @@ const subscribeNever = () => () => {};
  * client without a hydration mismatch.
  */
 export function useNoResetSubmit(action: (formData: FormData) => void) {
-  const submit = useMemo(() => buildNoResetSubmit(action, startTransition), [action]);
+  // BF-65: made on the first submit and kept while the form is mounted, so a
+  // retry after a lost reply resends the same key. Pages unmount on
+  // navigation, so a new visit (including browser Back) gets a new key.
+  const key = useRef<string | null>(null);
+  const submit = useMemo(
+    () => buildNoResetSubmit(action, startTransition, undefined, () => (key.current ??= crypto.randomUUID())),
+    [action],
+  );
   const ready = useSyncExternalStore(subscribeNever, () => true, () => false);
   return { submit, ready };
 }

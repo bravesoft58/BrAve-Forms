@@ -51,6 +51,7 @@ export default async function EditNdotStormwaterPage({
         location={project.address ?? ""}
         submissionId={submissionId}
         initialData={initialData}
+        version={submission.updated_at}
         cancelHref={`/dashboard/projects/${id}/forms/ndot-stormwater/${submissionId}`}
       />
     </div>
