@@ -20,7 +20,12 @@ registerHooks({
     let base = null;
     if (specifier.startsWith("@/")) {
       base = join(SRC, specifier.slice(2));
-    } else if (/^\.\.?\//.test(specifier) && context.parentURL?.startsWith("file:")) {
+    } else if (
+      /^\.\.?\//.test(specifier) &&
+      context.parentURL?.startsWith("file:") &&
+      // Packages resolve their own relative imports (CommonJS needs paths, not URLs).
+      !context.parentURL.includes("/node_modules/")
+    ) {
       base = fileURLToPath(new URL(specifier, context.parentURL));
     }
     const file = base && resolveSource(base);

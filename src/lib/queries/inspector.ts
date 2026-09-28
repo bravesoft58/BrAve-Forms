@@ -1,6 +1,8 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { signFileUrlsService } from "@/lib/supabase/signed-urls";
 import { signedUrlTtlSec, signedUrlWithin } from "@/lib/inspector/signed-url-deadline";
+import { FORM_PHOTO_SUBPATH } from "@/lib/forms/photo-paths";
+import type { FormType } from "@/lib/constants/permits";
 
 // Token validation lives in src/lib/inspector/session.ts (BF-56): the portal
 // is gated on an inspector session, not on the token URL itself.
@@ -51,9 +53,6 @@ export interface PortalData {
 // BF-32: form_submissions.data may carry a `photos` array whose items are
 // `{ file_name, ... }`. We reconstruct the storage path per form_type and
 // inject a freshly signed `url` for client-side <img> render.
-const PHOTO_STORAGE_PATHS: Record<string, string> = {
-  ndot_weekly_stormwater: "ndot-stormwater",
-};
 
 interface PhotoLike {
   file_name?: string;
@@ -75,7 +74,7 @@ async function signSubmissionPhotos(
   const locs: Loc[] = [];
 
   submissions.forEach((sub, subIdx) => {
-    const subPath = PHOTO_STORAGE_PATHS[sub.form_type];
+    const subPath = FORM_PHOTO_SUBPATH[sub.form_type as FormType];
     if (!subPath) return;
     const data = sub.data;
     if (!data || Array.isArray(data)) return;

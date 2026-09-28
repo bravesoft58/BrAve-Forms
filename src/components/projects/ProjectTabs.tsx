@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PERMIT_LABELS, FORM_LABELS, type FormType, type PermitType } from "@/lib/constants/permits";
 import DocumentsTab from "./DocumentsTab";
+import WaterwaySitesToday from "./WaterwaySitesToday";
+import type { SiteToday } from "@/lib/forms/waterway-sites-today";
 
 interface Permit {
   id: string;
@@ -45,6 +47,8 @@ export default function ProjectTabs({
   submissions = [],
   documents = [],
   userRole = "user",
+  waterwaySitesToday = [],
+  today = "",
 }: {
   projectId: string;
   activeTab: string;
@@ -53,6 +57,8 @@ export default function ProjectTabs({
   submissions?: Submission[];
   documents?: ProjectDocument[];
   userRole?: "admin" | "user";
+  waterwaySitesToday?: SiteToday[];
+  today?: string;
 }) {
   const pathname = usePathname();
   const basePath = pathname.split("?")[0];
@@ -102,6 +108,11 @@ export default function ProjectTabs({
         )}
         {activeTab === "team" && (
           <Placeholder message="Team management coming soon." />
+        )}
+        {activeTab === "working_in_waterways" && today && (
+          <div className="mb-4">
+            <WaterwaySitesToday rows={waterwaySitesToday} today={today} />
+          </div>
         )}
         {formTabs.some((ft) => ft.key === activeTab) && (
           <FormTabContent

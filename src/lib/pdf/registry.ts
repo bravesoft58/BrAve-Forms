@@ -5,6 +5,7 @@ import { NdepStormwaterPdf } from "./ndep-stormwater";
 import { NdotStormwaterPdf } from "./ndot-stormwater";
 import { NdepSadPdf } from "./ndep-sad";
 import { NnphDustPermitPdf } from "./nnph-dust-permit";
+import { WorkingInWaterwaysPdf } from "./working-in-waterways";
 
 interface PdfContext {
   data: Record<string, unknown>;
@@ -16,9 +17,8 @@ interface PdfContext {
 
 type PdfComponent = (ctx: PdfContext) => React.ReactElement;
 
-// Partial until every form type has a template; FormActions hides the PDF button
-// for types missing here. TODO(BF-58.2): add working_in_waterways.
-const registry: Partial<Record<FormType, PdfComponent>> = {
+// A full Record: a new form type without a template fails the type-check.
+const registry: Record<FormType, PdfComponent> = {
   daily_dust_log: (ctx) =>
     React.createElement(DustLogPdf, {
       data: ctx.data as Parameters<typeof DustLogPdf>[0]["data"],
@@ -56,10 +56,17 @@ const registry: Partial<Record<FormType, PdfComponent>> = {
       projectName: ctx.projectName,
       formDate: ctx.formDate,
     }),
+
+  working_in_waterways: (ctx) =>
+    React.createElement(WorkingInWaterwaysPdf, {
+      data: ctx.data as Parameters<typeof WorkingInWaterwaysPdf>[0]["data"],
+      projectName: ctx.projectName,
+      formDate: ctx.formDate,
+    }),
 };
 
-export function getPdfComponent(formType: FormType): PdfComponent | null {
-  return registry[formType] ?? null;
+export function getPdfComponent(formType: FormType): PdfComponent {
+  return registry[formType];
 }
 
 /** Generate a descriptive filename */
