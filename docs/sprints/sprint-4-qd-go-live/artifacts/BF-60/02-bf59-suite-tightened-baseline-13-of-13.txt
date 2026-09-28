@@ -1,0 +1,21 @@
+BF-59 negative suite with the BF-60 tightening of T10 and T12, run against production
+before the BF-60 migration (baseline). Run 2026-09-28 via Supabase MCP execute_sql.
+Every mutating probe rolls back by its P0999 marker; nothing persisted.
+
+T10 now also counts PUBLIC grantees; T12 now requires the exact WITH CHECK expression.
+
+T01 PASS ordinary user sets platform_role             sqlstate 42501
+T02 PASS ordinary user sets role                      sqlstate 42501
+T03 PASS ordinary user sets id                        sqlstate 42501
+T04 PASS ordinary user sets email                     sqlstate 42501
+T05 PASS ordinary user updates own full_name          probe:1
+T06 PASS ordinary user updates another user's row     probe:0
+T07 PASS guard trigger blocks authenticated JWT claim even as postgres   sqlstate 42501
+T08 PASS service_role request updates role            probe:1
+T09 PASS is_super_admin() true for the platform super admin   d0b8e31f-82ca-46a4-b0a8-8dc99399c5d2
+T10 PASS no UPDATE privilege on role/platform_role/id/email for authenticated/anon/PUBLIC   offending grants: 0
+T11 PASS guard trigger present on profiles            count=1
+T12 PASS profiles_update_own WITH CHECK pins the row to the caller   (( SELECT auth.uid() AS uid) = id)
+T13 PASS anon holds no write privileges on profiles   write grants: 0
+
+13 of 13 PASS.

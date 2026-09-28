@@ -9,7 +9,7 @@
 --   T07      guard trigger fires on the JWT-claim branch even when the DB role is postgres (SECURITY DEFINER path)
 --   T08      a service_role request can still change role to a DIFFERENT value (user-management actions keep working)
 --   T09      a super admin impersonation still passes is_super_admin()
---   T10-T12  catalog state: column grants, trigger present, policy has WITH CHECK
+--   T10-T12  catalog state: no column grant (incl. PUBLIC), trigger present, exact WITH CHECK (tightened in BF-60)
 --   T13      anon holds no write privileges on profiles
 
 CREATE TEMP TABLE IF NOT EXISTS bf59_results (id text, description text, outcome text, detail text);
@@ -141,18 +141,19 @@ END $$;
 
 -- ---- T10..T13: catalog assertions --------------------------------------------
 INSERT INTO bf59_results
-SELECT 'T10', 'no UPDATE privilege on role/platform_role/id/email for authenticated/anon',
+SELECT 'T10', 'no UPDATE privilege on role/platform_role/id/email for authenticated/anon/PUBLIC',
        CASE WHEN count(*) = 0 THEN 'PASS' ELSE 'FAIL' END, 'offending grants: ' || count(*)
 FROM information_schema.column_privileges
 WHERE table_schema = 'public' AND table_name = 'profiles' AND privilege_type = 'UPDATE'
-  AND grantee IN ('authenticated', 'anon') AND column_name IN ('role', 'platform_role', 'id', 'email');
+  AND grantee IN ('authenticated', 'anon', 'PUBLIC') AND column_name IN ('role', 'platform_role', 'id', 'email');
 
 INSERT INTO bf59_results
 SELECT 'T11', 'guard trigger present on profiles', CASE WHEN count(*) = 1 THEN 'PASS' ELSE 'FAIL' END, 'count=' || count(*)
 FROM pg_trigger WHERE tgrelid = 'public.profiles'::regclass AND tgname = 'profiles_guard_privilege_columns' AND NOT tgisinternal;
 
 INSERT INTO bf59_results
-SELECT 'T12', 'profiles_update_own has WITH CHECK', CASE WHEN with_check IS NOT NULL THEN 'PASS' ELSE 'FAIL' END, coalesce(with_check, '(none)')
+SELECT 'T12', 'profiles_update_own WITH CHECK pins the row to the caller',
+       CASE WHEN with_check = '(( SELECT auth.uid() AS uid) = id)' THEN 'PASS' ELSE 'FAIL' END, coalesce(with_check, '(none)')
 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'profiles' AND policyname = 'profiles_update_own';
 
 INSERT INTO bf59_results

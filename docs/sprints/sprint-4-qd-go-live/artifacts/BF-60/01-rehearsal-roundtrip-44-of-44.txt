@@ -1,0 +1,64 @@
+BF-60 rolled-back rehearsal on production (ytsghlfjgdhczfbggpdl, Postgres 15.8)
+Run: 2026-09-28, via Supabase MCP execute_sql
+Input: python Testing/security/bf60_rehearsal.py --roundtrip
+       (bf60_grants_probe.sql with the migration spliced at @@MIGRATION@@ and the
+       rollback at @@ROLLBACK@@). The block ends in P0999, so nothing persisted.
+"before" = the live pre-BF-60 grants; "after" = with the migration applied.
+
+ERROR:  P0999: BF60 PROBE (rolled back)
+PASS A01 member [UPDATE public.form_submissions SET data = '{"v":"edited"}', form_date ] before=allowed:1 after=allowed:1
+PASS A02 admin [UPDATE public.form_submissions SET data = '{"v":"admin"}' WHERE id = '] before=allowed:1 after=allowed:1
+PASS A03 member [INSERT INTO public.form_submissions (project_id, form_type, data, form] before=allowed:1 after=allowed:1
+PASS A04 member [INSERT INTO public.project_documents (project_id, name, file_path, fil] before=allowed:1 after=allowed:1
+PASS A05 member [DELETE FROM public.form_photos WHERE submission_id = '0d9c9b28-4166-4e] before=allowed:0 after=allowed:0
+PASS A06 admin [UPDATE public.projects SET name = name, address = address, waterway_si] before=allowed:1 after=allowed:1
+PASS A07 admin [SELECT * FROM public.reissue_inspector_qr('d80cdc1c-6199-4f58-a3bc-33b] before=allowed:1 after=allowed:1
+PASS A08 admin [DELETE FROM public.project_documents WHERE id = 'a1354982-aba1-4bd1-91] before=allowed:1 after=allowed:1
+PASS A09 admin [UPDATE public.project_users SET role = role WHERE project_id = 'd80cdc] before=allowed:1 after=allowed:1
+PASS X01 admin [TRUNCATE public.audit_log] before=allowed:0 after=42501
+PASS X02 member [TRUNCATE public.form_photos] before=allowed:0 after=42501
+PASS X03 admin [UPDATE public.form_submissions SET submitted_by = '284ff2a0-2ce2-4d19-] before=allowed:1 after=42501
+PASS X04 admin [UPDATE public.form_submissions SET project_id = '7164b7fb-063b-4050-a8] before=allowed:1 after=42501
+PASS X05 member [DELETE FROM public.form_submissions WHERE id = '0d9c9b28-4166-4eaa-994] before=allowed:0 after=42501
+PASS X06 member [INSERT INTO public.form_submissions (project_id, form_type, data, form] before=allowed:1 after=42501 rls
+PASS X07 member [INSERT INTO public.project_documents (project_id, name, file_path, upl] before=allowed:1 after=42501 rls
+PASS X08 admin [UPDATE public.project_documents SET name = 'renamed' WHERE id = 'a1354] before=allowed:0 after=42501
+PASS X09 admin [UPDATE public.projects SET organization_id = organization_id WHERE id ] before=allowed:1 after=42501
+PASS X10 admin [UPDATE public.projects SET created_by = created_by WHERE id = 'd80cdc1] before=allowed:1 after=42501
+PASS X11 admin [UPDATE public.qr_tokens SET project_id = project_id WHERE project_id =] before=allowed:6 after=42501
+PASS X12 admin [UPDATE public.organization_members SET role = role WHERE user_id = '21] before=allowed:1 after=42501
+PASS X13 admin [DELETE FROM public.audit_log WHERE false] before=allowed:0 after=42501
+PASS X14 member [UPDATE public.form_photos SET file_path = file_path WHERE false] before=allowed:0 after=42501
+PASS X15 anon [SELECT count(*) FROM public.form_submissions] before=allowed:1 after=42501
+PASS X16 anon [DELETE FROM public.organizations WHERE false] before=allowed:0 after=42501
+PASS X17 anon [SELECT public.handle_new_user()] before=0A000 after=42501
+PASS V1 per-tier visibility identical on all 15 tables x 3 signed-in tiers; anon sees nothing (form_submissions/admin=31 form_submissions/anon=-1 form_submissions/member=31 form_submissions/super=31)
+PASS C1 anon holds no privilege on the 12 tables
+PASS C2 anon holds no write privilege on any public table
+PASS C3 no API role or PUBLIC holds TRUNCATE, REFERENCES or TRIGGER on any public table
+PASS C4 form_submissions updatable columns for authenticated: {data,form_date}
+PASS C4 projects updatable columns for authenticated: {acres_disturbed,address,completion_date,description,foreman_email,foreman_name,foreman_phone,name,owner_rep_address,owner_rep_email,owner_rep_name,owner_rep_phone,parcel_numbers,pm_email,pm_name,pm_phone,soil_type,start_date,superintendent_email,superintendent_name,superintendent_phone,waterway_sites}
+PASS C4 qr_tokens updatable columns for authenticated: {expires_at,revoked_at}
+PASS C4 organization_members updatable columns for authenticated: {}
+PASS C4 form_photos updatable columns for authenticated: {}
+PASS C4 project_documents updatable columns for authenticated: {}
+PASS C4 audit_log updatable columns for authenticated: {}
+PASS C4 profiles updatable columns for authenticated: {full_name,phone}
+PASS C5 no PUBLIC or anon column UPDATE anywhere in public
+PASS C6 both insert policies start with the signed-in-user binding
+PASS C7 new postgres-created tables, sequences and functions grant nothing to anon, authenticated, service_role or PUBLIC
+PASS C8 handle_new_user not callable by anon/authenticated; search_path pinned empty
+PASS C9 a new auth user still gets its profile through handle_new_user
+PASS R1 rollback restores every table, column and default ACL, both policies and handle_new_user exactly
+0 failures
+
+Post-run check (same session): anon still holds 85 table privileges (12 tables x 7
+plus profiles SELECT), no probe rows, documents or auth user remain, and
+submissions_insert still has its pre-BF-60 expression. Production unchanged.
+
+Earlier attempts in the same session, all rolled back:
+- 55000: the pg_class alias "c" collided with the PL/pgSQL record variable c (renamed pc).
+- 42725: "char" and regclass need ::text before ||.
+- 43/44: X17 used SELECT * FROM handle_new_user(), which the parser rejects (42804)
+  before any privilege check; changed to SELECT public.handle_new_user(), confirmed
+  separately as 0A000 before / 42501 after.
