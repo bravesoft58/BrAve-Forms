@@ -2,7 +2,7 @@
 
 **Status:** NOT STARTED
 **Created:** 2026-09-20
-**Last Updated:** 2026-09-28T12:34:48Z
+**Last Updated:** 2026-09-28T16:49:18Z
 **Source:** Andy Breen (IT Director, Q&D) email "BrAve Forms Update", 2026-09-07, with attachment `WIW Daily Form.pdf`. Both filed under [docs/reference/](../../reference/).
 
 ## Why this sprint
@@ -32,7 +32,8 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-65](stories/BF-65-submission-idempotency.md) | Idempotent form submission (no duplicate inspections on retry) | 2 | MEDIUM | (BF-58.1 verify follow-up C2) | NOT STARTED |
 | [BF-66](stories/BF-66-form-reset-blanks-controls.md) | Rejected submits blank selects and radios while the old answers are still sent | 2 | HIGH | (BF-58.1 preview finding) | DONE (merged `d320394`) |
 | [BF-67](stories/BF-67-lock-fields-until-hydrated.md) | Lock form fields until the page has hydrated | 1 | MEDIUM | (BF-66 verify follow-up F4) | NOT STARTED |
-| **Total** | | **32** | | | **9/16 DONE** |
+| [BF-68](stories/BF-68-pdf-photo-drop-fails-silently.md) | Photo PDFs must never drop a photo silently (WebP, failed fetch) | 2 | MEDIUM | (BF-58.2 verify follow-up C1) | NOT STARTED |
+| **Total** | | **34** | | | **10/17 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
