@@ -1,13 +1,16 @@
 # BF-61: Optimistic concurrency on submission edits
 
+> **BUNDLED INTO [BF-65](BF-65-submission-idempotency.md), 2026-09-28T17:29:54Z (Tim: "bundle it if it makes sense").** Built, verified and closed out as part of BF-65 (branch `feature/BF-65-record-integrity`). The two meet at one point: a retried edit whose first attempt already landed must succeed rather than be refused as a conflict, and that check is BF-65's same-content comparison. This file keeps its ACs as the record; evidence lives in BF-65. Set to DONE by hand in BF-65's closeout, as the parent BF-58 was.
+
 **Type:** Record integrity (shared edit model)
 **Priority:** MEDIUM (pilot-scale collision risk is low; grows with users)
 **Points:** 2
-**Status:** NOT STARTED
+**Status:** IN PROGRESS
 **Sprint:** 4 (backlog)
 **Reported by:** BF-57 verify round 2, Codex adversarial review (confidence 0.99), filed 2026-09-22
 **Created:** 2026-09-22
-**Last Updated:** 2026-09-22T16:08:02Z
+**Started:** 2026-09-28T17:29:54Z
+**Last Updated:** 2026-09-28T17:29:54Z
 
 ## Problem
 

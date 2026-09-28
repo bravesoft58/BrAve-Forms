@@ -1,5 +1,19 @@
 import { startTransition, useMemo, useRef, useSyncExternalStore } from "react";
+import { unstable_rethrow } from "next/navigation";
 import { buildNoResetSubmit } from "@/lib/forms/no-reset-submit";
+import { catchLostReply } from "@/lib/forms/lost-reply";
+
+/**
+ * Pass the server action through this before useActionState:
+ *   useActionState(keepFormOnLostReply(submitX), initialState)
+ * A lost reply then shows as an error on the form, which stays mounted with
+ * its idempotency key, instead of Next's error page (BF-65).
+ */
+export function keepFormOnLostReply<S extends { error: string }>(
+  action: (state: S, formData: FormData) => Promise<S>,
+) {
+  return catchLostReply(action, unstable_rethrow);
+}
 
 const subscribeNever = () => () => {};
 

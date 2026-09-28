@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
+import { keepFormOnLostReply, useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
 import {
   submitNdepStormwater,
   updateNdepStormwater,
@@ -104,7 +104,7 @@ export default function NdepStormwaterForm({
   const action = isEdit
     ? updateNdepStormwater.bind(null, submissionId as string)
     : submitNdepStormwater;
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const [state, formAction, pending] = useActionState(keepFormOnLostReply(action), initialState);
   const { submit, ready } = useNoResetSubmit(formAction);
   const [data, setData] = useState<NdepStormwaterData>(() =>
     initialData ?? makeEmptyData(projectName, cswNumber, location)

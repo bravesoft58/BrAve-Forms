@@ -19,6 +19,7 @@ import {
   updateSubmissionIfUnchanged,
 } from "@/lib/forms/submission-writes";
 import { buildNoResetSubmit } from "@/lib/forms/no-reset-submit";
+import { catchLostReply, LOST_REPLY_ERROR } from "@/lib/forms/lost-reply";
 
 type Reply = { data?: unknown; error?: { code?: string; message: string } | null };
 type Call = { table: string; op: string; payload?: unknown; filters: Record<string, unknown> };
@@ -174,4 +175,28 @@ test("the submit hook sends one key for every retry of a mounted form, and a new
   assert.equal(first[0], first[1]);
   assert.match(first[0], /^[0-9a-f-]{36}$/);
   assert.notEqual(run(makeKeyProvider())[0], first[0]);
+});
+
+// Stands in for next/navigation's unstable_rethrow: re-raises Next's own control-flow errors.
+const NEXT_REDIRECT = Object.assign(new Error("NEXT_REDIRECT"), { digest: "NEXT_REDIRECT;replace;/x;307;" });
+const rethrowNext = (error: unknown) => {
+  if ((error as { digest?: string })?.digest?.startsWith("NEXT_")) throw error;
+};
+
+test("a lost reply becomes an error on the form, keeping the earlier state, instead of a thrown error", async () => {
+  const lost = catchLostReply(async () => {
+    throw new TypeError("Failed to fetch");
+  }, rethrowNext);
+  const before = { error: "", fieldErrors: { site_name: ["x"] } };
+  assert.deepEqual(await lost(before, new FormData()), { error: LOST_REPLY_ERROR, fieldErrors: { site_name: ["x"] } });
+});
+
+test("Next's redirect after a successful save still propagates, and a normal reply passes through", async () => {
+  const redirecting = catchLostReply(async () => {
+    throw NEXT_REDIRECT;
+  }, rethrowNext);
+  await assert.rejects(redirecting({ error: "" }, new FormData()), (e) => e === NEXT_REDIRECT);
+
+  const refused = catchLostReply(async () => ({ error: "Please fix the errors below." }), rethrowNext);
+  assert.deepEqual(await refused({ error: "" }, new FormData()), { error: "Please fix the errors below." });
 });

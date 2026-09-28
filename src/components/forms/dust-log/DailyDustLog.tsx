@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
+import { keepFormOnLostReply, useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
 import { useRouter } from "next/navigation";
 import { submitDustLog, type DustLogState } from "@/app/dashboard/projects/[id]/forms/dust-log/actions";
 import {
@@ -50,7 +50,7 @@ export default function DailyDustLog({
   previousEntry,
 }: DailyDustLogProps) {
   const router = useRouter();
-  const [state, formAction, pending] = useActionState(submitDustLog, initialState);
+  const [state, formAction, pending] = useActionState(keepFormOnLostReply(submitDustLog), initialState);
   const { submit, ready } = useNoResetSubmit(formAction);
   const [entries, setEntries] = useState<DustLogEntry[]>([makeEmptyEntry()]);
   const [usedPrevious, setUsedPrevious] = useState(false);

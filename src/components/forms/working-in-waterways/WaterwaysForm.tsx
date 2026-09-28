@@ -6,7 +6,7 @@ import {
   updateWaterways,
   type WaterwaysState,
 } from "@/app/dashboard/projects/[id]/forms/working-in-waterways/actions";
-import { useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
+import { keepFormOnLostReply, useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
 import PhotoAttachment from "@/components/forms/shared/PhotoAttachment";
 import { inputClass, labelClass, selectClass } from "@/components/forms/formStyles";
 import { pacificTime, pacificToday } from "@/lib/dates";
@@ -66,7 +66,7 @@ export default function WaterwaysForm({
 }) {
   const isEdit = Boolean(submissionId);
   const action = isEdit ? updateWaterways.bind(null, submissionId as string) : submitWaterways;
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const [state, formAction, pending] = useActionState(keepFormOnLostReply(action), initialState);
   const { submit, ready } = useNoResetSubmit(formAction);
   const [draft, setDraft] = useState<Draft>(() => initialData ?? emptyDraft(sites));
 
