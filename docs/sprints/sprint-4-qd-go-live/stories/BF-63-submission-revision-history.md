@@ -7,7 +7,7 @@
 **Sprint:** 4
 **Reported by:** Tim, 2026-09-25, raised while reviewing BF-58.1's photo-deletion fixes ("should superseded records have some kind of a chain, a history log? Same thing with an overwritten photo."). Routed to a ticket by Tim the same day.
 **Created:** 2026-09-25
-**Last Updated:** 2026-09-25T16:25:28Z
+**Last Updated:** 2026-09-28T12:41:36Z
 
 ## Problem
 
@@ -43,3 +43,58 @@ Capture only. Viewing history in the app is a later story.
 - **BF-61** (optimistic concurrency) is complementary: BF-61 stops two edits silently overwriting each other; this story makes any overwrite recoverable.
 - **BF-58.1** introduced the no-delete photo rule this story relies on, and another edit path.
 - **Follow-up, not in scope:** a history view for users and inspectors; a reference-aware Storage cleanup job (must count photos referenced by revisions).
+
+## Technical Approach
+
+Scouted 2026-09-28T12:41:36Z. Database-only story: one migration, its rollback, and a rolled-back SQL probe. No app code changes.
+
+**Build vs Use:** COPY. The pattern comes from Supabase's "Postgres Auditing in 150 lines of SQL" (jsonb snapshot of the old row, SECURITY DEFINER trigger), with the extension's later fixes applied: AFTER triggers and an explicit search path. `supa_audit` itself is out: the repo was archived 2025-02-16 (last commit 2024-01-02), and it is not in this project's available-extension list [verified 2026-09-28]. Reopen when Supabase ships a maintained, installable per-table history extension, or when a history viewer needs cross-table querying.
+
+**Design decisions (corrections to the Scope section are listed under "Story corrections" below):**
+
+1. **Table** `public.form_submission_revisions`:
+   - `id bigint generated always as identity primary key`
+   - `submission_id uuid not null`, with no FK, so history survives the delete
+   - `project_id uuid not null`, `form_type text not null`, copied from the old row
+   - `op text not null check (op in ('UPDATE','DELETE'))`
+   - `old_row jsonb not null`: the whole old row as `to_jsonb(OLD)`, so columns BF-61 and BF-65 add later are captured with no change here
+   - `changed_by uuid` (`auth.uid()`, null outside a signed-in request)
+   - `changed_role text`: the request's JWT role, `current_setting('request.jwt.claims', true)::jsonb->>'role'`; null means direct SQL
+   - `changed_at timestamptz not null default now()`
+   - Index `(submission_id, changed_at)`.
+2. **Trigger:** `AFTER UPDATE OR DELETE ... FOR EACH ROW` rather than BEFORE. An AFTER trigger only sees rows that were actually written, and it sees the final NEW row after `form_submissions_updated_at` has run. `supa_audit` made the same switch in 0.3.0.
+3. **No-op skip:** `(to_jsonb(OLD) - 'updated_at') IS NOT DISTINCT FROM (to_jsonb(NEW) - 'updated_at')` returns early. Comparing the full rows would never match, because `update_updated_at()` changes `updated_at` on every UPDATE, and the dust-log append also sets it from the app.
+4. **Function:** `public.record_form_submission_revision()`, `SECURITY DEFINER SET search_path = ''`, every name schema-qualified. `REVOKE EXECUTE ... FROM PUBLIC, anon, authenticated`, following the repo's BF-56 function pattern and Supabase's function-privileges guidance.
+5. **Grants, the append-only guarantee:**
+   - Supabase's default privileges give `anon`, `authenticated` and `service_role` SELECT, INSERT, UPDATE and DELETE on every new `public` table.
+   - So: `REVOKE ALL ... FROM anon, authenticated, service_role`, then `GRANT SELECT TO authenticated` and `GRANT SELECT, INSERT TO service_role`.
+   - Revoking from `service_role` too means the service key (inspector portal, scripts) cannot edit or delete history.
+   - The table owner and superuser can still write to it. That is accepted and stated, not hidden.
+6. **RLS:** enabled, with one SELECT policy that copies `submissions_select` from BF-42: `is_super_admin()` OR `project_id` in the caller's organizations' projects. There is no INSERT, UPDATE or DELETE policy.
+   - Known consequence: when a whole project is deleted, it cascades to its submissions, so the DELETE revisions are written. They then stay readable only to super admins, because the project row no longer exists. Accepted: that is the audit trail of the deletion.
+7. **Photos:** `data.photos` (file_name, caption, uploaded_at) lives in `data`, so `old_row` keeps the old photo list. The `form_photos` rows are a derived copy that the NDOT and Waterways edits delete and re-insert, so they need no separate history.
+
+**Blast radius:** `form_submissions` gains one trigger. Every write path is affected: 4 UPDATE paths (the NDOT, NDEP and Waterways edits, and the dust-log append) plus any cascade DELETE from a project. Overhead is one INSERT per changed row, negligible at this volume. The code graph was not run: no app symbols change.
+
+**Story corrections (for /story, not applied here):**
+- The Problem section names 3 edit paths. There are 4: `appendDustLogEntries` also UPDATEs `form_submissions` and sets `updated_at` itself.
+- Scope item 2 says BEFORE with `OLD IS NOT DISTINCT FROM NEW`. Use AFTER and exclude `updated_at` from the comparison (decisions 2 and 3); the literal version would record every save.
+- Scope item 1 lists individual columns. Store `old_row jsonb` plus the extracted `project_id` and `form_type` (decision 1).
+- Scope item 3 names only `authenticated` and `anon`. `service_role` must lose UPDATE, DELETE and TRUNCATE as well (decision 5).
+- The AC 3 probe should include a `service_role` attempt to UPDATE or DELETE a revision, rolled back. It should also change the row for real in the UPDATE case, not with a same-value write (lesson 2026-09-20).
+
+**Forward conflicts:**
+- BF-65 (adds `form_submissions.client_key`) and BF-61 (may add a version column): benign, because `old_row` captures new columns automatically. BF-65 notes that duplicates would show as separate records; that holds in either order.
+- BF-60 (default-grant cleanup): this table sets its own grants explicitly, so BF-60 should find nothing to change here. List it in BF-60's before/after matrix.
+- No story creates the same table or function.
+
+## Research Sources
+
+- firecrawl_scrape https://github.com/supabase/supa_audit: archived 2025-02-16, read-only; last commit 2024-01-02; 672 stars; Apache-2.0; commit "transition before triggers to after. explicit search path" (0.3.0). [verified 2026-09-28]
+- Supabase MCP `list_extensions` on ytsghlfjgdhczfbggpdl: `supa_audit` not offered; `pgaudit` 1.7 offered, but it writes to server logs, not table history. [verified 2026-09-28]
+- firecrawl_scrape https://supabase.com/blog/postgres-audit: jsonb `old_record` snapshot, SECURITY DEFINER trigger function, `to_jsonb(old)`; overhead negligible under 1000 writes/s (2022-03-08 post).
+- firecrawl_search "supabase supa_audit extension maintained" -> https://pganalyze.com/blog/5mins-postgres-auditing-pgaudit-supabase-supa-audit: trigger tables record history in the database; pgAudit writes to log files.
+- Supabase MCP `search_docs` "Securing your API" (https://supabase.com/docs/guides/api/securing-your-api): new public tables get default grants to `anon`, `authenticated` and `service_role`; the documented opt-out revokes them. [verified 2026-09-28]
+- firecrawl_search -> https://supabase.com/docs/guides/database/functions: `security definer set search_path = ''`; revoke execute from public and anon.
+- firecrawl_search -> https://github.com/2ndQuadrant/audit-trigger and https://github.com/m-martinez/pg-audit-json: generic trigger-based alternatives. Heavier than one purpose-built table and not needed here.
+- firecrawl_search -> https://viprasol.com/blog/postgres-triggers-audit/ and https://oneuptime.com/blog/post/2026-01-30-postgresql-triggers-audit/view: `IS DISTINCT FROM` over jsonb to skip no-op updates.
