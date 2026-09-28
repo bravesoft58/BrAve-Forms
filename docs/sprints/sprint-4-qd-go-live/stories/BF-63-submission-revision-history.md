@@ -3,11 +3,12 @@
 **Type:** Record integrity (database capture; no UI in this story)
 **Priority:** HIGH (every in-place edit made before this ships is lost for good)
 **Points:** 2
-**Status:** IN PROGRESS
+**Status:** DONE
 **Sprint:** 4
 **Reported by:** Tim, 2026-09-25, raised while reviewing BF-58.1's photo-deletion fixes ("should superseded records have some kind of a chain, a history log? Same thing with an overwritten photo."). Routed to a ticket by Tim the same day.
 **Created:** 2026-09-25
-**Last Updated:** 2026-09-28T13:33:00Z
+**Completed:** 2026-09-28T14:25:29Z
+**Last Updated:** 2026-09-28T14:25:29Z
 
 ## Problem
 
