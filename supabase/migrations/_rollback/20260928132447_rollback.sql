@@ -1,5 +1,5 @@
 -- BF-63 ROLLBACK: remove the form submission revision history.
--- Pair: supabase/migrations/20260928124638_form_submission_revisions.sql
+-- Pair: supabase/migrations/20260928132447_form_submission_revisions.sql
 --
 -- DESTRUCTIVE: drops every recorded revision. Export it first if it must be
 -- kept:

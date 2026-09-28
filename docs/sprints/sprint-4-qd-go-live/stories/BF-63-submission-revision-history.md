@@ -3,15 +3,15 @@
 **Type:** Record integrity (database capture; no UI in this story)
 **Priority:** HIGH (every in-place edit made before this ships is lost for good)
 **Points:** 2
-**Status:** NOT STARTED
+**Status:** IN PROGRESS
 **Sprint:** 4
 **Reported by:** Tim, 2026-09-25, raised while reviewing BF-58.1's photo-deletion fixes ("should superseded records have some kind of a chain, a history log? Same thing with an overwritten photo."). Routed to a ticket by Tim the same day.
 **Created:** 2026-09-25
-**Last Updated:** 2026-09-28T12:41:36Z
+**Last Updated:** 2026-09-28T13:25:53Z
 
 ## Problem
 
-Every edit path overwrites the record in place: `updateNdotStormwater`, `updateNdepStormwater` and (from BF-58.1) `updateWaterways` replace `form_submissions.data`, and the previous version is gone. Nothing records who changed what or when beyond the latest update time.
+Every edit path overwrites the record in place: `updateNdotStormwater`, `updateNdepStormwater`, (from BF-58.1) `updateWaterways`, and the dust log's `appendDustLogEntries` replace `form_submissions.data`, and the previous version is gone. Nothing records who changed what or when beyond the latest update time.
 
 These are compliance records. EPA stormwater records carry a 3-year retention requirement ([epa-osha-business-requirements.txt](../../../requirements/epa-osha-business-requirements.txt)). The PRD's "Form Versioning and Audit Trail" user stories ask for edit history and a complete audit trail for inspections ([comprehensive_prd.md](../../../requirements/comprehensive_prd.md), Epic 4). The [go-live readiness assessment](../../../release/QD-GO-LIVE-READINESS-2026-09-08.md) lists record integrity as an open gate.
 
@@ -21,22 +21,22 @@ These are compliance records. EPA stormwater records carry a 3-year retention re
 
 Capture only. Viewing history in the app is a later story.
 
-1. **Revision table.** A new `form_submission_revisions` table: `id`, `submission_id`, `project_id`, `form_type`, `op` (`UPDATE` or `DELETE`), the full old row (at least `data`, `form_date`, `status`, `submitted_by`, `submitted_at`), `changed_by` (`auth.uid()`, null for service-role writes), `changed_at` (`now()`).
-2. **Trigger.** `BEFORE UPDATE OR DELETE` on `form_submissions`, writing the OLD row. It runs in the database, so every present and future edit path is covered, including admin SQL. Skip no-op updates (`OLD IS NOT DISTINCT FROM NEW`) so an unchanged save does not add noise.
-3. **Append-only.** RLS on; read access organization-scoped to match `form_submissions` (BF-42 visibility); no INSERT/UPDATE/DELETE policy and no grants to `authenticated` or `anon`, so only the trigger (SECURITY DEFINER, pinned `search_path`) writes and nobody edits or deletes history. Check the table against BF-60's default-grant cleanup.
+1. **Revision table.** A new `form_submission_revisions` table: `id`, `submission_id`, `project_id`, `form_type`, `op` (`UPDATE` or `DELETE`), the whole old row as `old_row jsonb`, `changed_by` (`auth.uid()`, null outside a signed-in request), `changed_role` (the request's JWT role, null for direct SQL), `changed_at` (`now()`). (Revised at /story from "at least these columns" to the whole row, so columns BF-61 and BF-65 add are captured.)
+2. **Trigger.** `AFTER UPDATE OR DELETE` on `form_submissions`, writing the OLD row. It runs in the database, so every present and future edit path is covered, including admin SQL. Skip no-op updates by comparing the rows without `updated_at`, which `form_submissions_updated_at` changes on every save. (Revised at /story from BEFORE with a plain `OLD IS NOT DISTINCT FROM NEW`, which would never match; see the Technical Approach.)
+3. **Append-only.** RLS on; read access organization-scoped to match `form_submissions` (BF-42 visibility); no INSERT/UPDATE/DELETE policy; grants leave `anon` nothing and `authenticated` and `service_role` SELECT only (Supabase's default privileges would give all three full DML), so only the trigger (SECURITY DEFINER, pinned `search_path`) writes and nobody edits or deletes history. BF-60's default-grant cleanup should find nothing to change here.
 4. **Cascade decision.** `submission_id` must NOT cascade-delete history when a submission is deleted; the DELETE revision is the record that it existed. Use no FK, or a FK with `ON DELETE SET NULL`, and keep `submission_id` as a plain value.
 
 ## Build vs Use
 
-**Build vs Use:** USE or BUILD, decided at /story. Supabase publishes `supa_audit` (generic per-table history via `audit.enable_tracking`, write-up 2022); its maintenance status and availability on this project were not checked (unverified 2026-09-25). A hand-written trigger is about 30 lines and gives control over the columns, `changed_by`, the no-op skip and the RLS read policy. Prefer `supa_audit` only if it is maintained, installable on this Supabase project, and can meet items 2-4. Reopen when a history viewer needs richer querying than one table gives.
+**Decided at /story: COPY** (see the Technical Approach: `supa_audit` is archived and not offered on this project). Original note: Supabase publishes `supa_audit` (generic per-table history via `audit.enable_tracking`, write-up 2022); its maintenance status and availability on this project were not checked (unverified 2026-09-25). A hand-written trigger is about 30 lines and gives control over the columns, `changed_by`, the no-op skip and the RLS read policy. Prefer `supa_audit` only if it is maintained, installable on this Supabase project, and can meet items 2-4. Reopen when a history viewer needs richer querying than one table gives.
 
 ## Acceptance criteria
 
-- [ ] Every UPDATE of a `form_submissions` row that changes it writes exactly one revision holding the previous version, with `changed_by` and `changed_at`. A no-op update writes none.
-- [ ] Every DELETE writes one revision holding the deleted row, and the revision survives the delete.
-- [ ] Probe as an ordinary member, an org admin and an outsider (rolled back, P0999 pattern): members and admins can read revisions for their organization's projects only; nobody can INSERT, UPDATE or DELETE a revision directly.
+- [x] Every UPDATE of a `form_submissions` row that changes it writes exactly one revision holding the previous version, with `changed_by` and `changed_at`. A no-op update writes none.
+- [x] Every DELETE writes one revision holding the deleted row, and the revision survives the delete.
+- [x] Probe as an ordinary member, an org admin and an outsider (rolled back, P0999 pattern): members and admins can read revisions for their organization's projects only; nobody can INSERT, UPDATE or DELETE a revision directly.
 - [ ] Editing a submission through the app (one NDOT, NDEP or Working in Waterways edit on a preview) leaves a readable prior version, including its photo list, whose files still exist in Storage.
-- [ ] Migration with rollback pair, rehearsed rolled back before applying, with Tim's go.
+- [x] Migration with rollback pair, rehearsed rolled back before applying, with Tim's go.
 
 ## Relationships
 
@@ -98,3 +98,50 @@ Scouted 2026-09-28T12:41:36Z. Database-only story: one migration, its rollback, 
 - firecrawl_search -> https://supabase.com/docs/guides/database/functions: `security definer set search_path = ''`; revoke execute from public and anon.
 - firecrawl_search -> https://github.com/2ndQuadrant/audit-trigger and https://github.com/m-martinez/pg-audit-json: generic trigger-based alternatives. Heavier than one purpose-built table and not needed here.
 - firecrawl_search -> https://viprasol.com/blog/postgres-triggers-audit/ and https://oneuptime.com/blog/post/2026-01-30-postgresql-triggers-audit/view: `IS DISTINCT FROM` over jsonb to skip no-op updates.
+- /story spot-check, firecrawl_scrape https://www.postgresql.org/docs/15/trigger-definition.html: same-event triggers fire in alphabetical order by name; "an AFTER trigger can be certain it is seeing the final value of the row". [verified 2026-09-28]
+
+## Implementation (2026-09-28T13:25:53Z)
+
+Files (branch `feature/BF-63-submission-revision-history`):
+
+| File | Lines | What |
+| --- | --- | --- |
+| `supabase/migrations/20260928132447_form_submission_revisions.sql` | 99 | Table, indexes, trigger function, trigger, grants, RLS read policy |
+| `supabase/migrations/_rollback/20260928132447_rollback.sql` | 11 | Drops trigger, function, table (destructive: export first) |
+| `Testing/security/bf63_revisions_probe.sql` | 224 | 17-check probe, one DO block ending in P0999 so everything rolls back |
+| `Testing/security/bf63_rehearsal.py` | 33 | Splices the migration into the probe at `@@MIGRATION@@` for the pre-apply rehearsal |
+
+No app code changes. Decisions made at /story beyond the scout's:
+- `service_role` gets SELECT only, not SELECT + INSERT: the trigger writes as the function owner, so no role needs INSERT.
+- `changed_role` reads `request.jwt.claims` through `nullif(..., '')`: outside a request the setting can be an empty string, and `''::jsonb` would raise, failing every admin-SQL edit.
+- The existing `public.audit_log` was considered and not reused: it records super-admin cross-org access and only super admins may read it; this history must be readable by the organization's own members.
+- The probe's no-op test inserts its row with `updated_at` a day old and asserts the timestamp moved, because inside one transaction `now()` is constant and the updated_at trigger would otherwise leave it unchanged, making the test vacuous (lesson 2026-09-20).
+
+## Comprehensive Validation (2026-09-28T13:25:53Z)
+
+**Rehearsal** (migration spliced into the probe, one rolled-back block against production, Tim's go): 17/17 PASS, 0 failures. Afterwards `form_submission_revisions` did not exist and `form_submissions` still had 30 rows.
+
+**Applied** to production with Tim's go via `apply_migration`; recorded version `20260928132447` (repo files renamed to match).
+
+**Post-apply probe** (same probe, no splice, rolled back): 17/17 PASS, 0 failures. Afterwards `form_submission_revisions` 0 rows, `form_submissions` 30 rows.
+
+| # | Check | Result |
+| --- | --- | --- |
+| T1 | Grants: anon none; authenticated and service_role SELECT only (no INSERT/UPDATE/DELETE/TRUNCATE) | PASS |
+| T2 | Trigger function SECURITY DEFINER, not executable by anon or authenticated | PASS |
+| T3 | An INSERT writes no revision | PASS |
+| T4 | A save that only moves updated_at writes none (updated_at did change) | PASS |
+| T5 | Direct-SQL edit: one revision, previous data and photo list, no user or role | PASS |
+| T6 | Member edit: previous data, changed_by member, role authenticated | PASS |
+| T7 | Member reads org revisions, including one they did not make | PASS |
+| T8-T11 | Member INSERT, UPDATE, DELETE, TRUNCATE on revisions refused (42501) | PASS |
+| T12 | Org admin edit of a member's submission: previous data, changed_by admin | PASS |
+| T13 | Org admin DELETE of revisions refused (42501) | PASS |
+| T14 | Outsider sees no revisions | PASS |
+| T15 | Service-key edit: previous data, no user, role service_role | PASS |
+| T16 | Service key UPDATE, DELETE, INSERT on revisions refused (42501 x3) | PASS |
+| T17 | Chain survives the delete, in order: UPDATE:A, UPDATE:B, UPDATE:C, DELETE:D | PASS |
+
+**Security advisor** after apply: no finding names `form_submission_revisions` or `record_form_submission_revision`; every listed warning predates this story.
+
+**Open:** AC 4 (an edit through the app on a preview, prior version and photo files readable) is not yet run.

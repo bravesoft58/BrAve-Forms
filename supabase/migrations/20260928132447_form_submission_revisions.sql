@@ -1,5 +1,5 @@
 -- BF-63: append-only revision history for form submissions
--- Pair: supabase/migrations/_rollback/20260928124638_rollback.sql
+-- Pair: supabase/migrations/_rollback/20260928132447_rollback.sql
 --
 -- Every UPDATE that changes a form_submissions row, and every DELETE, copies
 -- the previous row into form_submission_revisions. The trigger runs in the
