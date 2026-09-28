@@ -3,12 +3,13 @@
 **Type:** Security hardening (database grants) + test hygiene
 **Priority:** HIGH (same class as BF-59; RLS does not cover TRUNCATE)
 **Points:** 3 (was 2; raised at scout, Tim approved 2026-09-28)
-**Status:** IN PROGRESS
+**Status:** DONE
 **Sprint:** 4
 **Reported by:** BF-59 verify rounds 1-6 (out-of-scope findings filed at closeout, 2026-09-21)
 **Created:** 2026-09-21
 **Started:** 2026-09-28T19:29:19Z
-**Last Updated:** 2026-09-28T20:31:46Z
+**Completed:** 2026-09-28T20:45:50Z
+**Last Updated:** 2026-09-28T20:45:50Z
 **Branch:** `feature/BF-60-default-table-grants`
 
 ## Problem
@@ -85,6 +86,10 @@ Round 1: NEEDS ATTENTION 7.5, one high finding (C1, Codex; confirmed by verify a
   - The rehearsal builder splices both migrations.
 - **Result:** the full probe on live production after the correction is 44/44 (artifact 09).
 - The first BF-60 migration file is left exactly as applied. Its schema-scoped PUBLIC revoke is harmless and the correction supersedes it.
+
+### Verify round 2 (2026-09-28T20:45:50Z) — PASS 9.4
+
+Fix verification. C1 confirmed **fixed** by both reviewers: the global revoke (`20260928202957`) matches the PostgreSQL 15 docs, probe C10 asserts the *effective* privilege on a newly-created function/table/sequence (closing the storage-proxy blind spot that gave C7 its false PASS), and artifact 09 records the live-production before/after reproduction and exact rollback (44/44). Codex (`gpt-6-astra` xhigh) independent verdict: **approve**, zero new critical/high. Carried forward as noted lows: V2 (probe A05/A09 `allowed0`, covered by app regression) and V3 (the global function revoke is a documented forward-operational constraint, same convention as tables/sequences). Rehearsal-builder smoke test and `git diff --check` clean. Status → DONE.
 
 ## Notes
 
