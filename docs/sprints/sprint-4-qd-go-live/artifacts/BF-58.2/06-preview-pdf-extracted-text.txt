@@ -1,0 +1,12 @@
+BF-58.2 AC 1: PDF downloaded from the view page's "Download PDF" link on the
+preview (brave-forms-rk96zzg5t-embracingai.vercel.app, commit 6acafd7),
+TEST submission 178a009f-c0ce-4356-88d7-68cb10e64fed on 17446 - RNO 18 Main Campus.
+Fetched in the signed-in browser 2026-09-28; decoded in the page with the same
+Flate + hex-string method as Testing/forms/bf58_2_waterways_pdf_test.ts.
+
+Response: %PDF-, 26309 bytes, 1 page, 1 embedded image object
+(/Subtype /Image, /Width 900, /Height 1200, /Filter /DCTDecode: the portrait TEST JPEG).
+
+Text runs in drawing order (the em dash in the banner is not a hex run, so it is missing here):
+
+Q&D Construction  Working in Waters of the State Daily Inspection | Project | 17446 -  | RNO 18 Main Campus | Site | Western Drainage | Date | 2026-09-28 | Time | 08:22 | Initials | TEST | Daily Checks | Is there water in the waterway? | Yes | Comment:  | TEST BF-58.2 - low flow | Daily vehicle inspection | Pass | BMPs visual inspection | Fail | Comment:  | TEST BF-58.2 - wattle torn, replaced | Visible sheen or plume? | N/A | Equipment in Use | TEST BF-58.2 - excavator, water truck | Site Photos | 1790609004681-7 | ryaxg.jpg

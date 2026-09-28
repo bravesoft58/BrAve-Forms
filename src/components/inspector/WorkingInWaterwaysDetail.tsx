@@ -8,14 +8,19 @@ interface CheckLike {
   comment?: string;
 }
 
+interface PhotoLike {
+  file_name?: string;
+  url?: string;
+  caption?: string;
+}
+
 /**
- * Read-only text summary of a Working in Waterways record for the inspector
- * portal. Photos are counted, not shown. TODO(BF-58.2): replace with the full
- * renderer, including signed photo links.
+ * Read-only Working in Waterways record for the inspector portal. Photo URLs
+ * are signed by getPortalData and end with the inspector's session (BF-56).
  */
-export default function WorkingInWaterwaysSummary({ data }: { data: Record<string, unknown> }) {
+export default function WorkingInWaterwaysDetail({ data }: { data: Record<string, unknown> }) {
   const text = (key: string) => (typeof data[key] === "string" && data[key] ? (data[key] as string) : "—");
-  const photoCount = Array.isArray(data.photos) ? data.photos.length : 0;
+  const photos = (Array.isArray(data.photos) ? data.photos : []) as PhotoLike[];
 
   return (
     <div className="space-y-4">
@@ -53,9 +58,25 @@ export default function WorkingInWaterwaysSummary({ data }: { data: Record<strin
         <p className={`${valueClass} whitespace-pre-wrap`}>{text("equipment_in_use")}</p>
       </div>
 
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
-        {photoCount} {photoCount === 1 ? "photo" : "photos"} attached.
-      </p>
+      {photos.length > 0 && (
+        <div>
+          <p className={`${labelClass} mb-2`}>Photos</p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {photos.map((photo, idx) => (
+              <div key={idx} className="overflow-hidden rounded border border-zinc-200 dark:border-zinc-700">
+                {photo.url ? (
+                  <img src={photo.url} alt={photo.caption || `Photo ${idx + 1}`} className="h-40 w-full object-cover" />
+                ) : (
+                  <p className="flex h-40 items-center justify-center text-xs text-zinc-500">Photo unavailable</p>
+                )}
+                {photo.caption && (
+                  <p className="p-2 text-xs text-zinc-600 dark:text-zinc-400">{photo.caption}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

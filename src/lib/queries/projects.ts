@@ -46,7 +46,8 @@ export async function getProjectSubmissions(projectId: string) {
 
   const { data, error } = await supabase
     .from("form_submissions")
-    .select("id, form_type, form_date, status, submitted_at, created_at")
+    // site_name: the Waterways site snapshot, for the "sites today" panel (null for other forms).
+    .select("id, form_type, form_date, status, submitted_at, created_at, site_name:data->>site_name")
     .eq("project_id", projectId)
     .order("form_date", { ascending: false });
 

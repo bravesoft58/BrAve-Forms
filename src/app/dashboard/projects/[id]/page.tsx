@@ -5,6 +5,9 @@ import { getCurrentUser } from "@/lib/auth";
 import { signFileUrlServer } from "@/lib/supabase/signed-urls";
 import ProjectTabs from "@/components/projects/ProjectTabs";
 import QrCodeModal from "@/components/inspector/QrCodeModal";
+import { pacificToday } from "@/lib/dates";
+import { readProjectSites } from "@/lib/schemas/waterways";
+import { waterwaySitesToday } from "@/lib/forms/waterway-sites-today";
 
 const statusColors: Record<string, string> = {
   active: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
@@ -42,6 +45,9 @@ export default async function ProjectDetailPage({
   );
 
   const activeTab = tab || "permits";
+  // Computed per request on the server, in Nevada time.
+  const today = pacificToday();
+  const sitesToday = waterwaySitesToday(readProjectSites(project.waterway_sites), submissions, today);
   const badgeClass = statusColors[project.status] ?? statusColors.archived;
 
   return (
@@ -83,6 +89,8 @@ export default async function ProjectDetailPage({
         submissions={submissions}
         documents={documents}
         userRole={user?.role ?? "user"}
+        waterwaySitesToday={sitesToday}
+        today={today}
       />
     </div>
   );

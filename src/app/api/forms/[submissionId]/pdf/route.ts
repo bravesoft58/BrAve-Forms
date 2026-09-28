@@ -5,11 +5,7 @@ import { signFileUrlServer } from "@/lib/supabase/signed-urls";
 import { getPdfComponent, getPdfFilename } from "@/lib/pdf/registry";
 import type { FormType } from "@/lib/constants/permits";
 import { FORM_TYPES } from "@/lib/constants/permits";
-
-// Maps form_type to the per-form subfolder used by PhotoAttachment.
-const PHOTO_SUBPATH: Partial<Record<FormType, string>> = {
-  ndot_weekly_stormwater: "ndot-stormwater",
-};
+import { FORM_PHOTO_SUBPATH } from "@/lib/forms/photo-paths";
 
 interface PhotoLike {
   file_name?: string;
@@ -23,7 +19,7 @@ async function signPhotosInPlace(
   formType: FormType,
   projectId: string,
 ): Promise<Record<string, unknown>> {
-  const subPath = PHOTO_SUBPATH[formType];
+  const subPath = FORM_PHOTO_SUBPATH[formType];
   if (!subPath) return data;
 
   const photos = (data as { photos?: PhotoLike[] }).photos;
@@ -77,9 +73,6 @@ export async function GET(
   }
 
   const renderFn = getPdfComponent(formType);
-  if (!renderFn) {
-    return NextResponse.json({ error: "PDF template not available" }, { status: 400 });
-  }
 
   const project = submission.projects as { name: string; project_permits: Array<{ permit_type: string; permit_number: string | null }> } | null;
   const projectName = project?.name ?? "Unknown Project";
