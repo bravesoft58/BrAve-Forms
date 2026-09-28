@@ -7,7 +7,7 @@
 **Sprint:** 4
 **Reported by:** Tim, 2026-09-25, raised while reviewing BF-58.1's photo-deletion fixes ("should superseded records have some kind of a chain, a history log? Same thing with an overwritten photo."). Routed to a ticket by Tim the same day.
 **Created:** 2026-09-25
-**Last Updated:** 2026-09-28T13:25:53Z
+**Last Updated:** 2026-09-28T13:33:00Z
 
 ## Problem
 
@@ -35,7 +35,7 @@ Capture only. Viewing history in the app is a later story.
 - [x] Every UPDATE of a `form_submissions` row that changes it writes exactly one revision holding the previous version, with `changed_by` and `changed_at`. A no-op update writes none.
 - [x] Every DELETE writes one revision holding the deleted row, and the revision survives the delete.
 - [x] Probe as an ordinary member, an org admin and an outsider (rolled back, P0999 pattern): members and admins can read revisions for their organization's projects only; nobody can INSERT, UPDATE or DELETE a revision directly.
-- [ ] Editing a submission through the app (one NDOT, NDEP or Working in Waterways edit on a preview) leaves a readable prior version, including its photo list, whose files still exist in Storage.
+- [x] Editing a submission through the app (one NDOT, NDEP or Working in Waterways edit on a preview) leaves a readable prior version, including its photo list, whose files still exist in Storage.
 - [x] Migration with rollback pair, rehearsed rolled back before applying, with Tim's go.
 
 ## Relationships
@@ -144,4 +144,4 @@ No app code changes. Decisions made at /story beyond the scout's:
 
 **Security advisor** after apply: no finding names `form_submission_revisions` or `record_form_submission_revision`; every listed warning predates this story.
 
-**Open:** AC 4 (an edit through the app on a preview, prior version and photo files readable) is not yet run.
+**AC 4, edit through the app** (preview of `8aa44e7`, signed in as Tim, labelled test record, details in [artifacts/BF-63/README.md](../artifacts/BF-63/README.md)): submitted a TEST Working in Waterways form on RNO 18 with one photo, edited one answer (No to Yes) with Save Changes. Exactly one revision: UPDATE, changed_by Tim, role authenticated, `old_row` answer No against the live Yes, photo list intact, photo file present in Storage. The test submission was then deleted with Tim's go, which wrote a DELETE revision (no user or role, direct SQL) holding the last version; the photo file stays. `form_submissions` back to 30 rows; the table holds these 2 test revisions, which stay permanently by design.
