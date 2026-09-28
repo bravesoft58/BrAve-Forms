@@ -4,7 +4,7 @@
 
 | File | What it shows |
 | --- | --- |
-| `01-sample-waterways-pdf-fixture.pdf` | The Working in Waterways PDF rendered from fixture data (site Western Drainage on Microsoft RNO18, all four checks, two comments, equipment, one photo) by `Testing/forms/bf58_2_waterways_pdf_test.ts` with `BF58_2_SAMPLE_PDF` set. The photo is a BF-58.1 screenshot standing in for a site photo. Not production data. Suitable to send Gracie as a first look at the layout; her sign-off (AC 5) still needs the PDF from a real submission with phone photos. |
+| `01-sample-waterways-pdf-fixture.pdf` | The Working in Waterways PDF rendered from fixture data (site Western Drainage on Microsoft RNO18, all four checks, two comments, equipment, one photo) by `Testing/forms/bf58_2_waterways_pdf_test.ts` with `BF58_2_SAMPLE_PDF` set. The photo is a BF-58.1 screenshot standing in for a site photo. Not production data. Regenerated at `ee81ba5` with Q&D's logo (from their paper form) and the paper form's wording; files 02-08 were captured before that change, so their PDFs have the text banner and the older labels. |
 | `02-sites-today-before-both-no-form.jpg` | Preview, RNO 18 Waterways tab before the test: "Sites today (Mon, Sep 28)", both sites "No form today", no submissions. |
 | `03-sites-today-after-western-submitted.jpg` | After one TEST submission for Western Drainage: Western "Submitted today", Eastern still "No form today" (AC 3). |
 | `04-view-page-photo-and-download-pdf-button.jpg` | The TEST submission's view page: answers, comments, the signed photo, and the Download PDF button that BF-58.1 hid (AC 1, AC 4). |
