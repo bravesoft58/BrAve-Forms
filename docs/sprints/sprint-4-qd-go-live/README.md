@@ -30,8 +30,8 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-63](stories/BF-63-submission-revision-history.md) | Append-only revision history for form submissions | 2 | HIGH | (Tim, 2026-09-25, record integrity) | NOT STARTED |
 | [BF-64](stories/BF-64-submit-waits-for-photo-uploads.md) | Submit must wait for photo uploads in flight | 1 | MEDIUM | (BF-58.1 verify follow-up C1) | NOT STARTED |
 | [BF-65](stories/BF-65-submission-idempotency.md) | Idempotent form submission (no duplicate inspections on retry) | 2 | MEDIUM | (BF-58.1 verify follow-up C2) | NOT STARTED |
-| [BF-66](stories/BF-66-form-reset-blanks-controls.md) | Rejected submits blank selects and radios while the old answers are still sent | 2 | HIGH | (BF-58.1 preview finding) | NOT STARTED |
-| **Total** | | **31** | | | **6/15 DONE** |
+| [BF-66](stories/BF-66-form-reset-blanks-controls.md) | Rejected submits blank selects and radios while the old answers are still sent | 2 | HIGH | (BF-58.1 preview finding) | DONE (merged `d320394`) |
+| **Total** | | **31** | | | **7/15 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
