@@ -1,10 +1,12 @@
 import { getCurrentUser } from "@/lib/auth";
+import EmailSecretExpiryBanner from "@/components/email-secret-expiry-banner";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
 
   return (
     <div>
+      <EmailSecretExpiryBanner />
       <h1 className="text-2xl font-semibold text-[#233B5C]">
         Welcome back, {user?.fullName || "there"}
       </h1>

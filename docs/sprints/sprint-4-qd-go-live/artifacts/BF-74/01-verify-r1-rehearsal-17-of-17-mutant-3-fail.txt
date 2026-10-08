@@ -1,0 +1,49 @@
+BF-74 verify round 1: independent re-run of the access-probe rehearsal
+Run: 2026-10-08, headless verify session (not the implementing session)
+
+Database: throwaway container from public.ecr.aws/supabase/postgres:15.8.1.070
+(PostgreSQL 15.8), removed afterwards. All repo migrations applied in order
+except 20261008164239 (the rehearsal splices it in). Shims needed on the bare
+image, none of which touch the BF-74 table:
+  - storage.buckets gained the public, file_size_limit, allowed_mime_types columns
+  - auth.jwt() created, reading request.jwt.claims
+  - a synthetic Tim auth.users + profiles row so the BF-30 backfill can run
+One unrelated migration failed (20260424140000_private_storage.sql calls
+is_super_admin(), defined in a later file); it only touches storage policies.
+
+1. Rehearsal: python Testing/security/bf74_rehearsal.py | psql
+BF-74 probe: 0 failure(s), everything rolled back
+PASS T1 RLS on, no policies
+PASS T2 anon and authenticated hold no table or column privilege
+PASS T3 service_role: SELECT, INSERT, UPDATE, DELETE and nothing more
+PASS T4 org FK cascades on delete; updated_by FK sets null
+PASS T5 service_role inserts and updates a settings row
+PASS T6 provider other than microsoft365 is refused (23514)
+PASS T7 admin cannot read the settings: 42501
+PASS T8 admin cannot change the settings: 42501
+PASS T9 admin cannot create settings: 42501
+PASS T10 is_org_admin(own org) is t for the admin
+PASS T11 is_org_admin(other org) is false for the admin
+PASS T7 member cannot read the settings: 42501
+PASS T8 member cannot change the settings: 42501
+PASS T9 member cannot create settings: 42501
+PASS T10 is_org_admin(own org) is f for the member
+PASS T11 is_org_admin(other org) is false for the member
+PASS T12 anon cannot read the settings: 42501
+
+2. Mutant: the same rehearsal with GRANT SELECT ... TO authenticated added
+   after the migration's service_role grant (proves the probe can fail)
+ERROR:  BF-74 probe: 3 failure(s), everything rolled back
+FAIL T2 2 privileges held by API user roles
+FAIL T7 admin read gave ok
+FAIL T7 member read gave ok
+
+3. State after both runs
+organization_email_settings: absent
+organizations with slug bf74-probe%: 0
+auth.users with email bf74-%: 0
+
+4. Migration applied for real, then the rollback file
+after apply:    organization_email_settings exists;
+                authenticated SELECT = f, service_role UPDATE = t
+after rollback: organization_email_settings absent
