@@ -34,10 +34,10 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-67](stories/BF-67-lock-fields-until-hydrated.md) | Lock form fields until the page has hydrated | 1 | MEDIUM | (BF-66 verify follow-up F4) | NOT STARTED |
 | [BF-68](stories/BF-68-pdf-photo-drop-fails-silently.md) | Photo PDFs must never drop a photo silently (WebP, failed fetch) | 2 | MEDIUM | (BF-58.2 verify follow-up C1) | NOT STARTED |
 | [BF-69](stories/BF-69-require-edit-version.md) | Require the loaded version on every submission edit | 1 | LOW | (BF-65 verify follow-up C2) | NOT STARTED |
-| [BF-70](stories/BF-70-waterways-gracie-small-asks.md) | Waterways: project-level sheen contact and hint, photo wording, copy equipment from a previous inspection (picker) | 3 | HIGH | Gracie's 2026-10-08 notes, asks 1, 3, 4 | NOT STARTED |
+| [BF-70](stories/BF-70-waterways-gracie-small-asks.md) | Waterways: project-level sheen contact and hint, photo wording, copy equipment from a previous inspection (picker) | 3 | HIGH | Gracie's 2026-10-08 notes, asks 1, 3, 4 | DONE (merged `d986c19`) |
 | [BF-71](stories/BF-71-photo-download-coordinates.md) | Download photos from a completed inspection, with where they were taken | 2 | MEDIUM | Gracie's 2026-10-08 notes, ask 5 | NOT STARTED |
 | [BF-72](stories/BF-72-sheen-plume-email-alert.md) | Email the project's waterway contact when sheen/plume is Yes (email only) | 3 | HIGH | Gracie's 2026-10-08 notes, ask 2 (not in Andy's bullets) | NOT STARTED |
-| **Total** | | **44** | | | **14/21 DONE** |
+| **Total** | | **44** | | | **15/21 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
