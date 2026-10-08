@@ -28,7 +28,17 @@ const TOKEN_ERRORS: Record<string, SendFailureReason> = {
 };
 
 function fail(reason: SendFailureReason, detail?: string): SendResult {
-  return { ok: false, reason, ...(detail ? { detail: detail.slice(0, DETAIL_MAX) } : {}) };
+  return { ok: false, reason, ...(detail ? { detail } : {}) };
+}
+
+// Microsoft's error text is not ours to trust, so the secret and the access
+// token are cut out of every detail before it leaves this module, and only
+// then is it capped (capping first could leave part of one behind).
+function scrubbed(result: SendResult, credentials: (string | undefined)[]): SendResult {
+  if (result.ok || !result.detail) return result;
+  let detail = result.detail;
+  for (const c of credentials) if (c) detail = detail.split(c).join("[redacted]");
+  return { ...result, detail: detail.slice(0, DETAIL_MAX) };
 }
 
 async function readJson(res: Response): Promise<Record<string, unknown>> {
@@ -78,9 +88,11 @@ export async function sendViaGraph(
   email: OrgEmail,
   fetchImpl: Fetch = fetch,
 ): Promise<SendResult> {
+  let token: string | undefined;
   try {
-    const token = await getToken(creds, fetchImpl);
-    if (typeof token !== "string") return token;
+    const got = await getToken(creds, fetchImpl);
+    if (typeof got !== "string") return scrubbed(got, [creds.clientSecret]);
+    token = got;
 
     const res = await fetchImpl(
       `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(creds.senderMailbox)}/sendMail`,
@@ -98,8 +110,8 @@ export async function sendViaGraph(
       },
     );
     if (res.ok) return { ok: true };
-    return sendFailure(res.status, await readJson(res));
+    return scrubbed(sendFailure(res.status, await readJson(res)), [creds.clientSecret, token]);
   } catch (e) {
-    return fail("network_error", e instanceof Error ? e.name : String(e));
+    return scrubbed(fail("network_error", e instanceof Error ? e.name : String(e)), [creds.clientSecret, token]);
   }
 }

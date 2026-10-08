@@ -164,20 +164,48 @@ test("network failures and non-JSON replies come back as results, never throws",
 });
 
 test("no failure detail ever carries the secret or the access token", async () => {
-  const echo = stubFetch((url) =>
+  const leaks = (r: Awaited<ReturnType<typeof sendViaGraph>>) => {
+    const text = JSON.stringify(r) + (r.ok ? "" : describeSendFailure(r.reason, r.detail));
+    // "token-" also catches a token cut in half by the length cap.
+    return text.includes(SECRET) || text.includes("token-");
+  };
+
+  // Graph echoing the token and the secret in its error message (verify round 1, C1).
+  const graphEcho = stubFetch((url) =>
     url.includes("login.")
       ? tokenOk()
-      : json(403, { error: { code: "ErrorAccessDenied", message: "Access is denied." } }),
+      : json(403, { error: { code: "ErrorAccessDenied", message: `Rejected token-123 with ${SECRET}` } }),
   );
-  const r = await sendViaGraph(CREDS, EMAIL, echo.fn);
-  const text = JSON.stringify(r) + (r.ok ? "" : describeSendFailure(r.reason, r.detail));
-  assert.ok(!text.includes(SECRET) && !text.includes("token-123"));
+  const r = await sendViaGraph(CREDS, EMAIL, graphEcho.fn);
+  assert.deepEqual(r, {
+    ok: false,
+    reason: "mailbox_not_permitted",
+    detail: "403 ErrorAccessDenied Rejected [redacted] with [redacted]",
+  });
 
-  const tokenEcho = stubFetch(() =>
+  // The token straddling the 300-character cap (characters 294-302): it is
+  // scrubbed before the cut, so no "token-" prefix is left behind.
+  const atCap = stubFetch((url) =>
+    url.includes("login.")
+      ? tokenOk()
+      : json(500, { error: { code: "ErrorX", message: `${"a".repeat(283)}token-123` } }),
+  );
+  const capped = await sendViaGraph(CREDS, EMAIL, atCap.fn);
+  assert.equal(!capped.ok && capped.detail, `500 ErrorX ${"a".repeat(283)}[redac`);
+  assert.ok(!leaks(capped), "a partial token survives the cap");
+
+  // The token endpoint: error_description is never copied, and an echo in
+  // `error` (the field that is copied when there are no error codes) is cut out.
+  const descEcho = stubFetch(() =>
     json(401, { error: "invalid_client", error_description: `bad secret ${SECRET}`, error_codes: [7000215] }),
   );
-  const t = await sendViaGraph(CREDS, EMAIL, tokenEcho.fn);
-  assert.ok(!JSON.stringify(t).includes(SECRET), "error_description is never copied into detail");
+  assert.ok(!leaks(await sendViaGraph(CREDS, EMAIL, descEcho.fn)), "error_description is never copied into detail");
+  const errorEcho = stubFetch(() => json(400, { error: `invalid_client ${SECRET}` }));
+  assert.deepEqual(await sendViaGraph(CREDS, EMAIL, errorEcho.fn), {
+    ok: false,
+    reason: "microsoft_error",
+    detail: "token 400 invalid_client [redacted]",
+  });
 });
 
 // --- sendOrgEmail end to end: stubbed Supabase REST + Microsoft ---
