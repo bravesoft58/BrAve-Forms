@@ -10,6 +10,7 @@ import {
   NNPH_DUST_CONTROL_METHODS,
   type NnphDustPermitData,
 } from "@/lib/schemas/nnph-dust-permit";
+import FormCancel from "@/components/forms/shared/FormCancel";
 import Section1ApplicationInfo from "./Section1ApplicationInfo";
 import Section2Contacts from "./Section2Contacts";
 import Section3ProjectDetails from "./Section3ProjectDetails";
@@ -160,6 +161,7 @@ export default function NnphDustPermitForm({
       <Section3ProjectDetails data={data} onChange={update} />
 
       <div className="flex items-center gap-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+        <FormCancel href={`/dashboard/projects/${projectId}?tab=nnph_dust_permit`} ready={ready} disabled={pending} />
         <button
           type="submit"
           disabled={pending || !ready}

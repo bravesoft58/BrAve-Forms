@@ -8,6 +8,7 @@ import {
 } from "@/app/dashboard/projects/[id]/forms/working-in-waterways/actions";
 import { keepFormOnLostReply, useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
 import PhotoAttachment from "@/components/forms/shared/PhotoAttachment";
+import FormCancel from "@/components/forms/shared/FormCancel";
 import { inputClass, labelClass, selectClass } from "@/components/forms/formStyles";
 import { pacificTime, pacificToday } from "@/lib/dates";
 import type { FormPhoto } from "@/lib/schemas/form-photo";
@@ -190,14 +191,11 @@ export default function WaterwaysForm({
       </section>
 
       <div className="flex items-center gap-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-        {cancelHref && (
-          <a
-            href={cancelHref}
-            className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-          >
-            Cancel
-          </a>
-        )}
+        <FormCancel
+          href={cancelHref ?? `/dashboard/projects/${projectId}?tab=working_in_waterways`}
+          ready={ready}
+          disabled={pending}
+        />
         <button
           type="submit"
           disabled={pending || !ready}

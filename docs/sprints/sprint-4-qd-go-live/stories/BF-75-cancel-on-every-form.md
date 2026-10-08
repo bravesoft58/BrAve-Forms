@@ -3,11 +3,12 @@
 **Type:** Feature (consistent form navigation; Q&D request)
 **Priority:** MEDIUM (usability; crews use the new-entry screens daily)
 **Points:** 2
-**Status:** NOT STARTED
+**Status:** IN PROGRESS
 **Sprint:** 4 (backlog)
+**Started:** 2026-10-08T20:44:28Z
 **Reported by:** Q&D note relayed by Tim, 2026-10-08: "Daily dust log had a cancel option next to Submit. None of the other forms have this cancel option. Would like to have that option in all forms." Confirmation step added by Tim the same day as a safety measure.
 **Created:** 2026-10-08
-**Last Updated:** 2026-10-08T16:38:50Z
+**Last Updated:** 2026-10-08T20:48:19Z
 
 ## Problem
 
@@ -19,18 +20,18 @@ The dust log's Cancel calls `router.back()`. That leaves the app when the form w
 
 - **One shared component**, for example `src/components/forms/shared/FormCancel.tsx`: a `type="button"` Cancel styled like the dust log's, placed left of Submit on every form in the BF-66 list (`Testing/forms/bf66_form_reset_test.ts`: the six form components, the dust-log append form, and `project-form.tsx`). Disabled while the form is saving.
 - **Fixed destination, not Back.** Each page passes `cancelHref`: the project's tab for that form on a new entry (`/dashboard/projects/{id}?tab=<form>`), the record's view page on an edit (as the three edit pages already do), the projects list or project page for the project form. The dust log moves from `router.back()` to its `cancelHref`.
-- **Confirmation only when there is something to lose.** The form tracks a "changed" flag set by any `input` or `change` event inside the `<form>` (works for the controlled React forms and the uncontrolled project form alike; the hidden photo file input bubbles too). Unchanged: Cancel navigates straight away. Changed: an inline confirmation replaces the button row: "Discard your changes? [Keep editing] [Discard]". Inline rather than the browser's `window.confirm`, so it matches the app's styling, works the same on iPhone and Android, and can be driven in browser tests.
+- **Confirmation only when there is something to lose.** *(Superseded at scout, 2026-10-08: change detection compares FormData snapshots, because button-driven changes fire no input event; see Technical Approach.)* The form tracks a "changed" flag set by any `input` or `change` event inside the `<form>` (works for the controlled React forms and the uncontrolled project form alike; the hidden photo file input bubbles too). Unchanged: Cancel navigates straight away. Changed: an inline confirmation replaces the button row: "Discard your changes? [Keep editing] [Discard]". Inline rather than the browser's `window.confirm`, so it matches the app's styling, works the same on iPhone and Android, and can be driven in browser tests.
 - **Photos already uploaded stay in Storage** when a form is discarded. That is the existing behaviour for removed photos (harmless, unreferenced; cleanup belongs to a reference-aware job, BF-58.1).
 - Extend the BF-66 static test: every form in the list renders the shared Cancel, and every button inside it is `type="button"`.
 
 ## Acceptance criteria
 
-- [ ] Every form in the list shows Cancel next to Submit, on both new and edit pages, with the same look.
-- [ ] Cancel on an untouched form goes straight to the project's tab for that form (new) or the record's view page (edit); never to an outside page.
-- [ ] After any change, Cancel shows "Discard your changes?"; Keep editing returns to the form with every value intact; Discard leaves without saving.
-- [ ] Cancel and the confirmation buttons are disabled while saving, and none of them submit the form (Enter key included).
-- [ ] The dust log no longer uses `router.back()`.
-- [ ] `pnpm build`, lint, BF-66 and the new test clean; no production file over 300 lines.
+- [x] Every form in the list shows Cancel next to Submit, on both new and edit pages, with the same look.
+- [ ] Cancel on an untouched form goes straight to the project's tab for that form (new) or the record's view page (edit); never to an outside page. *(Destinations fixed in code and tested; the "straight away" behaviour needs the browser check.)*
+- [ ] After any change, Cancel shows "Discard your changes?"; Keep editing returns to the form with every value intact; Discard leaves without saving. *(Comparison unit-tested and mutation-checked; on-screen flow needs the browser check.)*
+- [x] Cancel and the confirmation buttons are disabled while saving, and none of them submit the form (Enter key included).
+- [x] The dust log no longer uses `router.back()`.
+- [x] `pnpm build`, lint, BF-66 and the new test clean; no production file over 300 lines.
 
 ## Depends on
 
@@ -88,4 +89,28 @@ This catches typing, selects, radios, checkboxes, button-driven rows, photos and
 - MDN, `FormData()` constructor (firecrawl_scrape, page modified 2026-08-12, checked 2026-10-08): https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData. Built from the form's current values; only named, non-disabled controls are included; Baseline widely available since July 2015, including iOS Safari.
 - Unsaved-changes approaches (firecrawl_search, 2026-10-08): https://stackoverflow.com/questions/62792342/in-react-router-v6-how-to-check-form-is-dirty-before-leaving-page-route and https://github.com/jaredpalmer/formik/issues/1657. Both are framework-level dirty tracking; neither fits a hidden-JSON `useActionState` form.
 - react-hook-form with `useActionState` (firecrawl_search, 2026-10-08): https://react-hook-form.com/advanced-usage and https://github.com/orgs/react-hook-form/discussions/11832. Adopting it means restructuring every form, and syncing pending state is still a known friction. Rejected for this story.
-- Discard-changes wording (firecrawl_search, 2026-10-08): https://ux.stackexchange.com/questions/142111/intuitive-dialog-for-choosing-whether-to-close-and-lose-changes-or-keep-editing. Use explicit "Discard changes" and "Keep editing" labels, not Yes/No.
+- Discard-changes wording (firecrawl_search, 2026-10-08): https://ux.stackexchange.com/questions/142111/intuitive-dialog-for-choosing-whether-to-close-and-lose-changes-or-keep-editing.
+
+## Files
+
+| File | What |
+|---|---|
+| `src/lib/forms/form-snapshot.ts` (new, 28 lines) | `snapshotFormData` / `snapshotForm` (ordered `[name, value]` pairs, files as name:size:date) and `sameFormSnapshot`. |
+| `src/components/forms/shared/FormCancel.tsx` (new, 73 lines) | Cancel, and the inline "Discard your changes? Keep editing / Discard" row. Finds its form with `closest("form")`, takes the baseline once `ready`, `router.push(href)`. All buttons `type="button"`; disabled while saving; Cancel also until ready. |
+| Eight forms (dust log, dust log add-entries, NDEP SAD, NDEP stormwater, NDOT stormwater, NNPH, Waterways, project form) | Render `<FormCancel href=... ready={ready} disabled={pending} />` left of Submit. New-entry destinations default to `/dashboard/projects/{id}?tab={form_type}`; the edit pages keep passing their view page; dust log add-entries goes to the dust log record; the project form defaults to `/dashboard/projects`. Dust log `router.back()` and the three `<a>` Cancel links removed. |
+| `src/app/dashboard/projects/[id]/edit/page.tsx` | Passes `cancelHref` = the project page. |
+| `Testing/forms/bf75_cancel_test.ts` | Snapshot comparisons and static wiring guards. |
+
+## Validation (story session, 2026-10-08T20:48:19Z)
+
+Worktree `e:/brave-forms-worktrees/BF-75`, branch `feature/BF-75-cancel-on-every-form`, Node 24 + pnpm 10.34.5 via `npx`.
+
+| # | Check | Result | Evidence |
+|---|---|---|---|
+| 1 | `bf75_cancel_test.ts` | PASS 9/9 | Untouched equal; hidden JSON change seen; duplicate names (second value, then first value) seen; added and removed fields seen; reordered values seen; files compared by name/size/date; every form renders `FormCancel` inside its `<form>` with `ready`/`pending` and its fixed destination, with no `router.back()` and no hand-made Cancel left; the project edit page's destination; three `type="button"` buttons, no `window.confirm`, baseline only once ready. |
+| 2 | Mutation: `sameFormSnapshot` reduced to a length check | 4 FAIL | The comparison tests can fail; file restored from a scratchpad copy. |
+| 3 | Regression: bf66 4, bf70 13, bf70 render 6, bf72 16, bf74 19, bf65 15, bf58_1 16, bf73 9 + 6, bf58_2 7 | all pass, 0 fail | 111 tests across 10 files |
+| 4 | `tsc --noEmit`; `pnpm lint` (0 errors, the 12 pre-existing warnings, none in touched files); `pnpm build` | PASS | |
+| 5 | Sizes | `DailyDustLog.tsx` 283 to 275, `AppendDustLogEntries.tsx` 292 to 288, `project-form.tsx` 256 | No file over 300; net -8 lines across the eight forms. |
+
+Open for the browser check (preview or production after merge): an untouched form leaves straight away; after "+ Add Entry" or a typed change Cancel asks; Keep editing keeps every value; Discard leaves without saving. No database change in this story. Use explicit "Discard changes" and "Keep editing" labels, not Yes/No.

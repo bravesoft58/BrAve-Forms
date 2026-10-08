@@ -14,6 +14,7 @@ import {
   type ControlMeasureItem,
   type StabilizationItem,
 } from "@/lib/schemas/ndep-stormwater";
+import FormCancel from "@/components/forms/shared/FormCancel";
 import Section1GeneralInfo from "./Section1GeneralInfo";
 import Section2ControlMeasures from "./Section2ControlMeasures";
 import Section3Stabilization from "./Section3Stabilization";
@@ -170,14 +171,11 @@ export default function NdepStormwaterForm({
       <Section3Stabilization data={data} onChange={update} fieldErrors={state.fieldErrors} />
 
       <div className="flex items-center gap-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-        {cancelHref && (
-          <a
-            href={cancelHref}
-            className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-          >
-            Cancel
-          </a>
-        )}
+        <FormCancel
+          href={cancelHref ?? `/dashboard/projects/${projectId}?tab=ndep_weekly_stormwater`}
+          ready={ready}
+          disabled={pending}
+        />
         <button
           type="submit"
           disabled={pending || !ready}

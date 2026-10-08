@@ -13,6 +13,7 @@ import {
 } from "@/lib/constants/permits";
 import type { WaterwaySite } from "@/lib/schemas/waterways";
 import { inputClass, labelClass } from "@/components/forms/formStyles";
+import FormCancel from "@/components/forms/shared/FormCancel";
 import ContactGroup, { FieldError } from "./ContactGroup";
 import WaterwaySitesField from "./WaterwaySitesField";
 
@@ -30,6 +31,8 @@ interface ProjectFormProps {
   defaults?: Record<string, string | number | null>;
   existingPermits?: Permit[];
   existingSites?: WaterwaySite[];
+  /** Where Cancel goes: the project list when creating, the project when editing (BF-75). */
+  cancelHref?: string;
 }
 
 export default function ProjectForm({
@@ -39,6 +42,7 @@ export default function ProjectForm({
   defaults,
   existingPermits,
   existingSites = [],
+  cancelHref = "/dashboard/projects",
 }: ProjectFormProps = {}) {
   const serverAction = action ?? createProject;
   const [state, formAction, pending] = useActionState(serverAction, initialState);
@@ -238,6 +242,7 @@ export default function ProjectForm({
       </section>
 
       <div className="flex items-center gap-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+        <FormCancel href={cancelHref} ready={ready} disabled={pending} />
         <button
           type="submit"
           disabled={pending || !ready}
