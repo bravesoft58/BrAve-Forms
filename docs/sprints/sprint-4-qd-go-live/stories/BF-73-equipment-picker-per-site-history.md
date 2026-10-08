@@ -3,11 +3,12 @@
 **Type:** Bug (the BF-70 equipment picker can hide the most useful entry, or the whole button)
 **Priority:** MEDIUM (needs a project with more than ten recent inspections; Q&D's two waterway projects reach that within a week of daily forms)
 **Points:** 1
-**Status:** NOT STARTED
+**Status:** DONE
+**Completed:** 2026-10-08T16:51:51Z
 **Sprint:** 4 (backlog)
 **Reported by:** BF-70 `/verify` round 1 (finding C2, Codex, medium), filed at closeout 2026-10-08
 **Created:** 2026-10-08
-**Last Updated:** 2026-10-08T16:31:19Z
+**Last Updated:** 2026-10-08T16:51:51Z
 
 ## Problem
 
@@ -56,6 +57,24 @@ Run on the committed tree under Node 24 (`npx -p node@24`), pnpm 10.34.5.
 | 5 | `pnpm lint` | PASS | 0 errors; the 12 warnings are pre-existing and none are in touched files. |
 | 6 | `tsc --noEmit` | PASS | |
 | 7 | `pnpm build` | PASS | |
+
+## Verify round 1 (2026-10-08T16:51:51Z): PASS 9.4
+
+Verdict computed by `verify_verdict.py` from the round-1 findings (kept beside the stamp ledger). Re-run independently on Node 24: all 8 `Testing/forms/*_test.ts` files (76 tests), `tsc --noEmit`, `pnpm lint` (0 errors, no warning in a touched file) and `pnpm build` on the final tree.
+
+Codex (gpt-6-astra, xhigh) approved with no findings and model-checked the merge against an uncapped reference. Its first run through the companion reviewed nothing: with more than 2 changed files the companion asks Codex to collect the diff with git, and the read-only sandbox shell would not start. The review was re-run with the companion's own prompt and the diff inlined (`codex exec`, read-only).
+
+| # | Finding | Severity | Status |
+|---|---------|:--------:|--------|
+| V1 | The per-site wiring was proven only by a regex over the source; the probe's per-site loop ran zero times | medium | fixed in `d17c4ef`: `bf73_history_reads_test.ts` drives the real query through a stubbed PostgREST (mutation-checked) |
+| V2 | The query comment hand-typed "at most 20" per-site reads | low | fixed in `3131b3c` |
+| V3 | The per-site read has not run on real data (Codex's next step says the same) | low | open: confirm on the preview with equipment history at two sites |
+| V4 | 1 + N reads per page load (up to 22), all-or-nothing, after the project fetch | low | noted; trade-off in Build vs Use |
+| V5 | Every site's history is sent to the page | low | noted |
+| V6 | The "filter before the limit" guard checks source order, which does not change the request | low | noted |
+| V7 | PostgREST constants live in the client-shared forms module | low | noted |
+| V8 | The probe reads `form_submissions` without paging | low | noted |
+| V9 | `projects.ts` exports nine query functions (since BF-70) | low | pre-existing, to file |
 
 ## Depends on
 
