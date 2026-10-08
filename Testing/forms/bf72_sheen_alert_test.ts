@@ -111,6 +111,34 @@ test("no alert row: nothing for a No answer, a warning for a Yes answer", () => 
     "No alert email was recorded for this inspection. Call Gracie D.");
 });
 
+// Verify round 1 (BF-72): Next renders the page a Server Action redirects to
+// before after() runs, so right after an edit to Yes there is no alert row yet.
+test("no alert row just after the save that turned the answer to Yes reads as pending", () => {
+  const ago = (ms: number) => new Date(NOW - ms).toISOString();
+  const pending = { tone: "ok", text: "The alert email is being sent.", pending: true };
+  assert.deepEqual(describeSheenAlert(null, true, contact, fmt, NOW, ago(2000)), pending);
+  assert.deepEqual(describeSheenAlert(null, true, contact, fmt, NOW, ago(SENDING_STALE_MS)), pending, "window edge");
+  assert.deepEqual(describeSheenAlert(null, true, contact, fmt, NOW, ago(SENDING_STALE_MS + 1)), {
+    tone: "warn",
+    text: "No alert email was recorded for this inspection. Call Gracie D at 775-555-0101.",
+  });
+  assert.equal(describeSheenAlert(null, false, contact, fmt, NOW, ago(2000)), null, "a recent No save says nothing");
+  assert.equal(describeSheenAlert(null, true, contact, fmt, NOW, "not a time")?.tone, "warn", "unreadable save time");
+});
+
+test("only an unresolved alert asks the page to refresh", () => {
+  const row = (status: string, updated_at: string) =>
+    ({ status, recipient: "gracie@example.test", updated_at }) as Parameters<typeof describeSheenAlert>[0];
+  const recent = new Date(NOW - 2000).toISOString();
+  assert.equal(describeSheenAlert(row("sending", recent), true, contact, fmt, NOW)?.pending, true);
+  for (const status of ["sent", "failed", "not_configured", "no_contact"]) {
+    assert.equal(describeSheenAlert(row(status, recent), true, contact, fmt, NOW, recent)?.pending, undefined, status);
+  }
+  const stale = describeSheenAlert(row("sending", new Date(NOW - SENDING_STALE_MS - 1).toISOString()), true, contact, fmt, NOW);
+  assert.deepEqual(stale, { tone: "warn", text: "The alert email could not be confirmed. Call Gracie D at 775-555-0101." });
+  assert.equal(describeSheenAlert(row("sending", "not a time"), true, contact, fmt, NOW)?.tone, "warn", "unreadable row time");
+});
+
 // ---------------------------------------------- runSheenAlert, end to end
 
 const ORG = "11111111-1111-4111-8111-111111111111";
@@ -277,6 +305,16 @@ test("both actions schedule the alert with after(), before redirect", () => {
     assert.ok(scheduled < scope.indexOf("redirect("), `${fn} schedules before redirect`);
   }
   assert.match(src, /shouldSendSheenAlert\(stored, data\)/, "the edit compares with the stored answer");
+});
+
+test("the inspection page dates the line by the last save and refreshes only while pending", () => {
+  const page = read("app/dashboard/projects/[id]/forms/working-in-waterways/[submissionId]/page.tsx");
+  assert.match(page, /nevadaTime,\s*undefined,[^\n]*\s*submission\.updated_at,\s*\)/, "describeSheenAlert gets the save time");
+  assert.match(page, /\{alertLine\?\.pending && <RefreshWhilePending \/>\}/, "refresher mounted only while pending");
+  const refresher = read("components/refresh-while-pending.tsx");
+  assert.match(refresher, /^"use client";/);
+  assert.match(refresher, /const id = setInterval\(\(\) => router\.refresh\(\), REFRESH_MS\);\s*return \(\) => clearInterval\(id\);/,
+    "the timer is cleared when the result is known and the server stops rendering it");
 });
 
 test("alert state never touches form_submissions (BF-61 version, BF-63 history)", () => {

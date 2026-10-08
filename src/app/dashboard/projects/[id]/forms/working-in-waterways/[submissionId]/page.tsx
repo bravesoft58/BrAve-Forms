@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import FormActions from "@/components/form-actions";
+import RefreshWhilePending from "@/components/refresh-while-pending";
 import { headerCellClass, cellClass } from "@/components/forms/formStyles";
 import { getCurrentUser } from "@/lib/auth";
 import { describeSheenAlert, SHEEN_ALERT_KIND, type AlertRow } from "@/lib/alerts/sheen-alert-message";
@@ -70,6 +71,8 @@ export default async function WaterwaysViewPage({
     data.sheen_or_plume?.value === "Yes",
     { name: project.waterway_contact_name, phone: project.waterway_contact_phone },
     nevadaTime,
+    undefined, // now: the helper reads the clock, which keeps this render pure
+    submission.updated_at,
   );
 
   const photos: FormPhoto[] = await Promise.all(
@@ -154,6 +157,7 @@ export default async function WaterwaysViewPage({
             {alertLine.text}
           </p>
         )}
+        {alertLine?.pending && <RefreshWhilePending />}
       </section>
 
       <section className="mb-8 space-y-2">

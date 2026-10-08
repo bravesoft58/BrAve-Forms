@@ -71,6 +71,9 @@ export function inspectionLink(siteUrl: string | undefined, projectId: string, s
 /** A row still "sending" after this long was cut off (the function was stopped). */
 export const SENDING_STALE_MS = 5 * 60 * 1000;
 
+/** `pending`: the result is not known yet, so the page refreshes until it is. */
+export type AlertLine = { tone: "ok" | "warn"; text: string; pending?: true };
+
 function callLine(contact: WaterwayContact): string {
   const name = contact.name?.trim();
   const phone = contact.phone?.trim();
@@ -82,6 +85,11 @@ function callLine(contact: WaterwayContact): string {
 /**
  * The one line the inspection page shows under the sheen/plume answer, or null
  * when there is nothing to say (answer not Yes and no alert on record).
+ *
+ * `savedAt` is when the inspection was last saved. The save that turns the
+ * answer to Yes sends the email after its response, and Next renders the page
+ * that save redirects to before then, so no alert row exists yet. Within the
+ * pending window that is "being sent", not "no alert recorded".
  */
 export function describeSheenAlert(
   alert: AlertRow | null,
@@ -89,17 +97,23 @@ export function describeSheenAlert(
   contact: WaterwayContact,
   formatTime: (iso: string) => string,
   now: number = Date.now(),
-): { tone: "ok" | "warn"; text: string } | null {
+  savedAt: string | null = null,
+): AlertLine | null {
+  // NaN (an unreadable timestamp) is never recent, so it falls to the warning.
+  const recent = (iso: string) => now - Date.parse(iso) <= SENDING_STALE_MS;
+  const pending: AlertLine = { tone: "ok", text: "The alert email is being sent.", pending: true };
   if (!alert) {
-    return sheenIsYes ? { tone: "warn", text: `No alert email was recorded for this inspection. ${callLine(contact)}` } : null;
+    if (!sheenIsYes) return null;
+    if (savedAt && recent(savedAt)) return pending;
+    return { tone: "warn", text: `No alert email was recorded for this inspection. ${callLine(contact)}` };
   }
   switch (alert.status) {
     case "sent":
       return { tone: "ok", text: `Alert emailed to ${alert.recipient ?? "the waterway contact"} at ${formatTime(alert.updated_at)}.` };
     case "sending":
-      return now - Date.parse(alert.updated_at) > SENDING_STALE_MS
-        ? { tone: "warn", text: `The alert email could not be confirmed. ${callLine(contact)}` }
-        : { tone: "ok", text: "The alert email is being sent." };
+      return recent(alert.updated_at)
+        ? pending
+        : { tone: "warn", text: `The alert email could not be confirmed. ${callLine(contact)}` };
     case "failed":
       return { tone: "warn", text: `The alert email to ${alert.recipient ?? "the waterway contact"} failed. ${callLine(contact)}` };
     case "not_configured":
