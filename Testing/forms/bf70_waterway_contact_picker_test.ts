@@ -15,6 +15,7 @@ import { readWaterwayContact } from "@/lib/schemas/waterways";
 import {
   equipmentPreview,
   orderPreviousEquipment,
+  previousEquipmentUnavailable,
   type PreviousEquipment,
 } from "@/lib/forms/waterways-previous-equipment";
 
@@ -153,4 +154,38 @@ test("the sheen hint renders from the project contact in WaterwaysChecks", () =>
   const checks = read("components/forms/working-in-waterways/WaterwaysChecks.tsx");
   assert.match(checks, /If yes, call/);
   assert.match(checks, /href=\{`tel:/);
+});
+
+// --- Verify round 1 fixes ---
+
+test("every button in the equipment picker is disabled while the form saves (verify C1)", () => {
+  const picker = read("components/forms/working-in-waterways/WaterwaysEquipmentPicker.tsx");
+  // Whole elements, not `<button[^>]*>`: an onClick arrow's `=>` would end that match early.
+  const buttons = picker.split("<button").slice(1).map((chunk) => chunk.split("</button>")[0]);
+  assert.equal(buttons.length, 2, "the toggle and the row button");
+  assert.deepEqual(buttons.filter((el) => !el.includes("disabled={disabled}")), []);
+});
+
+test("a failed history read is logged and yields no picker rows, not a broken page (verify C3)", () => {
+  const logged: unknown[][] = [];
+  const original = console.error;
+  console.error = (...args: unknown[]) => void logged.push(args);
+  try {
+    assert.deepEqual(previousEquipmentUnavailable(new Error("statement timeout")), []);
+    assert.deepEqual(previousEquipmentUnavailable("network down"), []);
+  } finally {
+    console.error = original;
+  }
+  assert.equal(logged.length, 2);
+  assert.match(String(logged[0][0]), /\[waterways-equipment\]/);
+  assert.deepEqual(logged[0][1], { error: "statement timeout" });
+  assert.deepEqual(logged[1][1], { error: "network down" });
+});
+
+test("both form pages read the history through the fallback (verify C3)", () => {
+  const base = "app/dashboard/projects/[id]/forms/working-in-waterways/";
+  for (const page of ["new/page.tsx", "[submissionId]/edit/page.tsx"]) {
+    const src = read(base + page);
+    assert.match(src, /getRecentWaterwaysEquipment\([^)]*\)\.catch\(previousEquipmentUnavailable\)/, page);
+  }
 });

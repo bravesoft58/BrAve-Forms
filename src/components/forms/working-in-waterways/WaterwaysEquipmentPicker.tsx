@@ -64,7 +64,10 @@ export default function WaterwaysEquipmentPicker({
                   onPick((row.equipment ?? "").trim());
                   setOpen(false);
                 }}
-                className="w-full px-3 py-2 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                // An open list stays open while the form saves; a pick then would
+                // change the screen but not the record already on its way.
+                disabled={disabled}
+                className="w-full px-3 py-2 text-left hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-zinc-800"
               >
                 <span className="block text-sm font-medium text-zinc-900 dark:text-zinc-100">
                   {dateLabel(row.form_date)}
