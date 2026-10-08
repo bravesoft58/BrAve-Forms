@@ -105,12 +105,13 @@ test("readWaterwayContact needs a name; phone is optional; nothing else leaks", 
 
 // --- "Copy from previous" ordering ---
 
+const at = "2026-10-08T15:00:00+00:00";
 const rows: PreviousEquipment[] = [
-  { id: "a", form_date: "2026-10-07", site_name: "Eastern Drainage", initials: "GD", equipment: "Excavator, pump" },
-  { id: "b", form_date: "2026-10-06", site_name: "Western Drainage", initials: "FD", equipment: "Loader" },
-  { id: "c", form_date: "2026-10-05", site_name: "Eastern Drainage", initials: "GD", equipment: "   " },
-  { id: "d", form_date: "2026-10-04", site_name: "Western Drainage", initials: "FD", equipment: "Loader\nSkid steer" },
-  { id: "e", form_date: "2026-10-03", site_name: null, initials: null, equipment: "Hand tools" },
+  { id: "a", form_date: "2026-10-07", created_at: at, site_name: "Eastern Drainage", initials: "GD", equipment: "Excavator, pump" },
+  { id: "b", form_date: "2026-10-06", created_at: at, site_name: "Western Drainage", initials: "FD", equipment: "Loader" },
+  { id: "c", form_date: "2026-10-05", created_at: at, site_name: "Eastern Drainage", initials: "GD", equipment: "   " },
+  { id: "d", form_date: "2026-10-04", created_at: at, site_name: "Western Drainage", initials: "FD", equipment: "Loader\nSkid steer" },
+  { id: "e", form_date: "2026-10-03", created_at: at, site_name: null, initials: null, equipment: "Hand tools" },
 ];
 
 test("same-site rows come first, newest first within each group; empties dropped", () => {
@@ -186,6 +187,6 @@ test("both form pages read the history through the fallback (verify C3)", () => 
   const base = "app/dashboard/projects/[id]/forms/working-in-waterways/";
   for (const page of ["new/page.tsx", "[submissionId]/edit/page.tsx"]) {
     const src = read(base + page);
-    assert.match(src, /getRecentWaterwaysEquipment\([^)]*\)\.catch\(previousEquipmentUnavailable\)/, page);
+    assert.match(src, /getRecentWaterwaysEquipment\([^)]*\)\s*\.catch\(\s*previousEquipmentUnavailable,?\s*\)/, page);
   }
 });

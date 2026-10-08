@@ -15,12 +15,7 @@ export default async function EditWaterwaysPage({
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const [project, submission, previousEquipment] = await Promise.all([
-    getProjectById(id),
-    getSubmissionById(submissionId),
-    // One extra so the picker still offers a full list once this record is excluded.
-    getRecentWaterwaysEquipment(id, PREVIOUS_EQUIPMENT_LIMIT + 1).catch(previousEquipmentUnavailable),
-  ]);
+  const [project, submission] = await Promise.all([getProjectById(id), getSubmissionById(submissionId)]);
   if (!project || !submission) notFound();
   if (submission.project_id !== id || submission.form_type !== "working_in_waterways") notFound();
 
@@ -34,6 +29,14 @@ export default async function EditWaterwaysPage({
       : null;
   if (!initialData) notFound();
 
+  const sites = readProjectSites(project.waterway_sites);
+  // The record's own site too, in case it has since been renamed or removed.
+  const siteNames = [...new Set([...sites.map((site) => site.name), initialData.site_name].filter(Boolean))];
+  // One extra per read so the picker still offers a full list once this record is excluded.
+  const previousEquipment = await getRecentWaterwaysEquipment(id, siteNames, PREVIOUS_EQUIPMENT_LIMIT + 1).catch(
+    previousEquipmentUnavailable,
+  );
+
   return (
     <div>
       <h1 className="mb-1 text-2xl font-semibold tracking-tight text-[#233B5C] dark:text-zinc-100">
@@ -44,7 +47,7 @@ export default async function EditWaterwaysPage({
       </p>
       <WaterwaysForm
         projectId={id}
-        sites={readProjectSites(project.waterway_sites)}
+        sites={sites}
         submissionId={submissionId}
         initialData={initialData}
         version={submission.updated_at}
