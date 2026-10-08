@@ -8,7 +8,7 @@
 **Sprint:** 4 (backlog)
 **Reported by:** Tim, 2026-10-08, splitting BF-72: Q&D runs Microsoft 365, so the app sends from a Q&D mailbox instead of a third-party email service, and each customer's admin enters their own Microsoft 365 details on a settings page.
 **Created:** 2026-10-08
-**Last Updated:** 2026-10-08T17:16:25Z
+**Last Updated:** 2026-10-08T17:33:12Z
 
 ## Problem
 
@@ -89,7 +89,7 @@ From the BF-74 scout (Engram Flow fact `8d9f3a52`, 2026-10-08; it was not writte
 
 | File | What |
 |---|---|
-| `supabase/migrations/20261008164239_organization_email_settings.sql` (+ `_rollback/`) | The table. RLS on with no policies, nothing granted to `anon`/`authenticated`, `service_role` granted SELECT/INSERT/UPDATE/DELETE. The org FK cascades on delete; `updated_by` is set to null. **Not applied to production.** |
+| `supabase/migrations/20261008173255_organization_email_settings.sql` (+ `_rollback/`) | The table. RLS on with no policies, nothing granted to `anon`/`authenticated`, `service_role` granted SELECT/INSERT/UPDATE/DELETE. The org FK cascades on delete; `updated_by` is set to null. Applied to production 2026-10-08 (renamed from `20261008164239` to the version the database recorded). |
 | `src/lib/email/secret-box.ts` | AES-256-GCM encrypt/decrypt bound to the org id. |
 | `src/lib/email/graph-mail.ts` | Token plus sendMail on `fetch`; maps errors to reasons; never throws. |
 | `src/lib/email/send-mail.ts` | `sendOrgEmail(orgId, { to, subject, text })`, the service BF-72 calls. |
@@ -118,6 +118,8 @@ From the BF-74 scout (Engram Flow fact `8d9f3a52`, 2026-10-08; it was not writte
 Rehearsal note: on a bare supabase/postgres image, `auth.uid()` reads only `request.jwt.claim.sub`. The probe sets both claim forms and fails if `auth.uid()` does not match the impersonated user. Without that, the member's "not an admin" check would pass on a null uid.
 
 ## Open before closeout (needs Tim)
+
+**Status 2026-10-08T17:33:12Z (Tim: merge now, follow-ups for the gaps):** steps 1 and 2 done. The spliced migration + probe ran on production inside a rolled-back block first: 17/17 PASS, 0 failures, using the real Q&D admin and member. Then `apply_migration` recorded version `20261008173255`; live check: RLS on, 0 policies, `authenticated` and `anon` no SELECT, `service_role` UPDATE, 0 rows. `EMAIL_SETTINGS_KEY` added to Vercel **Production only**, as a sensitive variable, generated and piped into `vercel env add` without being displayed; Preview has no key, so a Preview refuses to save (C2 stays a filed follow-up). Step 3 (Andy's setup and a real test email) remains the gate for ACs 3 and 7.
 
 1. **Apply the migration** with Tim's go (Supabase MCP `apply_migration`). Rename the repo file to the recorded version, then run `Testing/security/bf74_email_settings_probe.sql` on production (it rolls back; all 17 lines should read PASS).
 2. **Set `EMAIL_SETTINGS_KEY` in Vercel** to 32 random bytes in base64 (`node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`). Give Preview the **same value** as Production, or no key at all; never a different one. Previews use production data, so on a Preview with a different key the stored secret reads as unreadable, the page tells the admin to paste it again, and saving it there re-encrypts the production row with a key Production cannot read: production email then fails until someone re-pastes on Production (verify round 1, finding C2; the code does not enforce this yet). With no key, a Preview refuses to save, which is safe. Losing the key means every organization re-enters its secret.

@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-MIGRATION = ROOT / "supabase/migrations/20261008164239_organization_email_settings.sql"
+MIGRATION = ROOT / "supabase/migrations/20261008173255_organization_email_settings.sql"
 PROBE = ROOT / "Testing/security/bf74_email_settings_probe.sql"
 MARKER = "  -- @@MIGRATION@@"
 

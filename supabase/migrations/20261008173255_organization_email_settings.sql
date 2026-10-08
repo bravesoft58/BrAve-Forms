@@ -1,5 +1,5 @@
 -- BF-74: per-organization email settings (send through the customer's Microsoft 365).
--- Pair: supabase/migrations/_rollback/20261008164239_rollback.sql
+-- Pair: supabase/migrations/_rollback/20261008173255_rollback.sql
 --
 -- One row per organization. The org admin enters the Microsoft Entra app
 -- registration (tenant ID, client ID, client secret, secret expiry) and the
