@@ -1,0 +1,98 @@
+{
+  "job": {
+    "createdAt": "2026-10-08T18:45:41.406Z",
+    "updatedAt": "2026-10-08T18:51:02.892Z",
+    "id": "review-muzvzxy6-wpgfwo",
+    "kind": "adversarial-review",
+    "kindLabel": "adversarial-review",
+    "title": "Codex Adversarial Review",
+    "workspaceRoot": "E:/brave-forms-worktrees/BF-72",
+    "jobClass": "review",
+    "summary": "Do not ship yet: interrupted edits can lose alerts, and the status page can hide subsequent failures. Reviewed the exact GitHub diff against master; local Git and test execution were unavailable.",
+    "write": false,
+    "sessionId": "f385081d-3d69-4263-90df-b414491aa2fa",
+    "status": "completed",
+    "startedAt": "2026-10-08T18:45:41.634Z",
+    "phase": "done",
+    "pid": null,
+    "logFile": "C:\\Users\\Tim\\.claude\\plugins\\data\\codex-openai-codex\\state\\BF-72-0c83edc52035898f\\jobs\\review-muzvzxy6-wpgfwo.log",
+    "threadId": "01a11cd5-fe82-7783-959d-6657363281a3",
+    "turnId": "01a11cd6-0c86-7b41-9315-4f3fbad3f8ec",
+    "completedAt": "2026-10-08T18:51:02.424Z"
+  },
+  "storedJob": {
+    "id": "review-muzvzxy6-wpgfwo",
+    "kind": "adversarial-review",
+    "kindLabel": "adversarial-review",
+    "title": "Codex Adversarial Review",
+    "workspaceRoot": "E:/brave-forms-worktrees/BF-72",
+    "jobClass": "review",
+    "summary": "Adversarial Review branch diff against master",
+    "write": false,
+    "createdAt": "2026-10-08T18:45:41.406Z",
+    "sessionId": "f385081d-3d69-4263-90df-b414491aa2fa",
+    "status": "completed",
+    "startedAt": "2026-10-08T18:45:41.634Z",
+    "phase": "done",
+    "pid": null,
+    "logFile": "C:\\Users\\Tim\\.claude\\plugins\\data\\codex-openai-codex\\state\\BF-72-0c83edc52035898f\\jobs\\review-muzvzxy6-wpgfwo.log",
+    "threadId": "01a11cd5-fe82-7783-959d-6657363281a3",
+    "turnId": "01a11cd6-0c86-7b41-9315-4f3fbad3f8ec",
+    "completedAt": "2026-10-08T18:51:02.424Z",
+    "result": {
+      "review": "Adversarial Review",
+      "target": {
+        "mode": "branch",
+        "label": "branch diff against master",
+        "baseRef": "master",
+        "explicit": true
+      },
+      "threadId": "01a11cd5-fe82-7783-959d-6657363281a3",
+      "context": {
+        "repoRoot": "E:/brave-forms-worktrees/BF-72",
+        "branch": "feature/BF-72-sheen-alert",
+        "summary": "Reviewing branch feature/BF-72-sheen-alert against master from merge-base b2aa93053e9063b69a5992df6b0d1d1a3d66ca4d."
+      },
+      "codex": {
+        "status": 0,
+        "stderr": "",
+        "stdout": "{\n  \"verdict\": \"needs-attention\",\n  \"summary\": \"Do not ship yet: interrupted edits can lose alerts, and the status page can hide subsequent failures. Reviewed the exact GitHub diff against master; local Git and test execution were unavailable.\",\n  \"findings\": [\n    {\n      \"severity\": \"high\",\n      \"title\": \"A successful edit replay can permanently skip the alert\",\n      \"body\": \"If a No-to-Yes update commits but execution stops before after() is registered, the retry loads Yes as `stored`. The write helper recognizes a successful replay, but this condition is now false, so no email is ever attempted. Fault injection using the actual action body with mocked dependencies reproduced a committed Yes followed by a successful replay with zero scheduled callbacks. The create path explicitly handles this recovery case; the edit path does not.\",\n      \"file\": \"src/app/dashboard/projects/[id]/forms/working-in-waterways/actions.ts\",\n      \"line_start\": 158,\n      \"line_end\": 160,\n      \"confidence\": 0.99,\n      \"recommendation\": \"Persist alert intent atomically with the No-to-Yes update and resume unattempted intent on replay. Keep claimed attempts deduplicated to preserve the no-retry policy for failed sends.\"\n    },\n    {\n      \"severity\": \"medium\",\n      \"title\": \"Pending status never updates when background delivery fails\",\n      \"body\": \"The redirected inspection page computes alert status once on the server. If it renders while the alert is sending, a later failure leaves 'The alert email is being sent' displayed indefinitely. The five-minute stale warning also requires another render; no polling, subscription, or refresh timer exists. Because failed sends are deliberately not retried, this conceals the instruction to call the contact—the design's recovery mechanism.\",\n      \"file\": \"src/app/dashboard/projects/[id]/forms/working-in-waterways/[submissionId]/page.tsx\",\n      \"line_start\": 68,\n      \"line_end\": 73,\n      \"confidence\": 0.98,\n      \"recommendation\": \"Refresh pending alert status until it reaches a terminal state, and trigger the stale warning without requiring a manual reload. Handle the initial pre-claim state as pending during that window.\"\n    }\n  ],\n  \"next_steps\": [\n    \"Add an action-level regression covering interruption after the edit commits, followed by replay.\",\n    \"Verify delayed failure and abandoned sending states become visible on an already-open inspection page.\"\n  ]\n}",
+        "reasoning": []
+      },
+      "result": {
+        "verdict": "needs-attention",
+        "summary": "Do not ship yet: interrupted edits can lose alerts, and the status page can hide subsequent failures. Reviewed the exact GitHub diff against master; local Git and test execution were unavailable.",
+        "findings": [
+          {
+            "severity": "high",
+            "title": "A successful edit replay can permanently skip the alert",
+            "body": "If a No-to-Yes update commits but execution stops before after() is registered, the retry loads Yes as `stored`. The write helper recognizes a successful replay, but this condition is now false, so no email is ever attempted. Fault injection using the actual action body with mocked dependencies reproduced a committed Yes followed by a successful replay with zero scheduled callbacks. The create path explicitly handles this recovery case; the edit path does not.",
+            "file": "src/app/dashboard/projects/[id]/forms/working-in-waterways/actions.ts",
+            "line_start": 158,
+            "line_end": 160,
+            "confidence": 0.99,
+            "recommendation": "Persist alert intent atomically with the No-to-Yes update and resume unattempted intent on replay. Keep claimed attempts deduplicated to preserve the no-retry policy for failed sends."
+          },
+          {
+            "severity": "medium",
+            "title": "Pending status never updates when background delivery fails",
+            "body": "The redirected inspection page computes alert status once on the server. If it renders while the alert is sending, a later failure leaves 'The alert email is being sent' displayed indefinitely. The five-minute stale warning also requires another render; no polling, subscription, or refresh timer exists. Because failed sends are deliberately not retried, this conceals the instruction to call the contact—the design's recovery mechanism.",
+            "file": "src/app/dashboard/projects/[id]/forms/working-in-waterways/[submissionId]/page.tsx",
+            "line_start": 68,
+            "line_end": 73,
+            "confidence": 0.98,
+            "recommendation": "Refresh pending alert status until it reaches a terminal state, and trigger the stale warning without requiring a manual reload. Handle the initial pre-claim state as pending during that window."
+          }
+        ],
+        "next_steps": [
+          "Add an action-level regression covering interruption after the edit commits, followed by replay.",
+          "Verify delayed failure and abandoned sending states become visible on an already-open inspection page."
+        ]
+      },
+      "rawOutput": "{\n  \"verdict\": \"needs-attention\",\n  \"summary\": \"Do not ship yet: interrupted edits can lose alerts, and the status page can hide subsequent failures. Reviewed the exact GitHub diff against master; local Git and test execution were unavailable.\",\n  \"findings\": [\n    {\n      \"severity\": \"high\",\n      \"title\": \"A successful edit replay can permanently skip the alert\",\n      \"body\": \"If a No-to-Yes update commits but execution stops before after() is registered, the retry loads Yes as `stored`. The write helper recognizes a successful replay, but this condition is now false, so no email is ever attempted. Fault injection using the actual action body with mocked dependencies reproduced a committed Yes followed by a successful replay with zero scheduled callbacks. The create path explicitly handles this recovery case; the edit path does not.\",\n      \"file\": \"src/app/dashboard/projects/[id]/forms/working-in-waterways/actions.ts\",\n      \"line_start\": 158,\n      \"line_end\": 160,\n      \"confidence\": 0.99,\n      \"recommendation\": \"Persist alert intent atomically with the No-to-Yes update and resume unattempted intent on replay. Keep claimed attempts deduplicated to preserve the no-retry policy for failed sends.\"\n    },\n    {\n      \"severity\": \"medium\",\n      \"title\": \"Pending status never updates when background delivery fails\",\n      \"body\": \"The redirected inspection page computes alert status once on the server. If it renders while the alert is sending, a later failure leaves 'The alert email is being sent' displayed indefinitely. The five-minute stale warning also requires another render; no polling, subscription, or refresh timer exists. Because failed sends are deliberately not retried, this conceals the instruction to call the contact—the design's recovery mechanism.\",\n      \"file\": \"src/app/dashboard/projects/[id]/forms/working-in-waterways/[submissionId]/page.tsx\",\n      \"line_start\": 68,\n      \"line_end\": 73,\n      \"confidence\": 0.98,\n      \"recommendation\": \"Refresh pending alert status until it reaches a terminal state, and trigger the stale warning without requiring a manual reload. Handle the initial pre-claim state as pending during that window.\"\n    }\n  ],\n  \"next_steps\": [\n    \"Add an action-level regression covering interruption after the edit commits, followed by replay.\",\n    \"Verify delayed failure and abandoned sending states become visible on an already-open inspection page.\"\n  ]\n}",
+      "parseError": null,
+      "reasoningSummary": []
+    },
+    "rendered": "# Codex Adversarial Review\n\nTarget: branch diff against master\nVerdict: needs-attention\n\nDo not ship yet: interrupted edits can lose alerts, and the status page can hide subsequent failures. Reviewed the exact GitHub diff against master; local Git and test execution were unavailable.\n\nFindings:\n- [high] A successful edit replay can permanently skip the alert (src/app/dashboard/projects/[id]/forms/working-in-waterways/actions.ts:158-160)\n  If a No-to-Yes update commits but execution stops before after() is registered, the retry loads Yes as `stored`. The write helper recognizes a successful replay, but this condition is now false, so no email is ever attempted. Fault injection using the actual action body with mocked dependencies reproduced a committed Yes followed by a successful replay with zero scheduled callbacks. The create path explicitly handles this recovery case; the edit path does not.\n  Recommendation: Persist alert intent atomically with the No-to-Yes update and resume unattempted intent on replay. Keep claimed attempts deduplicated to preserve the no-retry policy for failed sends.\n- [medium] Pending status never updates when background delivery fails (src/app/dashboard/projects/[id]/forms/working-in-waterways/[submissionId]/page.tsx:68-73)\n  The redirected inspection page computes alert status once on the server. If it renders while the alert is sending, a later failure leaves 'The alert email is being sent' displayed indefinitely. The five-minute stale warning also requires another render; no polling, subscription, or refresh timer exists. Because failed sends are deliberately not retried, this conceals the instruction to call the contact—the design's recovery mechanism.\n  Recommendation: Refresh pending alert status until it reaches a terminal state, and trigger the stale warning without requiring a manual reload. Handle the initial pre-claim state as pending during that window.\n\nNext steps:\n- Add an action-level regression covering interruption after the edit commits, followed by replay.\n- Verify delayed failure and abandoned sending states become visible on an already-open inspection page.\n"
+  }
+}

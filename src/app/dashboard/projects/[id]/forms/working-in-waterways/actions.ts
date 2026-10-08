@@ -2,6 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { runSheenAlert } from "@/lib/alerts/run-sheen-alert";
+import { shouldSendSheenAlert } from "@/lib/alerts/sheen-alert-message";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { collectFieldErrors } from "@/lib/forms/field-errors";
@@ -89,6 +92,12 @@ export async function submitWaterways(
   // A replay's first attempt already wrote the photo rows.
   if (!saved.replay) await replacePhotoRows(supabase, saved.id, data);
 
+  // BF-72: email the waterway contact after the response is sent. Scheduled
+  // on a replay too: the alert's claim row makes a second send impossible, and
+  // it covers a first attempt that saved but never got this far.
+  const submissionId = saved.id;
+  if (shouldSendSheenAlert(null, data)) after(() => runSheenAlert(submissionId, projectId, data));
+
   revalidatePath(`/dashboard/projects/${projectId}`);
   redirect(`/dashboard/projects/${projectId}?tab=${FORM_TYPE}`);
 }
@@ -145,6 +154,10 @@ export async function updateWaterways(
 
   // A replay's first attempt already replaced the photo rows.
   if (!saved.replay) await replacePhotoRows(supabase, submissionId, data);
+
+  // BF-72: an edit alerts only when it turns the answer to Yes. On a replay
+  // `existing` is already the saved Yes, so a retry never sends again.
+  if (shouldSendSheenAlert(stored, data)) after(() => runSheenAlert(submissionId, projectId, data));
 
   const viewPath = `/dashboard/projects/${projectId}/forms/working-in-waterways/${submissionId}`;
   revalidatePath(`/dashboard/projects/${projectId}`);
