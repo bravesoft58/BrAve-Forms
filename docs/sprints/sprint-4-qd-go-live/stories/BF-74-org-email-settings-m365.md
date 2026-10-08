@@ -3,11 +3,12 @@
 **Type:** Feature (first outbound application email; admin setup inside the app)
 **Priority:** HIGH (blocks BF-72, the sheen/plume alert)
 **Points:** 3
-**Status:** IN PROGRESS
+**Status:** DONE
+**Completed:** 2026-10-08T17:16:25Z
 **Sprint:** 4 (backlog)
 **Reported by:** Tim, 2026-10-08, splitting BF-72: Q&D runs Microsoft 365, so the app sends from a Q&D mailbox instead of a third-party email service, and each customer's admin enters their own Microsoft 365 details on a settings page.
 **Created:** 2026-10-08
-**Last Updated:** 2026-10-08T16:51:43Z
+**Last Updated:** 2026-10-08T17:16:25Z
 
 ## Problem
 
@@ -121,3 +122,22 @@ Rehearsal note: on a bare supabase/postgres image, `auth.uid()` reads only `requ
 1. **Apply the migration** with Tim's go (Supabase MCP `apply_migration`). Rename the repo file to the recorded version, then run `Testing/security/bf74_email_settings_probe.sql` on production (it rolls back; all 17 lines should read PASS).
 2. **Set `EMAIL_SETTINGS_KEY` in Vercel** to 32 random bytes in base64 (`node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`). Give Preview the **same value** as Production, or no key at all; never a different one. Previews use production data, so on a Preview with a different key the stored secret reads as unreadable, the page tells the admin to paste it again, and saving it there re-encrypts the production row with a key Production cannot read: production email then fails until someone re-pastes on Production (verify round 1, finding C2; the code does not enforce this yet). With no key, a Preview refuses to save, which is safe. Losing the key means every organization re-enters its secret.
 3. Andy's Microsoft-side setup, then a real test email (ACs 3 and 7).
+
+## Verify round 1 (2026-10-08T17:16:25Z, headless)
+
+**Verdict: PASS 9.2** (computed by `verify_verdict.py`; stamp bound to `ce8c1d8`, clean tree). DONE here means the code passed; the three operator steps above still gate closeout.
+
+Verify re-ran every gate itself on the fixed tree: BF-74 tests 19/19, regression 61/61 (bf58_1 16, bf58_2 7, bf65 15, bf66 4, bf70 13, bf70 render 6), `tsc --noEmit` and eslint clean, `next build` clean with the setup sheet in the email-setup route's trace. It also re-ran the access probe on a throwaway Postgres 15.8: 17/17 PASS, the extra-grant mutant fails T2 and both T7 checks, rollback clean ([artifact 01](../artifacts/BF-74/01-verify-r1-rehearsal-17-of-17-mutant-3-fail.txt)).
+
+Codex (`gpt-6-astra`, xhigh) could not start its sandbox on this host, the same failure as BF-70, so it reviewed statically from the full diff given inline ([artifact 02](../artifacts/BF-74/02-verify-r1-codex-static-review.json)).
+
+| # | Finding | Raised by | Severity | Status |
+|---|---|---|---|---|
+| C1 | Microsoft's error text reached the browser, `last_test_error` and the log unscrubbed. The "never carries the secret or the token" test could not fail on the Graph path. | Codex | medium | **fixed** in `ce8c1d8`: both credentials are scrubbed before the 300-character cap, and the test now echoes them on both paths and across the cap ([artifact 03](../artifacts/BF-74/03-verify-r1-c1-old-code-leaks-credentials.txt)) |
+| C2 | A Preview with a different `EMAIL_SETTINGS_KEY` can overwrite the shared production ciphertext | Codex + verify | medium | to file. The instruction in step 2 above is corrected; the code does not enforce it |
+| C3 | A stale save with a blank secret pairs old tenant/client values with the newest secret | Codex | medium | to file |
+| C4 | A test result can be written onto a configuration saved while the test was in flight | Codex + verify | medium | to file (one revision check fixes C3 and C4) |
+| V1 | No way to clear the settings, though the setup sheet's removal steps say to | verify | medium | to file |
+| V2-V9, CODEX-STATIC | Lows: operator-gated ACs; the settings page errors if code ships before the migration; no behavioural tests for the two actions; `getAdminOrg` hides errors as "not admin"; AAD bound to the caller's id text; probe re-run after real settings exist; dashboard round trips; raw Markdown sheet; static-only second review | verify | low | noted |
+
+Full findings with failure scenarios: `~/.claude/logs/pipeline/brave-forms/findings-BF-74-r1-*.json`.
