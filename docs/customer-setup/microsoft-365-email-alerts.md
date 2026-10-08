@@ -2,7 +2,7 @@
 
 **For:** the customer's Microsoft 365 administrator (Q&D: Andy Breen)
 **Created:** 2026-10-08
-**Last Updated:** 2026-10-08T16:14:54Z
+**Last Updated:** 2026-10-08T16:17:29Z
 **Status:** DRAFT. The in-app settings page this sheet points to ships with BF-74.
 
 BrAve Forms sends alert emails, starting with "Visible sheen/plume reported", from a mailbox in **your** Microsoft 365. Nothing goes through an outside email service. You create three things in Microsoft 365, then paste five values into BrAve Forms.
@@ -19,7 +19,7 @@ The app is limited to sending from that one mailbox. It cannot read any mail, an
 Use a **shared mailbox**: it needs no license.
 
 1. Exchange admin center, **Recipients**, **Mailboxes**, **Add a shared mailbox**.
-2. Display name: `BrAve Forms Alerts`. Email address: for example `forms-alerts@qdconstruction.com`. Use whichever domain your staff recognise.
+2. Display name: `BrAve Forms Alerts`. Email address: `forms-alerts@qdconstruction.com`.
 3. You do not need to add members. Nobody signs in to it; it only sends.
 
 Write down: **sender mailbox address**.
