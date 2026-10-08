@@ -2,7 +2,9 @@ import { notFound } from "next/navigation";
 import FormActions from "@/components/form-actions";
 import { headerCellClass, cellClass } from "@/components/forms/formStyles";
 import { getCurrentUser } from "@/lib/auth";
+import { describeSheenAlert, SHEEN_ALERT_KIND, type AlertRow } from "@/lib/alerts/sheen-alert-message";
 import { getProjectById, getSubmissionById } from "@/lib/queries/projects";
+import { createClient } from "@/lib/supabase/server";
 import type { FormPhoto } from "@/lib/schemas/form-photo";
 import { WATERWAY_CHECKS, type WaterwaysData } from "@/lib/schemas/waterways";
 import { signFileUrlServer } from "@/lib/supabase/signed-urls";
@@ -17,6 +19,28 @@ const ADVERSE: Record<string, string> = {
   sheen_or_plume: "Yes",
 };
 
+const nevadaTime = (iso: string) =>
+  new Date(iso).toLocaleString("en-US", {
+    timeZone: "America/Los_Angeles",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+// BF-72: read under the user's session; the table's policy shows an alert only
+// to someone who can see its inspection. A read failure shows nothing extra.
+async function loadSheenAlert(submissionId: string): Promise<AlertRow | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("submission_alerts")
+    .select("status, recipient, updated_at")
+    .eq("submission_id", submissionId)
+    .eq("kind", SHEEN_ALERT_KIND)
+    .maybeSingle();
+  return (data as AlertRow | null) ?? null;
+}
+
 export default async function WaterwaysViewPage({
   params,
 }: {
@@ -24,10 +48,11 @@ export default async function WaterwaysViewPage({
 }) {
   const { id, submissionId } = await params;
 
-  const [project, submission, user] = await Promise.all([
+  const [project, submission, user, sheenAlert] = await Promise.all([
     getProjectById(id),
     getSubmissionById(submissionId),
     getCurrentUser(),
+    loadSheenAlert(submissionId),
   ]);
   if (!project || !submission) notFound();
   if (submission.project_id !== id || submission.form_type !== "working_in_waterways") notFound();
@@ -39,6 +64,13 @@ export default async function WaterwaysViewPage({
   if (!data) notFound();
 
   const canEdit = user?.role === "admin" || (!!user && user.id === submission.submitted_by);
+
+  const alertLine = describeSheenAlert(
+    sheenAlert,
+    data.sheen_or_plume?.value === "Yes",
+    { name: project.waterway_contact_name, phone: project.waterway_contact_phone },
+    nevadaTime,
+  );
 
   const photos: FormPhoto[] = await Promise.all(
     (data.photos ?? []).map(async (photo) => ({
@@ -110,6 +142,18 @@ export default async function WaterwaysViewPage({
             </tbody>
           </table>
         </div>
+        {alertLine && (
+          <p
+            role="status"
+            className={`rounded-md p-3 text-sm ${
+              alertLine.tone === "ok"
+                ? "bg-zinc-50 text-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-300"
+                : "bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+            }`}
+          >
+            {alertLine.text}
+          </p>
+        )}
       </section>
 
       <section className="mb-8 space-y-2">

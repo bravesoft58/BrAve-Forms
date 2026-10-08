@@ -2,12 +2,13 @@
 
 **Type:** Feature (the first alert sent through the organization's email settings)
 **Priority:** HIGH (a visible sheen is a reportable event under the waterway permit; the contact must hear about it the same day)
-**Points:** 2
-**Status:** NOT STARTED
+**Points:** 3 (re-estimated at scout 2026-10-08: separate alert table, claim, view line, probe)
+**Status:** IN PROGRESS
 **Sprint:** 4 (backlog)
+**Started:** 2026-10-08T18:15:42Z
 **Reported by:** Gracie's handwritten note beside "Visible sheen/plume?" on her 2026-10-07 test submission: "Can I get alerted if someone submits 'yes' here?" Forwarded by Andy Breen 2026-10-08; not in Andy's bullet list. Filed under [docs/reference/WIW-Gracie-comments-2026-10-08.pdf](../../../reference/WIW-Gracie-comments-2026-10-08.pdf).
 **Created:** 2026-10-08
-**Last Updated:** 2026-10-08T16:14:54Z
+**Last Updated:** 2026-10-08T18:22:27Z
 
 ## Problem
 
@@ -22,17 +23,17 @@ Decisions (Tim, 2026-10-08):
 
 - **Trigger.** In the Working in Waterways create and edit actions, after the row is saved: if `sheen_or_plume.value` is "Yes" and the project has `waterway_contact_email`, call `sendOrgEmail` (BF-74). On edit, send only when the answer changed to Yes (compare with the loaded record), so a comment fix does not re-alert.
 - **Content.** Subject: "Sheen/plume reported: {project} / {site} / {date}". Body: project, site, date and time, initials, the sheen comment, a link to the submission, and a line saying the contact should act on it now. No photos; the link covers them.
-- **Reliability.** The save never fails because the email failed. Record `alert_sent_at` or `alert_error` on the submission (new columns, with their column grants for whichever client writes them) so the view shows "Contact emailed at ..." or "Email failed: call {name} at {phone}". A retried submit (BF-65 replay) sends once: send only while `alert_sent_at` is null.
+- **Reliability.** *(Superseded at scout, 2026-10-08: alert state lives in a separate `submission_alerts` table with an insert-claim, not on the submission; see Technical Approach.)* The save never fails because the email failed. Record `alert_sent_at` or `alert_error` on the submission (new columns, with their column grants for whichever client writes them) so the view shows "Contact emailed at ..." or "Email failed: call {name} at {phone}". A retried submit (BF-65 replay) sends once: send only while `alert_sent_at` is null.
 - **Not configured.** `sendOrgEmail` returning `not_configured` records that and shows "Email alerts are not set up: call {name}" on the view.
 - **Testing.** Unit test on the send-or-not decision (new Yes, edit to Yes, edit keeping Yes, edit away from Yes, no contact, not configured). One real send to Tim from preview, then one to Gracie from production as the closeout gate.
 
 ## Acceptance criteria
 
 - [ ] Submitting with sheen/plume = Yes on a project with a waterway contact emails that address within a minute, from the organization's configured mailbox, with the subject and body above and a working link.
-- [ ] No contact, or answer No or N/A: no email, no error.
-- [ ] Editing a Yes record without changing the answer sends nothing; editing No to Yes sends once.
-- [ ] A retried submit (lost reply, resend) sends one email, not two.
-- [ ] Email fails or is not configured: the inspection still saves, and the view says so and names the contact to call.
+- [x] No contact, or answer No or N/A: no email, no error.
+- [x] Editing a Yes record without changing the answer sends nothing; editing No to Yes sends once.
+- [x] A retried submit (lost reply, resend) sends one email, not two.
+- [x] Email fails or is not configured: the inspection still saves, and the view says so and names the contact to call.
 - [ ] Gracie receives a real alert from production and confirms it is what she wanted.
 
 ## Depends on
@@ -73,7 +74,9 @@ So the alert gets its own table, and the "send once" guard is an insert-claim on
 - `working-in-waterways/actions.ts`: after a successful insert or update, when `shouldSendSheenAlert` is true, call `after(() => runSheenAlert(...))` **before** `redirect` (redirect throws). The create path also runs it on a BF-65 replay: the claim makes that a no-op, and it covers a first attempt that saved but died before scheduling. The update path already loads `existing.data`, so the previous answer is at hand.
 - View page: read the alert row (session client) and show one line under the sheen answer: "Contact emailed at {time}" / "Email failed: call {name} at {phone}" / "Email alerts are not set up: call {name}" / "No waterway contact set" / "Sending..." (a row stuck in `sending` after a killed function reads "Email status unknown: call {name}").
 
-**Behaviour to confirm with Tim (AC wording):** the primary key allows one sheen alert per inspection. Yes, then edited to No, then back to Yes does not send a second email. A failed or not-configured alert is not retried automatically; the view tells the reader to call. Retrying would need a claim that may take over a `failed` row, which is a small add if wanted.
+**Confirmed by Tim 2026-10-08:** one alert per inspection, and no automatic retry of a failed send.
+
+**Behaviour as scouted:** the primary key allows one sheen alert per inspection. Yes, then edited to No, then back to Yes does not send a second email. A failed or not-configured alert is not retried automatically; the view tells the reader to call. Retrying would need a claim that may take over a `failed` row, which is a small add if wanted.
 
 **Gotchas:**
 - Do not wrap `redirect` in try/catch; call `after` first.
@@ -95,3 +98,31 @@ So the alert gets its own table, and the "send once" guard is an insert-claim on
 - Vercel, common App Router mistakes (firecrawl_search, 2026-10-08): https://vercel.com/blog/common-mistakes-with-the-next-js-app-router-and-how-to-fix-them. Do not call `redirect` inside try/catch.
 - Outbox/inbox dedup pattern (firecrawl_search, 2026-10-08): https://milanjovanovic.tech/blog/implementing-the-outbox-pattern and https://thebackenddevelopers.substack.com/p/transactional-inbox-pattern-in-backend. The `INSERT ... ON CONFLICT DO NOTHING RETURNING` claim used here.
 - No known `after`-specific bug found for Server Actions (firecrawl_search, 2026-10-08). Results were unrelated server-action issues (for example https://github.com/vercel/next.js/discussions/88767, a React 19 transition race fixed upstream in January 2026).
+
+## Files
+
+| File | What |
+|---|---|
+| `supabase/migrations/20261008182217_submission_alerts.sql` (+ `_rollback/`) | The alert table: PK (submission_id, kind), status check, RLS with a SELECT policy that defers to the submission's own visibility, SELECT for `authenticated`, SELECT/INSERT/UPDATE for `service_role`, nothing for `anon`. Applied to production 2026-10-08 (renamed from `20261008181542` to the recorded version). |
+| `src/lib/alerts/sheen-alert-message.ts` | Pure: `shouldSendSheenAlert`, `buildSheenAlertEmail`, `inspectionLink`, `describeSheenAlert` (the view's one line). |
+| `src/lib/alerts/run-sheen-alert.ts` | Claim (upsert with `ignoreDuplicates`, i.e. `ON CONFLICT DO NOTHING`), load project and contact, send via BF-74 `sendOrgEmail`, record the status. Never throws. |
+| `src/app/dashboard/projects/[id]/forms/working-in-waterways/actions.ts` | Create and edit schedule `after(() => runSheenAlert(...))` before `redirect`. Edit compares with the stored answer. |
+| `src/app/dashboard/projects/[id]/forms/working-in-waterways/[submissionId]/page.tsx` | Reads the alert under the user's session and shows the status line under the inspection table. |
+| `Testing/forms/bf72_sheen_alert_test.ts` | Unit and end-to-end tests with a fake Supabase REST API and fake Microsoft endpoints. |
+| `Testing/security/bf72_alerts_probe.sql` | Rolled-back production access probe. |
+
+## Validation (story session, 2026-10-08T18:22:27Z)
+
+Worktree `e:/brave-forms-worktrees/BF-72`, branch `feature/BF-72-sheen-alert`, Node 24 + pnpm 10.34.5 via `npx`.
+
+| # | Check | Result | Evidence |
+|---|---|---|---|
+| 1 | `bf72_sheen_alert_test.ts` | PASS 13/13 | Decision table (new Yes, No to Yes, N/A to Yes, keep Yes, Yes to No, blank); email subject, body and link; every view line, including a stale `sending`; end to end: claim body and `on_conflict`, one email to the contact, status `sent`; a second run sends nothing; no contact, not configured and Microsoft 403 recorded without throwing; `after` before `redirect` in both actions; no `form_submissions` write in the alert modules. |
+| 2 | Mutation: the claim always returns "claimed" | 1 FAIL (the second-run test) | The send-once test can fail; file restored from a scratchpad copy. |
+| 3 | Regression: bf74 19, bf58_1 16, bf65 15, bf66 4, bf70 13, bf70 render 6, bf73 9 + 6, bf58_2 7 | all pass, 0 fail | 108 tests across 10 files |
+| 4 | `tsc --noEmit`, `pnpm lint` (0 errors, 12 pre-existing warnings, none in touched files), `pnpm build` | PASS | |
+| 5 | Production rehearsal: migration spliced into `Testing/security/bf72_alerts_probe.sql`, rolled back | PASS 12/12 | Real Waterways inspection and a real Q&D member; outsider org sees 0 rows; member and outsider get 42501 on insert and update; anon 42501; no revision row for the inspection. |
+| 6 | Migration applied (`apply_migration`), recorded `20261008182217` | PASS | Live: RLS on, 1 policy, authenticated SELECT only, anon none, service_role INSERT, 0 rows. |
+| 7 | Largest touched production file | 199 lines (the view page) | No file over 300. |
+
+AC 1 and AC 6 need a configured Microsoft 365 (Andy's setup) and a real send: closeout gate, as BF-74.
