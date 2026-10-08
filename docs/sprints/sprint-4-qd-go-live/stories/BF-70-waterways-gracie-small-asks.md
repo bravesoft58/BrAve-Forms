@@ -3,11 +3,13 @@
 **Type:** Feature (three small changes to the Working in Waterways form, bundled)
 **Priority:** HIGH (direct requests from Q&D's environmental lead after her first live test; all cheap)
 **Points:** 3
-**Status:** NOT STARTED
+**Status:** DONE
 **Sprint:** 4 (backlog)
+**Started:** 2026-10-08T15:15:24Z
+**Completed:** 2026-10-08T15:59:11Z
 **Reported by:** Gracie's handwritten notes on her 2026-10-07 test submission, forwarded by Andy Breen 2026-10-08. Filed under [docs/reference/WIW-Gracie-comments-2026-10-08.pdf](../../../reference/WIW-Gracie-comments-2026-10-08.pdf) and [docs/reference/RE BrAve Forms Update 2026-10-08.msg](../../../reference/RE%20BrAve%20Forms%20Update%202026-10-08.msg).
 **Created:** 2026-10-08
-**Last Updated:** 2026-10-08T14:44:09Z
+**Last Updated:** 2026-10-08T15:59:11Z
 
 ## Problem
 
@@ -36,17 +38,57 @@ Gracie printed a Working in Waterways submission (17254 NDOT 4541 7 Bridges, sit
 
 ## Acceptance criteria
 
-- [ ] Admin can set and clear the waterway contact on the project edit page; the saved values survive a reload. A non-admin cannot change them (column grant plus existing policy).
-- [ ] With a contact set, the sheen/plume row shows "If yes, call {name} at {phone} immediately." on the new and edit forms; with none set, nothing extra is shown.
-- [ ] Waterways photo section reads "Attach at least one overview photo of the waterway work today." once; the NDOT and NDEP photo sections still read as before.
-- [ ] "Copy from previous" lists earlier inspections on the project, same site first, and fills the equipment box with the chosen one; the box stays editable and the form submits what is on screen.
-- [ ] Project with no earlier waterway inspection: no button.
-- [ ] Migration applied to production with the column grant; `pnpm build`, lint and tests clean; no production file over 300 lines.
+- [x] Admin can set and clear the waterway contact on the project edit page; the saved values survive a reload. A non-admin cannot change them (column grant plus existing policy).
+- [x] With a contact set, the sheen/plume row shows "If yes, call {name} at {phone} immediately." on the new and edit forms; with none set, nothing extra is shown.
+- [x] Waterways photo section reads "Attach at least one overview photo of the waterway work today." once; the NDOT and NDEP photo sections still read as before.
+- [x] "Copy from previous" lists earlier inspections on the project, same site first, and fills the equipment box with the chosen one; the box stays editable and the form submits what is on screen.
+- [x] Project with no earlier waterway inspection: no button.
+- [x] Migration applied to production with the column grant; `pnpm build`, lint and tests clean; no production file over 300 lines.
 - [ ] Gracie confirms the three changes from the live app (closeout gate, as BF-58.2).
 
 ## Depends on
 
 - Nothing. BF-72 depends on this ticket's contact field.
+
+## Validation (story session, 2026-10-08T15:23:40Z)
+
+Worktree `e:/brave-forms-worktrees/BF-70`, branch `feature/BF-70-waterways-small-asks`, Node 24 + pnpm 10.34.5 via `npx`.
+
+| # | Check | Result | Evidence |
+|---|-------|--------|----------|
+| 1 | `Testing/forms/bf70_waterway_contact_picker_test.ts` (schema fields, contact reader, picker ordering, static wiring guards) | PASS 10/10 | `node --import ./Testing/forms/ts-alias-hooks.mjs ...` |
+| 2 | Regressions: bf58_1 schema 16/16, bf66 form reset 4/4, bf65 record integrity 15/15, bf58_2 PDF 7/7 | PASS | same harness |
+| 3 | `tsc --noEmit`, `pnpm lint` (0 errors; 12 pre-existing warnings, none introduced), `pnpm build` | PASS | all routes compiled |
+| 4 | Migration rehearsal in production inside a `DO` block that raises at the end (rolled back): `has_column_privilege` update=t select=t insert=t, anon update=f | PASS | rehearsal before apply |
+| 5 | Migration applied via Supabase MCP `apply_migration`, recorded as version `20261008152320`; live re-check: authenticated UPDATE and SELECT true, anon UPDATE false on all three columns | PASS | repo file renamed to match the recorded version |
+| 6 | Line counts: project-form.tsx 300 -> 251 (ContactGroup extracted), WaterwaysForm.tsx 213, WaterwaysChecks.tsx 92, picker 84, helper 41 | PASS | all under the 300-line ceiling |
+
+Browser-dependent criteria (admin set/clear and reload, hint on the live form, picker fill, no-button case) are left for `/verify` and the signed-in preview run; the code paths are covered by the unit and static tests above. The picker was built inline (no dialog or popover) per the scout note on iOS Safari.
+
+Production data note: the migration adds three nullable columns to `projects`; no rows changed. Rollback: `supabase/migrations/_rollback/20261008152320_rollback.sql`.
+
+## Verify round 1 (2026-10-08T15:59:11Z): PASS 9.4
+
+Two reviewers: the verify session and Codex (`gpt-6-astra`, xhigh). Codex's shell and file tools failed to start (Windows sandbox setup error) on both `adversarial-review` attempts, so it reviewed in `task` mode from a pasted bundle: the full branch diff, nine full context files, the BF-60 grants migration, the projects and submissions policies, and this story. It then confirmed the fix commit. Verdict computed by `verify_verdict.py`; machine stamp recorded by `verify_stamp.py` (round 1, bound to `66754b4`).
+
+| # | Finding | Raised by | Severity | Status |
+|---|---------|-----------|----------|--------|
+| C1 | Picker rows stayed clickable while the form saved (only the toggle took `disabled`): a pick after Submit changed the screen, not the record | both | medium | fixed in `66754b4` |
+| C2 | The 10-row limit is applied project-wide before same-site ordering, so an older same-site inspection can drop out of the list; ten recent blank-equipment rows hide the button | Codex | medium | follow-up ticket (the story specified the cap; needs a per-site candidate query) |
+| C3 | A failed history read broke the whole new/edit inspection page (awaited in `Promise.all` with the required data) | both | medium | fixed in `66754b4`: `.catch(previousEquipmentUnavailable)` logs and renders the form without the picker |
+| V2 | Hint and no-button behaviour were proven only by source-text regexes | both | low | fixed: `Testing/forms/bf70_render_test.ts` renders both to HTML |
+| V1 | The migration comment says a missing column grant fails silently; PostgreSQL raises 42501 instead | verify | low | noted (the file is applied; no runtime effect) |
+| V3 | A contact with a phone but no name shows no hint | verify | low | noted (follows the spec: a name is required) |
+| V4 | Codex reviewed a pasted bundle, not the repo | verify | low | noted (sandbox to be repaired) |
+| V5 | No signed-in browser run in this headless verify | verify | low | noted (covered by the AC 7 closeout gate) |
+
+| Check | Result |
+|-------|--------|
+| Unit and render tests (Node 24.21.0): bf70 13, bf70 render 6, bf58_1 schema 16, bf65 15, bf66 4, bf58_2 PDF 7 | 61 pass, 0 fail |
+| `tsc --noEmit`, `eslint` (0 errors, the same 12 pre-existing warnings), `next build` | clean, on the committed tree |
+| `Testing/security/bf70_contact_grant_probe.sql` on production, read-only (session pooler, `BEGIN READ ONLY` then `ROLLBACK`) | 18/18: migration recorded; three nullable text columns; `authenticated` UPDATE and SELECT on each; `anon` neither; no table-wide UPDATE; every UPDATE policy requires `is_org_admin` |
+
+AC 1, 2, 4 and 5 are ticked on code, unit and render tests, the build and the production catalog probe. The live signed-in run is part of AC 7.
 
 ## Technical Approach
 

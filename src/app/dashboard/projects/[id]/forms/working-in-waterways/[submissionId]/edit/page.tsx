@@ -1,7 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { getProjectById, getSubmissionById } from "@/lib/queries/projects";
-import { readProjectSites, type WaterwaysData } from "@/lib/schemas/waterways";
+import { getProjectById, getRecentWaterwaysEquipment, getSubmissionById } from "@/lib/queries/projects";
+import { readProjectSites, readWaterwayContact, type WaterwaysData } from "@/lib/schemas/waterways";
+import { PREVIOUS_EQUIPMENT_LIMIT, previousEquipmentUnavailable } from "@/lib/forms/waterways-previous-equipment";
 import WaterwaysForm from "@/components/forms/working-in-waterways/WaterwaysForm";
 
 export default async function EditWaterwaysPage({
@@ -14,9 +15,11 @@ export default async function EditWaterwaysPage({
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const [project, submission] = await Promise.all([
+  const [project, submission, previousEquipment] = await Promise.all([
     getProjectById(id),
     getSubmissionById(submissionId),
+    // One extra so the picker still offers a full list once this record is excluded.
+    getRecentWaterwaysEquipment(id, PREVIOUS_EQUIPMENT_LIMIT + 1).catch(previousEquipmentUnavailable),
   ]);
   if (!project || !submission) notFound();
   if (submission.project_id !== id || submission.form_type !== "working_in_waterways") notFound();
@@ -46,6 +49,8 @@ export default async function EditWaterwaysPage({
         initialData={initialData}
         version={submission.updated_at}
         cancelHref={viewHref}
+        waterwayContact={readWaterwayContact(project)}
+        previousEquipment={previousEquipment}
       />
     </div>
   );

@@ -46,6 +46,11 @@ export const projectCreateSchema = z
     owner_rep_email: optionalEmail,
     owner_rep_address: optionalString,
 
+    // BF-70: who the crew calls on a visible sheen/plume (and BF-72's recipient).
+    waterway_contact_name: optionalString,
+    waterway_contact_phone: optionalPhone,
+    waterway_contact_email: optionalEmail,
+
     acres_disturbed: optionalString,
     soil_type: optionalString,
     parcel_numbers: optionalString,
@@ -117,6 +122,10 @@ export function parseProjectForm(formData: FormData): unknown {
     owner_rep_phone: get("owner_rep_phone"),
     owner_rep_email: get("owner_rep_email"),
     owner_rep_address: get("owner_rep_address"),
+
+    waterway_contact_name: get("waterway_contact_name"),
+    waterway_contact_phone: get("waterway_contact_phone"),
+    waterway_contact_email: get("waterway_contact_email"),
 
     acres_disturbed: get("acres_disturbed"),
     soil_type: get("soil_type"),

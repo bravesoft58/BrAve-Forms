@@ -12,7 +12,9 @@ import { inputClass, labelClass, selectClass } from "@/components/forms/formStyl
 import { pacificTime, pacificToday } from "@/lib/dates";
 import type { FormPhoto } from "@/lib/schemas/form-photo";
 import type { WaterwaySite, WaterwaysData } from "@/lib/schemas/waterways";
-import WaterwaysChecks, { type ChecksDraft } from "./WaterwaysChecks";
+import type { PreviousEquipment } from "@/lib/forms/waterways-previous-equipment";
+import WaterwaysChecks, { type ChecksDraft, type SheenContact } from "./WaterwaysChecks";
+import WaterwaysEquipmentPicker from "./WaterwaysEquipmentPicker";
 
 interface Draft extends ChecksDraft {
   site_name: string;
@@ -54,6 +56,8 @@ export default function WaterwaysForm({
   initialData,
   cancelHref,
   version,
+  waterwayContact,
+  previousEquipment = [],
 }: {
   projectId: string;
   sites: WaterwaySite[];
@@ -63,6 +67,10 @@ export default function WaterwaysForm({
   cancelHref?: string;
   /** Edit mode: the row's updated_at as loaded, sent back so a stale save is refused (BF-61). */
   version?: string;
+  /** The project's waterway contact, named under the sheen/plume question (BF-70). */
+  waterwayContact?: SheenContact | null;
+  /** Recent inspections on the project for "Copy from previous" on the equipment box (BF-70). */
+  previousEquipment?: readonly PreviousEquipment[];
 }) {
   const isEdit = Boolean(submissionId);
   const action = isEdit ? updateWaterways.bind(null, submissionId as string) : submitWaterways;
@@ -147,9 +155,9 @@ export default function WaterwaysForm({
         </div>
       </section>
 
-      <WaterwaysChecks checks={draft} onChange={update} fieldErrors={errors} />
+      <WaterwaysChecks checks={draft} onChange={update} fieldErrors={errors} sheenContact={waterwayContact} />
 
-      <section>
+      <section className="space-y-2">
         <label htmlFor="equipment_in_use" className={labelClass}>
           Equipment in use in and around the waterway today
         </label>
@@ -160,18 +168,23 @@ export default function WaterwaysForm({
           onChange={(e) => update("equipment_in_use", e.target.value)}
           className={inputClass}
         />
+        <WaterwaysEquipmentPicker
+          entries={previousEquipment}
+          currentSite={draft.site_name}
+          excludeId={submissionId}
+          disabled={pending}
+          onPick={(equipment) => update("equipment_in_use", equipment)}
+        />
         <FieldError errors={errors} field="equipment_in_use" />
       </section>
 
       <section className="space-y-2">
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          At least one photo is required for every day of in-water work.
-        </p>
         <PhotoAttachment
           photos={draft.photos}
           onPhotosChange={(photos) => update("photos", photos)}
           storagePath={`projects/${projectId}/working-in-waterways`}
           disabled={pending}
+          hint="Attach at least one overview photo of the waterway work today."
         />
         <FieldError errors={errors} field="photos" />
       </section>

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { getProjectById } from "@/lib/queries/projects";
-import { readProjectSites } from "@/lib/schemas/waterways";
+import { getProjectById, getRecentWaterwaysEquipment } from "@/lib/queries/projects";
+import { readProjectSites, readWaterwayContact } from "@/lib/schemas/waterways";
+import { previousEquipmentUnavailable } from "@/lib/forms/waterways-previous-equipment";
 import WaterwaysForm from "@/components/forms/working-in-waterways/WaterwaysForm";
 
 export default async function NewWaterwaysPage({
@@ -11,7 +12,11 @@ export default async function NewWaterwaysPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [project, user] = await Promise.all([getProjectById(id), getCurrentUser()]);
+  const [project, user, previousEquipment] = await Promise.all([
+    getProjectById(id),
+    getCurrentUser(),
+    getRecentWaterwaysEquipment(id).catch(previousEquipmentUnavailable),
+  ]);
   if (!project) notFound();
 
   const sites = readProjectSites(project.waterway_sites);
@@ -37,7 +42,12 @@ export default async function NewWaterwaysPage({
           )}
         </div>
       ) : (
-        <WaterwaysForm projectId={id} sites={sites} />
+        <WaterwaysForm
+          projectId={id}
+          sites={sites}
+          waterwayContact={readWaterwayContact(project)}
+          previousEquipment={previousEquipment}
+        />
       )}
     </div>
   );

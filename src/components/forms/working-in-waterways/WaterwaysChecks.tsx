@@ -10,15 +10,23 @@ export interface CheckDraft {
 
 export type ChecksDraft = Record<WaterwayCheckKey, CheckDraft>;
 
+export interface SheenContact {
+  name: string;
+  phone: string;
+}
+
 /** The four inspection items: an answer and a comment each, as on the paper form. */
 export default function WaterwaysChecks({
   checks,
   onChange,
   fieldErrors,
+  sheenContact,
 }: {
   checks: ChecksDraft;
   onChange: (key: WaterwayCheckKey, next: CheckDraft) => void;
   fieldErrors?: Record<string, string[]>;
+  /** The project's waterway contact, named under "Visible sheen/plume?" (BF-70). */
+  sheenContact?: SheenContact | null;
 }) {
   return (
     <section className="space-y-4">
@@ -32,6 +40,24 @@ export default function WaterwaysChecks({
               <legend className="sr-only">{item.label}</legend>
               <div>
                 <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{item.label}</p>
+                {item.key === "sheen_or_plume" && sheenContact && (
+                  <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+                    {"If yes, call "}
+                    {sheenContact.name}
+                    {sheenContact.phone && (
+                      <>
+                        {" at "}
+                        <a
+                          href={`tel:${sheenContact.phone.replace(/[^\d+]/g, "")}`}
+                          className="font-medium text-[#233B5C] underline dark:text-zinc-200"
+                        >
+                          {sheenContact.phone}
+                        </a>
+                      </>
+                    )}
+                    {" immediately."}
+                  </p>
+                )}
                 {error && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{error}</p>}
               </div>
               <div className="flex gap-4">
