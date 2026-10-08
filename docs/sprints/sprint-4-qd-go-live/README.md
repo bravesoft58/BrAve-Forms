@@ -36,7 +36,7 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-69](stories/BF-69-require-edit-version.md) | Require the loaded version on every submission edit | 1 | LOW | (BF-65 verify follow-up C2) | NOT STARTED |
 | [BF-70](stories/BF-70-waterways-gracie-small-asks.md) | Waterways: project-level sheen contact and hint, photo wording, copy equipment from a previous inspection (picker) | 3 | HIGH | Gracie's 2026-10-08 notes, asks 1, 3, 4 | DONE (merged `d986c19`) |
 | [BF-71](stories/BF-71-photo-download-coordinates.md) | Download photos from a completed inspection, with where they were taken | 2 | MEDIUM | Gracie's 2026-10-08 notes, ask 5 | NOT STARTED |
-| [BF-72](stories/BF-72-sheen-plume-email-alert.md) | Email the project's waterway contact when sheen/plume is Yes (email only; sends via BF-74) | 2 | HIGH | Gracie's 2026-10-08 notes, ask 2 (not in Andy's bullets) | NOT STARTED |
+| [BF-72](stories/BF-72-sheen-plume-email-alert.md) | Email the project's waterway contact when sheen/plume is Yes (email only; sends via BF-74) | 2 | HIGH | Gracie's 2026-10-08 notes, ask 2 (not in Andy's bullets) | DONE (merged `3b486db`) |
 | [BF-73](stories/BF-73-equipment-picker-per-site-history.md) | "Copy from previous" must not lose same-site or non-blank inspections to the 10-row limit | 1 | MEDIUM | (BF-70 verify follow-up C2) | DONE (merged `4924b2f`) |
 | [BF-74](stories/BF-74-org-email-settings-m365.md) | Organization email settings: send through the customer's Microsoft 365 (admin page, encrypted secret, test send) | 3 | HIGH | (Tim, 2026-10-08, split from BF-72) | DONE (merged `66ec348`) |
 | [BF-75](stories/BF-75-cancel-on-every-form.md) | Cancel next to Submit on every form, with a "discard changes?" confirmation | 2 | MEDIUM | (Q&D note, 2026-10-08) | NOT STARTED |
@@ -44,7 +44,7 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-77](stories/BF-77-email-settings-revision-check.md) | Email settings saves and test results must not cross configurations | 1 | MEDIUM | (BF-74 verify follow-ups C3, C4) | NOT STARTED |
 | [BF-78](stories/BF-78-email-settings-clear.md) | Let an org admin clear the email settings | 1 | MEDIUM | (BF-74 verify follow-up V1) | NOT STARTED |
 | [BF-79](stories/BF-79-split-waterways-queries.md) | Move the Waterways equipment-history query out of the shared project queries | 1 | LOW | (BF-73 verify follow-up V9) | NOT STARTED |
-| **Total** | | **53** | | | **17/28 DONE** |
+| **Total** | | **53** | | | **18/28 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
