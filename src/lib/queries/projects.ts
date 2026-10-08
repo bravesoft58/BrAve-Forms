@@ -68,7 +68,8 @@ export async function getProjectSubmissions(projectId: string) {
  * shows (BF-70). One capped read per site in `siteNames` plus one for the
  * whole project (BF-73), so a busy site cannot push a quieter site's history
  * out of the list; the project read also covers renamed or removed sites.
- * PostgREST has no per-group limit, hence a read per site (at most 20).
+ * PostgREST has no per-group limit, hence a read per site: at most
+ * MAX_WATERWAY_SITES, plus the record's own site on the edit page.
  * Read under the org-scoped submissions policy, so a crew member sees
  * colleagues' records on the same project.
  */
