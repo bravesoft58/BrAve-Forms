@@ -14,6 +14,8 @@ interface PhotoAttachmentProps {
   maxPhotos?: number;
   /** Locks add, remove and caption edits, e.g. while the form is saving. */
   disabled?: boolean;
+  /** Replaces the default "deficiencies" sentence for forms whose photos mean something else (BF-70). */
+  hint?: string;
 }
 
 const BUCKET = "form-attachments";
@@ -30,6 +32,7 @@ export default function PhotoAttachment({
   storagePath,
   maxPhotos = 10,
   disabled = false,
+  hint,
 }: PhotoAttachmentProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -139,7 +142,7 @@ export default function PhotoAttachment({
         Photo Attachments
       </h3>
       <p className="text-xs text-zinc-500 dark:text-zinc-400">
-        Attach digital photographs of deficiencies or other noted issues of concern.
+        {hint ?? "Attach digital photographs of deficiencies or other noted issues of concern."}
       </p>
 
       {/* Upload button */}

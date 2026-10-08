@@ -12,63 +12,11 @@ import {
   type FormType,
 } from "@/lib/constants/permits";
 import type { WaterwaySite } from "@/lib/schemas/waterways";
+import { inputClass, labelClass } from "@/components/forms/formStyles";
+import ContactGroup, { FieldError } from "./ContactGroup";
 import WaterwaySitesField from "./WaterwaySitesField";
 
 const initialState: ProjectState = { error: "" };
-
-const inputClass =
-  "mt-1 block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#5C6F8A] focus:outline-none focus:ring-1 focus:ring-[#5C6F8A] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
-const labelClass = "block text-sm font-medium text-zinc-700 dark:text-zinc-300";
-
-function FieldError({ errors, field }: { errors?: Record<string, string[]>; field: string }) {
-  const msgs = errors?.[field];
-  if (!msgs?.length) return null;
-  return <p className="mt-1 text-xs text-red-600 dark:text-red-400">{msgs[0]}</p>;
-}
-
-function ContactGroup({
-  title,
-  prefix,
-  errors,
-  showAddress,
-  defaults,
-}: {
-  title: string;
-  prefix: string;
-  errors?: Record<string, string[]>;
-  showAddress?: boolean;
-  defaults?: Record<string, string | null>;
-}) {
-  return (
-    <div className="space-y-3">
-      <h4 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{title}</h4>
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div>
-          <label htmlFor={`${prefix}_name`} className={labelClass}>Name</label>
-          <input id={`${prefix}_name`} name={`${prefix}_name`} type="text" defaultValue={defaults?.[`${prefix}_name`] ?? ""} className={inputClass} />
-          <FieldError errors={errors} field={`${prefix}_name`} />
-        </div>
-        <div>
-          <label htmlFor={`${prefix}_phone`} className={labelClass}>Phone</label>
-          <input id={`${prefix}_phone`} name={`${prefix}_phone`} type="tel" defaultValue={defaults?.[`${prefix}_phone`] ?? ""} className={inputClass} />
-          <FieldError errors={errors} field={`${prefix}_phone`} />
-        </div>
-        <div>
-          <label htmlFor={`${prefix}_email`} className={labelClass}>Email</label>
-          <input id={`${prefix}_email`} name={`${prefix}_email`} type="email" defaultValue={defaults?.[`${prefix}_email`] ?? ""} className={inputClass} />
-          <FieldError errors={errors} field={`${prefix}_email`} />
-        </div>
-      </div>
-      {showAddress && (
-        <div>
-          <label htmlFor={`${prefix}_address`} className={labelClass}>Address</label>
-          <input id={`${prefix}_address`} name={`${prefix}_address`} type="text" defaultValue={defaults?.[`${prefix}_address`] ?? ""} className={inputClass} />
-          <FieldError errors={errors} field={`${prefix}_address`} />
-        </div>
-      )}
-    </div>
-  );
-}
 
 interface Permit {
   permit_type: string;
@@ -188,6 +136,9 @@ export default function ProjectForm({
         <ContactGroup title="Foreman" prefix="foreman" errors={state.fieldErrors} defaults={d as Record<string, string | null>} />
         <ContactGroup title="Project Manager" prefix="pm" errors={state.fieldErrors} defaults={d as Record<string, string | null>} />
         <ContactGroup title="Owner Representative" prefix="owner_rep" errors={state.fieldErrors} showAddress defaults={d as Record<string, string | null>} />
+        {/* BF-70: named on the Working in Waterways form ("If yes, call ... immediately")
+            beside the sheen/plume question; BF-72 emails this address on a Yes. */}
+        <ContactGroup title="Waterway Contact (called on a sheen or plume)" prefix="waterway_contact" errors={state.fieldErrors} defaults={d as Record<string, string | null>} />
       </section>
 
       {/* Section 3: Site Details */}

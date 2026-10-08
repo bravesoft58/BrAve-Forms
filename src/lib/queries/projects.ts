@@ -1,4 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
+import {
+  PREVIOUS_EQUIPMENT_LIMIT,
+  type PreviousEquipment,
+} from "@/lib/forms/waterways-previous-equipment";
 
 export async function getProjects() {
   const supabase = await createClient();
@@ -53,6 +57,33 @@ export async function getProjectSubmissions(projectId: string) {
 
   if (error) throw new Error(error.message);
   return data;
+}
+
+/**
+ * The project's most recent Working in Waterways inspections, newest first,
+ * with the three JSON fields the "Copy from previous" picker shows (BF-70).
+ * Read under the org-scoped submissions policy, so a crew member sees
+ * colleagues' records on the same project.
+ */
+export async function getRecentWaterwaysEquipment(
+  projectId: string,
+  limit = PREVIOUS_EQUIPMENT_LIMIT,
+): Promise<PreviousEquipment[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("form_submissions")
+    .select(
+      "id, form_date, site_name:data->>site_name, initials:data->>initials, equipment:data->>equipment_in_use",
+    )
+    .eq("project_id", projectId)
+    .eq("form_type", "working_in_waterways")
+    .order("form_date", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(error.message);
+  return (data ?? []) as PreviousEquipment[];
 }
 
 export async function getLatestSubmission(projectId: string, formType: string) {

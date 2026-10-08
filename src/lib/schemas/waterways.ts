@@ -96,3 +96,16 @@ export function readProjectSites(value: unknown): WaterwaySite[] {
   const parsed = waterwaySitesSchema.safeParse(value);
   return parsed.success ? parsed.data : [];
 }
+
+/**
+ * The project's waterway contact for the sheen/plume hint (BF-70): null until a
+ * name is set, so the form shows nothing rather than "call  at  immediately".
+ */
+export function readWaterwayContact(project: {
+  waterway_contact_name?: string | null;
+  waterway_contact_phone?: string | null;
+}): { name: string; phone: string } | null {
+  const name = (project.waterway_contact_name ?? "").trim();
+  if (!name) return null;
+  return { name, phone: (project.waterway_contact_phone ?? "").trim() };
+}

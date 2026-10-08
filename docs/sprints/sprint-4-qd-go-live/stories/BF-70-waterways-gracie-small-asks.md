@@ -3,11 +3,12 @@
 **Type:** Feature (three small changes to the Working in Waterways form, bundled)
 **Priority:** HIGH (direct requests from Q&D's environmental lead after her first live test; all cheap)
 **Points:** 3
-**Status:** NOT STARTED
+**Status:** IN PROGRESS
 **Sprint:** 4 (backlog)
+**Started:** 2026-10-08T15:15:24Z
 **Reported by:** Gracie's handwritten notes on her 2026-10-07 test submission, forwarded by Andy Breen 2026-10-08. Filed under [docs/reference/WIW-Gracie-comments-2026-10-08.pdf](../../../reference/WIW-Gracie-comments-2026-10-08.pdf) and [docs/reference/RE BrAve Forms Update 2026-10-08.msg](../../../reference/RE%20BrAve%20Forms%20Update%202026-10-08.msg).
 **Created:** 2026-10-08
-**Last Updated:** 2026-10-08T14:44:09Z
+**Last Updated:** 2026-10-08T15:23:40Z
 
 ## Problem
 
@@ -38,15 +39,32 @@ Gracie printed a Working in Waterways submission (17254 NDOT 4541 7 Bridges, sit
 
 - [ ] Admin can set and clear the waterway contact on the project edit page; the saved values survive a reload. A non-admin cannot change them (column grant plus existing policy).
 - [ ] With a contact set, the sheen/plume row shows "If yes, call {name} at {phone} immediately." on the new and edit forms; with none set, nothing extra is shown.
-- [ ] Waterways photo section reads "Attach at least one overview photo of the waterway work today." once; the NDOT and NDEP photo sections still read as before.
+- [x] Waterways photo section reads "Attach at least one overview photo of the waterway work today." once; the NDOT and NDEP photo sections still read as before.
 - [ ] "Copy from previous" lists earlier inspections on the project, same site first, and fills the equipment box with the chosen one; the box stays editable and the form submits what is on screen.
 - [ ] Project with no earlier waterway inspection: no button.
-- [ ] Migration applied to production with the column grant; `pnpm build`, lint and tests clean; no production file over 300 lines.
+- [x] Migration applied to production with the column grant; `pnpm build`, lint and tests clean; no production file over 300 lines.
 - [ ] Gracie confirms the three changes from the live app (closeout gate, as BF-58.2).
 
 ## Depends on
 
 - Nothing. BF-72 depends on this ticket's contact field.
+
+## Validation (story session, 2026-10-08T15:23:40Z)
+
+Worktree `e:/brave-forms-worktrees/BF-70`, branch `feature/BF-70-waterways-small-asks`, Node 24 + pnpm 10.34.5 via `npx`.
+
+| # | Check | Result | Evidence |
+|---|-------|--------|----------|
+| 1 | `Testing/forms/bf70_waterway_contact_picker_test.ts` (schema fields, contact reader, picker ordering, static wiring guards) | PASS 10/10 | `node --import ./Testing/forms/ts-alias-hooks.mjs ...` |
+| 2 | Regressions: bf58_1 schema 16/16, bf66 form reset 4/4, bf65 record integrity 15/15, bf58_2 PDF 7/7 | PASS | same harness |
+| 3 | `tsc --noEmit`, `pnpm lint` (0 errors; 12 pre-existing warnings, none introduced), `pnpm build` | PASS | all routes compiled |
+| 4 | Migration rehearsal in production inside a `DO` block that raises at the end (rolled back): `has_column_privilege` update=t select=t insert=t, anon update=f | PASS | rehearsal before apply |
+| 5 | Migration applied via Supabase MCP `apply_migration`, recorded as version `20261008152320`; live re-check: authenticated UPDATE and SELECT true, anon UPDATE false on all three columns | PASS | repo file renamed to match the recorded version |
+| 6 | Line counts: project-form.tsx 300 -> 251 (ContactGroup extracted), WaterwaysForm.tsx 213, WaterwaysChecks.tsx 92, picker 84, helper 41 | PASS | all under the 300-line ceiling |
+
+Browser-dependent criteria (admin set/clear and reload, hint on the live form, picker fill, no-button case) are left for `/verify` and the signed-in preview run; the code paths are covered by the unit and static tests above. The picker was built inline (no dialog or popover) per the scout note on iOS Safari.
+
+Production data note: the migration adds three nullable columns to `projects`; no rows changed. Rollback: `supabase/migrations/_rollback/20261008152320_rollback.sql`.
 
 ## Technical Approach
 

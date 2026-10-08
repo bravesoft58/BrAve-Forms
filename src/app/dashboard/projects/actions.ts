@@ -147,6 +147,9 @@ function buildProjectFields(data: ReturnType<typeof projectCreateSchema.parse>) 
     owner_rep_phone: data.owner_rep_phone || null,
     owner_rep_email: data.owner_rep_email || null,
     owner_rep_address: data.owner_rep_address || null,
+    waterway_contact_name: data.waterway_contact_name || null,
+    waterway_contact_phone: data.waterway_contact_phone || null,
+    waterway_contact_email: data.waterway_contact_email || null,
     // Unticking the Waterway permit leaves the stored site list alone: it is
     // setup data, and past submissions keep their own copy of their site.
     ...(hasWaterwayPermit ? { waterway_sites: data.waterway_sites } : {}),
