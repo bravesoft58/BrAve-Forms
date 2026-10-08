@@ -39,7 +39,8 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-72](stories/BF-72-sheen-plume-email-alert.md) | Email the project's waterway contact when sheen/plume is Yes (email only; sends via BF-74) | 2 | HIGH | Gracie's 2026-10-08 notes, ask 2 (not in Andy's bullets) | NOT STARTED |
 | [BF-73](stories/BF-73-equipment-picker-per-site-history.md) | "Copy from previous" must not lose same-site or non-blank inspections to the 10-row limit | 1 | MEDIUM | (BF-70 verify follow-up C2) | NOT STARTED |
 | [BF-74](stories/BF-74-org-email-settings-m365.md) | Organization email settings: send through the customer's Microsoft 365 (admin page, encrypted secret, test send) | 3 | HIGH | (Tim, 2026-10-08, split from BF-72) | NOT STARTED |
-| **Total** | | **47** | | | **15/23 DONE** |
+| [BF-75](stories/BF-75-cancel-on-every-form.md) | Cancel next to Submit on every form, with a "discard changes?" confirmation | 2 | MEDIUM | (Q&D note, 2026-10-08) | NOT STARTED |
+| **Total** | | **49** | | | **15/24 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
