@@ -3,12 +3,13 @@
 **Type:** Feature (the first alert sent through the organization's email settings)
 **Priority:** HIGH (a visible sheen is a reportable event under the waterway permit; the contact must hear about it the same day)
 **Points:** 3 (re-estimated at scout 2026-10-08: separate alert table, claim, view line, probe)
-**Status:** IN PROGRESS
+**Status:** DONE
 **Sprint:** 4 (backlog)
 **Started:** 2026-10-08T18:15:42Z
+**Completed:** 2026-10-08T19:04:35Z
 **Reported by:** Gracie's handwritten note beside "Visible sheen/plume?" on her 2026-10-07 test submission: "Can I get alerted if someone submits 'yes' here?" Forwarded by Andy Breen 2026-10-08; not in Andy's bullet list. Filed under [docs/reference/WIW-Gracie-comments-2026-10-08.pdf](../../../reference/WIW-Gracie-comments-2026-10-08.pdf).
 **Created:** 2026-10-08
-**Last Updated:** 2026-10-08T18:22:27Z
+**Last Updated:** 2026-10-08T19:04:35Z
 
 ## Problem
 
@@ -107,7 +108,8 @@ So the alert gets its own table, and the "send once" guard is an insert-claim on
 | `src/lib/alerts/sheen-alert-message.ts` | Pure: `shouldSendSheenAlert`, `buildSheenAlertEmail`, `inspectionLink`, `describeSheenAlert` (the view's one line). |
 | `src/lib/alerts/run-sheen-alert.ts` | Claim (upsert with `ignoreDuplicates`, i.e. `ON CONFLICT DO NOTHING`), load project and contact, send via BF-74 `sendOrgEmail`, record the status. Never throws. |
 | `src/app/dashboard/projects/[id]/forms/working-in-waterways/actions.ts` | Create and edit schedule `after(() => runSheenAlert(...))` before `redirect`. Edit compares with the stored answer. |
-| `src/app/dashboard/projects/[id]/forms/working-in-waterways/[submissionId]/page.tsx` | Reads the alert under the user's session and shows the status line under the inspection table. |
+| `src/app/dashboard/projects/[id]/forms/working-in-waterways/[submissionId]/page.tsx` | Reads the alert under the user's session and shows the status line under the inspection table; dates a missing row by the last save (verify r1). |
+| `src/components/refresh-while-pending.tsx` | Verify r1: refreshes the page every 5 s while the alert line is pending, so the result (or the call instruction) shows without a reload. |
 | `Testing/forms/bf72_sheen_alert_test.ts` | Unit and end-to-end tests with a fake Supabase REST API and fake Microsoft endpoints. |
 | `Testing/security/bf72_alerts_probe.sql` | Rolled-back production access probe. |
 
@@ -126,3 +128,17 @@ Worktree `e:/brave-forms-worktrees/BF-72`, branch `feature/BF-72-sheen-alert`, N
 | 7 | Largest touched production file | 199 lines (the view page) | No file over 300. |
 
 AC 1 and AC 6 need a configured Microsoft 365 (Andy's setup) and a real send: closeout gate, as BF-74.
+
+## Verify round 1 (2026-10-08T19:04:35Z)
+
+**Verdict: PASS, 8.6/10** (verdict engine; stamped by `verify_stamp.py` on `e6c1027`, round 1 of 2). Second reviewer: Codex only (gpt-6-astra, xhigh), by operator instruction; the Grok / OpenRouter lane was not run. Evidence: [artifacts/BF-72/](../artifacts/BF-72/README.md).
+
+| # | Finding | Raised by | Severity | Status |
+|---|---|---|---|---|
+| C2 | The page an edit redirects to was rendered before `after()` ran, so every No-to-Yes edit showed "No alert email was recorded ... Call {name}" while the email was going out; the line never updated on an open page | both (Codex: medium) | high | Fixed in `1f678ec`; Codex fix-check approve |
+| C1 | An interrupted No-to-Yes edit whose retry is a replay never schedules the alert (the create path re-schedules on replay, the update path does not) | both (Codex: high) | medium | **To file** as a follow-up. Needs a function death between the commit and `after()`, plus a retry. Codex suggests storing the alert intent with the update |
+| V1-V8 | Unlogged alert read error and an inaccurate comment; catch path leaves `sending`; test gaps; operator-gated AC 1 and AC 6; stale `no_contact` line; pre-BF-72 Yes re-save reads pending for 5 minutes; query in the page; full-page refresh re-signs photos | verify | low | Noted |
+
+Gates on the final tree: `bf72_sheen_alert_test.ts` 16/16, with the mutation that disables the pending rule failing test 7. Regression suites all pass (111 tests across 10 files). `tsc --noEmit`, ESLint on the touched files, and `next build` under Node 24 are all clean.
+
+**Lesson, for `.claude/lessons-learned.md`** (the headless verify could not write that file; the harness treats it as sensitive): a Server Action's redirect target is rendered inside the action's own request, before its `after()` callbacks run [verified 2026-10-08, next 16.3.6 `server/app-render/action-handler.js`, `createRedirectRenderResult`]. Any page showing the result of background work therefore needs a "not started yet" state, dated from the save that scheduled the work, and has to refresh until the result is final. In the first minutes after that save, "no row" must not read as "failed".
