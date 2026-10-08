@@ -40,7 +40,11 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-73](stories/BF-73-equipment-picker-per-site-history.md) | "Copy from previous" must not lose same-site or non-blank inspections to the 10-row limit | 1 | MEDIUM | (BF-70 verify follow-up C2) | DONE (merged `4924b2f`) |
 | [BF-74](stories/BF-74-org-email-settings-m365.md) | Organization email settings: send through the customer's Microsoft 365 (admin page, encrypted secret, test send) | 3 | HIGH | (Tim, 2026-10-08, split from BF-72) | DONE (merged `66ec348`) |
 | [BF-75](stories/BF-75-cancel-on-every-form.md) | Cancel next to Submit on every form, with a "discard changes?" confirmation | 2 | MEDIUM | (Q&D note, 2026-10-08) | NOT STARTED |
-| **Total** | | **49** | | | **17/24 DONE** |
+| [BF-76](stories/BF-76-email-settings-preview-key-guard.md) | Only Production may write the email settings secret | 1 | MEDIUM | (BF-74 verify follow-up C2) | NOT STARTED |
+| [BF-77](stories/BF-77-email-settings-revision-check.md) | Email settings saves and test results must not cross configurations | 1 | MEDIUM | (BF-74 verify follow-ups C3, C4) | NOT STARTED |
+| [BF-78](stories/BF-78-email-settings-clear.md) | Let an org admin clear the email settings | 1 | MEDIUM | (BF-74 verify follow-up V1) | NOT STARTED |
+| [BF-79](stories/BF-79-split-waterways-queries.md) | Move the Waterways equipment-history query out of the shared project queries | 1 | LOW | (BF-73 verify follow-up V9) | NOT STARTED |
+| **Total** | | **53** | | | **17/28 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
