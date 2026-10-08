@@ -12,14 +12,14 @@ export default async function NewWaterwaysPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [project, user, previousEquipment] = await Promise.all([
-    getProjectById(id),
-    getCurrentUser(),
-    getRecentWaterwaysEquipment(id).catch(previousEquipmentUnavailable),
-  ]);
+  const [project, user] = await Promise.all([getProjectById(id), getCurrentUser()]);
   if (!project) notFound();
 
   const sites = readProjectSites(project.waterway_sites);
+  // The site is picked in the form, so every site's history is read up front.
+  const siteNames = sites.map((site) => site.name);
+  const previousEquipment =
+    sites.length === 0 ? [] : await getRecentWaterwaysEquipment(id, siteNames).catch(previousEquipmentUnavailable);
 
   return (
     <div>

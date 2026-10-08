@@ -75,10 +75,10 @@ test("with no contact set on the project, no row shows a hint", () => {
 // --- "Copy from previous" entry point (AC 4 and AC 5) ---
 
 const usable: PreviousEquipment = {
-  id: "a", form_date: "2026-10-07", site_name: "Eastern Drainage", initials: "GD", equipment: "Excavator, pump",
+  id: "a", form_date: "2026-10-07", created_at: "2026-10-07T15:00:00+00:00", site_name: "Eastern Drainage", initials: "GD", equipment: "Excavator, pump",
 };
 const noEquipment: PreviousEquipment = {
-  id: "b", form_date: "2026-10-06", site_name: "Eastern Drainage", initials: "GD", equipment: "  ",
+  id: "b", form_date: "2026-10-06", created_at: "2026-10-06T15:00:00+00:00", site_name: "Eastern Drainage", initials: "GD", equipment: "  ",
 };
 
 function renderPicker(props: {
