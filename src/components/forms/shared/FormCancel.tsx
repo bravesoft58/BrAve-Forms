@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { sameFormSnapshot, snapshotForm, type FormSnapshot } from "@/lib/forms/form-snapshot";
+import {
+  needsDiscardCheck,
+  PENDING_WORK_ATTR,
+  snapshotForm,
+  type FormSnapshot,
+} from "@/lib/forms/form-snapshot";
 
 const secondaryClass =
   "rounded-md border border-zinc-300 bg-white px-6 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-[#5C6F8A] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700";
@@ -15,7 +20,8 @@ const discardClass =
  * "Discard your changes?" first, inline rather than a browser dialog so it
  * looks and behaves the same on iPhone and Android. "Changed" means the form
  * would now submit something different from what it held when the page became
- * interactive (`ready` from useNoResetSubmit). `disabled` is the form's
+ * interactive (`ready` from useNoResetSubmit), or work FormData cannot see
+ * yet is still running (PENDING_WORK_ATTR). `disabled` is the form's
  * pending state: nothing here can be used while a save is in flight.
  */
 export default function FormCancel({
@@ -46,9 +52,9 @@ export default function FormCancel({
 
   function cancel() {
     const el = form();
-    const unchanged = !!baseline.current && !!el && sameFormSnapshot(baseline.current, snapshotForm(el));
-    if (unchanged) router.push(href);
-    else setConfirming(true);
+    const ask = !el || needsDiscardCheck(baseline.current, snapshotForm(el), !!el.querySelector(`[${PENDING_WORK_ATTR}]`));
+    if (ask) setConfirming(true);
+    else router.push(href);
   }
 
   return (

@@ -10,7 +10,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { sameFormSnapshot, snapshotFormData } from "@/lib/forms/form-snapshot";
+import {
+  needsDiscardCheck,
+  PENDING_WORK_ATTR,
+  sameFormSnapshot,
+  snapshotFormData,
+} from "@/lib/forms/form-snapshot";
 
 const SRC = fileURLToPath(new URL("../../src/", import.meta.url));
 const read = (rel: string) => readFileSync(join(SRC, rel), "utf-8");
@@ -65,7 +70,40 @@ test("a file field is compared by name, size and date, never as an empty string"
   assert.equal(sameFormSnapshot(snap([["upload", f1]]), snap([["upload", f2]])), false);
 });
 
+// ---------------------------------------------------------------- decision
+
+test("an untouched form with nothing in flight leaves without asking", () => {
+  const base = snap([["project_id", "p1"], ["photos", "[]"]]);
+  assert.equal(needsDiscardCheck(base, snap([["project_id", "p1"], ["photos", "[]"]]), false), false);
+});
+
+test("photos still uploading make Cancel ask, even when FormData is unchanged (verify C2)", () => {
+  const base = snap([["project_id", "p1"], ["photos", "[]"]]);
+  assert.equal(needsDiscardCheck(base, snap([["project_id", "p1"], ["photos", "[]"]]), true), true);
+});
+
+test("a changed form asks, and a missing baseline asks rather than leaving", () => {
+  const base = snap([["notes", ""]]);
+  assert.equal(needsDiscardCheck(base, snap([["notes", "silt fence down"]]), false), true);
+  assert.equal(needsDiscardCheck(null, base, false), true);
+});
+
 // ---------------------------------------------------------------- wiring
+
+test("PhotoAttachment marks in-flight uploads, and both photo forms render it inside the form", () => {
+  const photo = read("components/forms/shared/PhotoAttachment.tsx");
+  assert.match(photo, /uploading \? \{ \[PENDING_WORK_ATTR\]: "" \} : \{\}/, "marker follows the uploading state");
+  assert.match(photo, /<section\b[^>]*\{\.\.\.pendingWork\}/, "marker lands on the photo section");
+  assert.equal(PENDING_WORK_ATTR, "data-form-pending-work");
+  for (const rel of [
+    "components/forms/ndot-stormwater/NdotStormwaterForm.tsx",
+    "components/forms/working-in-waterways/WaterwaysForm.tsx",
+  ]) {
+    const src = read(rel);
+    const form = src.slice(src.indexOf("<form"), src.lastIndexOf("</form>"));
+    assert.match(form, /<PhotoAttachment\b/, `${rel}: photos inside the form Cancel inspects`);
+  }
+});
 
 const FORMS: Record<string, RegExp> = {
   "components/forms/dust-log/DailyDustLog.tsx": /tab=daily_dust_log/,
@@ -100,6 +138,10 @@ test("every button in FormCancel is type=\"button\" and it never uses window.con
   assert.equal(buttons.length, 3, "Cancel, Keep editing, Discard");
   assert.deepEqual(buttons.filter((tag) => !/type="button"/.test(tag)), []);
   assert.doesNotMatch(src, /window\.confirm|confirm\(/);
-  assert.match(src, /sameFormSnapshot\(baseline\.current, snapshotForm\(el\)\)/, "compares against the baseline");
+  assert.match(
+    src,
+    /needsDiscardCheck\(baseline\.current, snapshotForm\(el\), !!el\.querySelector\(`\[\$\{PENDING_WORK_ATTR\}\]`\)\)/,
+    "compares against the baseline and checks in-flight work",
+  );
   assert.match(src, /if \(ready && el && !baseline\.current\)/, "baseline only once ready");
 });

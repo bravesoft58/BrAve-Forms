@@ -3,13 +3,12 @@
 **Type:** Feature (consistent form navigation; Q&D request)
 **Priority:** MEDIUM (usability; crews use the new-entry screens daily)
 **Points:** 2
-**Status:** DONE
+**Status:** IN REVIEW (C2 fixed after verify round 1; awaiting round 2)
 **Sprint:** 4 (backlog)
 **Started:** 2026-10-08T20:44:28Z
-**Completed:** 2026-10-09T14:31:20Z
 **Reported by:** Q&D note relayed by Tim, 2026-10-08: "Daily dust log had a cancel option next to Submit. None of the other forms have this cancel option. Would like to have that option in all forms." Confirmation step added by Tim the same day as a safety measure.
 **Created:** 2026-10-08
-**Last Updated:** 2026-10-09T14:31:20Z
+**Last Updated:** 2026-10-09T14:42:12Z
 
 ## Problem
 
@@ -133,6 +132,6 @@ Re-run by verify on Node 24.21.0 [observed 2026-10-09]: the 11 `Testing/forms` u
 
 Findings to file (medium):
 - **C1** Edits typed into the uncontrolled project form before hydration become the baseline, so Cancel then leaves without asking. Closed structurally by BF-67 (lock fields until hydrated).
-- **C2** Photos still compressing or uploading are not in the hidden JSON yet, so Cancel during an upload on an otherwise unchanged NDOT or Waterways form leaves without asking. Fix: let `PhotoAttachment` report in-flight work and treat it as a change.
+- **C2** Photos still compressing or uploading are not in the hidden JSON yet, so Cancel during an upload on an otherwise unchanged NDOT or Waterways form leaves without asking. **FIXED after round 1 (Tim, 2026-10-09):** `PhotoAttachment` marks its section with `PENDING_WORK_ATTR` while uploading, and `FormCancel` asks whenever any element inside the form carries it (`needsDiscardCheck`). Unit test 13/13 (4 new), BF-66 4/4, tsc, lint and `next build` clean on Node 24. Discard during an upload still leaves the uploaded file unreferenced in Storage, which `PhotoAttachment` already accepts for removed photos (cleanup belongs in a reference-aware job).
 
 Noted (low): V1 no test executes `FormCancel`'s behaviour; V2 an empty named file input would make every snapshot differ (no form has one); V3 the wiring test matches destinations file-wide; V4 focus drops to the page after Keep editing; V5 no progress feedback while Cancel navigates; V6 the baseline effect would run before any future parent mount effect.

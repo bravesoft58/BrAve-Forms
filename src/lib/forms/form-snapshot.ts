@@ -26,3 +26,19 @@ export function snapshotForm(form: HTMLFormElement): FormSnapshot {
 export function sameFormSnapshot(a: FormSnapshot, b: FormSnapshot): boolean {
   return a.length === b.length && a.every(([name, value], i) => b[i][0] === name && b[i][1] === value);
 }
+
+/**
+ * Marks work inside a form that FormData cannot see yet, such as photos still
+ * compressing or uploading (BF-75 verify C2). Put it on any element inside the
+ * <form> while that work runs; Cancel then asks before leaving.
+ */
+export const PENDING_WORK_ATTR = "data-form-pending-work";
+
+/** Cancel asks first unless the form is provably untouched and nothing is in flight. */
+export function needsDiscardCheck(
+  baseline: FormSnapshot | null,
+  current: FormSnapshot,
+  pendingWork: boolean,
+): boolean {
+  return pendingWork || !baseline || !sameFormSnapshot(baseline, current);
+}
