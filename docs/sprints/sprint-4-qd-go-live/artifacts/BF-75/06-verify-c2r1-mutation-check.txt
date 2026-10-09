@@ -1,0 +1,7 @@
+Mutation check, head 3e821aa, 2026-10-09T15:23:27Z. Each mutant is applied, its guarding test run, then the file restored with git checkout.
+M1 project form loses the hydration lock: KILLED (# fail 1) via Testing/forms/bf66_form_reset_test.ts
+M2 PhotoAttachment never marks uploads: KILLED (# fail 1) via Testing/forms/bf75_cancel_test.ts
+M3 decision ignores in-flight work: KILLED (# fail 1) via Testing/forms/bf75_cancel_test.ts
+M4 FormCancel inverts ask/leave (runtime path): SURVIVED (# fail 0) via Testing/forms/bf75_cancel_test.ts
+M5 Discard wired to Keep editing (runtime path): SURVIVED (# fail 0) via Testing/forms/bf75_cancel_test.ts
+tracked tree after restore: CLEAN

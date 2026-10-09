@@ -10,6 +10,7 @@ import {
   NNPH_DUST_CONTROL_METHODS,
   type NnphDustPermitData,
 } from "@/lib/schemas/nnph-dust-permit";
+import FormCancel from "@/components/forms/shared/FormCancel";
 import Section1ApplicationInfo from "./Section1ApplicationInfo";
 import Section2Contacts from "./Section2Contacts";
 import Section3ProjectDetails from "./Section3ProjectDetails";
@@ -125,7 +126,9 @@ export default function NnphDustPermitForm({
   }
 
   return (
-    <form action={formAction} onSubmit={submit} className="space-y-8">
+    <form action={formAction} onSubmit={submit}>
+      {/* Locked until hydrated: an early edit would be lost or absorbed into Cancel's baseline (BF-67, BF-75 C1). */}
+      <fieldset disabled={!ready} className="min-w-0 space-y-8">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="data" value={JSON.stringify(data)} />
 
@@ -160,6 +163,7 @@ export default function NnphDustPermitForm({
       <Section3ProjectDetails data={data} onChange={update} />
 
       <div className="flex items-center gap-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+        <FormCancel href={`/dashboard/projects/${projectId}?tab=nnph_dust_permit`} ready={ready} disabled={pending} />
         <button
           type="submit"
           disabled={pending || !ready}
@@ -170,6 +174,7 @@ export default function NnphDustPermitForm({
             : pending ? "Submitting..." : "Submit Application"}
         </button>
       </div>
+      </fieldset>
     </form>
   );
 }

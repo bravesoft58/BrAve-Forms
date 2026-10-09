@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { keepFormOnLostReply, useNoResetSubmit } from "@/lib/forms/use-no-reset-submit";
-import { useRouter } from "next/navigation";
+import FormCancel from "@/components/forms/shared/FormCancel";
 import { appendDustLogEntries, type DustLogState } from "@/app/dashboard/projects/[id]/forms/dust-log/actions";
 import {
   SOIL_CONDITIONS_LIST,
@@ -50,7 +50,6 @@ export default function AppendDustLogEntries({
   companyName,
   existingEntries,
 }: AppendDustLogEntriesProps) {
-  const router = useRouter();
   const [state, formAction, pending] = useActionState(keepFormOnLostReply(appendDustLogEntries), initialState);
   const { submit, ready } = useNoResetSubmit(formAction);
   const [entries, setEntries] = useState<DustLogEntry[]>([makeEmptyEntry()]);
@@ -71,7 +70,9 @@ export default function AppendDustLogEntries({
   }
 
   return (
-    <form action={formAction} onSubmit={submit} className="space-y-6">
+    <form action={formAction} onSubmit={submit}>
+      {/* Locked until hydrated: an early edit would be lost or absorbed into Cancel's baseline (BF-67, BF-75 C1). */}
+      <fieldset disabled={!ready} className="min-w-0 space-y-6">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="submission_id" value={submissionId} />
       <input type="hidden" name="entries" value={JSON.stringify(entries)} />
@@ -254,14 +255,11 @@ export default function AppendDustLogEntries({
       </div>
 
       <div className="flex items-center gap-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-        <button
-          type="button"
-          onClick={() => router.back()}
+        <FormCancel
+          href={`/dashboard/projects/${projectId}/forms/dust-log/${submissionId}`}
+          ready={ready}
           disabled={pending}
-          className="rounded-md border border-zinc-300 bg-white px-6 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-[#5C6F8A] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-        >
-          Cancel
-        </button>
+        />
         <button
           type="submit"
           disabled={pending || !ready}
@@ -272,6 +270,7 @@ export default function AppendDustLogEntries({
             : pending ? "Saving..." : "Save Entries"}
         </button>
       </div>
+      </fieldset>
     </form>
   );
 }

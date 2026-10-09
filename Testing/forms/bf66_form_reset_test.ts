@@ -88,6 +88,35 @@ test("each stateful form's single submit button is disabled until hydrated (F3)"
   }
 });
 
+// BF-67 (closed by BF-75 verify C1): the fields stay locked until hydrated.
+// Before hydration a native edit is lost when React re-renders a controlled
+// field, or, for an uncontrolled one, absorbed into Cancel's "untouched"
+// baseline so Cancel leaves without asking. One disabled fieldset wraps the
+// whole form body, so nested fieldsets and shared children inherit the lock.
+test("each stateful form's body sits in one fieldset disabled until hydrated (BF-67)", () => {
+  for (const rel of FORM_COMPONENTS) {
+    const src = readFileSync(join(SRC, rel), "utf-8");
+    const body = src.slice(src.indexOf("<form"), src.lastIndexOf("</form>"));
+    const firstTag = body.slice(body.indexOf(">") + 1).match(/<(?!\{)(\w+)\b[^>]*>/);
+    assert.ok(firstTag, `${rel}: empty form`);
+    assert.match(firstTag[0], /^<fieldset disabled=\{!ready\}/, `${rel}: first element inside <form> is not the ready fieldset`);
+    assert.match(body, /<\/fieldset>\s*$/, `${rel}: the ready fieldset does not close right before </form>`);
+  }
+});
+
+// The Enter-key block relies on each form having exactly one submit button,
+// so every other button must say type="button" (a bare <button> submits).
+test("every button under the form components declares its type (BF-67)", () => {
+  const dirs = ["components/forms", "components/projects"];
+  const offenders = dirs.flatMap((d) => tsxFiles(join(SRC, d))).flatMap((f) => {
+    const src = readFileSync(f, "utf-8");
+    return [...src.matchAll(/<button\b[\s\S]*?>/g)]
+      .filter(([tag]) => !/\btype=/.test(tag))
+      .map((m) => `${f.slice(SRC.length).replace(/\\/g, "/")}:${src.slice(0, m.index).split("\n").length}`);
+  });
+  assert.deepEqual(offenders, []);
+});
+
 test("the shared handler prevents the native submit and runs the action in a transition", async () => {
   const { buildNoResetSubmit } = await import("@/lib/forms/no-reset-submit");
   const calls: string[] = [];

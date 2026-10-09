@@ -1,0 +1,18 @@
+Node v24.21.0, head 3e821aa, 2026-10-09T15:23:34Z
+=== tsc --noEmit ===
+tsc exit=0
+=== eslint ===
+  74:19  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+
+✖ 12 problems (0 errors, 12 warnings)
+
+=== next build ===
+✓ Compiled successfully in 1641ms
+  Running TypeScript ...
+  Finished TypeScript in 1416ms ...
+  Generating static pages using 31 workers (0/19) ...
+  Generating static pages using 31 workers (4/19) 
+  Generating static pages using 31 workers (9/19) 
+  Generating static pages using 31 workers (14/19) 
+✓ Generating static pages using 31 workers (19/19) in 308ms
+next build exit=0

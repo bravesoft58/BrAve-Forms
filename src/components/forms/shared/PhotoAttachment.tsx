@@ -6,6 +6,7 @@ import imageCompression from "browser-image-compression";
 import { createClient } from "@/lib/supabase/client";
 import { inputClass, labelClass } from "@/components/forms/formStyles";
 import type { FormPhoto } from "@/lib/schemas/form-photo";
+import { PENDING_WORK_ATTR } from "@/lib/forms/form-snapshot";
 
 interface PhotoAttachmentProps {
   photos: FormPhoto[];
@@ -136,8 +137,12 @@ export default function PhotoAttachment({
     onPhotosChange(photos.filter((_, i) => i !== index));
   }
 
+  // Photos join the form's hidden JSON only after the batch uploads; until then
+  // the section carries PENDING_WORK_ATTR so Cancel asks first (BF-75 verify C2).
+  const pendingWork = uploading ? { [PENDING_WORK_ATTR]: "" } : {};
+
   return (
-    <section className="space-y-4">
+    <section className="space-y-4" {...pendingWork}>
       <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
         Photo Attachments
       </h3>

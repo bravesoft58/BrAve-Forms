@@ -16,6 +16,7 @@ import Section1SiteInfo from "./Section1SiteInfo";
 import Section2BmpCategories from "./Section2BmpCategories";
 import Section3DischargeSignatures from "./Section3DischargeSignatures";
 import PhotoAttachment from "@/components/forms/shared/PhotoAttachment";
+import FormCancel from "@/components/forms/shared/FormCancel";
 import type { FormPhoto } from "@/lib/schemas/form-photo";
 import { NDOT_INSTRUCTIONS } from "@/lib/constants/ndot-form-text";
 
@@ -153,7 +154,9 @@ export default function NdotStormwaterForm({
   }
 
   return (
-    <form action={formAction} onSubmit={submit} className="space-y-8">
+    <form action={formAction} onSubmit={submit}>
+      {/* Locked until hydrated: an early edit would be lost or absorbed into Cancel's baseline (BF-67, BF-75 C1). */}
+      <fieldset disabled={!ready} className="min-w-0 space-y-8">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="data" value={JSON.stringify(data)} />
       <input type="hidden" name="version" value={version ?? ""} />
@@ -203,14 +206,11 @@ export default function NdotStormwaterForm({
       <Section3DischargeSignatures data={data} onChange={update} fieldErrors={state.fieldErrors} />
 
       <div className="flex items-center gap-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-        {cancelHref && (
-          <a
-            href={cancelHref}
-            className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-          >
-            Cancel
-          </a>
-        )}
+        <FormCancel
+          href={cancelHref ?? `/dashboard/projects/${projectId}?tab=ndot_weekly_stormwater`}
+          ready={ready}
+          disabled={pending}
+        />
         <button
           type="submit"
           disabled={pending || !ready}
@@ -223,6 +223,7 @@ export default function NdotStormwaterForm({
             : isEdit ? "Save Changes" : "Submit Inspection"}
         </button>
       </div>
+      </fieldset>
     </form>
   );
 }

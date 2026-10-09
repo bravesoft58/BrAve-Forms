@@ -1,0 +1,18 @@
+Testing/forms/bf57_ndep_edit_readiness.ts: pass=? fail=?
+ERROR: ENOENT: no such file or directory, open 'E:\brave-forms-worktrees\BF-75\.env.local'
+Testing/forms/bf58_1_ndot_photo_readiness.ts: pass=? fail=?
+ERROR: ENOENT: no such file or directory, open 'E:\brave-forms-worktrees\BF-75\.env.local'
+Testing/forms/bf58_1_waterways_schema_test.ts: pass=16 fail=0
+Testing/forms/bf58_2_waterways_pdf_test.ts: pass=7 fail=0
+Testing/forms/bf65_record_integrity_test.ts: pass=15 fail=0
+Testing/forms/bf66_form_reset_test.ts: pass=4 fail=0
+Testing/forms/bf70_render_test.ts: pass=6 fail=0
+Testing/forms/bf70_waterway_contact_picker_test.ts: pass=13 fail=0
+Testing/forms/bf72_sheen_alert_test.ts: pass=16 fail=0
+Testing/forms/bf73_equipment_filter_probe.ts: pass=? fail=?
+probe error: ENOENT: no such file or directory, open 'E:\brave-forms-worktrees\BF-75\.env.local'
+Testing/forms/bf73_equipment_history_test.ts: pass=9 fail=0
+Testing/forms/bf73_history_reads_test.ts: pass=6 fail=0
+Testing/forms/bf74_email_settings_test.ts: pass=19 fail=0
+Testing/forms/bf75_cancel_test.ts: pass=9 fail=0
+TOTAL pass=120 fail=0

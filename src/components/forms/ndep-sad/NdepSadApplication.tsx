@@ -12,6 +12,7 @@ import {
   type NdepSadData,
 } from "@/lib/schemas/ndep-sad";
 import { selectClass, labelClass, inputClass } from "@/components/forms/formStyles";
+import FormCancel from "@/components/forms/shared/FormCancel";
 import Section1CompanyInfo from "./Section1CompanyInfo";
 import Section2Location from "./Section2Location";
 import Section3SadDetails from "./Section3SadDetails";
@@ -125,7 +126,9 @@ export default function NdepSadApplication({
   }
 
   return (
-    <form action={formAction} onSubmit={submit} className="space-y-8">
+    <form action={formAction} onSubmit={submit}>
+      {/* Locked until hydrated: an early edit would be lost or absorbed into Cancel's baseline (BF-67, BF-75 C1). */}
+      <fieldset disabled={!ready} className="min-w-0 space-y-8">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="data" value={JSON.stringify(data)} />
 
@@ -218,6 +221,7 @@ export default function NdepSadApplication({
       <Section4Certification data={data} onChange={update} fieldErrors={state.fieldErrors} />
 
       <div className="flex items-center gap-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+        <FormCancel href={`/dashboard/projects/${projectId}?tab=ndep_sad_application`} ready={ready} disabled={pending} />
         <button
           type="submit"
           disabled={pending || !ready}
@@ -228,6 +232,7 @@ export default function NdepSadApplication({
             : pending ? "Submitting..." : "Submit Application"}
         </button>
       </div>
+      </fieldset>
     </form>
   );
 }

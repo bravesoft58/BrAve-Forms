@@ -37,6 +37,7 @@ export default async function EditProjectPage({
           defaults={project}
           existingPermits={project.project_permits ?? []}
           existingSites={readProjectSites(project.waterway_sites)}
+          cancelHref={`/dashboard/projects/${id}`}
         />
       </div>
     </div>

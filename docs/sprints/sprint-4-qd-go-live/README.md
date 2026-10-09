@@ -31,7 +31,7 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-64](stories/BF-64-submit-waits-for-photo-uploads.md) | Submit must wait for photo uploads in flight | 1 | MEDIUM | (BF-58.1 verify follow-up C1) | NOT STARTED |
 | [BF-65](stories/BF-65-submission-idempotency.md) | Idempotent form submission (no duplicate inspections on retry) | 2 | MEDIUM | (BF-58.1 verify follow-up C2) | DONE (merged `9cf1519`) |
 | [BF-66](stories/BF-66-form-reset-blanks-controls.md) | Rejected submits blank selects and radios while the old answers are still sent | 2 | HIGH | (BF-58.1 preview finding) | DONE (merged `d320394`) |
-| [BF-67](stories/BF-67-lock-fields-until-hydrated.md) | Lock form fields until the page has hydrated | 1 | MEDIUM | (BF-66 verify follow-up F4) | NOT STARTED |
+| [BF-67](stories/BF-67-lock-fields-until-hydrated.md) | Lock form fields until the page has hydrated | 1 | MEDIUM | (BF-66 verify follow-up F4) | IN REVIEW (with BF-75) |
 | [BF-68](stories/BF-68-pdf-photo-drop-fails-silently.md) | Photo PDFs must never drop a photo silently (WebP, failed fetch) | 2 | MEDIUM | (BF-58.2 verify follow-up C1) | NOT STARTED |
 | [BF-69](stories/BF-69-require-edit-version.md) | Require the loaded version on every submission edit | 1 | LOW | (BF-65 verify follow-up C2) | NOT STARTED |
 | [BF-70](stories/BF-70-waterways-gracie-small-asks.md) | Waterways: project-level sheen contact and hint, photo wording, copy equipment from a previous inspection (picker) | 3 | HIGH | Gracie's 2026-10-08 notes, asks 1, 3, 4 | DONE (merged `d986c19`) |
