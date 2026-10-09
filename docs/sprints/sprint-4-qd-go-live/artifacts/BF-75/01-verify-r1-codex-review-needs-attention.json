@@ -1,0 +1,54 @@
+{
+  "review": "Adversarial Review",
+  "target": {
+    "mode": "branch",
+    "label": "branch diff against master",
+    "baseRef": "master",
+    "explicit": true
+  },
+  "threadId": "01a12107-009c-74c3-8406-123bc0904db8",
+  "context": {
+    "repoRoot": "E:/brave-forms-worktrees/BF-75",
+    "branch": "feature/BF-75-cancel-on-every-form",
+    "summary": "Reviewing branch feature/BF-75-cancel-on-every-form against master from merge-base cc38c008d4eddbafdad5bef19490366b653d1a43."
+  },
+  "codex": {
+    "status": 0,
+    "stderr": "",
+    "stdout": "{\n  \"verdict\": \"needs-attention\",\n  \"summary\": \"Do not ship: two paths bypass discard confirmation. Reviewed pushed commit 8254d0d against master through GitHub; local runners failed, so tests were not rerun.\",\n  \"findings\": [\n    {\n      \"severity\": \"high\",\n      \"title\": \"The baseline can absorb unsaved edits made before hydration\",\n      \"body\": \"ProjectForm renders enabled, uncontrolled inputs before hydration, but this effect snapshots their live values only after ready becomes true. With delayed JavaScript, a user can enter project details first; those edits become the supposedly clean baseline. Cancel then leaves without warning unless another field changes. React preserves these input values during hydration ([React 19.2.3 source](https://github.com/facebook/react/blob/v19.2.3/packages/react-dom-bindings/src/client/ReactDOMInput.js#L229-L259)).\",\n      \"file\": \"src/components/forms/shared/FormCancel.tsx\",\n      \"line_start\": 38,\n      \"line_end\": 41,\n      \"confidence\": 0.98,\n      \"recommendation\": \"Derive the baseline from original defaults, or prevent editing from server render until a pristine baseline is captured. Add a browser regression that enters project details before hydration, then presses Cancel.\"\n    },\n    {\n      \"severity\": \"medium\",\n      \"title\": \"Pending photo attachments are invisible to the discard check\",\n      \"body\": \"On an otherwise unchanged NDOT or Waterways form, select photos and press Cancel while compression/upload is pending. PhotoAttachment updates the hidden JSON only after the upload batch finishes; its file input has no name and is disabled during upload. The snapshot therefore still matches, and server-action pending remains false. This branch navigates without confirmation, abandoning the attachment draft and potentially leaving uploaded files unreferenced.\",\n      \"file\": \"src/components/forms/shared/FormCancel.tsx\",\n      \"line_start\": 47,\n      \"line_end\": 50,\n      \"confidence\": 0.99,\n      \"recommendation\": \"Expose pending attachment work to FormCancel and require confirmation whenever it exists, or disable Cancel until uploads settle. FormData equality alone cannot establish that nothing will be lost.\"\n    }\n  ],\n  \"next_steps\": [\n    \"Fix both gaps and add browser regressions with delayed hydration and delayed photo uploads.\",\n    \"Verify Keep editing preserves values and attachment work, including after a rejected submission.\"\n  ]\n}",
+    "reasoning": []
+  },
+  "result": {
+    "verdict": "needs-attention",
+    "summary": "Do not ship: two paths bypass discard confirmation. Reviewed pushed commit 8254d0d against master through GitHub; local runners failed, so tests were not rerun.",
+    "findings": [
+      {
+        "severity": "high",
+        "title": "The baseline can absorb unsaved edits made before hydration",
+        "body": "ProjectForm renders enabled, uncontrolled inputs before hydration, but this effect snapshots their live values only after ready becomes true. With delayed JavaScript, a user can enter project details first; those edits become the supposedly clean baseline. Cancel then leaves without warning unless another field changes. React preserves these input values during hydration ([React 19.2.3 source](https://github.com/facebook/react/blob/v19.2.3/packages/react-dom-bindings/src/client/ReactDOMInput.js#L229-L259)).",
+        "file": "src/components/forms/shared/FormCancel.tsx",
+        "line_start": 38,
+        "line_end": 41,
+        "confidence": 0.98,
+        "recommendation": "Derive the baseline from original defaults, or prevent editing from server render until a pristine baseline is captured. Add a browser regression that enters project details before hydration, then presses Cancel."
+      },
+      {
+        "severity": "medium",
+        "title": "Pending photo attachments are invisible to the discard check",
+        "body": "On an otherwise unchanged NDOT or Waterways form, select photos and press Cancel while compression/upload is pending. PhotoAttachment updates the hidden JSON only after the upload batch finishes; its file input has no name and is disabled during upload. The snapshot therefore still matches, and server-action pending remains false. This branch navigates without confirmation, abandoning the attachment draft and potentially leaving uploaded files unreferenced.",
+        "file": "src/components/forms/shared/FormCancel.tsx",
+        "line_start": 47,
+        "line_end": 50,
+        "confidence": 0.99,
+        "recommendation": "Expose pending attachment work to FormCancel and require confirmation whenever it exists, or disable Cancel until uploads settle. FormData equality alone cannot establish that nothing will be lost."
+      }
+    ],
+    "next_steps": [
+      "Fix both gaps and add browser regressions with delayed hydration and delayed photo uploads.",
+      "Verify Keep editing preserves values and attachment work, including after a rejected submission."
+    ]
+  },
+  "rawOutput": "{\n  \"verdict\": \"needs-attention\",\n  \"summary\": \"Do not ship: two paths bypass discard confirmation. Reviewed pushed commit 8254d0d against master through GitHub; local runners failed, so tests were not rerun.\",\n  \"findings\": [\n    {\n      \"severity\": \"high\",\n      \"title\": \"The baseline can absorb unsaved edits made before hydration\",\n      \"body\": \"ProjectForm renders enabled, uncontrolled inputs before hydration, but this effect snapshots their live values only after ready becomes true. With delayed JavaScript, a user can enter project details first; those edits become the supposedly clean baseline. Cancel then leaves without warning unless another field changes. React preserves these input values during hydration ([React 19.2.3 source](https://github.com/facebook/react/blob/v19.2.3/packages/react-dom-bindings/src/client/ReactDOMInput.js#L229-L259)).\",\n      \"file\": \"src/components/forms/shared/FormCancel.tsx\",\n      \"line_start\": 38,\n      \"line_end\": 41,\n      \"confidence\": 0.98,\n      \"recommendation\": \"Derive the baseline from original defaults, or prevent editing from server render until a pristine baseline is captured. Add a browser regression that enters project details before hydration, then presses Cancel.\"\n    },\n    {\n      \"severity\": \"medium\",\n      \"title\": \"Pending photo attachments are invisible to the discard check\",\n      \"body\": \"On an otherwise unchanged NDOT or Waterways form, select photos and press Cancel while compression/upload is pending. PhotoAttachment updates the hidden JSON only after the upload batch finishes; its file input has no name and is disabled during upload. The snapshot therefore still matches, and server-action pending remains false. This branch navigates without confirmation, abandoning the attachment draft and potentially leaving uploaded files unreferenced.\",\n      \"file\": \"src/components/forms/shared/FormCancel.tsx\",\n      \"line_start\": 47,\n      \"line_end\": 50,\n      \"confidence\": 0.99,\n      \"recommendation\": \"Expose pending attachment work to FormCancel and require confirmation whenever it exists, or disable Cancel until uploads settle. FormData equality alone cannot establish that nothing will be lost.\"\n    }\n  ],\n  \"next_steps\": [\n    \"Fix both gaps and add browser regressions with delayed hydration and delayed photo uploads.\",\n    \"Verify Keep editing preserves values and attachment work, including after a rejected submission.\"\n  ]\n}",
+  "parseError": null,
+  "reasoningSummary": []
+}

@@ -1,0 +1,60 @@
+▲ Next.js 16.3.6 (Turbopack)
+✓ Running next.config.ts took 43ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1546ms
+  Running TypeScript ...
+  Finished TypeScript in 1233ms ...
+  Collecting page data using 31 workers ...
+  Generating static pages using 31 workers (0/19) ...
+  Generating static pages using 31 workers (4/19) 
+  Generating static pages using 31 workers (9/19) 
+  Generating static pages using 31 workers (14/19) 
+✓ Generating static pages using 31 workers (19/19) in 383ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/forms/[submissionId]/pdf
+├ ƒ /auth/confirm
+├ ƒ /auth/confirm-link
+├ ƒ /auth/signout
+├ ƒ /dashboard
+├ ƒ /dashboard/forms
+├ ƒ /dashboard/projects
+├ ƒ /dashboard/projects/[id]
+├ ƒ /dashboard/projects/[id]/edit
+├ ƒ /dashboard/projects/[id]/forms/dust-log/[submissionId]
+├ ƒ /dashboard/projects/[id]/forms/dust-log/[submissionId]/edit
+├ ƒ /dashboard/projects/[id]/forms/dust-log/new
+├ ƒ /dashboard/projects/[id]/forms/ndep-sad/[submissionId]
+├ ƒ /dashboard/projects/[id]/forms/ndep-sad/new
+├ ƒ /dashboard/projects/[id]/forms/ndep-stormwater/[submissionId]
+├ ƒ /dashboard/projects/[id]/forms/ndep-stormwater/[submissionId]/edit
+├ ƒ /dashboard/projects/[id]/forms/ndep-stormwater/new
+├ ƒ /dashboard/projects/[id]/forms/ndot-stormwater/[submissionId]
+├ ƒ /dashboard/projects/[id]/forms/ndot-stormwater/[submissionId]/edit
+├ ƒ /dashboard/projects/[id]/forms/ndot-stormwater/new
+├ ƒ /dashboard/projects/[id]/forms/nnph-dust-permit/[submissionId]
+├ ƒ /dashboard/projects/[id]/forms/nnph-dust-permit/new
+├ ƒ /dashboard/projects/[id]/forms/working-in-waterways/[submissionId]
+├ ƒ /dashboard/projects/[id]/forms/working-in-waterways/[submissionId]/edit
+├ ƒ /dashboard/projects/[id]/forms/working-in-waterways/new
+├ ƒ /dashboard/projects/new
+├ ƒ /dashboard/settings
+├ ƒ /dashboard/settings/email-setup
+├ ƒ /dashboard/users
+├ ○ /forgot-password
+├ ƒ /inspector
+├ ƒ /inspector/[token]
+├ ƒ /login
+├ ○ /reset-password
+└ ○ /signup
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

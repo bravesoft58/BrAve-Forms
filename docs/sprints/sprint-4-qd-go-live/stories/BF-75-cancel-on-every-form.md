@@ -3,12 +3,13 @@
 **Type:** Feature (consistent form navigation; Q&D request)
 **Priority:** MEDIUM (usability; crews use the new-entry screens daily)
 **Points:** 2
-**Status:** IN PROGRESS
+**Status:** DONE
 **Sprint:** 4 (backlog)
 **Started:** 2026-10-08T20:44:28Z
+**Completed:** 2026-10-09T14:31:20Z
 **Reported by:** Q&D note relayed by Tim, 2026-10-08: "Daily dust log had a cancel option next to Submit. None of the other forms have this cancel option. Would like to have that option in all forms." Confirmation step added by Tim the same day as a safety measure.
 **Created:** 2026-10-08
-**Last Updated:** 2026-10-08T20:48:19Z
+**Last Updated:** 2026-10-09T14:31:20Z
 
 ## Problem
 
@@ -114,3 +115,24 @@ Worktree `e:/brave-forms-worktrees/BF-75`, branch `feature/BF-75-cancel-on-every
 | 5 | Sizes | `DailyDustLog.tsx` 283 to 275, `AppendDustLogEntries.tsx` 292 to 288, `project-form.tsx` 256 | No file over 300; net -8 lines across the eight forms. |
 
 Open for the browser check (preview or production after merge): an untouched form leaves straight away; after "+ Add Entry" or a typed change Cancel asks; Keep editing keeps every value; Discard leaves without saving. No database change in this story. Use explicit "Discard changes" and "Keep editing" labels, not Yes/No.
+
+## Verify (round 1, 2026-10-09T14:31:20Z)
+
+**Verdict: PASS, score 8.8/10** (computed by `verify_verdict.py` from the adjudicated findings; no critical or high left unfixed). Headless, fresh session, on `8254d0d` against `master`. Second reviewer: Codex (gpt-6-astra, xhigh) [observed 2026-10-09], verdict needs-attention with two findings, both upheld as medium and filed. Evidence: [artifacts/BF-75](../artifacts/BF-75/README.md).
+
+Re-run by verify on Node 24.21.0 [observed 2026-10-09]: the 11 `Testing/forms` unit files 120 pass / 0 fail, `tsc --noEmit` clean, ESLint 0 errors (the 12 pre-existing warnings, none in a touched file), `next build` exit 0. No production file over 300 lines.
+
+| AC | Status | Evidence |
+|---|---|---|
+| 1 Cancel next to Submit on every form, same look | MET | All eight forms render `FormCancel` left of Submit inside the `<form>`; the three edit pages' `<a>` links and the dust log buttons replaced. |
+| 2 Untouched form goes straight to the fixed destination | MET by code trace | Tab keys equal `FORM_TYPES` and the project page reads `?tab=`; the dust log view route and `/dashboard/projects` exist. No form changes serialized state after mount, so the baseline equals an untouched form. Not yet executed on screen (V1). |
+| 3 Any change asks; Keep editing keeps values; Discard leaves | PARTIALLY MET | Typed, select, radio and button-driven changes all reach a named field at render time, so they are seen. Two edge paths skip the prompt: C1 and C2 below. |
+| 4 Disabled while saving; nothing submits (Enter included) | MET | All three buttons `type="button"`; `disabled` follows `pending`, Cancel also waits for `ready`; implicit submission goes to the real Submit, which is disabled while pending. |
+| 5 Dust log no longer uses `router.back()` | MET | No `router.back()` left in any touched production file. |
+| 6 Build, lint, BF-66 and new test clean; no file over 300 lines | MET | As above; largest touched file 288 lines. |
+
+Findings to file (medium):
+- **C1** Edits typed into the uncontrolled project form before hydration become the baseline, so Cancel then leaves without asking. Closed structurally by BF-67 (lock fields until hydrated).
+- **C2** Photos still compressing or uploading are not in the hidden JSON yet, so Cancel during an upload on an otherwise unchanged NDOT or Waterways form leaves without asking. Fix: let `PhotoAttachment` report in-flight work and treat it as a change.
+
+Noted (low): V1 no test executes `FormCancel`'s behaviour; V2 an empty named file input would make every snapshot differ (no form has one); V3 the wiring test matches destinations file-wide; V4 focus drops to the page after Keep editing; V5 no progress feedback while Cancel navigates; V6 the baseline effect would run before any future parent mount effect.
