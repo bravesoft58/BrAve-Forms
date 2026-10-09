@@ -126,7 +126,9 @@ export default function NdepSadApplication({
   }
 
   return (
-    <form action={formAction} onSubmit={submit} className="space-y-8">
+    <form action={formAction} onSubmit={submit}>
+      {/* Locked until hydrated: an early edit would be lost or absorbed into Cancel's baseline (BF-67, BF-75 C1). */}
+      <fieldset disabled={!ready} className="min-w-0 space-y-8">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="data" value={JSON.stringify(data)} />
 
@@ -230,6 +232,7 @@ export default function NdepSadApplication({
             : pending ? "Submitting..." : "Submit Application"}
         </button>
       </div>
+      </fieldset>
     </form>
   );
 }

@@ -133,7 +133,9 @@ export default function NdepStormwaterForm({
   }
 
   return (
-    <form action={formAction} onSubmit={submit} className="space-y-8">
+    <form action={formAction} onSubmit={submit}>
+      {/* Locked until hydrated: an early edit would be lost or absorbed into Cancel's baseline (BF-67, BF-75 C1). */}
+      <fieldset disabled={!ready} className="min-w-0 space-y-8">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="data" value={JSON.stringify(data)} />
       <input type="hidden" name="version" value={version ?? ""} />
@@ -188,6 +190,7 @@ export default function NdepStormwaterForm({
             : isEdit ? "Save Changes" : "Submit Inspection"}
         </button>
       </div>
+      </fieldset>
     </form>
   );
 }

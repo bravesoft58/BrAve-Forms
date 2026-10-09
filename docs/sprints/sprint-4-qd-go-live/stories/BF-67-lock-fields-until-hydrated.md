@@ -3,11 +3,13 @@
 **Type:** Bug (shared form behaviour; a visible edit can be silently discarded)
 **Priority:** MEDIUM (needs a slow page load plus an edit in that window; what is saved always matches the screen)
 **Points:** 1
-**Status:** NOT STARTED
+**Status:** IN REVIEW (built on the BF-75 branch; ships with BF-75)
 **Sprint:** 4 (backlog)
 **Reported by:** BF-66 `/verify` round 3 (finding F4, Codex, reported as C1 in the closeout summary), filed at closeout 2026-09-28
 **Created:** 2026-09-28
-**Last Updated:** 2026-09-28T12:34:48Z
+**Last Updated:** 2026-10-09T14:47:56Z
+
+> **Bundled into BF-75 (Tim, 2026-10-09).** BF-75's verify round 1 found the same gap from the other side (C1: an edit made before hydration became Cancel's baseline). Built on `feature/BF-75-cancel-on-every-form`: the fieldset on all eight forms and both test additions. The V2 split was not needed: `project-form.tsx` is 258 lines with the wrapper. Verified and merged with BF-75; the delayed-script browser check is part of BF-75's browser run.
 
 ## Problem
 

@@ -84,7 +84,9 @@ export default function ProjectForm({
   const d = defaults ?? {};
 
   return (
-    <form action={formAction} onSubmit={submit} className="space-y-8">
+    <form action={formAction} onSubmit={submit}>
+      {/* Locked until hydrated: an early edit would be lost or absorbed into Cancel's baseline (BF-67, BF-75 C1). */}
+      <fieldset disabled={!ready} className="min-w-0 space-y-8">
       {state.error && (
         <div ref={errorRef} role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-400">
           {state.error}
@@ -251,6 +253,7 @@ export default function ProjectForm({
           {!ready ? "Loading..." : pending ? pendingLabel : submitLabel}
         </button>
       </div>
+      </fieldset>
     </form>
   );
 }

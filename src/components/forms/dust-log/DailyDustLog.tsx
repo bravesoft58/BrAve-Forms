@@ -84,7 +84,9 @@ export default function DailyDustLog({
   }
 
   return (
-    <form action={formAction} onSubmit={submit} className="space-y-6">
+    <form action={formAction} onSubmit={submit}>
+      {/* Locked until hydrated: an early edit would be lost or absorbed into Cancel's baseline (BF-67, BF-75 C1). */}
+      <fieldset disabled={!ready} className="min-w-0 space-y-6">
       <input type="hidden" name="project_id" value={projectId} />
       <input type="hidden" name="entries" value={JSON.stringify(entries)} />
 
@@ -255,6 +257,7 @@ export default function DailyDustLog({
             : pending ? "Submitting..." : "Submit Dust Log"}
         </button>
       </div>
+      </fieldset>
     </form>
   );
 }
