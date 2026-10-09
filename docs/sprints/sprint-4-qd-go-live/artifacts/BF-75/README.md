@@ -29,6 +29,22 @@ After the round-1 PASS, C1 was fixed by building BF-67 (the hydration lock) on t
 
 Still unproven by execution: the on-screen flow, and BF-67's "fields cannot be changed before hydration" with script loading delayed. Both are in the story's browser check.
 
+## Browser check (2026-10-09T16:00:30Z, preview of `3e821aa`)
+
+Run with Claude in Chrome on the protected preview `brave-forms-83v4hg70r-embracingai.vercel.app` (a Vercel share link for access; Tim signed in to BrAve Forms himself). Project: 17254 NDOT 4541 7 Bridges. Nothing was submitted; the NDOT tab showed 3 submissions before and after.
+
+| File | What it shows |
+|---|---|
+| `08-browser-untouched-cancel-lands-on-ndot-tab.jpg` | New NDOT entry, untouched: Cancel went straight to `?tab=ndot_weekly_stormwater`, no prompt. |
+| `09-browser-changed-form-cancel-asks-discard.jpg` | After typing in Additional Comments, Cancel showed "Discard your changes? [Keep editing] [Discard]", with focus on Keep editing. |
+| `10-browser-keep-editing-keeps-comment.jpg` | Keep editing closed the prompt; the comment was still there and Cancel was back. |
+| `11-browser-discard-leaves-nothing-saved.jpg` | Discard went to the NDOT tab; still 3 submissions. |
+| `12-browser-cancel-during-photo-upload-asks.jpg` | A page script pressed Cancel the moment `data-form-pending-work` appeared on the photo section (upload in flight). The prompt appeared and the page stayed; the photo then finished (1/10). Discard afterwards left the uploaded file unreferenced in Storage (the Q&D logo PNG, under the NDOT 4541 attachments path), as already accepted for removed photos. |
+
+Also observed, no screenshot:
+- **Hydration lock (BF-67 AC1):** the server HTML of all eight form pages (NDOT, NDEP stormwater, Waterways, dust log new, NDEP SAD, NNPH, project new, project edit) has the form's `<fieldset>` with `disabled`; after load the inspection form's fieldset is enabled. The append-entries dust log page was not fetched (needs an existing log id). Delaying script load itself was not simulated: the extension cannot throttle the network.
+- **Destinations:** untouched dust log new entry Cancel went to `?tab=daily_dust_log` (was browser Back); untouched project edit Cancel went to the project page.
+
 ### Pending `.claude/lessons-learned.md` updates (cycle 2)
 
 The headless verify was again refused write access to `.claude/`. In an attended session, paste the round-1 entry above with its **Fix:** line replaced by the first block below, then add the second entry.

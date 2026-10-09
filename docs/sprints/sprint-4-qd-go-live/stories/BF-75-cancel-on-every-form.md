@@ -9,7 +9,7 @@
 **Completed:** 2026-10-09T15:23:58Z
 **Reported by:** Q&D note relayed by Tim, 2026-10-08: "Daily dust log had a cancel option next to Submit. None of the other forms have this cancel option. Would like to have that option in all forms." Confirmation step added by Tim the same day as a safety measure.
 **Created:** 2026-10-08
-**Last Updated:** 2026-10-09T15:23:58Z
+**Last Updated:** 2026-10-09T16:00:30Z
 
 ## Problem
 
@@ -28,8 +28,8 @@ The dust log's Cancel calls `router.back()`. That leaves the app when the form w
 ## Acceptance criteria
 
 - [x] Every form in the list shows Cancel next to Submit, on both new and edit pages, with the same look.
-- [ ] Cancel on an untouched form goes straight to the project's tab for that form (new) or the record's view page (edit); never to an outside page. *(Destinations fixed in code and tested; the "straight away" behaviour needs the browser check.)*
-- [ ] After any change, Cancel shows "Discard your changes?"; Keep editing returns to the form with every value intact; Discard leaves without saving. *(Comparison unit-tested and mutation-checked; the round-1 gaps C1 and C2 are fixed; on-screen flow needs the browser check.)*
+- [x] Cancel on an untouched form goes straight to the project's tab for that form (new) or the record's view page (edit); never to an outside page. *(Browser check 2026-10-09: NDOT and dust log new entries to their tabs, project edit to the project page.)*
+- [x] After any change, Cancel shows "Discard your changes?"; Keep editing returns to the form with every value intact; Discard leaves without saving. *(Browser check 2026-10-09: typed comment, and a photo upload in flight, both asked; Keep editing kept the comment; Discard saved nothing.)*
 - [x] Cancel and the confirmation buttons are disabled while saving, and none of them submit the form (Enter key included).
 - [x] The dust log no longer uses `router.back()`.
 - [x] `pnpm build`, lint, BF-66 and the new test clean; no production file over 300 lines.
@@ -114,7 +114,7 @@ Worktree `e:/brave-forms-worktrees/BF-75`, branch `feature/BF-75-cancel-on-every
 | 4 | `tsc --noEmit`; `pnpm lint` (0 errors, the 12 pre-existing warnings, none in touched files); `pnpm build` | PASS | |
 | 5 | Sizes | `DailyDustLog.tsx` 283 to 275, `AppendDustLogEntries.tsx` 292 to 288, `project-form.tsx` 256 | No file over 300; net -8 lines across the eight forms. |
 
-Open for the browser check (preview or production after merge): an untouched form leaves straight away; after "+ Add Entry" or a typed change Cancel asks; Keep editing keeps every value; Discard leaves without saving. No database change in this story. Use explicit "Discard changes" and "Keep editing" labels, not Yes/No.
+**Done 2026-10-09T16:00:30Z on the preview of `3e821aa`; all passed. Evidence and details: [artifacts/BF-75](../artifacts/BF-75/README.md) "Browser check", files 08 to 12.** Originally open for the browser check: an untouched form leaves straight away; after "+ Add Entry" or a typed change Cancel asks; Keep editing keeps every value; Discard leaves without saving. No database change in this story. Use explicit "Discard changes" and "Keep editing" labels, not Yes/No.
 
 ## Verify (round 1, 2026-10-09T14:31:20Z)
 
