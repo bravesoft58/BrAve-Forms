@@ -45,9 +45,9 @@ Also observed, no screenshot:
 - **Hydration lock (BF-67 AC1):** the server HTML of all eight form pages (NDOT, NDEP stormwater, Waterways, dust log new, NDEP SAD, NNPH, project new, project edit) has the form's `<fieldset>` with `disabled`; after load the inspection form's fieldset is enabled. The append-entries dust log page was not fetched (needs an existing log id). Delaying script load itself was not simulated: the extension cannot throttle the network.
 - **Destinations:** untouched dust log new entry Cancel went to `?tab=daily_dust_log` (was browser Back); untouched project edit Cancel went to the project page.
 
-### Pending `.claude/lessons-learned.md` updates (cycle 2)
+### `.claude/lessons-learned.md` updates (cycle 2) - APPLIED 2026-10-09
 
-The headless verify was again refused write access to `.claude/`. In an attended session, paste the round-1 entry above with its **Fix:** line replaced by the first block below, then add the second entry.
+Applied in an attended session on 2026-10-09: both entries are now in `.claude/lessons-learned.md`, with the Fix lines updated for the browser check. The text below is the verify's original draft, kept for the record; do not paste it again.
 
 ```markdown
 - **Fix:** C1 by building BF-67 on the BF-75 branch: one `<fieldset disabled={!ready}>` around every form body, so nothing is editable before the baseline is taken. C2 by `PhotoAttachment` setting `PENDING_WORK_ATTR` on its section while uploading; `FormCancel` asks whenever the form contains it. Verify cycle 2 round 1 PASS 9.1, both fixes mutation-checked.
@@ -61,9 +61,9 @@ The headless verify was again refused write access to `.claude/`. In an attended
 - **Prevention:** For each client component, run the two or three mutations that would hurt a user most (invert the decision, swap the handlers) before calling its tests sufficient. If they survive, either move the decision into a pure function the test can call, or add a DOM harness (jsdom or a browser run) once a second component needs one.
 ```
 
-## Pending entry for `.claude/lessons-learned.md`
+## Entry for `.claude/lessons-learned.md` (round 1) - APPLIED 2026-10-09
 
-Verify Phase 8.1 could not write this: the headless run is not permitted to edit files under `.claude/`. Paste it at the end of that file in an attended session.
+Verify Phase 8.1 could not write this from the headless run. Applied in an attended session on 2026-10-09 with the cycle-2 Fix line; kept below as the original draft, do not paste it again.
 
 ```markdown
 ### A FormData snapshot sees only what has already reached a named field; two kinds of change never do (BF-75, 2026-10-09)
