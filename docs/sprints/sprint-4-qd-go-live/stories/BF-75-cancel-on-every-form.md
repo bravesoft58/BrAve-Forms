@@ -3,12 +3,13 @@
 **Type:** Feature (consistent form navigation; Q&D request)
 **Priority:** MEDIUM (usability; crews use the new-entry screens daily)
 **Points:** 2
-**Status:** IN REVIEW (C1 and C2 fixed after verify round 1; awaiting round 2)
+**Status:** DONE (verify cycle 2 round 1 PASS 9.1; ships with BF-67)
 **Sprint:** 4 (backlog)
 **Started:** 2026-10-08T20:44:28Z
+**Completed:** 2026-10-09T15:23:58Z
 **Reported by:** Q&D note relayed by Tim, 2026-10-08: "Daily dust log had a cancel option next to Submit. None of the other forms have this cancel option. Would like to have that option in all forms." Confirmation step added by Tim the same day as a safety measure.
 **Created:** 2026-10-08
-**Last Updated:** 2026-10-09T14:47:56Z
+**Last Updated:** 2026-10-09T15:23:58Z
 
 ## Problem
 
@@ -28,7 +29,7 @@ The dust log's Cancel calls `router.back()`. That leaves the app when the form w
 
 - [x] Every form in the list shows Cancel next to Submit, on both new and edit pages, with the same look.
 - [ ] Cancel on an untouched form goes straight to the project's tab for that form (new) or the record's view page (edit); never to an outside page. *(Destinations fixed in code and tested; the "straight away" behaviour needs the browser check.)*
-- [ ] After any change, Cancel shows "Discard your changes?"; Keep editing returns to the form with every value intact; Discard leaves without saving. *(Comparison unit-tested and mutation-checked; on-screen flow needs the browser check.)*
+- [ ] After any change, Cancel shows "Discard your changes?"; Keep editing returns to the form with every value intact; Discard leaves without saving. *(Comparison unit-tested and mutation-checked; the round-1 gaps C1 and C2 are fixed; on-screen flow needs the browser check.)*
 - [x] Cancel and the confirmation buttons are disabled while saving, and none of them submit the form (Enter key included).
 - [x] The dust log no longer uses `router.back()`.
 - [x] `pnpm build`, lint, BF-66 and the new test clean; no production file over 300 lines.
@@ -135,3 +136,24 @@ Findings to file (medium):
 - **C2** Photos still compressing or uploading are not in the hidden JSON yet, so Cancel during an upload on an otherwise unchanged NDOT or Waterways form leaves without asking. **FIXED after round 1 (Tim, 2026-10-09):** `PhotoAttachment` marks its section with `PENDING_WORK_ATTR` while uploading, and `FormCancel` asks whenever any element inside the form carries it (`needsDiscardCheck`). Unit test 13/13 (4 new), BF-66 4/4, tsc, lint and `next build` clean on Node 24. Discard during an upload still leaves the uploaded file unreferenced in Storage, which `PhotoAttachment` already accepts for removed photos (cleanup belongs in a reference-aware job).
 
 Noted (low): V1 no test executes `FormCancel`'s behaviour; V2 an empty named file input would make every snapshot differ (no form has one); V3 the wiring test matches destinations file-wide; V4 focus drops to the page after Keep editing; V5 no progress feedback while Cancel navigates; V6 the baseline effect would run before any future parent mount effect.
+
+## Verify (cycle 2, round 1, 2026-10-09T15:23:58Z)
+
+**Verdict: PASS, score 9.1/10** (computed by `verify_verdict.py`; nothing critical, high or medium left open, nothing to file). The round-1 PASS closed that cycle, so this is a full, blind round on `3e821aa` against `master`, covering the C1 and C2 fixes and the BF-67 lock built on this branch. Headless, fresh session. Second reviewer: Codex (gpt-6-astra, xhigh) [observed 2026-10-09], verdict **approve**, no findings. It read the diff through GitHub because its sandbox could not run commands, so it ran no tests. Evidence: [artifacts/BF-75](../artifacts/BF-75/README.md), files 04 to 07.
+
+Re-run by verify on Node 24.21.0 [observed 2026-10-09]: the 11 `Testing/forms` unit files 126 pass / 0 fail (bf75 13, bf66 6); `tsc --noEmit` clean; ESLint 0 errors and the 12 pre-existing warnings (one, `no-img-element`, is in `PhotoAttachment.tsx`, which the C2 fix touched; it predates this story); `next build` exit 0. Largest touched production file 291 lines.
+
+Mutation check: removing the lock from the project form, dropping the upload marker, and ignoring in-flight work each fail a test. Inverting Cancel's ask/leave choice and wiring Discard to Keep editing both pass the whole suite: the click path is proven by code trace only (V1).
+
+| AC | Status | Evidence |
+|---|---|---|
+| 1 Cancel next to Submit on every form, same look | MET | All eight forms render `FormCancel` left of Submit inside the `<form>`; bf75 wiring test. |
+| 2 Untouched form goes straight to the fixed destination | MET by code trace | The fieldset lock means nothing can change before the baseline is taken; the tab keys match `ProjectTabs`; every destination route exists in the build. Browser check still pending. |
+| 3 Any change asks; Keep editing keeps values; Discard leaves | MET by code trace | C1 and C2 closed (below). Keep editing only re-renders `FormCancel`, so form state is untouched. Browser check still pending. |
+| 4 Disabled while saving; nothing submits (Enter included) | MET | Three `type="button"` buttons; `disabled` follows `pending`; bf66 now also requires every button under the form components to declare its type. |
+| 5 Dust log no longer uses `router.back()` | MET | bf75 wiring test. |
+| 6 Build, lint, BF-66 and new test clean; no file over 300 lines | MET | As above. |
+
+Round-1 findings re-checked: **C1 fixed.** Each form body is one `<fieldset disabled={!ready}>`, and `ready` is false in the server HTML. React removes the attribute in the same commit that `FormCancel`'s baseline effect follows, so the baseline always sees enabled fields. **C2 fixed.** `PhotoAttachment` sets `uploading` before compression starts and clears it in `finally`, and the new photos and the cleared marker land in one batched render, so there is no unguarded gap.
+
+Noted (low, not filed): V1 to V6 carried from round 1, still true; V7 browser-restored values on the uncontrolled project form, for example a Firefox reload mid-edit, would count as untouched (suspected, not reproduced); V8 the form bodies were not re-indented under the new `<fieldset>`. V9 (sprint-index row still NOT STARTED) was dismissed: closeout writes that row.

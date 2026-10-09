@@ -16,6 +16,35 @@ What is still unproven by execution: the on-screen flow (untouched form leaves s
 
 The adjudicated findings and the verdict are recorded by `verify_stamp.py` in the verify ledger, not here.
 
+## Verify cycle 2, round 1 (2026-10-09, on `3e821aa`)
+
+After the round-1 PASS, C1 was fixed by building BF-67 (the hydration lock) on this branch and C2 by the pending-upload marker. The ledger treats the next verify as a new cycle: round 1 again, full and blind, against `master`.
+
+| File | What it shows |
+|---|---|
+| `04-verify-c2r1-codex-review-approve.json` | Codex adversarial review of `3e821aa` against `master` (gpt-6-astra, xhigh) [observed 2026-10-09]. Verdict approve, no findings; it reports that C1 and C2 are addressed. It read the diff through GitHub because its sandbox could not run commands, so it ran no tests. |
+| `05-verify-c2r1-test-suite-node24.txt` | Every `Testing/forms` unit file on Node 24.21.0: 126 pass, 0 fail across 11 files (bf75 13/13, bf66 6/6). The three read-only production-database probes were not run (no `.env.local` in this worktree). [observed 2026-10-09] |
+| `06-verify-c2r1-mutation-check.txt` | Five mutants, each applied, its guarding test run, then restored from git. The hydration lock, the upload marker and the in-flight check are guarded (killed). Inverting Cancel's ask/leave choice and wiring Discard to Keep editing survive: `FormCancel`'s click path is unexecuted (verify V1, low). |
+| `07-verify-c2r1-tsc-lint-build-node24.txt` | `tsc --noEmit` exit 0, ESLint 0 errors (the 12 pre-existing warnings), `next build` (16.3.6) exit 0 with 19 static pages. [observed 2026-10-09] |
+
+Still unproven by execution: the on-screen flow, and BF-67's "fields cannot be changed before hydration" with script loading delayed. Both are in the story's browser check.
+
+### Pending `.claude/lessons-learned.md` updates (cycle 2)
+
+The headless verify was again refused write access to `.claude/`. In an attended session, paste the round-1 entry above with its **Fix:** line replaced by the first block below, then add the second entry.
+
+```markdown
+- **Fix:** C1 by building BF-67 on the BF-75 branch: one `<fieldset disabled={!ready}>` around every form body, so nothing is editable before the baseline is taken. C2 by `PhotoAttachment` setting `PENDING_WORK_ATTR` on its section while uploading; `FormCancel` asks whenever the form contains it. Verify cycle 2 round 1 PASS 9.1, both fixes mutation-checked.
+```
+
+```markdown
+### Source-text tests guard wiring, not behaviour; mutate the click path to see what they miss (BF-75, 2026-10-09)
+- **Context:** BF-75's `bf75_cancel_test.ts` unit-tests the snapshot comparison with real `FormData` and checks `FormCancel` with regexes over its source, because the repo has no DOM harness.
+- **Problem:** Verify cycle 2 mutated the code. Removing the hydration lock, dropping the upload marker and ignoring in-flight work each failed a test. Inverting `if (ask)` and pointing Discard at "Keep editing" both left the whole suite green. A regex that finds `needsDiscardCheck(...)` in the source proves the call exists, not what the component does with the answer.
+- **Fix:** none in this story (verify V1, low). The click path is correct by code trace, and the story's browser check is the execution evidence.
+- **Prevention:** For each client component, run the two or three mutations that would hurt a user most (invert the decision, swap the handlers) before calling its tests sufficient. If they survive, either move the decision into a pure function the test can call, or add a DOM harness (jsdom or a browser run) once a second component needs one.
+```
+
 ## Pending entry for `.claude/lessons-learned.md`
 
 Verify Phase 8.1 could not write this: the headless run is not permitted to edit files under `.claude/`. Paste it at the end of that file in an attended session.
