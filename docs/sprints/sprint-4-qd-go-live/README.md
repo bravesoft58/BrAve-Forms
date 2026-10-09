@@ -39,13 +39,13 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-72](stories/BF-72-sheen-plume-email-alert.md) | Email the project's waterway contact when sheen/plume is Yes (email only; sends via BF-74) | 3 | HIGH | Gracie's 2026-10-08 notes, ask 2 (not in Andy's bullets) | DONE (merged `3b486db`) |
 | [BF-73](stories/BF-73-equipment-picker-per-site-history.md) | "Copy from previous" must not lose same-site or non-blank inspections to the 10-row limit | 1 | MEDIUM | (BF-70 verify follow-up C2) | DONE (merged `4924b2f`) |
 | [BF-74](stories/BF-74-org-email-settings-m365.md) | Organization email settings: send through the customer's Microsoft 365 (admin page, encrypted secret, test send) | 3 | HIGH | (Tim, 2026-10-08, split from BF-72) | DONE (merged `66ec348`) |
-| [BF-75](stories/BF-75-cancel-on-every-form.md) | Cancel next to Submit on every form, with a "discard changes?" confirmation | 2 | MEDIUM | (Q&D note, 2026-10-08) | NOT STARTED |
+| [BF-75](stories/BF-75-cancel-on-every-form.md) | Cancel next to Submit on every form, with a "discard changes?" confirmation | 2 | MEDIUM | (Q&D note, 2026-10-08) | DONE (merged `4535e7b`) |
 | [BF-76](stories/BF-76-email-settings-preview-key-guard.md) | Only Production may write the email settings secret | 1 | MEDIUM | (BF-74 verify follow-up C2) | NOT STARTED |
 | [BF-77](stories/BF-77-email-settings-revision-check.md) | Email settings saves and test results must not cross configurations | 1 | MEDIUM | (BF-74 verify follow-ups C3, C4) | NOT STARTED |
 | [BF-78](stories/BF-78-email-settings-clear.md) | Let an org admin clear the email settings | 1 | MEDIUM | (BF-74 verify follow-up V1) | NOT STARTED |
 | [BF-79](stories/BF-79-split-waterways-queries.md) | Move the Waterways equipment-history query out of the shared project queries | 1 | LOW | (BF-73 verify follow-up V9) | NOT STARTED |
 | [BF-80](stories/BF-80-sheen-alert-edit-replay.md) | A retried No-to-Yes edit must still send the sheen alert | 1 | MEDIUM | (BF-72 verify follow-up C1) | NOT STARTED |
-| **Total** | | **55** | | | **18/29 DONE** |
+| **Total** | | **55** | | | **19/29 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
