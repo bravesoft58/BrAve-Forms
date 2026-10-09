@@ -2,7 +2,7 @@
 
 **Status:** NOT STARTED
 **Created:** 2026-09-20
-**Last Updated:** 2026-10-08T14:35:51Z
+**Last Updated:** 2026-10-09T16:03:59Z
 **Source:** Andy Breen (IT Director, Q&D) email "BrAve Forms Update", 2026-09-07, with attachment `WIW Daily Form.pdf`. Both filed under [docs/reference/](../../reference/). Second round: Gracie's handwritten notes on her first live Working in Waterways test, forwarded by Andy 2026-10-08 (`WIW-Gracie-comments-2026-10-08.pdf` and the `.msg`, same folder), tracked as BF-70 to BF-72.
 
 ## Why this sprint
@@ -31,7 +31,7 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-64](stories/BF-64-submit-waits-for-photo-uploads.md) | Submit must wait for photo uploads in flight | 1 | MEDIUM | (BF-58.1 verify follow-up C1) | NOT STARTED |
 | [BF-65](stories/BF-65-submission-idempotency.md) | Idempotent form submission (no duplicate inspections on retry) | 2 | MEDIUM | (BF-58.1 verify follow-up C2) | DONE (merged `9cf1519`) |
 | [BF-66](stories/BF-66-form-reset-blanks-controls.md) | Rejected submits blank selects and radios while the old answers are still sent | 2 | HIGH | (BF-58.1 preview finding) | DONE (merged `d320394`) |
-| [BF-67](stories/BF-67-lock-fields-until-hydrated.md) | Lock form fields until the page has hydrated | 1 | MEDIUM | (BF-66 verify follow-up F4) | IN REVIEW (with BF-75) |
+| [BF-67](stories/BF-67-lock-fields-until-hydrated.md) | Lock form fields until the page has hydrated | 1 | MEDIUM | (BF-66 verify follow-up F4) | DONE (merged with BF-75, `4535e7b`) |
 | [BF-68](stories/BF-68-pdf-photo-drop-fails-silently.md) | Photo PDFs must never drop a photo silently (WebP, failed fetch) | 2 | MEDIUM | (BF-58.2 verify follow-up C1) | NOT STARTED |
 | [BF-69](stories/BF-69-require-edit-version.md) | Require the loaded version on every submission edit | 1 | LOW | (BF-65 verify follow-up C2) | NOT STARTED |
 | [BF-70](stories/BF-70-waterways-gracie-small-asks.md) | Waterways: project-level sheen contact and hint, photo wording, copy equipment from a previous inspection (picker) | 3 | HIGH | Gracie's 2026-10-08 notes, asks 1, 3, 4 | DONE (merged `d986c19`) |
@@ -45,7 +45,7 @@ Launch context: the [Q&D readiness assessment](../../release/QD-GO-LIVE-READINES
 | [BF-78](stories/BF-78-email-settings-clear.md) | Let an org admin clear the email settings | 1 | MEDIUM | (BF-74 verify follow-up V1) | NOT STARTED |
 | [BF-79](stories/BF-79-split-waterways-queries.md) | Move the Waterways equipment-history query out of the shared project queries | 1 | LOW | (BF-73 verify follow-up V9) | NOT STARTED |
 | [BF-80](stories/BF-80-sheen-alert-edit-replay.md) | A retried No-to-Yes edit must still send the sheen alert | 1 | MEDIUM | (BF-72 verify follow-up C1) | NOT STARTED |
-| **Total** | | **55** | | | **19/29 DONE** |
+| **Total** | | **55** | | | **20/29 DONE** |
 
 Points are first-pass estimates made while filing the tickets, not scoped estimates. Re-estimate during `/sprint-plan` or `/story` pre-flight.
 
